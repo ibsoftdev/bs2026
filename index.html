@@ -14,7 +14,7 @@
       flex-wrap: wrap;
       background-image: url('ImagenEmpresa.png');
       background-repeat: no-repeat;
-      background-position: -0.5cm calc(50% - 1cm);
+      background-position: center center;
       background-size: cover;
       min-height: 120px;
     }
@@ -22,10 +22,34 @@
       max-width: 65%;
       min-width: 200px;
       text-align: right;
-      padding: 0.5rem 0;
+      padding: 0.6rem 0 0.75rem 0;
       color: var(--primary-dark);
+      border-bottom: 2px solid rgba(0, 33, 113, 0.2);
     }
-    .comercial-header .title-wrap h1,
+    .comercial-header .title-wrap h1 {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: var(--primary-dark);
+      font-weight: 600;
+      letter-spacing: 0.015em;
+      line-height: 1.5;
+      margin: 0;
+    }
+    .comercial-header .title-wrap h1 .header-line-1 {
+      display: block;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+    }
+    .comercial-header .title-wrap h1 .header-line-2,
+    .comercial-header .title-wrap h1 .header-line-3 {
+      display: block;
+      font-size: 1.18rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    .comercial-header .title-wrap h1 .header-line-2 { margin-bottom: 0.2rem; }
     .comercial-header .title-wrap p {
       color: var(--primary-dark);
     }
@@ -38,6 +62,7 @@
       opacity: 0.95;
     }
     .intro-propuesta { max-width: calc(100% - 1cm - 1.5rem - 1cm); margin-left: 1cm; margin-right: 0; }
+    .intro-propuesta h2 { font-size: 1.05rem; font-weight: 600; color: var(--primary-dark); margin: 0 0 0.75rem 0; }
     .intro-propuesta p { text-align: justify; }
     .punto-clave {
       display: flex;
@@ -74,6 +99,10 @@
     }
     .punto-clave-expandido .texto p { margin-bottom: 0.75rem; }
     .punto-clave-expandido .texto p:last-of-type { margin-bottom: 0; }
+    .punto-servicios-potenciar .texto ul li { margin-bottom: 0.85rem; }
+    .punto-servicios-potenciar .texto ul li:last-child { margin-bottom: 0; }
+    .punto-caracteristicas-considerar .texto ul li { margin-bottom: 0.85rem; text-align: justify; }
+    .punto-caracteristicas-considerar .texto ul li:last-child { margin-bottom: 0; }
     .ciclo-desarrollo {
       margin: 0.75rem 0 0;
       padding-left: 1.25rem;
@@ -99,6 +128,12 @@
     .subpunto-item.subpunto-componentes .subpunto-texto { text-align: justify; }
     .subpunto-item.subpunto-consultas .subpunto-consultas-arriba { text-align: justify; }
     .subpunto-item.subpunto-consultas .subpunto-consultas-fila .subpunto-texto { text-align: justify; }
+    .subpunto-item.subpunto-mantenimiento { flex-direction: column; align-items: stretch; }
+    .subpunto-mantenimiento-arriba { margin-bottom: 1rem; font-size: 0.95rem; line-height: 1.55; color: var(--text); text-align: justify; }
+    .subpunto-mantenimiento-arriba strong { color: var(--primary-dark); }
+    .subpunto-mantenimiento-fila { display: flex; flex-direction: row; align-items: flex-start; gap: 1.25rem; margin-left: -1rem; margin-right: -1rem; width: calc(100% + 2rem); }
+    .subpunto-mantenimiento-fila .subpunto-img { flex-shrink: 0; width: 400px; height: 257px; object-fit: contain; object-position: left top; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); order: 1; background: #fafafa; }
+    .subpunto-mantenimiento-fila .subpunto-texto { flex: 1; min-width: 0; margin: 0; order: 2; text-align: justify; }
     .subpunto-item.subpunto-mantenimiento .subpunto-texto { text-align: justify; }
     .subpunto-item.subpunto-despliegue .subpunto-texto { text-align: justify; }
     .subpunto-item {
@@ -264,7 +299,13 @@
     }
     .punto2-desglose li { margin-bottom: 0.5rem; }
     .punto2-desglose li:last-child { margin-bottom: 0; }
-    .punto2-item.punto2-ibforms .punto2-img { margin-top: 2cm; width: 364px; height: 234px; }
+    .punto2-item.punto2-ibforms { flex-direction: column; align-items: stretch; }
+    .punto2-ibforms-arriba { margin-bottom: 1rem; font-size: 0.95rem; line-height: 1.55; color: var(--text); text-align: justify; }
+    .punto2-ibforms-arriba strong { color: #e65100; }
+    .punto2-ibforms-fila { display: flex; flex-direction: row; align-items: flex-start; gap: 1.25rem; }
+    .punto2-ibforms-fila .punto2-texto { flex: 1; min-width: 0; margin: 0; text-align: justify; }
+    .punto2-ibforms-fila .punto2-img { flex-shrink: 0; width: 364px; height: 234px; object-fit: cover; border-radius: 6px; box-shadow: 0 2px 8px rgba(230, 81, 0, 0.15); }
+    .punto2-item.punto2-ibforms .punto2-img { margin-top: 0; }
     .punto2-item.punto2-modulos .punto2-texto { text-align: justify; }
     .punto2-item.punto2-modulos .punto2-desglose p,
     .punto2-item.punto2-modulos .punto2-desglose li { text-align: justify; }
@@ -314,6 +355,34 @@
       font-weight: 600;
     }
     .tabla-estimacion tr:nth-child(even) { background: #fafafa; }
+    .tabla-funcionalidades-portal {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.25rem 0;
+      font-size: 0.9rem;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .tabla-funcionalidades-portal th {
+      background: var(--primary-dark);
+      color: white;
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border: none;
+    }
+    .tabla-funcionalidades-portal td {
+      padding: 0.65rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      color: var(--text);
+    }
+    .tabla-funcionalidades-portal tr:last-child td { border-bottom: none; }
+    .tabla-funcionalidades-portal tr:nth-child(even) td { background: #fafafa; }
+    .tabla-funcionalidades-portal tr:hover td { background: #f5f8fa; }
+    .tabla-funcionalidades-portal .grupo-nombre { font-weight: 600; color: var(--primary-dark); white-space: nowrap; }
+    .tabla-funcionalidades-portal .grupo-items { margin: 0; padding-left: 1.1rem; line-height: 1.6; }
     .casos-uso-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -375,6 +444,8 @@
     @media (max-width: 600px) {
       .punto2-item { flex-direction: column; align-items: center; }
       .punto2-item .punto2-img { width: 100%; max-width: 320px; height: auto; }
+      .punto2-ibforms-fila { flex-direction: column; align-items: center; }
+      .punto2-ibforms-fila .punto2-img { width: 100%; max-width: 364px; height: auto; }
       .punto3-migracion-imagenes { flex-direction: column; align-items: center; }
       .punto3-migracion-imagenes .punto3-img { width: 100%; max-width: 320px; }
       .punto4-fila-texto-imagen { flex-direction: column; align-items: center; }
@@ -388,6 +459,8 @@
       .subpunto-item.img-ampliada .subpunto-img { width: 100%; max-width: 380px; height: auto; min-height: 200px; }
       .subpunto-consultas-fila { flex-direction: column; align-items: center; }
       .subpunto-consultas-fila .subpunto-img { width: 100%; max-width: 364px; height: auto; }
+      .subpunto-mantenimiento-fila { flex-direction: column; align-items: center; margin-left: 0; margin-right: 0; width: 100%; }
+      .subpunto-mantenimiento-fila .subpunto-img { width: 100%; max-width: 400px; height: auto; }
     }
   </style>
 </head>
@@ -395,14 +468,13 @@
   <div class="app-wrap">
     <header class="flow-header comercial-header">
       <div class="title-wrap">
-        <h1>Módulo de Formas Configurables</h1>
-        <p class="header-tagline">Secuencias de captura de datos definidas por configuración — desarrollo ágil y evolución sin redespliegue.</p>
+        <h1><span class="header-line-1">Propuesta de Valor</span><span class="header-line-2">para el Plan estratégico 2026-2027</span><span class="header-line-3">de Banesco Seguros Venezuela</span></h1>
       </div>
     </header>
 
     <div class="intro intro-propuesta">
-      <h2>Propuesta de valor</h2>
-      <p>El <strong>Módulo de Formas Configurables</strong> permite crear secuencias completas de pantallas de captura de datos para problemas de negocio diversos, a partir de archivos de configuración JSON registrados en tablas de la base de datos. La idea central es poder <strong>construir aplicaciones nuevas</strong> o <strong>actualizar aplicaciones existentes</strong> de una forma <strong>fácil y confiable</strong>: sin depender de redespliegues para cada cambio de pantalla o de negocio, y con un mismo modelo de configuración para todos los flujos. Esto se traduce en <strong>reducción del tiempo de desarrollo</strong> y en una <strong>evolución ágil de los flujos de captura</strong> mediante configuración en lugar de programación, lo que permite adaptar con mayor velocidad las soluciones a nuevos productos o procesos.</p>
+      <h2>Módulo de Formas Configurables: nuevo acercamiento de Desarrollo de Aplicaciones</h2>
+      <p>Es una librería de componentes FrontEnd y Backend que permite crear secuencias completas de pantallas de captura de datos para problemas de negocio diversos, a partir de archivos de configuración JSON registrados en tablas de la base de datos. La idea central es poder <strong>construir aplicaciones nuevas</strong> o <strong>actualizar aplicaciones existentes</strong> de una forma <strong>fácil y confiable</strong>: sin depender de redespliegues para cada cambio de pantalla o de negocio, y con un mismo modelo de configuración para todos los flujos. Esto se traduce en <strong>reducción del tiempo de desarrollo</strong> y en una <strong>evolución ágil de los flujos de captura</strong> mediante configuración en lugar de programación, lo que permite adaptar con mayor velocidad las soluciones a nuevos productos o procesos.</p>
     </div>
 
     <div class="card">
@@ -454,8 +526,14 @@
                 </div>
               </div>
               <div class="subpunto-item subpunto-mantenimiento p1-naranja">
-                <div class="subpunto-texto">
-                  <strong>7. Mantenimiento sencillo</strong> — Una vez desplegadas las Formas, el mantenimiento se realiza modificando únicamente, en la mayoría de los casos, los valores de configuración en las tablas, sin cambios en el código de la aplicación. Cambios de etiquetas, textos de ayuda, orden de campos, validaciones o nuevos pasos en un flujo se resuelven actualizando la configuración y, si aplica, los datos en BD, reduciendo el tiempo de entrega y el riesgo asociado a redespliegues. Es posible ajustar tipos de presentación, listas de valores, comportamientos condicionales y reglas de negocio declaradas en la configuración sin tocar el frontend ni el backend; en muchos casos, perfiles funcionales o equipos de producto pueden asumir estas actualizaciones con un conocimiento mínimo técnico. La trazabilidad de los cambios queda en la base de datos, lo que facilita auditorías y, en su caso, rollbacks controlados.
+                <div class="subpunto-mantenimiento-arriba">
+                  <strong>7. Mantenimiento sencillo</strong> — Una vez desplegadas las Formas, el mantenimiento se realiza modificando únicamente, en la mayoría de los casos, los valores de configuración en las tablas, sin cambios en el código de la aplicación. Cambios de etiquetas, textos de ayuda, orden de campos, validaciones o nuevos pasos en un flujo se resuelven actualizando la configuración y, si aplica, los datos en BD, reduciendo el tiempo de entrega y el riesgo asociado a redespliegues.
+                </div>
+                <div class="subpunto-mantenimiento-fila">
+                  <img src="subpunto-07-mantenimiento-sencillo.png" alt="Mantenimiento sencillo: actualizar configuración en tablas, sin tocar código; trazabilidad y rollback" class="subpunto-img">
+                  <div class="subpunto-texto">
+                    Es posible ajustar tipos de presentación, listas de valores, comportamientos condicionales y reglas de negocio declaradas en la configuración sin tocar el frontend ni el backend; en muchos casos, perfiles funcionales o equipos de producto pueden asumir estas actualizaciones con un conocimiento mínimo técnico. La trazabilidad de los cambios queda en la base de datos, lo que facilita auditorías y, en su caso, rollbacks controlados.
+                  </div>
                 </div>
               </div>
               <div class="subpunto-item subpunto-despliegue p1-verde">
@@ -464,7 +542,7 @@
                 </div>
               </div>
               <div class="ilustracion-despliegue" style="text-align: center; margin-top: 1.25rem;">
-                <img src="despliegue-successful-launch.png" alt="Despliegue: app en producción, sin redespliegue de código" style="max-width: 100%; width: 480px; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                <img src="despliegue-evolucion-sin-redeploy.png" alt="Despliegue: configuración en tablas, publicar cambios sin redesplegar; contenedores Docker/Podman, Node o Spring Boot; integración en distintos entornos" style="max-width: 100%; width: 480px; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
               </div>
             </div>
             <p>En resumen: <em>configuración JSON → persistencia en Tablas → DynamicForm las desplega como Formas Configurables</em>. El ciclo es ágil y centrado en datos.</p>
@@ -492,10 +570,15 @@
                   <p>Frente a esto, el modelo de Formas Configurables centraliza la lógica de presentación y comportamiento en una librería (ibForms) y en configuración (JSON en tablas), reduciendo la cantidad de componentes a mantener y favoreciendo la reutilización en todos los módulos.</p>
                 </div>
               </div>
-              <div class="punto2-item punto2-ibforms item-naranja img-derecha">
-                <img src="punto2-ibforms-reutilizacion.png" alt="ibForms y reutilización" class="punto2-img">
-                <div class="punto2-texto">
-                  <strong>Librería ibForms y reutilización.</strong> Construir cada módulo de forma independiente y homogénea: formularios, tablas, navegación, validación y enlace a datos están encapsulados en la librería. La generación y el mantenimiento de los proyectos de configuración JSON pueden apoyarse en herramientas de IA, alimentadas con el modelo de configuración existente.
+              <div class="punto2-item punto2-ibforms item-naranja">
+                <div class="punto2-ibforms-arriba">
+                  <strong>Librería ibForms y reutilización.</strong> Construir cada módulo de forma independiente y homogénea: formularios, tablas, navegación, validación y enlace a datos están encapsulados en la librería.
+                </div>
+                <div class="punto2-ibforms-fila">
+                  <div class="punto2-texto">
+                    La generación y el mantenimiento de los proyectos de configuración JSON pueden apoyarse en herramientas de IA, alimentadas con el modelo de configuración existente. Al tener el esquema (formas dinámicas, filas, grupos, campos, validaciones) como referencia, las herramientas pueden proponer o completar configuraciones a partir de descripciones en lenguaje natural o de ejemplos ya desplegados, reduciendo el tiempo de creación y la probabilidad de errores de transcripción. El resultado se mantiene alineado con el modelo que ibForms espera, de modo que la evolución de los JSON sigue siendo ágil y coherente con la librería.
+                  </div>
+                  <img src="punto2-ibforms-reutilizacion.png" alt="ibForms y reutilización" class="punto2-img">
                 </div>
               </div>
               <div class="punto2-item punto2-como-construir item-verde img-abajo">
@@ -616,8 +699,7 @@
       <div class="card-body">
         <p style="margin: 0 0 1rem 0; color: var(--text); text-align: justify;">A partir de las iniciativas estratégicas planteadas (plataforma omnicanal, workflows de servicios médicos y automóvil, multicotizadores y modernización de suscripción), se presenta una visión de <strong>estimación de esfuerzo</strong> y de <strong>cómo el Módulo de Formas Configurables</strong> permite abordarlas de forma eficiente, reutilizando un mismo motor de formularios y flujos por configuración.</p>
 
-        <h4 style="margin: 1.25rem 0 0.5rem 0; color: var(--primary-dark); font-size: 1rem;">Iniciativas 2026</h4>
-        <div class="punto-clave punto-clave-expandido texto-justificado">
+        <div class="punto-clave punto-clave-expandido texto-justificado punto-servicios-potenciar">
           <span class="numero">1</span>
           <div class="texto">
             <h4>Servicios a potenciar.</h4>
@@ -625,23 +707,74 @@
               <li><strong>Servicios Médicos.</strong> Se busca contar con <strong>aplicaciones modulares</strong> que permitan capturar el registro de solicitudes de servicios médicos, cada una orientada a un tipo de trámite: <strong>claves de emergencia</strong>, <strong>carta aval</strong>, <strong>reembolso</strong>, <strong>APS</strong>, <strong>medicamentos</strong> e <strong>indemnizaciones</strong>.</li>
               <li><strong>Servicios de Automóvil.</strong> Se busca contar con <strong>aplicaciones modulares</strong> que permitan capturar el registro de solicitudes de servicios de automóvil, cada una orientada a un tipo de trámite: <strong>pérdidas parciales</strong>, <strong>pérdidas totales</strong>, <strong>responsabilidad civil</strong> e <strong>indemnizatorio</strong>.</li>
             </ul>
-            <p style="margin: 0.75rem 0 0;">Dentro del Portal Banesco Seguros Online se cuentan con funcionalidades similares, por lo cual se puede hacer la migración a este nuevo concepto de Formas Configurables, reutilizando tanto los conceptos funcionales ya existentes, como componentes de código que pueden convertirse rápidamente en APIs.</p>
+            <ul style="margin: 0.35rem 0 0.5rem 0; padding-left: 1.25rem;">
+              <li><strong>Multicotizadores : Urgencias y Emergencias, Combinado residencial, Combinado industria y comercio paquetizado, Productos de personas (AP, Funerario, Cáncer, IDH y Vida).</strong> Experiencia omnicanal, cotización en tiempo real, comparación paramétrica, suscripción y emisión, pago integrado, tracking. <em>Abordaje:</em> Los pasos de captura se modelan como <strong>Formas Configurables</strong> por producto o línea; el motor de cotización y las APIs se integran vía backend. <strong>Estimación:</strong> Configuración base por línea (3–5 semanas) más integraciones (motor de cotización, pasarelas, tracking), reutilizables entre líneas.</li>
+              <li><strong>Workflow de Suscripción Etapa 1 y 2.</strong> Modernización y configuración de productos (AP Escolar, AP Individual, Funerario Colectivo, RC Patronal, Fraude; y en Etapa 2: AP Colectivos, Combinado industria y comercio, RC Empresarial, TRI), multimoneda (VES/USD), automatización de reglas (primas, inclusión/exclusión, renovaciones, reservas), evolución de tarificación, módulos de autogestión. <em>Abordaje:</em> Cada producto se traduce en <strong>configuración de formas</strong> y reglas en backend; la capa de captura queda unificada en ibForms. <strong>Estimación:</strong> 2–4 semanas por producto modernizado (configuración e integración).</li>
+              <li><strong>Servicios patrimoniales y ramos de personas;</strong> multicotizadores para combinado industria/comercio y productos de personas (AP, Funerario, Cáncer, IDH, Vida). El mismo modelo aplica: <strong>nuevos flujos = nueva configuración JSON</strong>; las estimaciones por línea se benefician de la reutilización de configuraciones y patrones ya desplegados.</li>
+            </ul>
           </div>
         </div>
-        <div class="punto-clave punto-clave-expandido texto-justificado">
+        <div class="punto-clave punto-clave-expandido texto-justificado punto-caracteristicas-considerar">
           <span class="numero">2</span>
           <div class="texto">
             <h4>Características a considerar.</h4>
             <p style="margin: 0.5rem 0 0.35rem 0;">Estas aplicaciones deben integrarse en un <strong>workflow único</strong> que permita hacer el seguimiento de las solicitudes de punta a punta, con las siguientes características:</p>
             <ul style="margin: 0.35rem 0 0.5rem 0; padding-left: 1.25rem;">
               <li><strong>Roles de usuario:</strong> empleado, proveedor, asegurado e intermediario, cada uno con visibilidad y acciones acordes a su rol dentro del flujo del proceso. A lo largo del ciclo de vida del portal Banesco Seguros se ha consolidado una estructura de usuarios basada en <strong>Roles, Perfiles y Privilegios</strong>, que permite configurar las necesidades de estas funcionalidades; apoyarse en estas estructuras aportaría un valor agregado muy importante a los nuevos módulos a desarrollar.</li>
-              <li><strong>Dashboard de seguimiento de gestión</strong> para los distintos usuarios, con vistas filtradas por rol y estado de la solicitud.</li>
-              <li><strong>Indicadores de gestión</strong> que permitan medir tiempos, volúmenes y estados del proceso.</li>
+              <li><strong>Dashboard de seguimiento de gestión:</strong> panel centralizado donde los distintos usuarios (empleados, supervisores, gestores) pueden consultar el estado de las solicitudes bajo su ámbito de responsabilidad. Las vistas se filtran por <strong>rol</strong>, <strong>estado de la solicitud</strong>, tipo de trámite (salud, automóvil, etc.) y, si aplica, por asignación o período, de modo que cada perfil acceda solo a la información relevante. El dashboard facilita el seguimiento de las solicitudes de punta a punta, la priorización de tareas y la identificación de cuellos de botella en el flujo de los procesos.</li>
+              <li><strong>Indicadores de gestión:</strong> medición de tiempos, volúmenes y estados del proceso, alimentados por los datos que las aplicaciones capturan o generan a lo largo de los flujos en los que interviene el usuario. El objetivo es disponer de representaciones visuales que permitan el seguimiento y el monitoreo de estos indicadores.</li>
             </ul>
           </div>
         </div>
-        <div class="punto-clave punto-clave-expandido texto-justificado">
+        <div class="punto-clave texto-justificado">
           <span class="numero">3</span>
+          <div class="texto">
+            <h4>Sin comenzar desde cero, hagamos uso de lo aprendido:</h4>
+            <p style="margin: 0.5rem 0 0.35rem 0;">Dentro del Portal Banesco Seguros Online se cuentan con funcionalidades similares, por lo cual se puede hacer la migración a este nuevo modelo de Formas Configurables, reutilizando tanto los conceptos funcionales ya existentes, como componentes de código backend que pueden convertirse rápidamente en APIs.</p>
+            <p style="margin: 0.5rem 0 0.35rem 0;">Esta base existente aporta ventajas claras: <strong>simplificación de los tiempos de desarrollo</strong>, al evitar partir de cero y poder reutilizar flujos, reglas y pantallas ya validados por el negocio; <strong>reducción de la curva de aprendizaje</strong>, porque equipos funcionales y técnicos ya conocen los conceptos (solicitudes, expedientes, roles, tipos de trámite), y el esfuerzo se concentra en adoptar el modelo de configuración en lugar de redescubrir el dominio; y <strong>menor riesgo y mayor coherencia</strong>, al mantener la misma terminología y lógica que el negocio usa hoy y permitir una migración gradual por área o por flujo. Aprovechar lo aprendido en el portal actual hace que la transición hacia Formas Configurables sea más ágil y predecible.</p>
+            <p style="margin: 0.5rem 0 0.35rem 0;">Funcionalidades existentes en el portal actual:</p>
+            <table class="tabla-funcionalidades-portal">
+              <thead>
+                <tr>
+                  <th style="width: 28%;">Área</th>
+                  <th>Funcionalidades</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="grupo-nombre">Gestión de Usuarios</td>
+                  <td><ul class="grupo-items"><li>Creación y Administración de Usuarios</li><li>Configuración y Gestión de Roles y Perfiles de Usuarios</li><li>Configuración y asignación de opciones de Usuarios</li><li>Monitoreo de Transacciones</li></ul></td>
+                </tr>
+                <tr>
+                  <td class="grupo-nombre">Servicios Médicos</td>
+                  <td><ul class="grupo-items"><li>Solicitud de Clave de Emergencia</li><li>Solicitud de Carta Aval</li><li>Solicitud de Orden Médica</li><li>Reembolsos de Salud</li><li>Notificaciones de Siniestros de Vida y Funerario</li></ul></td>
+                </tr>
+                <tr>
+                  <td class="grupo-nombre">Servicios de Automóvil</td>
+                  <td><ul class="grupo-items"><li>Declaración de Siniestros de Automóvil: Parcial y Total</li></ul></td>
+                </tr>
+                <tr>
+                  <td class="grupo-nombre">Cotización y Suscripción</td>
+                  <td><ul class="grupo-items"><li>Funerario</li><li>Accidentes Personales</li><li>Cáncer</li><li>Vida</li><li>Renovación de Certificados de Salida de Grupo BOF</li></ul></td>
+                </tr>
+                <tr>
+                  <td class="grupo-nombre">Gestión de Documentos</td>
+                  <td><ul class="grupo-items"><li>Carga de Documentos de Expedientes</li><li>Sincronización de Gestor Documental</li><li>Búsqueda de Expedientes existentes</li><li>Notificaciones de documentos faltantes</li></ul></td>
+                </tr>
+                <tr>
+                  <td class="grupo-nombre">Creación y Seguimiento de Requerimientos</td>
+                  <td><ul class="grupo-items"><li>Modificaciones de Pólizas</li><li>Renovaciones</li><li>Anulaciones</li></ul></td>
+                </tr>
+                <tr>
+                  <td class="grupo-nombre">Servicios de Pagos</td>
+                  <td><ul class="grupo-items"><li>Débito en Cuenta</li><li>Tarjeta de Crédito</li><li>Notificación de Transferencias</li></ul></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="punto-clave punto-clave-expandido texto-justificado">
+          <span class="numero">4</span>
           <div class="texto">
             <h4>Abordaje con Formas Configurables.</h4>
             <p style="margin: 0.5rem 0 0.75rem 0;">Para ambas iniciativas (Servicios Médicos y Servicios de Automóvil), cada tipo de solicitud o variante se modela como una secuencia de pantallas representadas por <strong>formas dinámicas</strong>, con su propio proyecto de configuración JSON (pasos, campos, validaciones, listas de valores y reglas de visibilidad por rol). Las aplicaciones modulares son instancias del mismo frontend (librería ibForms) que consumen configuraciones distintas; la reutilización del motor reduce fuertemente el esfuerzo frente a desarrollar cada pantalla como un caso particular. El workflow de seguimiento y los indicadores se alimentan de los datos registrados y pueden apoyarse en consultas configurables y en integración con el backend.</p>
@@ -663,29 +796,22 @@
               </tbody>
             </table>
             <p style="margin: 0.5rem 0 0; color: var(--text-muted); font-size: 0.9rem;">Los rangos son orientativos; el esfuerzo total por iniciativa dependerá del número de flujos o productos y del grado de reutilización.</p>
+            <p style="margin: 0.75rem 0 0; color: var(--text); text-align: justify;">Al centralizar la construcción de pantallas y flujos en <strong>configuración</strong> y en una <strong>librería común</strong> (ibForms), el esfuerzo se desplaza de "desarrollar N pantallas por producto" a "diseñar y mantener N configuraciones", con tiempos de entrega y riesgo menores. Los presupuestos pueden estructurarse por fases (diseño funcional, configuración por flujo/producto, integración backend, pruebas y puesta en producción), permitiendo priorizar iniciativas y escalar el alcance sin multiplicar el costo por pantalla.</p>
           </div>
         </div>
         <div class="punto-clave texto-justificado">
-          <span class="numero">4</span>
+          <span class="numero">5</span>
           <div class="texto">
             <h4>Integración con plataformas de automatización de flujos de trabajo.</h4>
             <p style="margin: 0.5rem 0 0;">Los módulos de servicios desarrollados a partir del <strong>abordaje con Formas Configurables</strong> (captura de solicitudes de salud y automóvil, workflows de seguimiento) pueden integrarse con plataformas de automatización como <strong>n8n</strong>, recomendada por ser una herramienta que se puede autoalojar, de modo que los flujos de negocio no queden limitados a la aplicación web: las solicitudes registradas pueden disparar procesos posteriores (notificaciones, validaciones con terceros, actualización de sistemas), y a la inversa, flujos diseñados en esas plataformas pueden invocar los módulos de captura como pasos del proceso. Así se automatizan flujos de trabajo asociados al negocio y se aprovecha la misma base de <strong>formas dinámicas</strong> y APIs ya expuestas por el módulo.</p>
           </div>
         </div>
-        <figure style="margin: 1.5rem 0 0; text-align: center;">
-          <img src="iniciativas-2026-diagrama.png" alt="Diagrama Iniciativas 2026: Servicios a potenciar, Características, Formas Configurables, Integración n8n" style="max-width: 100%; height: auto; border-radius: var(--radius); box-shadow: 0 2px 8px rgba(0,0,0,0.08);" />
-          <figcaption style="margin-top: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">Resumen visual de Iniciativas 2026: servicios a potenciar (Salud y Automóvil), características (roles, dashboard, indicadores), abordaje con Formas Configurables e integración con n8n.</figcaption>
+        <p class="titulo-diagrama-iniciativas" style="margin: 1.5rem 0 0.5rem 0; font-size: 1.25rem; font-weight: 700; color: var(--primary-dark); text-align: center;">Iniciativas 2026-2027</p>
+        <figure style="margin: 0 0 0; text-align: center;">
+          <img src="iniciativas-2026-2027-diagrama.png" alt="Diagrama Iniciativas 2026-2027: Servicios a potenciar, Características, Formas Configurables, Integración n8n" style="max-width: 100%; height: auto; border-radius: var(--radius); box-shadow: 0 2px 8px rgba(0,0,0,0.08);" />
+          <figcaption style="margin-top: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">Resumen visual de Iniciativas 2026-2027: servicios a potenciar (Salud y Automóvil), características (roles, dashboard, indicadores), abordaje con Formas Configurables e integración con n8n.</figcaption>
         </figure>
 
-        <h4 style="margin: 1.25rem 0 0.5rem 0; color: var(--primary-dark); font-size: 1rem;">Iniciativas 2027</h4>
-        <ul style="line-height: 1.7; color: var(--text); padding-left: 1.25rem; margin: 0;">
-          <li><strong>Multicotizadores (Urgencia y emergencias, Combinado residencial, y ampliación a otras líneas).</strong> Experiencia omnicanal, cotización en tiempo real, comparación paramétrica, suscripción y emisión, pago integrado, tracking. <em>Abordaje:</em> Los pasos de captura se modelan como <strong>Formas Configurables</strong> por producto o línea; el motor de cotización y las APIs se integran vía backend. <strong>Estimación:</strong> Configuración base por línea (3–5 semanas) más integraciones (motor de cotización, pasarelas, tracking), reutilizables entre líneas.</li>
-          <li><strong>Workflow de Suscripción Etapa 1 y 2.</strong> Modernización y configuración de productos (AP Escolar, AP Individual, Funerario Colectivo, RC Patronal, Fraude; y en Etapa 2: AP Colectivos, Combinado industria y comercio, RC Empresarial, TRI), multimoneda (VES/USD), automatización de reglas (primas, inclusión/exclusión, renovaciones, reservas), evolución de tarificación, módulos de autogestión. <em>Abordaje:</em> Cada producto se traduce en <strong>configuración de formas</strong> y reglas en backend; la capa de captura queda unificada en ibForms. <strong>Estimación:</strong> 2–4 semanas por producto modernizado (configuración e integración).</li>
-          <li><strong>Servicios patrimoniales y ramos de personas;</strong> multicotizadores para combinado industria/comercio y productos de personas (AP, Funerario, Cáncer, IDH, Vida). El mismo modelo aplica: <strong>nuevos flujos = nueva configuración JSON</strong>; las estimaciones por línea se benefician de la reutilización de configuraciones y patrones ya desplegados.</li>
-        </ul>
-
-        <h4 style="margin: 1.25rem 0 0.5rem 0; color: var(--primary-dark); font-size: 1rem;">Ventaja de estimación con Formas Configurables</h4>
-        <p style="margin: 0; color: var(--text); text-align: justify;">Al centralizar la construcción de pantallas y flujos en <strong>configuración</strong> y en una <strong>librería común</strong> (ibForms), el esfuerzo se desplaza de “desarrollar N pantallas por producto” a “diseñar y mantener N configuraciones”, con tiempos de entrega y riesgo menores. Los presupuestos pueden estructurarse por fases (diseño funcional, configuración por flujo/producto, integración backend, pruebas y puesta en producción), permitiendo priorizar iniciativas y escalar el alcance sin multiplicar el costo por pantalla.</p>
       </div>
     </div>
 
