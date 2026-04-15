@@ -1,1 +1,1888 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Módulo de Formas Configurables - Presentación Comercial</title>
+  <link rel="stylesheet" href="estilos-demo.css">
+  <link rel="stylesheet" href="print.css" media="print">
+  <link rel="stylesheet" href="../bso-actual/styles.css">
+  <style>
+    .comercial-header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      background-image: url('ImagenEmpresa.png');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: cover;
+      min-height: calc(120px + 1cm);
+    }
+    .comercial-header .title-wrap {
+      max-width: 65%;
+      min-width: 200px;
+      text-align: right;
+      padding: 0.6rem 0 0.75rem 0;
+      color: var(--primary-dark);
+      border-bottom: 2px solid rgba(0, 33, 113, 0.2);
+    }
+    .comercial-header .title-wrap h1 {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: var(--primary-dark);
+      font-weight: 600;
+      letter-spacing: 0.015em;
+      line-height: 1.5;
+      margin: 0;
+    }
+    .comercial-header .title-wrap h1 .header-line-1 {
+      display: block;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+    }
+    .comercial-header .title-wrap h1 .header-line-2,
+    .comercial-header .title-wrap h1 .header-line-3 {
+      display: block;
+      font-size: 1.18rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    .comercial-header .title-wrap h1 .header-line-2 { margin-bottom: 0.2rem; }
+    .comercial-header .title-wrap p {
+      color: var(--primary-dark);
+    }
+    .comercial-header .title-wrap .header-tagline {
+      font-size: 1.05rem;
+      line-height: 1.45;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      margin-top: 0.35rem;
+      opacity: 0.95;
+    }
+    .punto-clave {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      padding: 1rem 1.25rem;
+      background: #fafafa;
+      border-radius: 8px;
+    }
+    .punto-clave .numero {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .punto-clave .texto h4 {
+      margin-bottom: 0.25rem;
+      color: var(--primary-dark);
+      font-size: 1rem;
+    }
+    .punto-clave .texto p {
+      margin: 0;
+      color: var(--text);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    .punto-clave-expandido .texto p { margin-bottom: 0.75rem; }
+    .punto-clave-expandido .texto p:last-of-type { margin-bottom: 0; }
+    .punto-caracteristicas-considerar .texto ul li { margin-bottom: 0.85rem; text-align: justify; }
+    .punto-caracteristicas-considerar .texto ul li:last-child { margin-bottom: 0; }
+    .ciclo-desarrollo {
+      margin: 0.75rem 0 0;
+      padding-left: 1.25rem;
+      color: var(--text);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .ciclo-desarrollo li {
+      margin-bottom: 0.5rem;
+    }
+    .ciclo-desarrollo li:last-child {
+      margin-bottom: 0;
+    }
+    .punto-clave.texto-justificado .texto p,
+    .punto-clave.texto-justificado .texto .ciclo-desarrollo,
+    .punto-clave.texto-justificado .texto .ciclo-desarrollo li {
+      text-align: justify;
+    }
+    .subpunto-item.subpunto-definicion-json .subpunto-texto { text-align: justify; }
+    .subpunto-item.subpunto-registro-tablas .subpunto-texto { text-align: justify; }
+    .subpunto-item.subpunto-backend-carga .subpunto-texto { text-align: justify; }
+    .subpunto-item.subpunto-dynamicform .subpunto-texto { text-align: justify; }
+    .subpunto-item.subpunto-componentes .subpunto-texto { text-align: justify; }
+    .subpunto-item.subpunto-consultas .subpunto-consultas-arriba { text-align: justify; }
+    .subpunto-item.subpunto-consultas .subpunto-consultas-fila .subpunto-texto { text-align: justify; }
+    .subpunto-item.subpunto-mantenimiento { flex-direction: column; align-items: stretch; }
+    .subpunto-mantenimiento-arriba { margin-bottom: 1rem; font-size: 0.95rem; line-height: 1.55; color: var(--text); text-align: justify; }
+    .subpunto-mantenimiento-arriba strong { color: var(--primary-dark); }
+    .subpunto-mantenimiento-fila { display: flex; flex-direction: row; align-items: flex-start; gap: 1.25rem; margin-left: -1rem; margin-right: -1rem; width: calc(100% + 2rem); }
+    .subpunto-mantenimiento-fila .subpunto-img { flex-shrink: 0; width: 400px; height: 257px; object-fit: contain; object-position: left top; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); order: 1; background: #fafafa; }
+    .subpunto-mantenimiento-fila .subpunto-texto { flex: 1; min-width: 0; margin: 0; order: 2; text-align: justify; }
+    .subpunto-item.subpunto-mantenimiento .subpunto-texto { text-align: justify; }
+    .subpunto-item.subpunto-despliegue .subpunto-texto { text-align: justify; }
+    .subpunto-item {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: #fafafa;
+      border-radius: 8px;
+    }
+    .subpunto-item:last-child { margin-bottom: 0; }
+    .subpunto-img {
+      flex-shrink: 0;
+      width: 280px;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    .subpunto-texto { flex: 1; min-width: 0; }
+    .subpunto-texto strong { color: var(--primary-dark); }
+    .subpunto-item.img-derecha { flex-direction: row-reverse; }
+    .subpunto-item.img-abajo { flex-direction: column; align-items: center; }
+    .subpunto-item.img-abajo .subpunto-img { width: 100%; max-width: 400px; height: auto; min-height: 180px; }
+    .subpunto-item.img-ampliada .subpunto-img { width: 420px; height: 260px; }
+    .subpunto-item.img-debajo { flex-direction: column; align-items: center; }
+    .subpunto-item.img-debajo .subpunto-img { order: 2; width: 100%; max-width: 480px; height: auto; min-height: 240px; margin-top: 0.75rem; }
+    .subpunto-item.p1-verde { background: rgba(27, 94, 32, 0.04); }
+    .subpunto-item.p1-verde .subpunto-texto strong { color: #2e7d32; }
+    .subpunto-item.p1-naranja { background: rgba(230, 81, 0, 0.04); }
+    .subpunto-item.p1-naranja .subpunto-texto strong { color: #ef6c00; }
+    .subpunto-item.subpunto-consultas { flex-direction: column; align-items: stretch; }
+    .subpunto-consultas-arriba { margin-bottom: 1rem; font-size: 0.95rem; line-height: 1.55; color: var(--text); }
+    .subpunto-consultas-arriba strong { color: var(--primary-dark); }
+    .subpunto-consultas-fila { display: flex; flex-direction: row; align-items: flex-start; gap: 1.25rem; }
+    .subpunto-consultas-fila .subpunto-texto { flex: 1; min-width: 0; margin: 0; }
+    .subpunto-consultas-fila .subpunto-img { flex-shrink: 0; width: 364px; height: 234px; object-fit: cover; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    .ilustracion {
+      margin-top: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .ilustracion h3 {
+      font-size: 1rem;
+      color: var(--primary-dark);
+      margin-bottom: 0.75rem;
+    }
+    .ilustracion-container {
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 1rem;
+      min-height: 320px;
+    }
+    .ilustracion-container object,
+    .ilustracion-container iframe {
+      width: 100%;
+      height: 400px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: white;
+    }
+    .ilustracion-container .pdf-link {
+      display: inline-block;
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .ilustracion-container .pdf-link:hover {
+      text-decoration: underline;
+    }
+    .ilustraciones-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    .ilustracion-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .ilustracion-card .card-header {
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+    }
+    .ilustracion-card .card-body {
+      padding: 1rem;
+    }
+    .highlight-box {
+      background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%);
+      border: 1px solid var(--primary);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    .highlight-box p {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .punto2-subpuntos { margin-top: 1rem; }
+    .punto2-item {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    .punto2-item:last-child { margin-bottom: 0; }
+    .punto2-item.item-verde { background: linear-gradient(to right, rgba(27, 94, 32, 0.06), transparent); }
+    .punto2-item.item-naranja { background: linear-gradient(to right, rgba(230, 81, 0, 0.06), transparent); }
+    .punto2-item .punto2-img {
+      flex-shrink: 0;
+      width: 280px;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(27, 94, 32, 0.15);
+    }
+    .punto2-item.item-naranja .punto2-img { box-shadow: 0 2px 8px rgba(230, 81, 0, 0.15); }
+    .punto2-item .punto2-texto { flex: 1; min-width: 0; }
+    .punto2-item .punto2-texto strong { color: #1b5e20; }
+    .punto2-item.item-naranja .punto2-texto strong { color: #e65100; }
+    .punto2-lista {
+      margin: 0.75rem 0 0;
+      padding-left: 1.5rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .punto2-lista li { margin-bottom: 0.6rem; }
+    .punto2-lista li:last-child { margin-bottom: 0; }
+    .punto2-item.img-derecha { flex-direction: row-reverse; }
+    .punto2-item.img-abajo { flex-direction: column; align-items: center; }
+    .punto2-item.img-abajo .punto2-img { width: 100%; max-width: 400px; height: auto; min-height: 180px; margin-top: 0.5rem; order: 2; }
+    .punto2-item.punto2-modulos.img-abajo .punto2-img { max-width: 600px; min-height: 270px; }
+    .punto2-desglose {
+      margin-top: 1.25rem;
+      padding: 1rem 1.25rem;
+      background: rgba(0, 0, 0, 0.03);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 100%;
+      order: 3;
+    }
+    .punto2-desglose p {
+      margin: 0 0 0.75rem 0;
+      font-size: 0.95rem;
+      line-height: 1.55;
+      color: var(--text);
+    }
+    .punto2-desglose p:last-of-type { margin-bottom: 0; }
+    .punto2-desglose ul {
+      margin: 0.5rem 0 1rem 1.5rem;
+      padding: 0;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .punto2-desglose li { margin-bottom: 0.5rem; }
+    .punto2-desglose li:last-child { margin-bottom: 0; }
+    .punto2-item.punto2-ibforms { flex-direction: column; align-items: stretch; }
+    .punto2-ibforms-arriba { margin-bottom: 1rem; font-size: 0.95rem; line-height: 1.55; color: var(--text); text-align: justify; }
+    .punto2-ibforms-arriba strong { color: #e65100; }
+    .punto2-ibforms-fila { display: flex; flex-direction: row; align-items: flex-start; gap: 1.25rem; }
+    .punto2-ibforms-fila .punto2-texto { flex: 1; min-width: 0; margin: 0; text-align: justify; }
+    .punto2-ibforms-fila .punto2-img { flex-shrink: 0; width: 364px; height: 234px; object-fit: cover; border-radius: 6px; box-shadow: 0 2px 8px rgba(230, 81, 0, 0.15); }
+    .punto2-item.punto2-ibforms .punto2-img { margin-top: 0; }
+    .punto2-item.punto2-modulos .punto2-texto { text-align: justify; }
+    .punto2-item.punto2-modulos .punto2-desglose p,
+    .punto2-item.punto2-modulos .punto2-desglose li { text-align: justify; }
+    .punto2-item.punto2-ibforms .punto2-texto { text-align: justify; }
+    .punto2-item.punto2-como-construir .punto2-texto { text-align: justify; }
+    .punto2-item.punto2-como-construir .punto2-lista,
+    .punto2-item.punto2-como-construir .punto2-lista li { text-align: justify; }
+    .punto2-item.punto2-como-construir.img-abajo .punto2-img { max-width: 560px; min-height: 200px; }
+    .punto2-item.punto2-despliegue.img-abajo .punto2-img { max-width: 520px; min-height: 235px; }
+    /* Comparativa y casos de uso */
+    .comparativa-tabla {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+    }
+    .comparativa-tabla th,
+    .comparativa-tabla td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    .comparativa-tabla th {
+      background: var(--primary-dark);
+      color: white;
+      font-weight: 600;
+    }
+    .comparativa-tabla tr:nth-child(even) { background: #fafafa; }
+    .comparativa-tabla .check { color: var(--success); font-weight: bold; }
+    .comparativa-tabla .cross { color: #c62828; }
+    .tabla-estimacion {
+      width: 100%;
+      max-width: 560px;
+      border-collapse: collapse;
+      margin: 1rem auto;
+      font-size: 0.95rem;
+    }
+    .tabla-estimacion th,
+    .tabla-estimacion td {
+      border: 1px solid var(--border);
+      padding: 0.6rem 1rem;
+      text-align: left;
+    }
+    .tabla-estimacion th {
+      background: var(--primary-dark);
+      color: white;
+      font-weight: 600;
+    }
+    .tabla-estimacion tr:nth-child(even) { background: #fafafa; }
+    .tabla-funcionalidades-portal {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.25rem 0;
+      font-size: 0.9rem;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .tabla-funcionalidades-portal th {
+      background: var(--primary-dark);
+      color: white;
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border: none;
+    }
+    .tabla-funcionalidades-portal td {
+      padding: 0.65rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      color: var(--text);
+    }
+    .tabla-funcionalidades-portal tr:last-child td { border-bottom: none; }
+    .tabla-funcionalidades-portal tr:nth-child(even) td { background: #fafafa; }
+    .tabla-funcionalidades-portal tr:hover td { background: #f5f8fa; }
+    .tabla-funcionalidades-portal .grupo-nombre { font-weight: 600; color: var(--primary-dark); white-space: nowrap; }
+    .tabla-funcionalidades-portal .grupo-items { margin: 0; padding-left: 1.1rem; line-height: 1.6; }
+    .tabla-modulo-alcance {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.5rem 0 0.75rem 0;
+      font-size: 0.9rem;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      table-layout: fixed;
+    }
+    .tabla-modulo-alcance th,
+    .tabla-modulo-alcance td {
+      border-bottom: 1px solid var(--border);
+      padding: 0.65rem 1rem;
+      text-align: left;
+      vertical-align: top;
+      color: var(--text);
+      line-height: 1.55;
+    }
+    .tabla-modulo-alcance thead tr:first-child th {
+      background: var(--primary-dark);
+      color: white;
+      font-weight: 700;
+      font-size: 1rem;
+      text-align: center;
+      padding: 0.75rem 1rem;
+      border-bottom: none;
+    }
+    .tabla-modulo-alcance thead tr:nth-child(2) th {
+      background: var(--primary-dark);
+      color: white;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border-top: 1px solid rgba(255,255,255,0.25);
+    }
+    .tabla-modulo-alcance col.col-modulo-caracteristicas { width: 85%; }
+    .tabla-modulo-alcance col.col-modulo-tiempo { width: 15%; }
+    .tabla-modulo-alcance tbody tr:last-child td { border-bottom: none; }
+    .tabla-modulo-alcance tbody tr:nth-child(even) td:first-child { background: #fafafa; }
+    .tabla-modulo-alcance .celda-tiempo-modulo {
+      vertical-align: middle;
+      text-align: center;
+      font-weight: 600;
+      color: var(--primary-dark);
+      background: #f0f4f8;
+      border-left: 1px solid var(--border);
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      text-transform: uppercase;
+      white-space: nowrap;
+      letter-spacing: 0.04em;
+    }
+    .modulo-alcance-observaciones {
+      margin: 0.65rem 0 0 0;
+      padding: 0.9rem 1.1rem 1rem;
+      background: linear-gradient(180deg, #fff9e6 0%, #fff3cc 100%);
+      border: 1px solid rgba(180, 110, 0, 0.38);
+      border-left: 5px solid #c67600;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(140, 80, 0, 0.08);
+    }
+    .modulo-alcance-observaciones-titulo {
+      margin: 0 0 0.55rem 0;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #7a4200;
+      letter-spacing: 0.02em;
+    }
+    .modulo-alcance-observaciones-texto {
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.58;
+      color: var(--text);
+      text-align: justify;
+    }
+    .modulo-alcance-observaciones-texto p { margin: 0 0 0.55rem 0; }
+    .modulo-alcance-observaciones-texto p:last-child { margin-bottom: 0; }
+    .modulo-alcance-observaciones-texto ul {
+      margin: 0.35rem 0 0;
+      padding-left: 1.2rem;
+    }
+    .modulo-alcance-observaciones-texto > ul:first-child {
+      margin-top: 0;
+    }
+    .modulo-alcance-observaciones-texto li { margin-bottom: 0.4rem; }
+    .modulo-alcance-observaciones-texto li:last-child { margin-bottom: 0; }
 
+    .servicios-bso-embed .servicios-subtitulo-presentacion {
+      margin: 1rem 0 0.65rem 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      letter-spacing: 0.02em;
+      border-bottom: 2px solid rgba(0, 33, 113, 0.15);
+      padding-bottom: 0.35rem;
+    }
+    .servicios-bso-embed .screen > .servicios-subtitulo-presentacion:first-of-type {
+      margin-top: 0.35rem;
+    }
+    .servicios-bso-embed .servicios-subtitulo-propuesta {
+      margin-top: 1.5rem;
+    }
+    .servicios-bso-embed .servicios-texto-propuesta {
+      margin: 0 0 0.25rem 0;
+      padding: 0.85rem 1rem;
+      font-size: 0.9rem;
+      font-style: italic;
+      color: var(--text-muted);
+      background: rgba(0, 33, 113, 0.04);
+      border-radius: 8px;
+      border: 1px dashed rgba(0, 33, 113, 0.2);
+    }
+    .servicios-bso-embed .servicios-bloque-actual {
+      margin-bottom: 0.15rem;
+    }
+    .servicios-bso-embed .servicios-bloque-propuesta {
+      margin-top: 0.35rem;
+      margin-bottom: 0.25rem;
+    }
+    .servicios-bso-embed .notificacion-tipo h4.consulta-intra-presentacion {
+      font-size: 0.97rem;
+      margin-top: 0.75rem;
+      margin-bottom: 0.45rem;
+    }
+    .servicios-bso-embed .notificacion-tipo h4.consulta-intra-presentacion.servicios-subtitulo-propuesta {
+      margin-top: 1.15rem;
+    }
+    .servicios-bso-embed .notificacion-tipo .consulta-bloque-actual {
+      margin-bottom: 0.15rem;
+    }
+    .servicios-bso-embed .consulta-propuesta-partes {
+      margin-top: 0.35rem;
+    }
+    .servicios-bso-embed .consulta-propuesta-parte + .consulta-propuesta-parte {
+      margin-top: 1.35rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(0, 33, 113, 0.12);
+    }
+    .servicios-bso-embed .consulta-propuesta-parte-titulo {
+      margin: 0 0 0.6rem 0;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+    .servicios-bso-embed .consulta-propuesta-provisional-nota {
+      margin: 0 0 0.65rem 0;
+      font-size: 0.85rem;
+      line-height: 1.45;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .apartado-propuesta-consolidada-final {
+      margin-top: 2rem;
+      padding-top: 0.25rem;
+    }
+    .apartado-propuesta-consolidada-final .bloque-propuesta-consolidada {
+      margin-top: 0;
+    }
+    .bloque-propuesta-consolidada {
+      margin-top: 1.75rem;
+      padding: 1.35rem 1.4rem 1.45rem;
+      background: linear-gradient(165deg, #e8f0f8 0%, #ffffff 42%, #f9fbfd 100%);
+      border: 1px solid rgba(0, 33, 113, 0.16);
+      border-left: 5px solid var(--primary);
+      border-radius: 10px;
+      box-shadow: 0 6px 22px rgba(0, 33, 113, 0.1);
+    }
+    .bloque-propuesta-consolidada .titulo-resumen-servicios {
+      margin: 0 0 0.55rem 0;
+      font-size: 1.12rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(13, 71, 161, 0.2);
+      letter-spacing: 0.02em;
+    }
+    .bloque-propuesta-consolidada .intro-resumen-servicios {
+      margin: 0 0 0.9rem 0;
+      font-size: 0.9rem;
+      color: var(--text);
+      text-align: justify;
+      line-height: 1.52;
+    }
+    .tabla-resumen-servicios-total {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.75rem 0 0.5rem 0;
+      font-size: 0.9rem;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total {
+      margin: 0;
+      box-shadow: 0 4px 16px rgba(0, 33, 113, 0.14);
+      border: 1px solid rgba(0, 33, 113, 0.12);
+    }
+    .tabla-resumen-servicios-total th,
+    .tabla-resumen-servicios-total td {
+      border-bottom: 1px solid var(--border);
+      padding: 0.6rem 0.85rem;
+      text-align: left;
+      vertical-align: top;
+      color: var(--text);
+    }
+    .tabla-resumen-servicios-total thead th {
+      background: var(--primary-dark);
+      color: white;
+      font-weight: 600;
+      border-bottom: none;
+      padding: 0.7rem 0.9rem;
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total thead th {
+      background: linear-gradient(180deg, #002a7a 0%, var(--primary-dark) 100%);
+    }
+    .tabla-resumen-servicios-total tbody tr:nth-child(even) td { background: #fafafa; }
+    .tabla-resumen-servicios-total tfoot th,
+    .tabla-resumen-servicios-total tfoot td {
+      background: #e8eef4;
+      font-weight: 600;
+      color: var(--primary-dark);
+      border-bottom: none;
+      padding: 0.65rem 0.9rem;
+    }
+    /* Bloque de totales: separado visualmente del listado de módulos */
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales th,
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales td {
+      padding: 0.78rem 1rem;
+      border-bottom: none;
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales tr:first-child th,
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales tr:first-child td {
+      background: linear-gradient(180deg, #f0f5fb 0%, #e2ecf6 100%);
+      border-top: 3px solid var(--primary);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+      font-weight: 600;
+      color: var(--primary-dark);
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales tr:nth-child(2) th,
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales tr:nth-child(2) td {
+      background: linear-gradient(180deg, #d8e4f2 0%, #cadcf0 100%);
+      border-top: 1px solid rgba(0, 33, 113, 0.14);
+      font-weight: 700;
+      color: #0a2a66;
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales tr:last-child th,
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales tr:last-child td {
+      background: linear-gradient(165deg, #002a7a 0%, var(--primary-dark) 55%, #001d5c 100%);
+      color: #fff;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      font-weight: 700;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales tr:last-child td {
+      font-size: 1.08rem;
+      letter-spacing: 0.02em;
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales tr:last-child th {
+      border-bottom-left-radius: 10px;
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales tr:last-child td {
+      border-bottom-right-radius: 10px;
+    }
+    /* Filas de módulos: más contraste y lectura tipo “puntos” */
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr td {
+      padding: 0.72rem 0.95rem;
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr:nth-child(odd) td {
+      background: #f5f8fc;
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr:nth-child(even) td {
+      background: #e4ecf6;
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr td:first-child {
+      font-weight: 600;
+      color: var(--primary-dark);
+      border-left: 4px solid var(--primary);
+      padding-left: 0.8rem;
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr .col-tiempo-resumen {
+      font-weight: 700;
+      color: var(--primary-dark);
+      font-size: 0.93rem;
+    }
+    .tabla-resumen-servicios-total .col-tiempo-resumen { white-space: nowrap; width: 12rem; }
+    .titulo-resumen-servicios {
+      margin: 1.5rem 0 0.35rem 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+    .apartado-propuesta-consolidada-final .bloque-consideraciones-generales {
+      margin-top: 1.15rem;
+      margin-bottom: 0;
+    }
+    .bloque-consideraciones-generales {
+      margin-top: 1.35rem;
+      padding: 1.25rem 1.35rem 1.3rem;
+      background: linear-gradient(180deg, #f4f6f9 0%, #fafbfc 55%);
+      border-radius: 10px;
+    }
+    .titulo-consideraciones-generales {
+      margin: 0 0 0.8rem 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      padding-bottom: 0.45rem;
+      border-bottom: 2px solid rgba(13, 71, 161, 0.18);
+      letter-spacing: 0.015em;
+    }
+    .lista-consideraciones-generales {
+      margin: 0;
+      padding-left: 1.35rem;
+      line-height: 1.58;
+      font-size: 0.9rem;
+      color: var(--text);
+      text-align: justify;
+    }
+    .lista-consideraciones-generales li { margin-bottom: 0.7rem; }
+    .lista-consideraciones-generales li:last-child { margin-bottom: 0; }
+    .casos-uso-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .caso-uso-card {
+      background: linear-gradient(to bottom, #fafafa, #f5f5f5);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .caso-uso-card h4 {
+      color: var(--primary-dark);
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+    .caso-uso-card p { margin: 0; font-size: 0.9rem; line-height: 1.5; color: var(--text); }
+    .punto3-migracion-imagenes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      margin-top: 1.25rem;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .punto3-migracion-imagenes .punto3-img {
+      max-width: 100%;
+      width: 480px;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      object-fit: contain;
+    }
+    .punto4-fila-texto-imagen {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    .punto4-fila-texto-imagen .punto4-texto { flex: 1; min-width: 0; margin: 0; }
+    .punto4-fila-texto-imagen .punto4-img-wrap { flex-shrink: 0; }
+    .punto4-fila-texto-imagen .punto4-img-wrap img {
+      max-width: 320px; max-height: 200px; width: auto; height: auto;
+      object-fit: contain; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .subpunto-img:not([src]),
+    .subpunto-img[src=""],
+    .punto2-img:not([src]),
+    .punto2-img[src=""] {
+      background: linear-gradient(135deg, #e0e0e0 0%, #eeeeee 100%);
+      min-height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    /* Carta comercial: ancho lo da el contenedor (misma caja que .plan-word-docx-wrap) */
+    .plan-word-docx .plan-carta-comercial {
+      margin: 2cm 0 1.25rem 0;
+      padding: 0 0.91cm 0 1cm;
+      font-family: "Times New Roman", Times, serif;
+      font-size: 12pt;
+      line-height: 1.45;
+      color: #00000a;
+    }
+    .plan-word-docx .plan-carta-comercial p {
+      margin: 0 0 0.4em 0;
+      text-indent: 0;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-fecha {
+      text-align: right;
+      margin-top: 3.5cm;
+      margin-bottom: 3cm;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-left {
+      text-align: left;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-body {
+      text-align: justify;
+      hyphens: auto;
+      -webkit-hyphens: auto;
+      margin-bottom: 0.85em;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-sep {
+      text-align: center;
+      margin: 0.35em 0 0.65em 0;
+      font-weight: normal;
+      line-height: 1.2;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-saludo {
+      text-align: left;
+      margin-top: 0.85em;
+      margin-bottom: 0.5em;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-cierre {
+      text-align: left;
+      margin-top: 0.85em;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-firma-sp {
+      height: 3.2em;
+      margin: 0.15em 0 0.35em 0;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-nombre {
+      text-align: left;
+      margin-top: 3cm;
+      margin-bottom: 0.35em;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-contact {
+      text-align: left;
+      font-size: 12pt;
+      line-height: 1.4;
+      margin-bottom: 0.15em;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-contact a {
+      color: inherit;
+      text-decoration: underline;
+    }
+    /* Portada plan Word: título y versión a la derecha; ilustración abajo a la izquierda.
+       Mismo respiro horizontal que CONFIDENCIALIDAD (1cm / 0.91cm). */
+    .plan-word-docx .plan-portada {
+      display: flex;
+      flex-direction: column;
+      margin: 0 0 1.75rem 0;
+      min-height: auto;
+      padding-top: 7cm;
+      padding-left: 1cm;
+      padding-right: 0.91cm;
+      box-sizing: border-box;
+    }
+    /* Párrafos Word tras la carta (huecos antes de CONFIDENCIALIDAD): mismo margen horizontal */
+    .plan-word-docx > .plan-carta-comercial ~ p.western {
+      margin-left: 1cm !important;
+      margin-right: 0.91cm !important;
+    }
+    /* padding-top solo en pantalla: en PDF/print ese 6cm quedaba activo (cascada tras print.css)
+       y empujaba CONFIDENCIALIDAD ~6cm hacia abajo en la página 3. */
+    .plan-word-docx > p.western.plan-titulo-confidencialidad {
+      margin-top: 0 !important;
+      box-sizing: border-box !important;
+    }
+    @media screen {
+      .plan-word-docx > p.western.plan-titulo-confidencialidad {
+        padding-top: 6cm !important;
+      }
+    }
+    .plan-word-docx .plan-portada-derecha {
+      text-align: right;
+      width: 100%;
+    }
+    .plan-word-docx .plan-portada-titulo {
+      margin: 0;
+      margin-left: auto;
+      max-width: 22em;
+      font-family: Verdana, "Segoe UI", Geneva, sans-serif;
+      font-size: 18pt;
+      font-weight: 700;
+      font-style: italic;
+      color: #17365d;
+      line-height: 1.35;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .plan-word-docx .plan-portada-version {
+      margin: 2.75rem 0 0 0;
+      text-align: right;
+      font-family: Verdana, "Segoe UI", Geneva, sans-serif;
+      font-size: 14pt;
+      font-weight: 700;
+      font-style: normal;
+      color: #00000a;
+      line-height: 1.3;
+    }
+    .plan-word-docx .plan-portada-imagen {
+      margin-top: 6cm;
+      align-self: flex-start;
+    }
+    .plan-word-docx .plan-portada-imagen img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      width: 296px;
+    }
+    @media (max-width: 600px) {
+      .plan-word-docx .plan-portada {
+        margin-left: 0;
+        margin-right: 0;
+        padding-top: 2rem;
+      }
+      .plan-word-docx .plan-portada-imagen {
+        margin-top: 1.75rem !important;
+      }
+      .plan-word-docx .plan-carta-comercial {
+        margin-top: 1.25rem !important;
+      }
+      .plan-word-docx .plan-portada-titulo {
+        font-size: clamp(0.95rem, 4.2vw, 18pt);
+        max-width: none;
+      }
+      .plan-word-docx .plan-portada-imagen img {
+        width: 100%;
+        max-width: 296px;
+      }
+      .punto2-item { flex-direction: column; align-items: center; }
+      .punto2-item .punto2-img { width: 100%; max-width: 320px; height: auto; }
+      .punto2-ibforms-fila { flex-direction: column; align-items: center; }
+      .punto2-ibforms-fila .punto2-img { width: 100%; max-width: 364px; height: auto; }
+      .punto3-migracion-imagenes { flex-direction: column; align-items: center; }
+      .punto3-migracion-imagenes .punto3-img { width: 100%; max-width: 320px; }
+      .punto4-fila-texto-imagen { flex-direction: column; align-items: center; }
+      .punto4-fila-texto-imagen .punto4-img-wrap img { max-width: 100%; }
+      .plan-word-docx-wrap {
+        margin-top: 2rem !important;
+        margin-left: 1cm !important;
+        margin-right: 0 !important;
+        max-width: calc(100% - 1cm - 1.5rem - 1cm) !important;
+        padding: 0 !important;
+      }
+      .comercial-header { flex-direction: column; align-items: flex-start; }
+      .ilustracion-container object, .ilustracion-container iframe { height: 280px; }
+      .subpunto-item { flex-direction: column; align-items: center; }
+      .subpunto-img { width: 100%; max-width: 320px; height: auto; min-height: 180px; }
+      .subpunto-item.img-ampliada .subpunto-img { width: 100%; max-width: 380px; height: auto; min-height: 200px; }
+      .subpunto-consultas-fila { flex-direction: column; align-items: center; }
+      .subpunto-consultas-fila .subpunto-img { width: 100%; max-width: 364px; height: auto; }
+      .subpunto-mantenimiento-fila { flex-direction: column; align-items: center; margin-left: 0; margin-right: 0; width: 100%; }
+      .subpunto-mantenimiento-fila .subpunto-img { width: 100%; max-width: 400px; height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-wrap">
+    <header class="flow-header comercial-header" role="banner" aria-label="Encabezado"></header>
+
+        <section class="plan-word-docx-wrap" aria-label="Plan 2026 v1, páginas 1 a 3">
+    <style type="text/css">
+
+    /* Caja horizontal del bloque Word (páginas 1–3) */
+    .plan-word-docx-wrap {
+      margin-top: 4cm;
+      margin-bottom: 1.5rem;
+      margin-left: 1cm;
+      margin-right: 0;
+      max-width: calc(100% - 1cm - 1.5rem - 1cm);
+      padding: 0;
+      box-sizing: border-box;
+    }
+    .plan-word-docx-wrap .plan-word-docx {
+      max-width: none;
+      margin: 0;
+      background: #fff;
+    }
+    .plan-word-docx-wrap .plan-word-docx img {
+      max-width: 100%;
+      height: auto;
+    }
+    /* No forzar margin 0 en todos los <p>: rompe los márgenes inline de Word en
+       CONFIDENCIALIDAD / CONFLICTO DE INTERESES (deben alinearse con el ancho del bloque Word).
+       La carta ya define márgenes en el <head> (.plan-carta-comercial p). */
+    .plan-word-docx-wrap .plan-word-docx .plan-portada p {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
+
+		/* @page: definido en print.css (copia para PDF); el @page de Word desactivado aquí */
+		.plan-word-docx p { color: #00000a; line-height: 115%; text-align: justify; orphans: 0; widows: 0; margin-bottom: 0.25cm; direction: ltr; background: transparent }
+		.plan-word-docx p.western { font-family: "Times New Roman", serif; font-size: 10pt; so-language: en-US; font-weight: normal }
+		.plan-word-docx p.cjk { font-family: "Times New Roman"; font-size: 10pt; so-language: zh-CN; font-weight: normal }
+		.plan-word-docx p.ctl { font-family: "Times New Roman"; font-size: 10pt; so-language: ar-SA }
+		.plan-word-docx a:link { color: #000080; so-language: zxx; text-decoration: underline }
+		.plan-word-docx a:visited { color: #800080; so-language: zxx; text-decoration: underline }
+		.plan-word-docx a.sdfootnotesym-western { font-size: 10pt }
+		.plan-word-docx a.sdfootnotesym-cjk { font-size: 10pt }
+	
+  
+    </style>
+    <div class="plan-word-docx">
+<section class="plan-portada" aria-label="Portada">
+  <div class="plan-portada-derecha">
+    <h1 class="plan-portada-titulo">PROPUESTA DE CAMBIO DE IMAGEN PORTAL BANESCO SEGUROS ONLINE. CLIENTES</h1>
+    <p class="plan-portada-version">Versión 1.0</p>
+  </div>
+  <div class="plan-portada-imagen">
+    <img src="banescovzla_plan_2026_v1_html_95f8590f.jpg" alt="Ilustración de dispositivos digitales" width="296" height="218" loading="lazy" decoding="async">
+  </div>
+</section>
+<div class="plan-carta-comercial">
+<p class="plan-carta-fecha">Caracas, 15 de Abril de 2026</p>
+<p class="plan-carta-left">Señores</p>
+<p class="plan-carta-left">Ariana Guaregua</p>
+<p class="plan-carta-left">Atención. Srta Guaregua</p>
+<p class="plan-carta-left">Ciudad.-</p>
+<p class="plan-carta-saludo">Estimados Sres.:</p>
+<p class="plan-carta-body">De acuerdo con conversaciones sostenidas con usted recientemente, nos es grato hacerle entrega formal de nuestra propuesta de “<strong>PROPUESTA DE CAMBIO DE IMAGEN PORTAL BANESCO SEGUROS ONLINE. CLIENTES</strong>”.</p>
+<p class="plan-carta-sep" aria-hidden="true">|</p>
+<p class="plan-carta-body">Entendiendo la importancia que este proyecto tiene para ustedes, ratificamos nuestro mayor compromiso y dedicación para el logro de las metas planteadas.</p>
+<p class="plan-carta-body">Buscando a través del éxito de este proyecto, convertirnos en un verdadero socio tecnológico y estratégico, que los acompañe en el empuje y crecimiento que Banesco Seguros ha demostrado mantener durante estos últimos años en el sector.</p>
+<p class="plan-carta-cierre">En espera de su respuesta, se despide,</p>
+<p class="plan-carta-left">Atentamente,</p>
+<div class="plan-carta-firma-sp" aria-hidden="true"></div>
+<p class="plan-carta-left plan-carta-nombre"><strong>César Rodríguez</strong></p>
+<p class="plan-carta-left plan-carta-contact">Cel: +58 (412) 237.33.20</p>
+<p class="plan-carta-left plan-carta-contact">e-mail: <a href="mailto:ibsoftdev.info@gmail.com">ibsoftdev.info@gmail.com</a></p>
+</div>
+<p lang="es-VE" class="western" align="left" style="line-height: 100%; orphans: 2; widows: 2; margin-left: 0.05cm; margin-right: 0.91cm; margin-bottom: 0.21cm">
+<br/>
+<br/>
+
+</p>
+<p lang="es-VE" class="western" align="center" style="line-height: 0.85cm; orphans: 2; widows: 2; margin-left: 1cm; margin-right: 0.91cm; margin-top: 0.42cm; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" align="center" style="line-height: 0.85cm; orphans: 2; widows: 2; margin-left: 1cm; margin-right: 0.91cm; margin-top: 0.42cm; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="en-US" class="western plan-titulo-confidencialidad" align="center" style="line-height: 0.85cm; orphans: 2; widows: 2; margin-left: 1cm; margin-right: 0.91cm; margin-top: 0; margin-bottom: 0cm">
+<font size="5" style="font-size: 20pt"><span lang="es-VE"><b>CONFIDENCIALIDAD</b></span></font></p>
+<p lang="en-US" class="western" style="line-height: 0.64cm; orphans: 2; widows: 2; margin-left: 1cm; margin-right: 0.91cm; margin-top: 0.42cm; margin-bottom: 0cm">
+<font size="3" style="font-size: 12pt"><span lang="es-VE"><span style="font-weight: normal">El
+material presentado en esta propuesta representa información
+exclusiva de los productos y metodología de IBSOFT DEVELOPMENT, C.A.
+ Esta propuesta incluye información que no debe ser ofrecida ni
+divulgada fuera de Banesco Seguros  y no deberá ser duplicada,
+utilizada o revelada para ningún propósito que no sea el de evaluar
+esta propuesta.  En caso de que el contrato sea otorgado a IBSOFT
+DEVELOPMENT, C.A. por los resultados de esta propuesta, o en conjunto
+con la información suministrada,  Banesco Seguros tendrá el derecho
+de duplicar, utilizar y divulgar la información provista en el
+resultado del contrato.  Esta restricción no limita a Banesco
+Seguros el derecho de uso de información ofrecida en esta propuesta
+si es obtenida por otras fuentes sin restricción de
+confidencialidad.</span></span></font></p>
+<p lang="es-VE" class="western" align="center" style="line-height: 0.85cm; orphans: 2; widows: 2; margin-right: 0.91cm; margin-top: 0.42cm; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="en-US" class="western" align="center" style="line-height: 0.85cm; orphans: 2; widows: 2; margin-left: 1cm; margin-right: 0.91cm; margin-top: 0.42cm; margin-bottom: 0cm">
+<font size="5" style="font-size: 20pt"><span lang="es-VE"><b>CONFLICTO
+DE INTERESES</b></span></font></p>
+<p lang="en-US" class="western" style="line-height: 0.64cm; orphans: 2; widows: 2; margin-left: 1cm; margin-right: 0.91cm; margin-top: 0.42cm; margin-bottom: 0cm">
+<font size="3" style="font-size: 12pt"><span lang="es-VE"><span style="font-weight: normal">IBSOFT
+DEVELOPMENT, C.A. certifica que ningún empleado que ejerza alguna
+función o responsabilidad en la revisión o aprobación de este
+documento o en la ejecución de este proyecto, adquirirá
+voluntariamente, antes de finalizar el proyecto, algún interés
+personal, directo o indirecto, en este contrato o propuesta.</span></span></font></p>
+<p lang="es-VE" class="western" align="right" style="font-weight: normal; line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="font-weight: normal; line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+
+  
+    </div>
+    </section>
+
+    <div class="card card-plan-estrategico-2026">
+      <div class="card-header">Cambio de Imagen Banesco Seguros Online</div>
+      <div class="card-body">
+        <p style="margin: 0 0 1rem 0; color: var(--text); text-align: justify;">A partir de las iniciativas estratégicas planteadas (plataforma omnicanal, workflows de servicios médicos y automóvil, multicotizadores y modernización de suscripción), se presenta una visión de <strong>estimación de esfuerzo</strong> y de <strong>cómo el Módulo de Formas Configurables</strong> permite abordarlas de forma eficiente, reutilizando un mismo motor de formularios y flujos por configuración.</p>
+
+        <div class="punto-clave punto-clave-expandido texto-justificado punto-servicios-alcance-pdf">
+          <span class="numero">1</span>
+          <div class="texto">
+            <h4>Servicios a Desarrollar</h4>
+            <p style="margin: 0 0 1rem 0; color: var(--text); text-align: justify;">Referencia de <strong>pantallas del portal actual</strong> (SegurOnline), alineada con el documento <code>bso-actual/index.html</code>. A continuación se reproducen las mismas secciones y capturas que en esa referencia, como base para el alcance de <strong>Servicios a Desarrollar</strong>.</p>
+            <div class="servicios-bso-embed">
+    <section id="pantalla-1" class="screen screen-acceso" aria-labelledby="titulo-1">
+      <div class="screen-header">
+        <span class="screen-num" aria-hidden="true">1</span>
+        <h2 id="titulo-1">Acceso al portal</h2>
+        <p class="screen-desc">Flujo de entrada: <strong>ingreso de usuario y clave</strong> (recuperación de clave, afiliación y datos de contacto para soporte: gestion_usuarios_web_ve@banescoseguros.com; pie con RIF y copyright) y, a continuación, <strong>selección de roles</strong> — tipo de usuario (por ejemplo Cliente o Analista) antes de continuar.</p>
+      </div>
+
+      <h3 class="servicios-subtitulo-presentacion">Presentación actual</h3>
+      <div class="servicios-bloque-actual">
+<div class="acceso-subsecciones">
+        <article class="acceso-paso" id="acceso-ingreso" aria-labelledby="acceso-ingreso-titulo">
+          <h3 id="acceso-ingreso-titulo" class="acceso-paso-titulo">Ingreso (usuario y clave)</h3>
+          <figure class="figure-screen">
+            <img src="../bso-actual/assets/01-login.png" width="1200" height="675" alt="Pantalla de acceso: Ingrese sus datos y ¿Desea afiliarse?">
+          </figure>
+        </article>
+
+        <article class="acceso-paso" id="acceso-roles" aria-labelledby="acceso-roles-titulo">
+          <h3 id="acceso-roles-titulo" class="acceso-paso-titulo">Selección de roles</h3>
+          <p class="screen-desc acceso-paso-desc">Elección del tipo de usuario (por ejemplo Cliente o Analista) antes de continuar en el flujo de acceso.</p>
+          <figure class="figure-screen">
+            <img src="../bso-actual/assets/02-seleccion-roles.png" width="1200" height="675" alt="Selección de roles: tipo de usuario Cliente o Analista, Regresar y Continuar">
+          </figure>
+        </article>
+      </div>
+      </div>
+      <h3 class="servicios-subtitulo-presentacion servicios-subtitulo-propuesta">Presentación propuesta</h3>
+      <div class="servicios-bloque-propuesta acceso-subsecciones">
+        <article class="acceso-paso" aria-labelledby="acceso-propuesta-ingreso-titulo">
+          <h3 id="acceso-propuesta-ingreso-titulo" class="acceso-paso-titulo">Ingreso (usuario y clave)</h3>
+          <p class="screen-desc acceso-paso-desc">Propuesta visual: pantalla de bienvenida <strong>Banesco SegurOnline</strong>, formulario de usuario y contraseña, enlaces de recuperación y pie de soporte.</p>
+          <figure class="figure-screen">
+            <img src="assets-propuesta/acceso-propuesta-01-login.png" width="1200" height="675" alt="Propuesta: inicio de sesión Banesco SegurOnline">
+          </figure>
+        </article>
+        <article class="acceso-paso" aria-labelledby="acceso-propuesta-roles-titulo">
+          <h3 id="acceso-propuesta-roles-titulo" class="acceso-paso-titulo">Selección de roles</h3>
+          <p class="screen-desc acceso-paso-desc">Propuesta: tarjetas para elegir el tipo de usuario (Cliente, Analista, Intermediario, Proveedor, Rol enlace) con enlace para volver al inicio de sesión.</p>
+          <figure class="figure-screen">
+            <img src="assets-propuesta/acceso-propuesta-02-seleccion-roles.png" width="1200" height="675" alt="Propuesta: selección de rol">
+          </figure>
+        </article>
+        <article class="acceso-paso" aria-labelledby="acceso-propuesta-inicio-clientes-titulo">
+          <h3 id="acceso-propuesta-inicio-clientes-titulo" class="acceso-paso-titulo">Panel de inicio Clientes</h3>
+          <p class="screen-desc acceso-paso-desc">Propuesta: vista inicial tras el acceso, con saludo, accesos a consultas (pólizas, solicitudes, pagos, perfil) y bloque para cotizar nuevas pólizas.</p>
+          <figure class="figure-screen">
+            <img src="assets-propuesta/acceso-propuesta-03-panel-inicio.png" width="1200" height="675" alt="Propuesta: panel de inicio clientes ¿Qué gestión deseas realizar?">
+          </figure>
+        </article>
+        <article class="acceso-paso" aria-labelledby="acceso-propuesta-mi-perfil-titulo">
+          <h3 id="acceso-propuesta-mi-perfil-titulo" class="acceso-paso-titulo">Mi Perfil</h3>
+          <p class="screen-desc acceso-paso-desc">Propuesta: pantalla <strong>Mi Perfil</strong> para gestionar datos personales (usuario, nombre, apellidos, correo, rol, código de cliente), acciones de <strong>Seguridad</strong> (cambiar contraseña) y <strong>Notificaciones</strong> (gestionar alertas), con botón <strong>Editar perfil</strong>.</p>
+          <figure class="figure-screen">
+            <img src="assets-propuesta/acceso-propuesta-05-mi-perfil.png" width="915" height="700" alt="Propuesta: Mi Perfil, información personal, seguridad y notificaciones">
+          </figure>
+        </article>
+        <article class="acceso-paso" aria-labelledby="acceso-propuesta-inicio-otros-roles-titulo">
+          <h3 id="acceso-propuesta-inicio-otros-roles-titulo" class="acceso-paso-titulo">Panel de inicio otros Roles</h3>
+          <p class="screen-desc acceso-paso-desc">Propuesta: vista <strong>Mi perfil</strong> para roles distintos de Cliente (p. ej. <strong>Analista</strong>): menú lateral con Consultas, Productos, Pagos, siniestros, expediente, servicios, etc., y datos de usuario en tabla.</p>
+          <p class="screen-desc acceso-paso-desc">Se requiere implementar el <strong>LoginModule</strong> JAAS para permitir la transferencia de credenciales de <strong>JWT</strong> a JAAS.</p>
+          <figure class="figure-screen">
+            <img src="assets-propuesta/acceso-propuesta-04-panel-inicio-otros-roles.png" width="1200" height="675" alt="Propuesta: Mi perfil SegurOnline, rol Analista">
+          </figure>
+        </article>
+      </div>
+    </section>
+
+    <section id="pantalla-2" class="screen screen-consultas" aria-labelledby="titulo-2">
+      <div class="screen-header">
+        <span class="screen-num" aria-hidden="true">2</span>
+        <h2 id="titulo-2">Consultas</h2>
+        <p class="screen-desc">Área autenticada SegurOnline: menú lateral <strong>Consultas</strong> (junto a Productos, Pagos, Declaración / Notificación de siniestros, etc.). Cada subopción ofrece filtros y tabla de resultados; soporte telefónico en el lateral.</p>
+      </div>
+
+      <div class="notificacion-tipos consultas-tipos-detalle">
+        <p class="notificacion-tipos-lead">Tipos de consulta</p>
+
+        <article class="notificacion-tipo" id="consulta-polizas" aria-labelledby="consulta-polizas-titulo">
+          <header class="notificacion-tipo-header">
+            <span class="notificacion-tipo-num" aria-hidden="true">1</span>
+            <h3 id="consulta-polizas-titulo">Pólizas</h3>
+          </header>
+          <p class="screen-desc notificacion-tipo-desc">Ruta <strong>Consultas → Pólizas</strong>. Filtros: período, producto, estatus, póliza/certificado. Tabla «Pólizas» con certificado, titular, fechas de emisión y vigencia, primas, IGTF, estatus, recibos y siniestros, opciones por fila.</p>
+          <h4 class="servicios-subtitulo-presentacion consulta-intra-presentacion">Presentación actual</h4>
+          <div class="consulta-bloque-actual">
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/03-consultas-polizas.png" width="1200" height="675" alt="Consultas Pólizas: filtros y listado de pólizas">
+            </figure>
+          </div>
+          <h4 class="servicios-subtitulo-presentacion servicios-subtitulo-propuesta consulta-intra-presentacion">Presentación propuesta</h4>
+          <div class="consulta-propuesta-partes">
+            <section class="consulta-propuesta-parte" aria-labelledby="consulta-polizas-propuesta-vigentes-titulo">
+              <h5 id="consulta-polizas-propuesta-vigentes-titulo" class="consulta-propuesta-parte-titulo">Mis Pólizas Vigentes</h5>
+              <div class="figure-stack">
+                <figure class="figure-screen">
+                  <img src="assets-propuesta/consultas-propuesta-polizas-mis-vigentes.png" width="1200" height="675" alt="Propuesta: consulta de pólizas vigentes, filtros y tarjetas de póliza">
+                </figure>
+                <figure class="figure-screen">
+                  <img src="assets-propuesta/consultas-propuesta-polizas-mis-vigentes-detalle.png" width="1200" height="675" alt="Propuesta: detalle de la póliza, resumen de cobertura, documentación legal y asegurados">
+                </figure>
+              </div>
+            </section>
+            <section class="consulta-propuesta-parte" aria-labelledby="consulta-polizas-propuesta-historial-titulo">
+              <h5 id="consulta-polizas-propuesta-historial-titulo" class="consulta-propuesta-parte-titulo">Historial de Pólizas</h5>
+              <p class="consulta-propuesta-provisional-nota">Imagen <strong>provisional</strong> solo como referencia de maquetado; <strong>no</strong> corresponde a la funcionalidad de historial de pólizas y será sustituida.</p>
+              <figure class="figure-screen">
+                <img src="assets-propuesta/consultas-propuesta-polizas-historial-placeholder.png" width="1200" height="675" alt="Placeholder provisional: pantalla de historial con filtros y tabla (sustituir por diseño de historial de pólizas)">
+              </figure>
+            </section>
+          </div>
+        </article>
+
+        <article class="notificacion-tipo" id="consulta-siniestros" aria-labelledby="consulta-siniestros-titulo">
+          <header class="notificacion-tipo-header">
+            <span class="notificacion-tipo-num" aria-hidden="true">2</span>
+            <h3 id="consulta-siniestros-titulo">Siniestros</h3>
+          </header>
+          <p class="screen-desc notificacion-tipo-desc">Ruta <strong>Consultas → Siniestros</strong>. Filtros: período, producto, estatus, póliza/certificado y número de siniestro. Tabla con tipo de siniestro, póliza/certificado, estatus, fechas, cédula, asegurado y opciones por fila.</p>
+          <h4 class="servicios-subtitulo-presentacion consulta-intra-presentacion">Presentación actual</h4>
+          <div class="consulta-bloque-actual">
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/03-consultas-siniestros.png" width="1200" height="675" alt="Consultas Siniestros: filtros y tabla de siniestros">
+            </figure>
+          </div>
+          <h4 class="servicios-subtitulo-presentacion servicios-subtitulo-propuesta consulta-intra-presentacion">Presentación propuesta</h4>
+          <div class="figure-stack">
+            <figure class="figure-screen">
+              <img src="assets-propuesta/consultas-propuesta-siniestros-listado.png" width="1200" height="675" alt="Propuesta: estatus de siniestros, filtros y listado de siniestros">
+            </figure>
+            <figure class="figure-screen">
+              <img src="assets-propuesta/consultas-propuesta-siniestros-detalle.png" width="1200" height="675" alt="Propuesta: detalle de siniestro, seguimiento de estatus e información del caso">
+            </figure>
+          </div>
+        </article>
+
+        <article class="notificacion-tipo" id="consulta-carta-aval" aria-labelledby="consulta-carta-aval-titulo">
+          <header class="notificacion-tipo-header">
+            <span class="notificacion-tipo-num" aria-hidden="true">3</span>
+            <h3 id="consulta-carta-aval-titulo">Carta Aval</h3>
+          </header>
+          <p class="screen-desc notificacion-tipo-desc">Ruta <strong>Consultas → Carta Aval</strong>. Filtros: período, fechas desde/hasta, número de siniestro, estatus. Botones Aplicar, Limpiar, Descargas y Ayuda. Tabla «Carta Aval» con columnas de siniestro, carta, fechas, ocurrencia, procedimiento, cédula, asegurado, parentesco, edad, estatus.</p>
+          <h4 class="servicios-subtitulo-presentacion consulta-intra-presentacion">Presentación actual</h4>
+          <div class="consulta-bloque-actual">
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/03-consultas-carta-aval.png" width="1200" height="675" alt="Consultas Carta Aval: filtros y tabla de resultados">
+            </figure>
+          </div>
+          <h4 class="servicios-subtitulo-presentacion servicios-subtitulo-propuesta consulta-intra-presentacion">Presentación propuesta</h4>
+          <figure class="figure-screen">
+            <img src="assets-propuesta/consultas-propuesta-carta-aval.png" width="1200" height="675" alt="Propuesta: estatus de Carta Aval, filtros y tabla de cartas avales">
+          </figure>
+        </article>
+
+        <article class="notificacion-tipo" id="consulta-inspecciones" aria-labelledby="consulta-inspecciones-titulo">
+          <header class="notificacion-tipo-header">
+            <span class="notificacion-tipo-num" aria-hidden="true">4</span>
+            <h3 id="consulta-inspecciones-titulo">Inspecciones</h3>
+          </header>
+          <p class="screen-desc notificacion-tipo-desc">Ruta <strong>Consultas → Inspecciones</strong>. Filtro por <strong>Placa</strong>; Aplicar, Limpiar, Descargas y Ayuda. Tabla con inspección, cédula/RIF, cliente, estatus, fecha de inspección, aceptación, motivo de rechazo, descripción del bien, placa.</p>
+          <h4 class="servicios-subtitulo-presentacion consulta-intra-presentacion">Presentación actual</h4>
+          <div class="consulta-bloque-actual">
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/03-consultas-inspecciones.png" width="1200" height="675" alt="Consultas Inspecciones: filtro por placa y tabla">
+            </figure>
+          </div>
+          <h4 class="servicios-subtitulo-presentacion servicios-subtitulo-propuesta consulta-intra-presentacion">Presentación propuesta</h4>
+          <figure class="figure-screen">
+            <img src="assets-propuesta/consultas-propuesta-inspecciones.png" width="1200" height="675" alt="Propuesta: estatus de inspección, filtro por placa y tabla de inspecciones">
+          </figure>
+        </article>
+
+        <article class="notificacion-tipo" id="consulta-ordenes-medicas" aria-labelledby="consulta-ordenes-medicas-titulo">
+          <header class="notificacion-tipo-header">
+            <span class="notificacion-tipo-num" aria-hidden="true">5</span>
+            <h3 id="consulta-ordenes-medicas-titulo">Órdenes médicas</h3>
+          </header>
+          <p class="screen-desc notificacion-tipo-desc">Ruta <strong>Consultas → Órdenes médicas</strong>. Filtros: período, fechas, siniestro, estatus; acciones Aplicar, Limpiar, Descargas y Ayuda. Tabla con Nro. siniestro, Nro. orden, fechas, cédula, asegurado, parentesco, edad, servicio, estatus de factura, observaciones.</p>
+          <h4 class="servicios-subtitulo-presentacion consulta-intra-presentacion">Presentación actual</h4>
+          <div class="consulta-bloque-actual">
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/03-consultas-ordenes-medicas.png" width="1200" height="675" alt="Consultas Órdenes médicas: filtros y tabla">
+            </figure>
+          </div>
+          <h4 class="servicios-subtitulo-presentacion servicios-subtitulo-propuesta consulta-intra-presentacion">Presentación propuesta</h4>
+          <figure class="figure-screen">
+            <img src="assets-propuesta/consultas-propuesta-ordenes-medicas.png" width="1200" height="675" alt="Propuesta: estatus de órdenes médicas, filtros y tabla de órdenes">
+          </figure>
+        </article>
+      </div>
+    </section>
+
+    <section id="pantalla-3" class="screen screen-notificacion" aria-labelledby="titulo-3">
+      <div class="screen-header">
+        <span class="screen-num" aria-hidden="true">3</span>
+        <h2 id="titulo-3">Notificación de Siniestros</h2>
+        <p class="screen-desc">Capturas agrupadas <strong>por tipo de notificación</strong> (ramas Personas y Patrimoniales en el portal). Se documentan <strong>Reembolso</strong>, <strong>Carta Aval</strong>, <strong>Vida</strong>, <strong>Funerario</strong> y <strong>Patrimoniales</strong> (<strong>Funerario</strong> reutiliza en pasos 1 y 2 las mismas capturas que <strong>Vida</strong>; <strong>Patrimoniales</strong> tiene capturas propias de pólizas y formulario patrimonial).</p>
+      </div>
+
+<div class="notificacion-tipos">
+        <p class="notificacion-tipos-lead">Tipos de notificación</p>
+
+        <article class="notificacion-tipo" id="notif-reembolso" aria-labelledby="notif-reembolso-titulo">
+          <header class="notificacion-tipo-header">
+            <span class="notificacion-tipo-num" aria-hidden="true">1</span>
+            <h3 id="notif-reembolso-titulo">Reembolso</h3>
+          </header>
+          <p class="screen-desc notificacion-tipo-desc">Flujo bajo <strong>Notificación Siniestros → Personas → Reembolso</strong>. Mismo asistente en cinco pasos que Carta Aval: Selección de póliza, Notificación de siniestro, Recaudos del siniestro, Confirmación de notificación, Siniestro notificado.</p>
+
+          <h4 class="servicios-subtitulo-presentacion consulta-intra-presentacion">Presentación actual</h4>
+          <div class="consulta-bloque-actual">
+          <nav class="notificacion-mini-nav" aria-label="Pasos Reembolso">
+            <a href="#notif-reembolso-seleccion-poliza">Paso 1 · Selección de póliza</a>
+            <a href="#notif-reembolso-notificacion-siniestro">Paso 2 · Notificación de siniestro</a>
+          </nav>
+
+          <div class="notificacion-paso" id="notif-reembolso-seleccion-poliza">
+            <h4 class="notificacion-paso-titulo">Paso 1 — Selección de póliza</h4>
+            <p class="screen-desc">Filtro por póliza/certificado; Aplicar, Limpiar y Ayuda; tabla de pólizas con radios por asegurado. En el menú lateral, <strong>Reembolso</strong> queda seleccionado bajo Personas.</p>
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/04-notif-reembolso-01-seleccion-poliza.png" width="1200" height="675" alt="Reembolso: paso Selección de póliza, tabla de asegurados">
+            </figure>
+          </div>
+
+          <div class="notificacion-paso" id="notif-reembolso-notificacion-siniestro">
+            <h4 class="notificacion-paso-titulo">Paso 2 — Notificación de siniestro</h4>
+            <p class="screen-desc">Formulario <strong>Detalles del Siniestro</strong> con tipo de siniestro <strong>REEMBOLSO</strong>; causa, fechas, hora, especialidad, monto estimado, descripción; bloque <strong>Datos de médico tratante</strong> al continuar el formulario. El paso 1 figura completado en el asistente.</p>
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/04-notif-reembolso-02-notificacion-siniestro.png" width="1200" height="675" alt="Reembolso: Detalles del Siniestro y datos de médico tratante">
+            </figure>
+          </div>
+          </div>
+
+          <h4 class="servicios-subtitulo-presentacion servicios-subtitulo-propuesta consulta-intra-presentacion">Presentación propuesta</h4>
+          <div class="consulta-propuesta-partes">
+            <section class="consulta-propuesta-parte" aria-labelledby="notif-reembolso-propuesta-p1-titulo">
+              <h5 id="notif-reembolso-propuesta-p1-titulo" class="consulta-propuesta-parte-titulo">Paso 1 — Selección de asegurado</h5>
+              <figure class="figure-screen">
+                <img src="assets-propuesta/notif-propuesta-reembolso-01-seleccion-asegurado.png" width="950" height="781" alt="Propuesta Reembolso: selección de asegurado, indicador de pasos, filtros y tarjetas de asegurados">
+              </figure>
+            </section>
+            <section class="consulta-propuesta-parte" aria-labelledby="notif-reembolso-propuesta-p2-titulo">
+              <h5 id="notif-reembolso-propuesta-p2-titulo" class="consulta-propuesta-parte-titulo">Paso 2</h5>
+              <p class="servicios-texto-propuesta">Por definir</p>
+            </section>
+          </div>
+        </article>
+
+        <article class="notificacion-tipo" id="notif-carta-aval" aria-labelledby="notif-carta-aval-titulo">
+          <header class="notificacion-tipo-header">
+            <span class="notificacion-tipo-num" aria-hidden="true">2</span>
+            <h3 id="notif-carta-aval-titulo">Carta Aval</h3>
+          </header>
+          <p class="screen-desc notificacion-tipo-desc">Flujo bajo <strong>Notificación Siniestros → Personas → Carta Aval</strong>. Asistente en cinco pasos: Selección de póliza, Notificación de siniestro, Recaudos del siniestro, Confirmación de notificación, Siniestro notificado.</p>
+
+          <h4 class="servicios-subtitulo-presentacion consulta-intra-presentacion">Presentación actual</h4>
+          <div class="consulta-bloque-actual">
+          <nav class="notificacion-mini-nav" aria-label="Pasos Carta Aval">
+            <a href="#notif-carta-aval-seleccion-poliza">Paso 1 · Selección de póliza</a>
+            <a href="#notif-carta-aval-notificacion-siniestro">Paso 2 · Notificación de siniestro</a>
+          </nav>
+
+          <div class="notificacion-paso" id="notif-carta-aval-seleccion-poliza">
+            <h4 class="notificacion-paso-titulo">Paso 1 — Selección de póliza</h4>
+            <p class="screen-desc">Filtro por póliza/certificado; botones Aplicar, Limpiar y Ayuda; tabla de pólizas con selección por radio del asegurado. Paso activo en el indicador de avance.</p>
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/04-notif-carta-aval-01-seleccion-poliza.png" width="1200" height="675" alt="Carta Aval: paso Selección de póliza, tabla de asegurados">
+            </figure>
+          </div>
+
+          <div class="notificacion-paso" id="notif-carta-aval-notificacion-siniestro">
+            <h4 class="notificacion-paso-titulo">Paso 2 — Notificación de siniestro</h4>
+            <p class="screen-desc">Formulario <strong>Detalles del Siniestro</strong> (campos obligatorios marcados): tipo Carta Aval, causa, fechas y hora, especialidad, monto estimado, proveedor, descripción, etc. El paso 1 aparece completado en el asistente.</p>
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/04-notif-carta-aval-02-notificacion-siniestro.png" width="1200" height="675" alt="Carta Aval: formulario Detalles del Siniestro">
+            </figure>
+          </div>
+          </div>
+
+          <h4 class="servicios-subtitulo-presentacion servicios-subtitulo-propuesta consulta-intra-presentacion">Presentación propuesta</h4>
+          <div class="consulta-propuesta-partes">
+            <section class="consulta-propuesta-parte" aria-labelledby="notif-carta-aval-propuesta-p1-titulo">
+              <h5 id="notif-carta-aval-propuesta-p1-titulo" class="consulta-propuesta-parte-titulo">Paso 1 — Selección de asegurado</h5>
+              <figure class="figure-screen">
+                <img src="assets-propuesta/notif-propuesta-reembolso-01-seleccion-asegurado.png" width="950" height="781" alt="Propuesta Carta Aval: selección de asegurado, indicador de pasos, filtros y tarjetas de asegurados">
+              </figure>
+            </section>
+            <section class="consulta-propuesta-parte" aria-labelledby="notif-carta-aval-propuesta-p2-titulo">
+              <h5 id="notif-carta-aval-propuesta-p2-titulo" class="consulta-propuesta-parte-titulo">Paso 2</h5>
+              <p class="servicios-texto-propuesta">Por definir</p>
+            </section>
+          </div>
+        </article>
+
+        <article class="notificacion-tipo" id="notif-vida" aria-labelledby="notif-vida-titulo">
+          <header class="notificacion-tipo-header">
+            <span class="notificacion-tipo-num" aria-hidden="true">3</span>
+            <h3 id="notif-vida-titulo">Vida</h3>
+          </header>
+          <p class="screen-desc notificacion-tipo-desc">Flujo bajo <strong>Notificación Siniestros → Personas → Vida</strong>. Mismo asistente en cinco pasos que el resto de tipos bajo Personas. Las capturas de los pasos 1 y 2 sirven de referencia visual y se reutilizan en <strong>Funerario</strong> (apartado siguiente); sustituir por capturas específicas cuando estén disponibles.</p>
+
+          <h4 class="servicios-subtitulo-presentacion consulta-intra-presentacion">Presentación actual</h4>
+          <div class="consulta-bloque-actual">
+          <nav class="notificacion-mini-nav" aria-label="Pasos Vida">
+            <a href="#notif-vida-seleccion-poliza">Paso 1 · Selección de póliza</a>
+            <a href="#notif-vida-notificacion-siniestro">Paso 2 · Notificación de siniestro</a>
+          </nav>
+
+          <div class="notificacion-paso" id="notif-vida-seleccion-poliza">
+            <h4 class="notificacion-paso-titulo">Paso 1 — Selección de póliza</h4>
+            <p class="screen-desc">Filtro por póliza/certificado, tabla con radios, paginación, <strong>Siguiente</strong>.</p>
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/04-notif-funerario-01-seleccion-poliza.png" width="1200" height="675" alt="Vida: paso Selección de póliza">
+            </figure>
+          </div>
+
+          <div class="notificacion-paso" id="notif-vida-notificacion-siniestro">
+            <h4 class="notificacion-paso-titulo">Paso 2 — Notificación de siniestro</h4>
+            <p class="screen-desc"><strong>Detalles del Siniestro</strong> y <strong>Datos de contacto (Asegurado / Tercero)</strong>.</p>
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/04-notif-funerario-02-notificacion-siniestro.png" width="1200" height="675" alt="Vida: Detalles del Siniestro y datos de contacto">
+            </figure>
+          </div>
+          </div>
+
+          <h4 class="servicios-subtitulo-presentacion servicios-subtitulo-propuesta consulta-intra-presentacion">Presentación propuesta</h4>
+          <div class="consulta-propuesta-partes">
+            <section class="consulta-propuesta-parte" aria-labelledby="notif-vida-propuesta-p1-titulo">
+              <h5 id="notif-vida-propuesta-p1-titulo" class="consulta-propuesta-parte-titulo">Paso 1 — Selección de asegurado</h5>
+              <figure class="figure-screen">
+                <img src="assets-propuesta/notif-propuesta-reembolso-01-seleccion-asegurado.png" width="950" height="781" alt="Propuesta Vida: selección de asegurado, indicador de pasos, filtros y tarjetas de asegurados">
+              </figure>
+            </section>
+            <section class="consulta-propuesta-parte" aria-labelledby="notif-vida-propuesta-p2-titulo">
+              <h5 id="notif-vida-propuesta-p2-titulo" class="consulta-propuesta-parte-titulo">Paso 2</h5>
+              <p class="servicios-texto-propuesta">Por definir</p>
+            </section>
+          </div>
+        </article>
+
+        <article class="notificacion-tipo" id="notif-funerario" aria-labelledby="notif-funerario-titulo">
+          <header class="notificacion-tipo-header">
+            <span class="notificacion-tipo-num" aria-hidden="true">4</span>
+            <h3 id="notif-funerario-titulo">Funerario</h3>
+          </header>
+          <p class="screen-desc notificacion-tipo-desc">Flujo bajo <strong>Notificación Siniestros → Personas → Funerario</strong>. Asistente en cinco pasos: Selección de póliza, Notificación de siniestro, Recaudos del siniestro, Confirmación de notificación, Siniestro notificado. En pasos 1 y 2 se muestran <strong>las mismas capturas que en Vida</strong>.</p>
+
+          <h4 class="servicios-subtitulo-presentacion consulta-intra-presentacion">Presentación actual</h4>
+          <div class="consulta-bloque-actual">
+          <nav class="notificacion-mini-nav" aria-label="Pasos Funerario">
+            <a href="#notif-funerario-seleccion-poliza">Paso 1 · Selección de póliza</a>
+            <a href="#notif-funerario-notificacion-siniestro">Paso 2 · Notificación de siniestro</a>
+          </nav>
+
+          <div class="notificacion-paso" id="notif-funerario-seleccion-poliza">
+            <h4 class="notificacion-paso-titulo">Paso 1 — Selección de póliza</h4>
+            <p class="screen-desc">Ramo <strong>Funerarios individual</strong>; filtro por póliza/certificado; tabla con radios; paginación; botón <strong>Siguiente</strong>. Menú lateral con <strong>Funerario</strong> seleccionado. Captura compartida con <strong>Vida</strong>.</p>
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/04-notif-funerario-01-seleccion-poliza.png" width="1200" height="675" alt="Funerario: paso Selección de póliza, tabla y Siguiente">
+            </figure>
+          </div>
+
+          <div class="notificacion-paso" id="notif-funerario-notificacion-siniestro">
+            <h4 class="notificacion-paso-titulo">Paso 2 — Notificación de siniestro</h4>
+            <p class="screen-desc"><strong>Detalles del Siniestro</strong>: tipo indemnización por cláusula, causa <strong>Muerte</strong>, fechas y hora, monto estimado, descripción. Bloque <strong>Datos de contacto (Asegurado / Tercero)</strong>: teléfono celular y correo. Paso 1 completado en el asistente. Captura compartida con <strong>Vida</strong>.</p>
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/04-notif-funerario-02-notificacion-siniestro.png" width="1200" height="675" alt="Funerario: Detalles del Siniestro y datos de contacto">
+            </figure>
+          </div>
+          </div>
+
+          <h4 class="servicios-subtitulo-presentacion servicios-subtitulo-propuesta consulta-intra-presentacion">Presentación propuesta</h4>
+          <div class="consulta-propuesta-partes">
+            <section class="consulta-propuesta-parte" aria-labelledby="notif-funerario-propuesta-p1-titulo">
+              <h5 id="notif-funerario-propuesta-p1-titulo" class="consulta-propuesta-parte-titulo">Paso 1 — Selección de asegurado</h5>
+              <figure class="figure-screen">
+                <img src="assets-propuesta/notif-propuesta-reembolso-01-seleccion-asegurado.png" width="950" height="781" alt="Propuesta Funerario: selección de asegurado, indicador de pasos, filtros y tarjetas de asegurados">
+              </figure>
+            </section>
+            <section class="consulta-propuesta-parte" aria-labelledby="notif-funerario-propuesta-p2-titulo">
+              <h5 id="notif-funerario-propuesta-p2-titulo" class="consulta-propuesta-parte-titulo">Paso 2</h5>
+              <p class="servicios-texto-propuesta">Por definir</p>
+            </section>
+          </div>
+        </article>
+
+        <article class="notificacion-tipo" id="notif-patrimoniales" aria-labelledby="notif-patrimoniales-titulo">
+          <header class="notificacion-tipo-header">
+            <span class="notificacion-tipo-num" aria-hidden="true">5</span>
+            <h3 id="notif-patrimoniales-titulo">Patrimoniales</h3>
+          </header>
+          <p class="screen-desc notificacion-tipo-desc">Flujo bajo <strong>Notificación Siniestros → Patrimoniales</strong>. Asistente en cinco pasos (Selección de póliza, Notificación de siniestro, Recaudos, Confirmación, Siniestro notificado). Capturas de ramos patrimoniales (p. ej. Casco de naves, Riesgos diversos).</p>
+
+          <h4 class="servicios-subtitulo-presentacion consulta-intra-presentacion">Presentación actual</h4>
+          <div class="consulta-bloque-actual">
+          <nav class="notificacion-mini-nav" aria-label="Pasos Patrimoniales">
+            <a href="#notif-patrimoniales-seleccion-poliza">Paso 1 · Selección de póliza</a>
+            <a href="#notif-patrimoniales-notificacion-siniestro">Paso 2 · Notificación de siniestro</a>
+          </nav>
+
+          <div class="notificacion-paso" id="notif-patrimoniales-seleccion-poliza">
+            <h4 class="notificacion-paso-titulo">Paso 1 — Selección de póliza</h4>
+            <p class="screen-desc">Filtros por <strong>Cédula/RIF</strong> y <strong>Póliza / Certificado</strong>; Aplicar, Limpiar y Ayuda. Tabla de pólizas con ramo (p. ej. Casco de naves, Riesgos diversos), estatus y asegurado; selección por radio y <strong>Siguiente</strong>.</p>
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/04-notif-patrimoniales-01-seleccion-poliza.png" width="1200" height="675" alt="Patrimoniales: Selección de póliza">
+            </figure>
+          </div>
+
+          <div class="notificacion-paso" id="notif-patrimoniales-notificacion-siniestro">
+            <h4 class="notificacion-paso-titulo">Paso 2 — Notificación de siniestro</h4>
+            <p class="screen-desc"><strong>Detalles del Siniestro</strong>: tipo (p. ej. daños al interés asegurado), causa, fechas y hora, estado, ciudad, lugar de ocurrencia, monto estimado, descripción breve, otra póliza. Bloque <strong>Datos de contacto (Asegurado / Tercero)</strong>: teléfono celular y correo.</p>
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/04-notif-patrimoniales-02-notificacion-siniestro.png" width="1200" height="675" alt="Patrimoniales: Notificación de siniestro y datos de contacto">
+            </figure>
+          </div>
+          </div>
+
+          <h4 class="servicios-subtitulo-presentacion servicios-subtitulo-propuesta consulta-intra-presentacion">Presentación propuesta</h4>
+          <div class="consulta-propuesta-partes">
+            <section class="consulta-propuesta-parte" aria-labelledby="notif-patrimoniales-propuesta-p1-titulo">
+              <h5 id="notif-patrimoniales-propuesta-p1-titulo" class="consulta-propuesta-parte-titulo">Paso 1 — Selección de asegurado</h5>
+              <figure class="figure-screen">
+                <img src="assets-propuesta/notif-propuesta-reembolso-01-seleccion-asegurado.png" width="950" height="781" alt="Propuesta Patrimoniales: selección de asegurado, indicador de pasos, filtros y tarjetas de asegurados">
+              </figure>
+            </section>
+            <section class="consulta-propuesta-parte" aria-labelledby="notif-patrimoniales-propuesta-p2-titulo">
+              <h5 id="notif-patrimoniales-propuesta-p2-titulo" class="consulta-propuesta-parte-titulo">Paso 2</h5>
+              <p class="servicios-texto-propuesta">Por definir</p>
+            </section>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="pantalla-4" class="screen screen-declaracion" aria-labelledby="titulo-4">
+      <div class="screen-header">
+        <span class="screen-num" aria-hidden="true">4</span>
+        <h2 id="titulo-4">Declaración de Siniestros Automóvil</h2>
+        <p class="screen-desc">Flujo guiado en seis pasos: Buscar Pólizas, Datos del Cliente, Declaración de Daños, Recaudos, Confirmación, Siniestro declarado. Para <strong>pérdida parcial</strong> y <strong>pérdida total</strong> se documentan los tres primeros pasos (el paso «Datos del cliente» de pérdida total comparte captura con pérdida parcial). En el menú lateral, <strong>Declaración de Siniestros</strong> ofrece las ramas Daños / Perdida parcial y Daños / Perdida total.</p>
+      </div>
+
+<div class="notificacion-tipos">
+        <p class="notificacion-tipos-lead">Tipos de declaración</p>
+
+        <article class="notificacion-tipo" id="declaracion-perdida-parcial" aria-labelledby="declaracion-perdida-parcial-titulo">
+          <header class="notificacion-tipo-header">
+            <span class="notificacion-tipo-num" aria-hidden="true">1</span>
+            <h3 id="declaracion-perdida-parcial-titulo">Pérdida parcial</h3>
+          </header>
+          <p class="screen-desc notificacion-tipo-desc">Ruta <strong>Declaración de Siniestros → Daños / Perdida parcial</strong>. Asistente en seis pasos; a continuación, los pasos 1 a 3 del flujo.</p>
+
+          <h4 class="servicios-subtitulo-presentacion consulta-intra-presentacion">Presentación actual</h4>
+          <div class="consulta-bloque-actual">
+          <nav class="notificacion-mini-nav" aria-label="Pasos Pérdida parcial">
+            <a href="#declaracion-parcial-paso1">1 · Buscar pólizas</a>
+            <a href="#declaracion-parcial-paso2">2 · Datos del cliente</a>
+            <a href="#declaracion-parcial-paso3">3 · Declaración de daños</a>
+          </nav>
+
+          <div class="notificacion-paso" id="declaracion-parcial-paso1">
+            <h4 class="notificacion-paso-titulo">Paso 1 — Buscar pólizas</h4>
+            <p class="screen-desc">Filtros por póliza/certificado y placa; Aplicar, Limpiar y Ayuda; tabla de resultados. Menú lateral con <strong>Daños / Perdida parcial</strong> seleccionado.</p>
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/05-declaracion-auto-perdida-parcial.png" width="1200" height="675" alt="Pérdida parcial: paso Buscar pólizas">
+            </figure>
+          </div>
+
+          <div class="notificacion-paso" id="declaracion-parcial-paso2">
+            <h4 class="notificacion-paso-titulo">Paso 2 — Datos del cliente</h4>
+            <p class="screen-desc">Formulario <strong>Datos del Cliente</strong> (campos obligatorios): teléfono, correo, estado, ciudad, urbanización, zona postal, dirección (av./calle, edif./casa, piso, apto), <strong>Conductor igual al asegurado</strong> (Sí/No). Botón Siguiente.</p>
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/05-declaracion-parcial-02-datos-cliente.png" width="1200" height="675" alt="Pérdida parcial: paso Datos del cliente">
+            </figure>
+          </div>
+
+          <div class="notificacion-paso" id="declaracion-parcial-paso3">
+            <h4 class="notificacion-paso-titulo">Paso 3 — Declaración de daños</h4>
+            <p class="screen-desc">Formulario <strong>Declaración de Daños / Perdida parcial</strong> (Ayuda, campos obligatorios) y, a continuación en el mismo paso, sección <strong>Piezas afectadas</strong> con checklist por área del vehículo y diagramas.</p>
+            <div class="figure-stack">
+              <figure class="figure-screen">
+                <img src="../bso-actual/assets/05-declaracion-parcial-03a-declaracion-danos.png" width="1200" height="675" alt="Pérdida parcial: Declaración de Daños / Perdida parcial">
+              </figure>
+              <figure class="figure-screen">
+                <img src="../bso-actual/assets/05-declaracion-parcial-03b-piezas-afectadas.png" width="1200" height="675" alt="Pérdida parcial: Piezas afectadas">
+              </figure>
+            </div>
+          </div>
+          </div>
+
+          <h4 class="servicios-subtitulo-presentacion servicios-subtitulo-propuesta consulta-intra-presentacion">Presentación propuesta</h4>
+          <p class="servicios-texto-propuesta">Por definir</p>
+        </article>
+
+        <article class="notificacion-tipo" id="declaracion-perdida-total" aria-labelledby="declaracion-perdida-total-titulo">
+          <header class="notificacion-tipo-header">
+            <span class="notificacion-tipo-num" aria-hidden="true">2</span>
+            <h3 id="declaracion-perdida-total-titulo">Pérdida total</h3>
+          </header>
+          <p class="screen-desc notificacion-tipo-desc">Ruta <strong>Declaración de Siniestros → Daños / Perdida total</strong>. Mismo asistente en seis pasos; a continuación, los pasos 1 a 3. El paso 2 reutiliza la misma captura que <strong>pérdida parcial</strong> (Datos del cliente).</p>
+
+          <h4 class="servicios-subtitulo-presentacion consulta-intra-presentacion">Presentación actual</h4>
+          <div class="consulta-bloque-actual">
+          <nav class="notificacion-mini-nav" aria-label="Pasos Pérdida total">
+            <a href="#declaracion-total-paso1">1 · Buscar pólizas</a>
+            <a href="#declaracion-total-paso2">2 · Datos del cliente</a>
+            <a href="#declaracion-total-paso3">3 · Declaración de daños</a>
+          </nav>
+
+          <div class="notificacion-paso" id="declaracion-total-paso1">
+            <h4 class="notificacion-paso-titulo">Paso 1 — Buscar pólizas</h4>
+            <p class="screen-desc">Filtros por póliza/certificado y placa; tabla de resultados. Menú lateral con <strong>Daños / Perdida total</strong> seleccionado.</p>
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/05-declaracion-auto-perdida-total.png" width="1200" height="675" alt="Pérdida total: paso Buscar pólizas">
+            </figure>
+          </div>
+
+          <div class="notificacion-paso" id="declaracion-total-paso2">
+            <h4 class="notificacion-paso-titulo">Paso 2 — Datos del cliente</h4>
+            <p class="screen-desc">Misma pantalla de referencia que en pérdida parcial: formulario <strong>Datos del Cliente</strong> (teléfono, correo, dirección, conductor igual al asegurado).</p>
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/05-declaracion-parcial-02-datos-cliente.png" width="1200" height="675" alt="Pérdida total: paso Datos del cliente (misma referencia que pérdida parcial)">
+            </figure>
+          </div>
+
+          <div class="notificacion-paso" id="declaracion-total-paso3">
+            <h4 class="notificacion-paso-titulo">Paso 3 — Declaración de daños</h4>
+            <p class="screen-desc">Formulario <strong>Declaración de Daños / Perdida total</strong> con Ayuda: fecha y hora de ocurrencia, lugar, estado, ciudad, sucursal de tramitación del siniestro, causa del accidente, descripción (máx. 250 caracteres). Botones Regresar y Siguiente.</p>
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/05-declaracion-total-03-declaracion-danos.png" width="1200" height="675" alt="Pérdida total: paso Declaración de daños">
+            </figure>
+          </div>
+          </div>
+
+          <h4 class="servicios-subtitulo-presentacion servicios-subtitulo-propuesta consulta-intra-presentacion">Presentación propuesta</h4>
+          <p class="servicios-texto-propuesta">Por definir</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="pantalla-5" class="screen screen-pagos" aria-labelledby="titulo-5">
+      <div class="screen-header">
+        <span class="screen-num" aria-hidden="true">5</span>
+        <h2 id="titulo-5">Pagos</h2>
+        <p class="screen-desc">Módulo de <strong>Pagos</strong> del portal (menú lateral). Se documentan el pago con <strong>tarjeta de crédito</strong> (cuatro pasos: selección de recibos, datos de pago, confirmación, pago registrado) y el <strong>débito en cuenta</strong> (tres pasos en el asistente: selección de recibos, botón de pago con BanescoPagos, procesando pago).</p>
+      </div>
+
+<div class="notificacion-tipos">
+        <p class="notificacion-tipos-lead">Medios de pago</p>
+
+        <article class="notificacion-tipo" id="pagos-tarjeta-credito" aria-labelledby="pagos-tarjeta-credito-titulo">
+          <header class="notificacion-tipo-header">
+            <span class="notificacion-tipo-num" aria-hidden="true">1</span>
+            <h3 id="pagos-tarjeta-credito-titulo">Tarjeta de crédito</h3>
+          </header>
+          <p class="screen-desc notificacion-tipo-desc">Pago con TDC: selección de recibos pendientes, captura de datos de la tarjeta y montos, luego confirmación y comprobante. Capturas de los pasos 1 y 2.</p>
+
+          <h4 class="servicios-subtitulo-presentacion consulta-intra-presentacion">Presentación actual</h4>
+          <div class="consulta-bloque-actual">
+          <nav class="notificacion-mini-nav" aria-label="Pasos pago con tarjeta">
+            <a href="#pagos-tdc-paso1">1 · Selección de recibos</a>
+            <a href="#pagos-tdc-paso2">2 · Datos de pago</a>
+          </nav>
+
+          <div class="notificacion-paso" id="pagos-tdc-paso1">
+            <h4 class="notificacion-paso-titulo">Paso 1 — Selección de recibos</h4>
+            <p class="screen-desc">Filtros por cédula/RIF, póliza/certificado, recibo y moneda; Aplicar, Limpiar y Ayuda. Tabla <strong>Recibos a pagar</strong> con selección, prima, IGTF y total; tasa de cambio y botón <strong>Pagar</strong>.</p>
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/06-pagos-tdc-01-seleccion-recibos.png" width="1200" height="675" alt="Pagos TDC: Selección de recibos">
+            </figure>
+          </div>
+
+          <div class="notificacion-paso" id="pagos-tdc-paso2">
+            <h4 class="notificacion-paso-titulo">Paso 2 — Datos de pago</h4>
+            <p class="screen-desc">Resumen <strong>Datos del pago</strong> (monto total, prima, IGTF, correo). Bloque <strong>Datos de la tarjeta</strong>: identificación, nombre en TDC, número de tarjeta, banco emisor, vencimiento, código de seguridad, monto a pagar.</p>
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/06-pagos-tdc-02-datos-pago.png" width="1200" height="675" alt="Pagos TDC: Datos del pago y tarjeta">
+            </figure>
+          </div>
+          </div>
+
+          <h4 class="servicios-subtitulo-presentacion servicios-subtitulo-propuesta consulta-intra-presentacion">Presentación propuesta</h4>
+          <div class="consulta-propuesta-partes">
+            <section class="consulta-propuesta-parte" aria-labelledby="pagos-tdc-propuesta-p1-titulo">
+              <h5 id="pagos-tdc-propuesta-p1-titulo" class="consulta-propuesta-parte-titulo">Paso 1 — Selección de recibos</h5>
+              <figure class="figure-screen">
+                <img src="assets-propuesta/pagos-propuesta-tdc-01-seleccion-recibos.png" width="1024" height="640" alt="Propuesta pago con tarjeta de crédito: selección de recibos, filtros y tabla de recibos pendientes">
+              </figure>
+            </section>
+            <section class="consulta-propuesta-parte" aria-labelledby="pagos-tdc-propuesta-p2-titulo">
+              <h5 id="pagos-tdc-propuesta-p2-titulo" class="consulta-propuesta-parte-titulo">Paso 2 — Datos de pago</h5>
+              <p class="servicios-texto-propuesta">Por definir</p>
+            </section>
+          </div>
+        </article>
+
+        <article class="notificacion-tipo" id="pagos-debito-cuenta" aria-labelledby="pagos-debito-cuenta-titulo">
+          <header class="notificacion-tipo-header">
+            <span class="notificacion-tipo-num" aria-hidden="true">2</span>
+            <h3 id="pagos-debito-cuenta-titulo">Débito en cuenta</h3>
+          </header>
+          <p class="screen-desc notificacion-tipo-desc">Pago por débito: selección de recibos en bolívares, resumen del monto y apertura del flujo <strong>BanescoPagos</strong> para elegir banco destino. Capturas de los pasos 1 y 2 del asistente (tres pasos en total).</p>
+
+          <h4 class="servicios-subtitulo-presentacion consulta-intra-presentacion">Presentación actual</h4>
+          <div class="consulta-bloque-actual">
+          <nav class="notificacion-mini-nav" aria-label="Pasos débito en cuenta">
+            <a href="#pagos-dec-paso1">1 · Selección de recibos</a>
+            <a href="#pagos-dec-paso2">2 · Resumen y banco</a>
+          </nav>
+
+          <div class="notificacion-paso" id="pagos-dec-paso1">
+            <h4 class="notificacion-paso-titulo">Paso 1 — Selección de recibos</h4>
+            <p class="screen-desc">Indicador de tres pasos (Selección de recibos, Botón de pago, Procesando pago). Filtros por póliza/certificado, recibo y moneda (p. ej. bolívares); tabla <strong>Recibos a pagar</strong>; tasa de cambio y <strong>Pagar</strong>.</p>
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/06-pagos-dec-01-seleccion-recibos.png" width="1200" height="675" alt="Pagos débito en cuenta: Selección de recibos">
+            </figure>
+          </div>
+
+          <div class="notificacion-paso" id="pagos-dec-paso2">
+            <h4 class="notificacion-paso-titulo">Paso 2 — Resumen del pago y banco destino</h4>
+            <p class="screen-desc">Ventana <strong>Resumen del pago</strong> con recibos y total a pagar; texto de tiempo límite. Ventana <strong>BanescoPagos</strong> para <strong>seleccionar banco destino</strong> (p. ej. 0134 — Banesco) y confirmar o cancelar.</p>
+            <figure class="figure-screen">
+              <img src="../bso-actual/assets/06-pagos-dec-02-resumen-banescopagos.png" width="1200" height="675" alt="Pagos débito en cuenta: Resumen y BanescoPagos">
+            </figure>
+          </div>
+          </div>
+
+          <h4 class="servicios-subtitulo-presentacion servicios-subtitulo-propuesta consulta-intra-presentacion">Presentación propuesta</h4>
+          <p class="servicios-texto-propuesta">Por definir</p>
+        </article>
+      </div>
+    </section>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="punto-clave punto-clave-expandido texto-justificado punto-caracteristicas-considerar">
+          <span class="numero">2</span>
+          <div class="texto">
+            <h4>Características a considerar.</h4>
+            <p style="margin: 0.5rem 0 0.35rem 0;">Estas aplicaciones deben integrarse en un <strong>workflow único</strong> que permita hacer el seguimiento de las solicitudes de punta a punta, con las siguientes características:</p>
+            <ul style="margin: 0.35rem 0 0.5rem 0; padding-left: 1.25rem;">
+              <li><strong>Roles de usuario:</strong> empleado, proveedor, asegurado e intermediario, cada uno con visibilidad y acciones acordes a su rol dentro del flujo del proceso. A lo largo del ciclo de vida del portal Banesco Seguros se ha consolidado una estructura de usuarios basada en <strong>Roles, Perfiles y Privilegios</strong>, que permite configurar las necesidades de estas funcionalidades; apoyarse en estas estructuras aportaría un valor agregado muy importante a los nuevos módulos a desarrollar.</li>
+              <li><strong>Dashboard de seguimiento de gestión:</strong> panel centralizado donde los distintos usuarios (empleados, supervisores, gestores) pueden consultar el estado de las solicitudes bajo su ámbito de responsabilidad. Las vistas se filtran por <strong>rol</strong>, <strong>estado de la solicitud</strong>, tipo de trámite (salud, automóvil, etc.) y, si aplica, por asignación o período, de modo que cada perfil acceda solo a la información relevante. El dashboard facilita el seguimiento de las solicitudes de punta a punta, la priorización de tareas y la identificación de cuellos de botella en el flujo de los procesos.</li>
+              <li><strong>Indicadores de gestión:</strong> medición de tiempos, volúmenes y estados del proceso, alimentados por los datos que las aplicaciones capturan o generan a lo largo de los flujos en los que interviene el usuario. El objetivo es disponer de representaciones visuales que permitan el seguimiento y el monitoreo de estos indicadores.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="punto-clave texto-justificado">
+          <span class="numero">3</span>
+          <div class="texto">
+            <h4>Sin comenzar desde cero, hagamos uso de lo aprendido:</h4>
+            <p style="margin: 0.5rem 0 0.35rem 0;">Dentro del Portal Banesco Seguros Online se cuenta con funcionalidades similares, por lo cual se puede hacer la migración a este nuevo modelo de Formas Configurables, reutilizando tanto los conceptos funcionales ya existentes, como componentes de código backend que pueden convertirse rápidamente en APIs.</p>
+            <p style="margin: 0.5rem 0 0.35rem 0;">Esta base existente aporta ventajas claras: <strong>simplificación de los tiempos de desarrollo</strong>, al evitar partir de cero y poder reutilizar flujos, reglas y pantallas ya validados por el negocio; <strong>reducción de la curva de aprendizaje</strong>, porque equipos funcionales y técnicos ya conocen los conceptos (solicitudes, expedientes, roles, tipos de trámite), y el esfuerzo se concentra en adoptar el modelo de configuración en lugar de redescubrir el dominio; y <strong>menor riesgo y mayor coherencia</strong>, al mantener la misma terminología y lógica que el negocio usa hoy y permitir una migración gradual por área o por flujo. Aprovechar lo aprendido en el portal actual hace que la transición hacia Formas Configurables sea más ágil y predecible.</p>
+            <p style="margin: 0.5rem 0 0.35rem 0;">Funcionalidades existentes en el portal actual:</p>
+            <table class="tabla-funcionalidades-portal">
+              <thead>
+                <tr>
+                  <th style="width: 28%;">Área</th>
+                  <th>Funcionalidades</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="grupo-nombre">Gestión de Usuarios</td>
+                  <td><ul class="grupo-items"><li>Creación y Administración de Usuarios</li><li>Configuración y Gestión de Roles y Perfiles de Usuarios</li><li>Configuración y asignación de opciones de Usuarios</li><li>Monitoreo de Transacciones</li></ul></td>
+                </tr>
+                <tr>
+                  <td class="grupo-nombre">Servicios Médicos</td>
+                  <td><ul class="grupo-items"><li>Solicitud de Clave de Emergencia</li><li>Solicitud de Carta Aval</li><li>Solicitud de Orden Médica</li><li>Reembolsos de Salud</li><li>Notificaciones de Siniestros de Vida y Funerario</li></ul></td>
+                </tr>
+                <tr>
+                  <td class="grupo-nombre">Servicios de Automóvil</td>
+                  <td><ul class="grupo-items"><li>Declaración de Siniestros de Automóvil: Parcial y Total</li></ul></td>
+                </tr>
+                <tr>
+                  <td class="grupo-nombre">Gestión de Documentos</td>
+                  <td><ul class="grupo-items"><li>Carga de Documentos de Expedientes</li><li>Sincronización de Gestor Documental</li><li>Búsqueda de Expedientes existentes</li><li>Notificaciones de documentos faltantes</li></ul></td>
+                </tr>
+                <tr>
+                  <td class="grupo-nombre">Creación y Seguimiento de Requerimientos</td>
+                  <td><ul class="grupo-items"><li>Modificaciones de Pólizas</li><li>Renovaciones</li><li>Anulaciones</li></ul></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <section class="apartado-propuesta-consolidada-final" aria-label="Propuesta consolidada">
+            <div class="bloque-propuesta-consolidada">
+            <p class="titulo-resumen-servicios">Propuesta consolidada: tiempo total (alcance complemento)</p>
+            <p class="intro-resumen-servicios">Síntesis de las estimaciones de <strong>tiempo</strong> por módulo según el <strong>alcance funcional (complemento)</strong>. El apartado <strong>Servicios a Desarrollar</strong> de esta sección documenta la <strong>referencia visual del portal actual</strong> (alineada con <code>bso-actual/index.html</code>); la tabla siguiente conserva el <strong>resumen de tiempos</strong> por módulo. La <strong>propuesta económica</strong> global no se desglosa por módulo en esta tabla; los costos se definen en cotización comercial según equipo, tarifas y alcance acordado.</p>
+            <table class="tabla-resumen-servicios-total" role="table" aria-label="Resumen tiempo total Servicios a Desarrollar">
+              <thead>
+                <tr>
+                  <th scope="col">Módulo</th>
+                  <th class="col-tiempo-resumen" scope="col">Tiempo estimado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1. Acceso al portal</td>
+                  <td class="col-tiempo-resumen">2 semanas</td>
+                </tr>
+                <tr>
+                  <td>2. Consultas</td>
+                  <td class="col-tiempo-resumen">5 semanas</td>
+                </tr>
+                <tr>
+                  <td>3. Notificación de Siniestros</td>
+                  <td class="col-tiempo-resumen">8 semanas</td>
+                </tr>
+                <tr>
+                  <td>4. Declaración de Siniestros Automóvil</td>
+                  <td class="col-tiempo-resumen">6 semanas</td>
+                </tr>
+                <tr>
+                  <td>5. Pagos</td>
+                  <td class="col-tiempo-resumen">4 semanas</td>
+                </tr>
+              </tbody>
+              <tfoot class="resumen-propuesta-totales">
+                <tr>
+                  <th scope="row">Subtotal tiempo (módulos con cifra)</th>
+                  <td class="col-tiempo-resumen">25 semanas</td>
+                </tr>
+                <tr>
+                  <th scope="row">Total alcance estimado</th>
+                  <td class="col-tiempo-resumen">aprox. 10 semanas</td>
+                </tr>
+                <tr>
+                  <th scope="row">Total costo</th>
+                  <td class="col-tiempo-resumen">00,00 USD</td>
+                </tr>
+              </tfoot>
+            </table>
+            </div>
+
+            <section class="bloque-consideraciones-generales" aria-label="Consideraciones generales">
+              <p class="titulo-consideraciones-generales">Consideraciones generales</p>
+              <ul class="lista-consideraciones-generales">
+                <li><strong>Los tiempos presentados son estimaciones aproximadas. Para poder establecer la línea de tiempo definitiva se debe contar con los documentos de especificación requeridos para cada funcionalidad.</strong></li>
+                <li><strong>El costo presentado en esta propuesta es cerrado, tomando en cuenta los siguientes aspectos:</strong>
+                  <ul style="margin: 0.4rem 0 0 1.25rem; padding-left: 1rem; list-style-type: disc;">
+                    <li>Si al establecer los planes de trabajo en base a los documentos de especificación, el tiempo total supera las 26 semanas totales estimadas con más de un 10% de diferencia, es decir 29 semanas, entonces se deberá ajustar el costo de manera proporcional al tiempo.</li>
+                    <li>En caso de presentarse algún inconveniente que impida la continuidad del desarrollo (fallas de infraestructura, factores externos, etc.), esto no generará costos adicionales sobre el desarrollo, siempre y cuando los mismos no excedan más de 15 días.</li>
+                    <li>Los cambios de especificación una vez iniciado el ciclo de desarrollo pueden implicar el ajuste del costo de la funcionalidad que se desea modificar.</li>
+                  </ul>
+                </li>
+                <li><strong>La aceptación de esta propuesta conlleva un descuento del 25% sobre la propuesta de «AJUSTES Y MEJORAS DE MULTICOTIZADOR DE AUTOMÓVIL», ya presentada ante ustedes.</strong></li>
+                <li>Para cada uno de los módulos indicados, se construirán las interfaces web de acuerdo con los ERF proporcionados por Banesco Seguros. También se construirán los programas en PL/SQL para llevar a cabo la integración con Rector, a partir de las especificaciones funcionales y técnicas proporcionadas por Banesco Seguros.</li>
+                <li>Una vez culminado el desarrollo de cada entregable, Banesco Seguros dispondrá de un período de 30 días para realizar el proceso de certificación de esta funcionalidad. En caso de no reportar ningún incidente asociado a las especificaciones del documento ERF, se dará por entregado dicho entregable y se procederá a su facturación.</li>
+                <li>Esta propuesta solo considera la integración en los ambientes de desarrollo, calidad y producción de Banesco Seguros. Para integración en ambientes adicionales por causas no imputables a ibSoft Development, dichas horas adicionales serán facturadas a la misma tasa de las horas correspondientes a este presupuesto.</li>
+                <li>En caso de reinstalación de ambientes por causas no imputables a ibSoft Development, dichas horas adicionales serán facturadas a la misma tasa de las horas correspondientes a este presupuesto.</li>
+                <li>En caso de requerirse ciclos de pruebas adicionales por causas no imputables a ibSoft Development, dichas horas adicionales serán facturadas a la misma tasa de las horas correspondientes a este presupuesto.</li>
+                <li>Se extenderá una garantía de 30 días para corregir cualquier incidente, siempre y cuando el mismo corresponda a una falla en los programas asociados a la funcionalidad que presenta la falla y no sea derivado de:
+                  <ul style="margin: 0.4rem 0 0 1.25rem; padding-left: 1rem; list-style-type: disc;">
+                    <li>Mal funcionamiento de Rector.</li>
+                    <li>Fallas en la infraestructura donde se ejecutan las aplicaciones.</li>
+                    <li>Modificación en las reglas de negocio.</li>
+                    <li>Otros factores externos al componente desplegado.</li>
+                  </ul>
+                </li>
+                <li>No incluyen instalación ni puesta en marcha de Sistemas Operativos, Redes, Base de Datos, o elementos de Infraestructura.</li>
+                <li>No se requieren costos adicionales de licenciamiento de software, ya que el portal se ejecuta en una plataforma 100% open source: Linux, Java SpringBoot, React.</li>
+              </ul>
+            </section>
+        </section>
+
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

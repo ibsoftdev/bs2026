@@ -1,0 +1,181 @@
+/**
+ * Estilos solo para impresión / PDF (Chromium + Puppeteer con emulateMediaType('print')).
+ *
+ * Cómo se eligen los saltos de página
+ * ------------------------------------
+ * 1) Saltos "fuertes" (nueva página): break-after: page / page-break-after: always
+ *    en contenedores que marcan fases del documento (portada, cierre del bloque Word, etc.).
+ *    Puedes mover o quitar estas reglas según cómo quieras agrupar páginas.
+ *
+ * 2) Evitar cortes feos: break-inside: avoid en tablas, tarjetas y figuras para que,
+ *    si caben en una página, no se partan por la mitad. Si un bloque es más alto que
+ *    una página, el motor igual lo partirá.
+ *
+ * 3) Títulos: break-after: avoid en encabezados para no dejar el título solo al pie.
+ *
+ * 4) Ajuste fino: inspecciona con "Vista previa de impresión" en Chrome; es lo mismo
+ *    que verá Puppeteer con printBackground y preferCSSPageSize.
+ *
+ * Esquema acordado (PDF)
+ * ----------------------
+ * Pág. 1: banner IB Soft + portada; título/versión centrados en vertical; ilustración al pie.
+ * Pág. 2: carta comercial (y párrafos separadores Word si caben en la misma hoja).
+ * Pág. 3: CONFIDENCIALIDAD y cierre del bloque Word (huecos Word sin texto ocultos en PDF).
+ * Pág. 4: sección «Cambio de Imagen Banesco Seguros Online» (.card-plan-estrategico-2026, salto forzado).
+ */
+
+/* Márgenes base 14 mm; PDF: −0,75 cm izq. y −1 cm der. respecto a ese valor. Arriba/abajo sin cambio. */
+@page {
+  size: A4 portrait;
+  margin-top: 14mm;
+  margin-bottom: 14mm;
+  margin-left: 6.5mm; /* 14mm − 7.5mm */
+  margin-right: 4mm; /* 14mm − 10mm */
+}
+
+@media print {
+  html,
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .app-wrap {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .plan-word-docx-wrap {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Banner visible en portada (referencia: logo IB Soft arriba). */
+  .app-wrap > header.comercial-header.flow-header {
+    display: flex !important;
+    margin-bottom: 0 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* --- Saltos de página (esquema pág. 1–4) --- */
+
+  /*
+   * Área útil por página ≈ 269mm (297 − márgenes @page).
+   * Cabecera ~ calc(120px + 1cm) ≈ 46mm → portada ocupa el resto en pág. 1.
+   * !important: index.html define .plan-portada { min-height: auto } después en la cascada.
+   * Grid 1fr | auto (título) | 1fr | auto (imagen): reparte el espacio libre en dos mitades
+   * arriba y entre título e ilustración → el bloque título queda en el centro vertical de la hoja.
+   */
+  .plan-word-docx .plan-portada {
+    min-height: calc(269mm - 48mm) !important;
+    display: grid !important;
+    grid-template-rows: 1fr auto 1fr auto !important;
+    grid-template-columns: 100% !important;
+    align-items: start !important;
+    justify-items: stretch !important;
+    box-sizing: border-box !important;
+    padding-top: 10mm !important;
+    padding-bottom: 4mm !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .plan-word-docx .plan-portada-derecha {
+    grid-row: 2;
+  }
+
+  .plan-word-docx .plan-portada-imagen {
+    grid-row: 4;
+    margin-top: 0 !important;
+    align-self: start;
+    justify-self: start;
+  }
+
+  /*
+   * Nueva página tras la carta: break-after en el <div> de la carta (contenido real).
+   * NO usar page-break-before: always en el título CONFIDENCIALIDAD: si la carta ya llena la
+   * página anterior, Chromium inserta un salto “natural” y el always del título añade otro;
+   * los <p> vacíos entre carta y título quedan solos en una hoja → página en blanco.
+   */
+  .plan-word-docx .plan-carta-comercial {
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .plan-word-docx > p.western.plan-titulo-confidencialidad {
+    break-before: auto;
+    page-break-before: auto;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  /* Huecos Word (export) sin texto real: solo <br/>, sin <font>. Ocupan muchas líneas al pie y empujan el módulo a la pág. siguiente. */
+  .plan-word-docx > p.western:not(:has(font)) {
+    display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 0 !important;
+    min-height: 0 !important;
+  }
+
+  /* Nueva página antes de «Cambio de Imagen Banesco Seguros Online». */
+  .card.card-plan-estrategico-2026 {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  /* Misma card (PDF): bloque siguiente. */
+  .punto-caracteristicas-considerar {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  .bloque-consideraciones-generales {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  /* --- Evitar partir bloques cuando quepan en una página --- */
+
+  .tabla-modulo-alcance,
+  .tabla-resumen-servicios-total,
+  .punto-clave,
+  .card,
+  figure,
+  .bloque-propuesta-consolidada,
+  aside.modulo-alcance-observaciones,
+  .comparativa-tabla {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* El expandido es muy alto; break-inside: avoid lo mandaba entero a la siguiente página. */
+  .punto-clave.punto-clave-expandido {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
+  /* .card también tenía avoid junto a .punto-clave: el contenedor entero saltaba de página. */
+  .app-wrap .card {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
+  h2,
+  h3,
+  h4 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+}
