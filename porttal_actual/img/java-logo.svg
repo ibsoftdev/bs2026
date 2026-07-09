@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 40" role="img" aria-label="Java">
+  <defs>
+    <linearGradient id="cup" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f89820"/>
+      <stop offset="100%" stop-color="#e76f00"/>
+    </linearGradient>
+    <linearGradient id="steam" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#5382a1" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#5382a1"/>
+    </linearGradient>
+  </defs>
+  <path d="M8 22 Q8 14 16 12 L24 12 Q32 14 32 22 L32 26 Q32 32 20 32 Q8 32 8 26 Z" fill="url(#cup)"/>
+  <ellipse cx="20" cy="12" rx="8" ry="3" fill="#f89820"/>
+  <path d="M32 18 Q40 18 40 22 Q40 26 32 26" fill="none" stroke="#e76f00" stroke-width="2.5"/>
+  <path d="M14 8 Q12 4 14 1" fill="none" stroke="url(#steam)" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M20 7 Q18 3 20 0" fill="none" stroke="url(#steam)" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M26 8 Q24 4 26 1" fill="none" stroke="url(#steam)" stroke-width="1.5" stroke-linecap="round"/>
+  <text x="46" y="22" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#003366">Java</text>
+  <text x="46" y="34" font-family="Segoe UI, Arial, sans-serif" font-size="9" fill="#4a5f73">17</text>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" role="img" aria-label="WildFly">
+  <defs>
+    <linearGradient id="wf-body" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4a9fd4"/>
+      <stop offset="100%" stop-color="#2d6fa0"/>
+    </linearGradient>
+    <linearGradient id="wf-wing" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e8a030"/>
+      <stop offset="100%" stop-color="#d07010"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="22" cy="20" rx="5" ry="7" fill="url(#wf-body)"/>
+  <ellipse cx="14" cy="14" rx="9" ry="4" fill="url(#wf-wing)" opacity="0.9" transform="rotate(-25 14 14)"/>
+  <ellipse cx="14" cy="26" rx="9" ry="4" fill="url(#wf-wing)" opacity="0.9" transform="rotate(25 14 26)"/>
+  <ellipse cx="30" cy="14" rx="9" ry="4" fill="url(#wf-wing)" opacity="0.7" transform="rotate(25 30 14)"/>
+  <ellipse cx="30" cy="26" rx="9" ry="4" fill="url(#wf-wing)" opacity="0.7" transform="rotate(-25 30 26)"/>
+  <text x="44" y="18" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#003366">Wild</text>
+  <text x="44" y="32" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#d07010">Fly</text>
+  <text x="82" y="26" font-family="Segoe UI, Arial, sans-serif" font-size="9" fill="#4a5f73">26</text>
+</svg>
