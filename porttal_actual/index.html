@@ -140,11 +140,11 @@
               </div>
               <div class="module-card mod-requerimientos">
                 Gestión de Requerimientos
-                <small>WAR &middot; Spring MVC</small>
+                <small>Renovaciones &middot; Anulaciones &middot; Modificaciones</small>
               </div>
               <div class="module-card mod-renovacion">
-                Renovación de Pólizas Grupo BOF
-                <small>WAR &middot; Spring MVC</small>
+                Pólizas Grupo BOF
+                <small>Renovación y Pago</small>
               </div>
             </div>
 
@@ -183,7 +183,8 @@
     <section id="flujo">
       <h2 class="section-title"><span class="icon">&#9670;</span> Flujo de una Solicitud</h2>
       <p class="section-desc">
-        Recorrido simplificado desde que el usuario accede al portal hasta la consulta de datos.
+        Recorrido simplificado desde que el usuario accede al portal hasta la consulta de datos
+        e integración con aplicaciones satélites externas.
       </p>
 
       <div class="flow-timeline">
@@ -202,8 +203,21 @@
           <h4>Procesamiento</h4>
           <p>Spring MVC recibe la petición, aplica reglas de seguridad y ejecuta la lógica de negocio del módulo correspondiente.</p>
         </div>
-        <div class="flow-step">
+        <div class="flow-step flow-step-wide flow-step-satellite">
           <div class="step-num">4</div>
+          <h4>Integración con aplicaciones satélites</h4>
+          <p>Durante el procesamiento, los módulos se integran con servicios externos según la operación requerida:</p>
+          <ul class="satellite-list">
+            <li><span class="satellite-tag">Gestor de Documentos</span></li>
+            <li><span class="satellite-tag">Danna Connect</span> <span class="satellite-detail">(Correos)</span></li>
+            <li><span class="satellite-tag">TotalText</span> <span class="satellite-detail">(SMS)</span></li>
+            <li><span class="satellite-tag">Banesco Pagos</span> <span class="satellite-detail">(Débito)</span></li>
+            <li><span class="satellite-tag">CyberSource</span> <span class="satellite-detail">(Crédito)</span></li>
+            <li><span class="satellite-tag">Seniat</span></li>
+          </ul>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">5</div>
           <h4>Datos y respuesta</h4>
           <p>Spring JDBC consulta Oracle Database. La respuesta se renderiza en JSP y se entrega al navegador.</p>
         </div>
@@ -349,11 +363,11 @@
               </tr>
               <tr>
                 <th>Gestión de Requerimientos</th>
-                <td>Registro, seguimiento y resolución de requerimientos</td>
+                <td>Renovaciones, anulaciones y modificaciones</td>
               </tr>
               <tr>
-                <th>Renovación de Pólizas Grupo BOF</th>
-                <td>Proceso de renovación de pólizas del grupo BOF</td>
+                <th>Pólizas Grupo BOF</th>
+                <td>Renovación y pago</td>
               </tr>
             </tbody>
           </table>
