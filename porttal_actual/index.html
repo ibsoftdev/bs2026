@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banesco Seguros Online — Arquitectura Lógica Actual</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <span class="badge">Arquitectura Lógica Actual</span>
+      <h1>Banesco Seguros Online</h1>
+      <p class="subtitle">
+        Plataforma integral de seguros con múltiples aplicaciones Java integradas,
+        acceso unificado mediante SSO y distribución global de contenido estático.
+      </p>
+    </div>
+  </header>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <h3>Plataforma</h3>
+      <p>WildFly 26 &middot; Java 17</p>
+    </div>
+    <div class="summary-card">
+      <h3>Aplicaciones</h3>
+      <p>15 módulos WAR interconectados</p>
+    </div>
+    <div class="summary-card">
+      <h3>Acceso</h3>
+      <p>SSO &middot; CloudFront</p>
+    </div>
+    <div class="summary-card">
+      <h3>Datos</h3>
+      <p>Oracle Database</p>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- Diagrama principal -->
+    <section id="diagrama">
+      <h2 class="section-title"><span class="icon">&#9670;</span> Diagrama de Arquitectura</h2>
+      <p class="section-desc">
+        Vista de alto nivel del flujo de usuarios y componentes. Los módulos de negocio
+        comparten un mismo servidor de aplicaciones y una sesión de autenticación única (SSO).
+      </p>
+
+      <div class="architecture-flow">
+
+        <!-- Usuarios -->
+        <div class="flow-row">
+          <div class="flow-node">
+            <div class="node-icon">&#128101;</div>
+            <h4>Usuarios</h4>
+            <p>Clientes, intermediarios<br>y personal interno</p>
+          </div>
+          <div class="flow-arrow">&#8594;</div>
+          <div class="flow-node">
+            <div class="node-icon">&#127760;</div>
+            <h4>Internet</h4>
+            <p>Acceso HTTPS<br>desde navegador web</p>
+          </div>
+          <div class="flow-arrow">&#8594;</div>
+          <div class="flow-node" style="border-top: 3px solid #ff9900;">
+            <img src="img/cloudfront-logo.svg" alt="CloudFront" width="48" height="48" style="margin-bottom:0.4rem;">
+            <h4>Amazon CloudFront</h4>
+            <p>CDN &mdash; contenido estático<br>(CSS, JS, imágenes)</p>
+          </div>
+        </div>
+
+        <div class="flow-row">
+          <div class="flow-arrow vertical">&#8595;</div>
+        </div>
+
+        <!-- Servidor WildFly -->
+        <div class="flow-row">
+          <div class="server-container">
+
+            <div class="server-header">
+              <div class="server-title">
+                Servidor de Aplicaciones J2EE
+                <span>WildFly 26 ejecutando múltiples aplicaciones Java interconectadas con SSO</span>
+              </div>
+              <div class="server-badges">
+                <span class="tech-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+                    <path d="M8 12h8M12 8v8"/>
+                  </svg>
+                  Java 17
+                </span>
+                <span class="tech-badge">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6 3h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2zm0 4v12h12V7H6z"/>
+                  </svg>
+                  WildFly 26
+                </span>
+              </div>
+            </div>
+
+            <div class="sso-banner">
+              &#128274; Single Sign-On (SSO) &mdash; Autenticación centralizada compartida entre todos los módulos
+            </div>
+
+            <div class="modules-grid">
+              <div class="module-card mod-auth">
+                Autenticación y Perfiles
+                <small>Gestión de Roles, Usuarios y Menús</small>
+              </div>
+              <div class="module-card mod-cartera">
+                Consultas de Cartera
+                <small>Pólizas &middot; Recibos &middot; Siniestros &middot; Pagos &middot; Inspecciones, etc.</small>
+              </div>
+              <div class="module-card mod-clinicos">
+                Servicios Clínicos
+                <small>Clave de Emergencia &middot; Carta Avak &middot; Órdenes Médicas</small>
+              </div>
+              <div class="module-card mod-personas">
+                Cotización / Emisión Personas
+                <small>WAR &middot; Spring MVC</small>
+              </div>
+              <div class="module-card mod-notificaciones">
+                Servicios de Notificaciones y Mensajería
+                <small>eMail &middot; SMS &middot; Danna</small>
+              </div>
+              <div class="module-card mod-siniestros">
+                Declaración de Siniestros Auto y Personas
+                <small>WAR &middot; Spring MVC</small>
+              </div>
+              <div class="module-card mod-pagos">
+                Servicios de Pago
+                <small>Crédito &middot; Débito &middot; Transferencias</small>
+              </div>
+              <div class="module-card mod-expedientes">
+                Manejo de Expedientes
+                <small>Personas &middot; Pólizas &middot; Siniestros</small>
+              </div>
+              <div class="module-card mod-requerimientos">
+                Gestión de Requerimientos
+                <small>WAR &middot; Spring MVC</small>
+              </div>
+              <div class="module-card mod-renovacion">
+                Renovación de Pólizas Grupo BOF
+                <small>WAR &middot; Spring MVC</small>
+              </div>
+            </div>
+
+            <div class="server-footer">
+              <p class="server-footer-text">
+                Cada módulo es una aplicación Java (WAR) independiente desplegada en el mismo
+                servidor. Comparten el framework Spring (MVC, Security, JDBC) y renderizan
+                vistas JSP con jQuery en el cliente.
+              </p>
+              <div class="server-logos">
+                <img src="img/wildfly-logo.svg" alt="WildFly" width="90" height="32">
+                <img src="img/java-logo.svg" alt="Java" width="70" height="32">
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="flow-row">
+          <div class="flow-arrow vertical">&#8595;</div>
+        </div>
+
+        <!-- Base de datos -->
+        <div class="flow-row">
+          <div class="db-node">
+            <img src="img/oracle-logo.svg" alt="Oracle" width="56" height="56" style="margin-bottom:0.5rem;">
+            <h4>Oracle Database</h4>
+            <p>Persistencia de pólizas, clientes,<br>siniestros y datos operativos</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Flujo de datos -->
+    <section id="flujo">
+      <h2 class="section-title"><span class="icon">&#9670;</span> Flujo de una Solicitud</h2>
+      <p class="section-desc">
+        Recorrido simplificado desde que el usuario accede al portal hasta la consulta de datos.
+      </p>
+
+      <div class="flow-timeline">
+        <div class="flow-step">
+          <div class="step-num">1</div>
+          <h4>Acceso al portal</h4>
+          <p>El usuario ingresa vía HTTPS. Los recursos estáticos se sirven desde CloudFront para mayor velocidad.</p>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">2</div>
+          <h4>Autenticación SSO</h4>
+          <p>El módulo de Autenticación valida credenciales y establece una sesión compartida para todos los módulos.</p>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">3</div>
+          <h4>Procesamiento</h4>
+          <p>Spring MVC recibe la petición, aplica reglas de seguridad y ejecuta la lógica de negocio del módulo correspondiente.</p>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">4</div>
+          <h4>Datos y respuesta</h4>
+          <p>Spring JDBC consulta Oracle Database. La respuesta se renderiza en JSP y se entrega al navegador.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Paneles ejecutivo / técnico -->
+    <section id="detalle">
+      <h2 class="section-title"><span class="icon">&#9670;</span> Características de la Arquitectura</h2>
+      <p class="section-desc">
+        Resumen orientado a decisión de negocio y detalle de implementación tecnológica.
+      </p>
+
+      <div class="panels-grid">
+
+        <div class="panel executive">
+          <h3>&#128188; Visión Ejecutiva</h3>
+          <ul class="feature-list">
+            <li>
+              <span class="bullet">&#9656;</span>
+              <span><strong>Plataforma unificada:</strong> Un solo portal de seguros con múltiples líneas de negocio (personas, cartera, siniestros, pagos, notificaciones) accesibles desde un mismo punto de entrada.</span>
+            </li>
+            <li>
+              <span class="bullet">&#9656;</span>
+              <span><strong>Experiencia sin fricción:</strong> El usuario se autentica una sola vez (SSO) y navega entre módulos sin volver a ingresar credenciales.</span>
+            </li>
+            <li>
+              <span class="bullet">&#9656;</span>
+              <span><strong>Rendimiento global:</strong> CloudFront distribuye contenido estático en el borde de la red, reduciendo tiempos de carga para usuarios en distintas regiones.</span>
+            </li>
+            <li>
+              <span class="bullet">&#9656;</span>
+              <span><strong>Datos centralizados:</strong> Toda la información operativa reside en Oracle Database, garantizando consistencia entre módulos.</span>
+            </li>
+            <li>
+              <span class="bullet">&#9656;</span>
+              <span><strong>Modularidad operativa:</strong> Cada línea de negocio es una aplicación independiente (WAR), lo que permite evolucionar módulos de forma aislada.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <h3>&#9881;&#65039; Detalle Técnico</h3>
+          <table class="tech-table">
+            <tbody>
+              <tr>
+                <th>Servidor</th>
+                <td><span class="tech-tag">WildFly 26</span></td>
+              </tr>
+              <tr>
+                <th>Lenguaje</th>
+                <td><span class="tech-tag">Java 17</span></td>
+              </tr>
+              <tr>
+                <th>Empaquetado</th>
+                <td><span class="tech-tag">WAR</span> (15 aplicaciones)</td>
+              </tr>
+              <tr>
+                <th>Framework</th>
+                <td>
+                  <span class="tech-tag">Spring MVC</span>
+                  <span class="tech-tag">Spring Security</span>
+                  <span class="tech-tag">Spring JDBC</span>
+                </td>
+              </tr>
+              <tr>
+                <th>Vista</th>
+                <td><span class="tech-tag">JSP</span> + <span class="tech-tag">jQuery</span></td>
+              </tr>
+              <tr>
+                <th>Autenticación</th>
+                <td><span class="tech-tag">SSO</span> (Single Sign-On)</td>
+              </tr>
+              <tr>
+                <th>CDN</th>
+                <td><span class="tech-tag">Amazon CloudFront</span></td>
+              </tr>
+              <tr>
+                <th>Base de datos</th>
+                <td><span class="tech-tag">Oracle Database</span></td>
+              </tr>
+              <tr>
+                <th>Protocolo</th>
+                <td><span class="tech-tag">HTTPS</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Módulos -->
+    <section id="modulos">
+      <h2 class="section-title"><span class="icon">&#9670;</span> Módulos de Negocio</h2>
+      <p class="section-desc">
+        Cada módulo corresponde a una aplicación WAR desplegada en el servidor WildFly.
+      </p>
+
+      <div class="panels-grid">
+        <div class="panel">
+          <h3>Módulos principales</h3>
+          <table class="tech-table">
+            <tbody>
+              <tr>
+                <th>Autenticación y Perfiles</th>
+                <td>Gestión de roles, usuarios y menús</td>
+              </tr>
+              <tr>
+                <th>Consultas de Cartera</th>
+                <td>Pólizas, recibos, siniestros, pagos, inspecciones, etc.</td>
+              </tr>
+              <tr>
+                <th>Servicios Clínicos</th>
+                <td>Clave de Emergencia, Carta Avak y Órdenes Médicas</td>
+              </tr>
+              <tr>
+                <th>Cotización / Emisión Personas</th>
+                <td>Cotización y emisión de pólizas de personas</td>
+              </tr>
+              <tr>
+                <th>Servicios de Notificaciones y Mensajería</th>
+                <td>eMail, SMS y Danna</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <h3>Módulos complementarios</h3>
+          <table class="tech-table">
+            <tbody>
+              <tr>
+                <th>Declaración de Siniestros Auto y Personas</th>
+                <td>Registro y seguimiento de reclamaciones de auto y personas</td>
+              </tr>
+              <tr>
+                <th>Servicios de Pago</th>
+                <td>Crédito, débito y transferencias</td>
+              </tr>
+              <tr>
+                <th>Manejo de Expedientes</th>
+                <td>Personas, pólizas y siniestros</td>
+              </tr>
+              <tr>
+                <th>Gestión de Requerimientos</th>
+                <td>Registro, seguimiento y resolución de requerimientos</td>
+              </tr>
+              <tr>
+                <th>Renovación de Pólizas Grupo BOF</th>
+                <td>Proceso de renovación de pólizas del grupo BOF</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    Banesco Seguros Online &mdash; Arquitectura Lógica Actual &middot; Documento de referencia &middot; 2026
+  </footer>
+
+</body>
+</html>
