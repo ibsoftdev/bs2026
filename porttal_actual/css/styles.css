@@ -524,6 +524,51 @@ section {
   color: var(--text-secondary);
 }
 
+.flow-step-wide {
+  grid-column: 1 / -1;
+}
+
+.flow-step-satellite {
+  background: linear-gradient(135deg, #f8fbfe 0%, #eef4fa 100%);
+  border: 1px solid var(--server-border);
+}
+
+.flow-step-satellite .step-num {
+  background: var(--accent-gold);
+  color: #3d3208;
+}
+
+.satellite-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.satellite-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.satellite-tag {
+  display: inline-block;
+  background: #fff;
+  border: 1px solid var(--server-border);
+  border-radius: 6px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--banesco-blue);
+  box-shadow: 0 1px 3px rgba(0, 51, 102, 0.06);
+}
+
+.satellite-detail {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
 /* ── Footer ── */
 .site-footer {
   background: var(--banesco-blue);
