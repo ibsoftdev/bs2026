@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" role="img" aria-label="Spring Boot">
+  <rect width="80" height="80" rx="12" fill="#6db33f"/>
+  <circle cx="40" cy="36" r="18" fill="none" stroke="#ffffff" stroke-width="3"/>
+  <path d="M40 18 L40 54 M28 30 L52 42 M28 42 L52 30" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="40" y="68" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="6.5" font-weight="700" fill="#ffffff">Spring Boot</text>
+</svg>

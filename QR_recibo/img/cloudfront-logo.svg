@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" role="img" aria-label="Amazon CloudFront">
+  <rect width="80" height="80" rx="12" fill="#232f3e"/>
+  <path d="M40 18 C28 18 20 26 20 36 C20 46 28 54 40 54 C52 54 60 46 60 36 C60 26 52 18 40 18Z" fill="none" stroke="#ff9900" stroke-width="2.5"/>
+  <path d="M40 24 C31 24 26 30 26 36 C26 42 31 48 40 48 C49 48 54 42 54 36 C54 30 49 24 40 24Z" fill="#ff9900" opacity="0.3"/>
+  <circle cx="40" cy="36" r="4" fill="#ff9900"/>
+  <text x="40" y="68" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="7" font-weight="600" fill="#ff9900">CloudFront</text>
+</svg>
