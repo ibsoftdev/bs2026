@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banesco Seguros Online — Generación Segura de Recibos vía Token y QR</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <span class="badge">Arquitectura Lógica — Token JWT y Código QR</span>
+      <h1>Generación Segura de Recibos</h1>
+      <p class="subtitle">
+        Flujo para emitir recibos en PDF a través de un código QR con token JWT firmado.
+        Solo la aplicación <strong>genererar_recibo</strong> se expone a Internet; la base de datos
+        y el servidor de reportes permanecen en la red interna.
+      </p>
+    </div>
+  </header>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <h3>Origen del QR</h3>
+      <p>PLSQL_QR &middot; JWT</p>
+    </div>
+    <div class="summary-card">
+      <h3>Acceso público</h3>
+      <p>CloudFront &middot; HTTPS</p>
+    </div>
+    <div class="summary-card security">
+      <h3>Recursos protegidos</h3>
+      <p>Oracle DB &middot; Reports Server</p>
+    </div>
+    <div class="summary-card">
+      <h3>Resultado</h3>
+      <p>PDF del recibo</p>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- Diagrama principal -->
+    <section id="diagrama">
+      <h2 class="section-title"><span class="icon">&#9670;</span> Diagrama Lógico del Proceso</h2>
+      <p class="section-desc">
+        Vista de alto nivel en tres fases: generación del código QR con token firmado,
+        acceso del usuario vía Internet y procesamiento seguro del recibo en la red interna.
+      </p>
+
+      <div class="architecture-flow">
+
+        <!-- Fase 1: Generación del QR (red interna) -->
+        <div class="flow-row">
+          <div class="zone-container zone-internal">
+            <div class="zone-header">
+              <div class="zone-title">
+                Fase 1 — Generación del Código QR
+                <span>Aplicación PL/SQL PLSQL_QR consulta la base de datos, genera el token JWT y el código QR</span>
+              </div>
+              <span class="zone-badge internal">&#128274; Red interna</span>
+            </div>
+
+            <div class="process-grid">
+              <div class="process-card plsql-qr">
+                <div class="node-icon">&#9881;&#65039;</div>
+                <h4>PLSQL_QR</h4>
+                <p>Aplicación PL/SQL que lee tablas de la BD, genera el token JWT y construye el código QR.</p>
+              </div>
+
+              <div class="process-arrow-row" style="grid-column: 1 / -1;">
+                <span class="mini-arrow">&#8594;</span>
+                <span style="font-size:0.75rem;color:var(--text-secondary);">Consulta tablas de recibos, sucursal, cliente, etc.</span>
+                <span class="mini-arrow">&#8592;</span>
+              </div>
+
+              <div class="process-card db-card">
+                <img src="img/oracle-logo.svg" alt="Oracle Database" width="48" height="48">
+                <h4>Oracle Database</h4>
+                <p>Fuente de datos para construir el payload del JWT y la URL del recibo.</p>
+              </div>
+
+              <div class="process-arrow-row" style="grid-column: 1 / -1;">
+                <span class="mini-arrow">&#8594;</span>
+                <span style="font-size:0.75rem;color:var(--text-secondary);">Genera token JWT firmado con clave secreta almacenada en BD</span>
+                <span class="mini-arrow">&#8594;</span>
+              </div>
+
+              <div class="process-card qr-card">
+                <img src="img/qr-icon.svg" alt="Código QR" width="48" height="48">
+                <h4>Código QR</h4>
+                <p>Contiene la URL pública con el token como parámetro <code>k</code>.</p>
+                <div class="url-box">https://dominio/genererar_recibo?k=eyJhbGciOi...</div>
+              </div>
+            </div>
+
+            <div class="jwt-box">
+              <span class="jwt-key">"sub"</span>: <span class="jwt-str">"1234567890"</span>,<br>
+              <span class="jwt-key">"name"</span>: <span class="jwt-str">"John Doe"</span>,<br>
+              <span class="jwt-key">"suc_recibo"</span>: <span class="jwt-num">1</span>,<br>
+              <span class="jwt-key">"nu_recibo"</span>: <span class="jwt-num">101010</span>,<br>
+              <span class="jwt-key">"iat"</span>: <span class="jwt-num">1516239022</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-row">
+          <div class="flow-arrow vertical">
+            &#8595;
+            <span class="arrow-label">Usuario escanea el QR</span>
+          </div>
+        </div>
+
+        <!-- Fase 2: Acceso público -->
+        <div class="flow-row">
+          <div class="flow-node">
+            <div class="node-icon">&#128100;</div>
+            <h4>Usuario</h4>
+            <p>Escanea el QR<br>desde móvil o navegador</p>
+          </div>
+          <div class="flow-arrow">&#8594;</div>
+          <div class="flow-node">
+            <div class="node-icon">&#127760;</div>
+            <h4>Internet</h4>
+            <p>HTTPS<br>acceso público</p>
+          </div>
+          <div class="flow-arrow">&#8594;</div>
+          <div class="flow-node" style="border-top: 3px solid #ff9900;">
+            <img src="img/cloudfront-logo.svg" alt="CloudFront" width="48" height="48">
+            <h4>Amazon CloudFront</h4>
+            <p>CDN &mdash; punto de entrada<br>público al dominio</p>
+          </div>
+          <div class="flow-arrow">&#8594;</div>
+          <div class="flow-node" style="border-top: 3px solid #6db33f;">
+            <img src="img/springboot-logo.svg" alt="Spring Boot" width="48" height="48">
+            <h4>genererar_recibo</h4>
+            <p>Spring Boot &mdash; única app<br>expuesta a Internet</p>
+          </div>
+        </div>
+
+        <div class="flow-row">
+          <div class="flow-arrow vertical">
+            &#8595;
+            <span class="arrow-label">Validación y generación del PDF</span>
+          </div>
+        </div>
+
+        <!-- Fase 3: Procesamiento interno -->
+        <div class="flow-row">
+          <div class="zone-container zone-public">
+            <div class="zone-header">
+              <div class="zone-title">
+                Fase 2 y 3 — Validación del Token y Generación del Recibo
+                <span>La aplicación Spring Boot valida el JWT y orquesta la generación del PDF en la red interna</span>
+              </div>
+              <span class="zone-badge secure">&#128737; Único punto expuesto</span>
+            </div>
+
+            <div class="server-container" style="margin-bottom:1rem;">
+              <div class="server-header">
+                <div class="server-title">
+                  genererar_recibo &mdash; Spring Boot
+                  <span>Recibe <code>?k=token</code>, valida vigencia y firma, luego genera el PDF del recibo</span>
+                </div>
+                <div class="server-badges">
+                  <span class="tech-badge">
+                    <img src="img/springboot-logo.svg" alt="" width="18" height="18" style="border-radius:3px;">
+                    Spring Boot
+                  </span>
+                  <span class="tech-badge">
+                    <img src="img/java-logo.svg" alt="" width="18" height="18">
+                    Java
+                  </span>
+                  <span class="tech-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path d="M12 2L4 7v10l8 5 8-5V7L12 2z"/>
+                      <path d="M12 12l8-5M12 12v10M12 12L4 7"/>
+                    </svg>
+                    JWT
+                  </span>
+                </div>
+              </div>
+
+              <div class="process-grid" style="grid-template-columns: repeat(3, 1fr);">
+                <div class="process-card spring-app">
+                  <h4>1. Decodificar token</h4>
+                  <p>Extrae el parámetro <code>k</code> de la URL y consulta la clave secreta en BD para validar firma y vigencia.</p>
+                </div>
+                <div class="process-card spring-app">
+                  <h4>2. Invocar Reports</h4>
+                  <p>Construye la URL del reporte con <code>suc_recibo</code> y <code>nu_recibo</code> del payload JWT.</p>
+                </div>
+                <div class="process-card spring-app">
+                  <h4>3. Entregar PDF</h4>
+                  <p>Consolida los PDFs generados y devuelve el recibo como respuesta HTTP al navegador del usuario.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="zone-header" style="margin-top:0.5rem; padding-bottom:0.75rem;">
+              <div class="zone-title" style="font-size:0.95rem;">
+                Recursos críticos &mdash; Red interna (no expuestos a Internet)
+              </div>
+              <span class="zone-badge internal">&#128274; Solo acceso interno</span>
+            </div>
+
+            <div class="internal-resources">
+              <div class="resource-node db-node">
+                <img src="img/oracle-logo.svg" alt="Oracle" width="48" height="48">
+                <h4>Oracle Database</h4>
+                <p>Almacena la clave secreta JWT<br>y datos operativos del recibo</p>
+              </div>
+              <div class="resource-node reports-node">
+                <img src="img/reports-logo.svg" alt="Oracle Reports Server" width="48" height="48">
+                <h4>Oracle Reports Server</h4>
+                <p>Genera los PDFs del recibo<br>dentro de la red corporativa</p>
+              </div>
+            </div>
+
+            <div class="security-banner">
+              &#128274; La base de datos y el servidor de reportes nunca son accesibles directamente desde Internet.
+              Toda la comunicación pasa exclusivamente por <strong>genererar_recibo</strong>.
+            </div>
+
+            <div class="connection-legend">
+              <div class="legend-item">
+                <span class="legend-line public"></span>
+                Tráfico público (Usuario &rarr; CloudFront &rarr; genererar_recibo)
+              </div>
+              <div class="legend-item">
+                <span class="legend-line internal"></span>
+                Tráfico interno (genererar_recibo &rarr; BD / Reports Server)
+              </div>
+              <div class="legend-item">
+                <span class="legend-line blocked"></span>
+                Sin acceso directo desde Internet
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Flujo paso a paso -->
+    <section id="flujo">
+      <h2 class="section-title"><span class="icon">&#9670;</span> Flujo Detallado del Proceso</h2>
+      <p class="section-desc">
+        Recorrido completo desde la generación del código QR hasta la entrega del PDF del recibo al usuario.
+      </p>
+
+      <div class="flow-timeline">
+        <div class="flow-step flow-step-highlight">
+          <div class="step-num">1</div>
+          <h4>Lectura de datos (PLSQL_QR)</h4>
+          <p>PLSQL_QR consulta las tablas necesarias en Oracle Database para obtener sucursal, número de recibo, cliente y demás datos del recibo.</p>
+        </div>
+        <div class="flow-step flow-step-highlight">
+          <div class="step-num">2</div>
+          <h4>Construcción del JWT</h4>
+          <p>PLSQL_QR arma el payload del token con los campos del recibo (<code>suc_recibo</code>, <code>nu_recibo</code>, etc.) y lo firma con la clave secreta almacenada en BD.</p>
+        </div>
+        <div class="flow-step flow-step-highlight">
+          <div class="step-num">3</div>
+          <h4>Generación del QR</h4>
+          <p>PLSQL_QR construye la URL <code>https://dominio/genererar_recibo?k=&lt;token&gt;</code> y la codifica en un código QR para impresión o visualización.</p>
+        </div>
+        <div class="flow-step flow-step-public">
+          <div class="step-num">4</div>
+          <h4>Escaneo y acceso</h4>
+          <p>El usuario escanea el QR. El navegador abre la URL a través de Internet y Amazon CloudFront enruta la petición a la aplicación Spring Boot.</p>
+        </div>
+        <div class="flow-step flow-step-public">
+          <div class="step-num">5</div>
+          <h4>Validación del token</h4>
+          <p>genererar_recibo obtiene la clave secreta de Oracle Database, decodifica el JWT, verifica la firma y confirma que el token es válido y vigente.</p>
+        </div>
+        <div class="flow-step flow-step-highlight">
+          <div class="step-num">6</div>
+          <h4>Generación del reporte</h4>
+          <p>Con los datos del token, la aplicación invoca al Oracle Reports Server en la red interna para generar el PDF del recibo indicado.</p>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">7</div>
+          <h4>Entrega del PDF</h4>
+          <p>El PDF consolidado se devuelve como respuesta HTTP al navegador del usuario. El recibo queda disponible sin exponer recursos internos.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Paneles ejecutivo / técnico / seguridad -->
+    <section id="detalle">
+      <h2 class="section-title"><span class="icon">&#9670;</span> Características del Diseño</h2>
+      <p class="section-desc">
+        Resumen orientado a decisión de negocio, detalle técnico y principios de seguridad del flujo.
+      </p>
+
+      <div class="panels-grid">
+
+        <div class="panel executive">
+          <h3>&#128188; Visión Ejecutiva</h3>
+          <ul class="feature-list">
+            <li>
+              <span class="bullet">&#9656;</span>
+              <span><strong>Acceso controlado:</strong> El usuario accede al recibo únicamente mediante un código QR con un token de un solo uso o vigencia limitada.</span>
+            </li>
+            <li>
+              <span class="bullet">&#9656;</span>
+              <span><strong>Superficie de ataque reducida:</strong> Solo la aplicación genererar_recibo está expuesta a Internet; la BD y el servidor de reportes permanecen protegidos.</span>
+            </li>
+            <li>
+              <span class="bullet">&#9656;</span>
+              <span><strong>Sin credenciales del usuario:</strong> No se requiere autenticación adicional; el token JWT actúa como autorización temporal para ese recibo específico.</span>
+            </li>
+            <li>
+              <span class="bullet">&#9656;</span>
+              <span><strong>Distribución global:</strong> CloudFront actúa como punto de entrada seguro (HTTPS) ante el dominio público de la empresa.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <h3>&#9881;&#65039; Detalle Técnico</h3>
+          <table class="tech-table">
+            <tbody>
+              <tr>
+                <th>Generador QR</th>
+                <td><span class="tech-tag">PLSQL_QR</span> <span class="tech-tag">PL/SQL</span></td>
+              </tr>
+              <tr>
+                <th>Token</th>
+                <td><span class="tech-tag">JWT</span> firmado con clave en BD</td>
+              </tr>
+              <tr>
+                <th>URL pública</th>
+                <td><span class="tech-tag">/genererar_recibo?k=</span></td>
+              </tr>
+              <tr>
+                <th>App expuesta</th>
+                <td><span class="tech-tag">Spring Boot</span></td>
+              </tr>
+              <tr>
+                <th>CDN / entrada</th>
+                <td><span class="tech-tag">Amazon CloudFront</span></td>
+              </tr>
+              <tr>
+                <th>Base de datos</th>
+                <td><span class="tech-tag">Oracle Database</span> (interna)</td>
+              </tr>
+              <tr>
+                <th>Reportes</th>
+                <td><span class="tech-tag">Oracle Reports Server</span> (interno)</td>
+              </tr>
+              <tr>
+                <th>Respuesta</th>
+                <td><span class="tech-tag">PDF</span> del recibo</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <div class="panels-grid" style="margin-top:1.5rem;">
+        <div class="panel security">
+          <h3>&#128737; Modelo de Seguridad</h3>
+          <ul class="feature-list">
+            <li>
+              <span class="bullet">&#9656;</span>
+              <span><strong>Token firmado:</strong> El JWT incluye los identificadores del recibo y está firmado con una clave secreta que solo reside en la base de datos interna.</span>
+            </li>
+            <li>
+              <span class="bullet">&#9656;</span>
+              <span><strong>Validación en servidor:</strong> genererar_recibo verifica firma, integridad y vigencia antes de procesar cualquier solicitud de recibo.</span>
+            </li>
+            <li>
+              <span class="bullet">&#9656;</span>
+              <span><strong>Aislamiento de recursos críticos:</strong> Oracle Database y Reports Server no tienen endpoint público; solo genererar_recibo puede comunicarse con ellos.</span>
+            </li>
+            <li>
+              <span class="bullet">&#9656;</span>
+              <span><strong>Principio de mínimo privilegio:</strong> El token autoriza únicamente la generación del recibo identificado en su payload, sin acceso a otros datos.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <h3>&#128196; Payload del Token JWT</h3>
+          <table class="tech-table">
+            <tbody>
+              <tr>
+                <th>sub</th>
+                <td>Identificador del sujeto (cliente / póliza)</td>
+              </tr>
+              <tr>
+                <th>name</th>
+                <td>Nombre del titular</td>
+              </tr>
+              <tr>
+                <th>suc_recibo</th>
+                <td>Código de sucursal del recibo</td>
+              </tr>
+              <tr>
+                <th>nu_recibo</th>
+                <td>Número del recibo a generar</td>
+              </tr>
+              <tr>
+                <th>iat</th>
+                <td>Timestamp de emisión (validez temporal)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    Banesco Seguros Online &mdash; Generación Segura de Recibos vía Token JWT y QR &middot; Documento de referencia &middot; 2026
+  </footer>
+
+</body>
+</html>
