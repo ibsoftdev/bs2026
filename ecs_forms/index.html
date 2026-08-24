@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ECS Forms — Guía de creación (task definition + servicio)</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --panel: #1a2332;
+      --text: #e7ecf3;
+      --muted: #9aa8bc;
+      --accent: #3d8bfd;
+      --ok: #3dd68c;
+      --warn: #f5a524;
+      --border: #2a3548;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    header {
+      padding: 2rem 1.5rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #1a2740 0%, var(--bg) 100%);
+    }
+    header h1 { margin: 0 0 0.35rem; font-size: 1.65rem; }
+    header p { margin: 0; color: var(--muted); max-width: 52rem; }
+    main { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
+    nav.toc {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 2rem;
+    }
+    nav.toc h2 { margin: 0 0 0.75rem; font-size: 1rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    nav.toc ol { margin: 0; padding-left: 1.25rem; }
+    nav.toc a { color: var(--accent); text-decoration: none; }
+    nav.toc a:hover { text-decoration: underline; }
+    section.step {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.4rem;
+      margin-bottom: 1.25rem;
+    }
+    section.step h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      background: #243044;
+      color: var(--muted);
+    }
+    .badge.done { background: #143528; color: var(--ok); }
+    .badge.pending { background: #3a2e14; color: var(--warn); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      margin: 0.75rem 0;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.45rem 0.6rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #121a27; color: var(--muted); font-weight: 600; }
+    code, .path {
+      font-family: ui-monospace, "Cascadia Code", monospace;
+      font-size: 0.86em;
+      background: #0d1218;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+    }
+    pre {
+      background: #0d1218;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.9rem 1rem;
+      overflow-x: auto;
+      font-size: 0.85rem;
+    }
+    .shot {
+      margin: 1rem 0;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 0.75rem;
+      background: #121820;
+    }
+    .shot img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      display: block;
+    }
+    .shot .placeholder {
+      color: var(--muted);
+      font-size: 0.9rem;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .shot figcaption {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .note {
+      border-left: 3px solid var(--accent);
+      padding: 0.5rem 0.85rem;
+      margin: 0.75rem 0;
+      background: #152033;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.92rem;
+    }
+    .warn-box {
+      border-left: 3px solid var(--warn);
+      background: #2a2210;
+    }
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 2rem 1rem 3rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Creación del contenedor Forms en ECS Fargate</h1>
+    <p>
+      Guía paso a paso para crear la <strong>task definition</strong> <code>forms-server</code>
+      y el <strong>servicio</strong> correspondiente en el cluster <code>forms_report</code>,
+      reutilizando la imagen ECR y el EFS <code>rector-dev</code>, con las lecciones del servicio admin.
+    </p>
+  </header>
+
+  <main>
+    <nav class="toc">
+      <h2>Índice de pasos</h2>
+      <ol>
+        <li><a href="#paso-0">Preparación y valores fijos</a></li>
+        <li><a href="#paso-1">Crear task definition — inicio</a></li>
+        <li><a href="#paso-2">Infraestructura (Fargate, CPU, memoria, roles)</a></li>
+        <li><a href="#paso-3">Contenedor (imagen, puertos, env, comando)</a></li>
+        <li><a href="#paso-4">Almacenamiento efímero + volúmenes EFS</a></li>
+        <li><a href="#paso-5">Puntos de montaje y guardar revisión</a></li>
+        <li><a href="#paso-6">Crear servicio Forms</a></li>
+        <li><a href="#paso-7">Opciones de implementación</a></li>
+        <li><a href="#paso-8">Redes (subnets, SG, IP pública)</a></li>
+        <li><a href="#paso-9">Verificar Running + ECS Exec</a></li>
+        <li><a href="#anexo-cli">Anexo — Comandos AWS CLI (referencia admin)</a></li>
+      </ol>
+    </nav>
+
+    <section class="step" id="paso-0">
+      <h2><span class="badge pending">Paso 0</span> Preparación y valores fijos</h2>
+      <p>Captura o anota estos valores antes de empezar (no hace falta pantalla de AWS si ya los tienes).</p>
+      <table>
+        <tr><th>Concepto</th><th>Valor</th></tr>
+        <tr><td>Cluster</td><td><code>forms_report</code></td></tr>
+        <tr><td>Imagen ECR</td><td>Misma que admin: <code>730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker@sha256:…</code> (o tag)</td></tr>
+        <tr><td>EFS</td><td><code>fs-08471cc88d2a8edc3</code> (rector-dev)</td></tr>
+        <tr><td>VPC</td><td><code>vpc-055a4007418b34e64</code></td></tr>
+        <tr><td>Subnets</td><td>Solo pub: <code>subnet-01212efd4a9ce759b</code>, <code>subnet-0d27c63b4c25eabe1</code>, <code>subnet-0f4f99dc20cbd7798</code></td></tr>
+        <tr><td>SG tarea</td><td><code>sg-0e1787d32bac71fcd</code> (<code>forms-sg-ecs</code>) — ya tiene NFS en EFS</td></tr>
+        <tr><td>Rol ejecución</td><td><code>ecsTaskExecutionRole</code></td></tr>
+        <tr><td>Rol tarea (Exec)</td><td><code>ecs-forms-admin-task-role</code> (reutilizable)</td></tr>
+        <tr><td>Nombre familia TD</td><td><code>forms-server</code></td></tr>
+        <tr><td>Nombre servicio</td><td><code>forms-server</code> (sugerido)</td></tr>
+        <tr><td>Nombre contenedor</td><td><code>forms-server</code></td></tr>
+      </table>
+      <div class="note warn-box">
+        <strong>Paths EFS (sin <code>/domain</code>):</strong><br />
+        domains → <code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/domains</code><br />
+        app → <code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/app</code><br />
+        scripts → <code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/scripts/forms</code>
+      </div>
+      <figure class="shot" data-shot="paso-0">
+        <div class="placeholder">[ Captura pendiente: checklist / valores anotados ]</div>
+        <figcaption>Paso 0 — Valores de referencia</figcaption>
+      </figure>
+    </section>
+
+    <section class="step" id="paso-1">
+      <h2><span class="badge done">Paso 1</span> Crear task definition — inicio</h2>
+      <ol>
+        <li>ECS → <strong>Definiciones de tareas</strong> → <strong>Crear nueva definición de tarea</strong></li>
+        <li>Familia: <code>forms-server</code></li>
+      </ol>
+      <figure class="shot" data-shot="paso-1">
+        <img src="assets/paso-01-crear-td.png" alt="Familia de definición de tareas forms-server" />
+        <figcaption>Paso 1 — Familia <code>forms-server</code></figcaption>
+      </figure>
+    </section>
+
+    <section class="step" id="paso-2">
+      <h2><span class="badge done">Paso 2</span> Infraestructura y roles</h2>
+      <table>
+        <tr><th>Campo</th><th>Valor</th></tr>
+        <tr><td>Tipo de inicio</td><td>AWS Fargate ✅</td></tr>
+        <tr><td>SO / Arquitectura</td><td>Linux / X86_64 ✅</td></tr>
+        <tr><td>CPU</td><td>2 vCPU ✅</td></tr>
+        <tr><td>Memoria</td><td>4 GB ✅</td></tr>
+        <tr><td>Rol de tarea</td><td><code>ecs-forms-admin-task-role</code> ✅</td></tr>
+        <tr><td>Rol de ejecución</td><td><code>ecsTaskExecutionRole</code> ✅</td></tr>
+      </table>
+      <figure class="shot" data-shot="paso-2">
+        <img src="assets/paso-02-infra.png" alt="Fargate Linux X86_64 2 vCPU 4 GB" />
+        <figcaption>Paso 2 — Fargate, Linux/X86_64, 2 vCPU, 4 GB</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-2b">
+        <img src="assets/paso-02b-roles.png" alt="Roles de tarea y ejecución" />
+        <figcaption>Paso 2b — Rol de tarea <code>ecs-forms-admin-task-role</code> + ejecución <code>ecsTaskExecutionRole</code></figcaption>
+      </figure>
+    </section>
+
+    <section class="step" id="paso-3">
+      <h2><span class="badge pending">Paso 3</span> Contenedor: imagen, puertos, entorno, comando</h2>
+      <table>
+        <tr><th>Campo</th><th>Valor</th></tr>
+        <tr><td>Nombre</td><td><code>forms-server</code> ✅</td></tr>
+        <tr><td>Esencial</td><td>Sí ✅</td></tr>
+        <tr><td>URI imagen</td><td>Misma ECR que admin (<code>forms-docker@sha256:9667eb31…</code>) ✅</td></tr>
+        <tr><td>Puertos</td><td>9001/9501/9991/5556 ✅</td></tr>
+        <tr><td>Comando (pruebas)</td><td><code>sleep,infinity</code> ✅</td></tr>
+        <tr><td>Comando (producción)</td><td><code>/u01/oracle/scripts/entrypoint.sh</code></td></tr>
+      </table>
+      <p>Variables de entorno (compose):</p>
+      <pre>ORACLE_HOME=/u01/oracle
+DOMAIN_NAME=forms_domain
+DOMAIN_HOME=/u01/oracle/user_projects/domains/forms_domain
+ADMIN_SERVER_NAME=AdminServer
+ADMIN_SERVER_HOST=weblogic-admin
+ADMIN_SERVER_PORT=7001
+ADMIN_USER=weblogic
+ADMIN_PASSWORD=&lt;usar Secrets Manager luego&gt;
+MANAGED_SERVER_NAME=WLS_FORMS
+MANAGED_SERVER_PORT=9001
+LD_LIBRARY_PATH=/u01/oracle/lib:/u01/oracle/oracle_common/lib</pre>
+      <div class="note">
+        <code>ADMIN_SERVER_HOST=weblogic-admin</code> solo resolverá cuando exista Service Discovery.
+        Mientras tanto puedes usar la IP privada de la tarea admin, o dejarlo así y arrancar Forms a mano después.
+      </div>
+      <figure class="shot" data-shot="paso-3a">
+        <img src="assets/paso-03a-imagen.png" alt="Contenedor forms-server e imagen ECR" />
+        <figcaption>Paso 3a — Contenedor <code>forms-server</code> + imagen ECR</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-3b">
+        <img src="assets/paso-03b-puertos.png" alt="Mapeos de puertos Forms" />
+        <figcaption>Paso 3b — Puertos 9001, 9501, 9991, 5556</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-3c">
+        <img src="assets/paso-03c-env.png" alt="Variables de entorno Forms" />
+        <figcaption>Paso 3c — Environment (password en claro solo para pruebas; migrar a Secrets Manager)</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-3d">
+        <img src="assets/paso-03d-comando.png" alt="Configuración Docker comando" />
+        <figcaption>Paso 3d — Docker config con <code>sleep,infinity</code></figcaption>
+      </figure>
+      <div class="note warn-box">
+        Verificar que <strong>Punto de entrada</strong> quede vacío. El <strong>Directorio de trabajo</strong>
+        puede quedar por defecto o en <code>/u01/oracle</code>.
+      </div>
+    </section>
+
+    <section class="step" id="paso-4">
+      <h2><span class="badge pending">Paso 4</span> Almacenamiento efímero + volúmenes EFS</h2>
+      <table>
+        <tr><th>Campo</th><th>Valor</th></tr>
+        <tr><td>Almacenamiento efímero</td><td><strong>100</strong> GiB</td></tr>
+      </table>
+      <table>
+        <tr><th>Volumen</th><th>File system</th><th>Root directory</th></tr>
+        <tr>
+          <td><code>efs-domains</code></td>
+          <td><code>fs-08471cc88d2a8edc3</code></td>
+          <td><code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/domains</code></td>
+        </tr>
+        <tr>
+          <td><code>efs-app</code></td>
+          <td><code>fs-08471cc88d2a8edc3</code></td>
+          <td><code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/app</code></td>
+        </tr>
+        <tr>
+          <td><code>efs-scripts</code></td>
+          <td><code>fs-08471cc88d2a8edc3</code></td>
+          <td><code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/scripts/forms</code></td>
+        </tr>
+      </table>
+      <div class="note warn-box">No anteponer <code>/domain</code> al root directory.</div>
+      <figure class="shot" data-shot="paso-4a">
+        <img src="assets/paso-04a-ephemeral.png" alt="Almacenamiento efimero 100 GiB" />
+        <figcaption>Paso 4a — Almacenamiento efímero configurado en 100 GiB</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-4b">
+        <img src="assets/paso-04b-efs-domains.png" alt="Volumen EFS domains" />
+        <figcaption>Paso 4b.1 — Volumen <code>efs-domains</code> en EFS</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-4b-app">
+        <img src="assets/paso-04b-efs-app.png" alt="Volumen EFS app" />
+        <figcaption>Paso 4b.2 — Volumen <code>efs-app</code> en EFS</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-4b-scripts">
+        <img src="assets/paso-04b-efs-scripts.png" alt="Volumen EFS scripts" />
+        <figcaption>Paso 4b.3 — Volumen <code>efs-scripts</code> en EFS</figcaption>
+      </figure>
+    </section>
+
+    <section class="step" id="paso-5">
+      <h2><span class="badge pending">Paso 5</span> Puntos de montaje y crear</h2>
+      <table>
+        <tr><th>Volumen</th><th>Ruta contenedor</th><th>Solo lectura</th></tr>
+        <tr><td>efs-domains</td><td><code>/u01/oracle/user_projects/domains</code></td><td>No</td></tr>
+        <tr><td>efs-app</td><td><code>/u01/oracle/user_projects/apps</code></td><td>No</td></tr>
+        <tr><td>efs-scripts</td><td><code>/u01/oracle/scripts</code></td><td>No</td></tr>
+      </table>
+      <p>Crear la definición → quedó <code>forms-server:2</code> ✅.</p>
+      <figure class="shot" data-shot="paso-5a">
+        <img src="assets/paso-05a-mounts.png" alt="Puntos de montaje del contenedor" />
+        <figcaption>Paso 5a — Mount points de domains, app y scripts</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-5b-pre">
+        <img src="assets/paso-05b-crear-boton.png" alt="Paso final antes de crear task definition" />
+        <figcaption>Paso 5b.1 — Pantalla final antes de crear la definición</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-5b">
+        <img src="assets/paso-05b-td-creada.png" alt="Task definition forms-server 2 creada" />
+        <figcaption>Paso 5b.2 — Confirmación de creación: <code>forms-server:2</code></figcaption>
+      </figure>
+    </section>
+
+    <section class="step" id="paso-6">
+      <h2><span class="badge pending">Paso 6</span> Crear servicio en el cluster</h2>
+      <ol>
+        <li>Cluster <code>forms_report</code> → Servicios → <strong>Crear</strong></li>
+        <li>Task definition: <code>forms-server:4</code></li>
+        <li>Nombre servicio: <code>forms-server</code></li>
+        <li>Tareas deseadas: <code>1</code></li>
+        <li>Encender <strong>ECS Exec</strong></li>
+      </ol>
+      <figure class="shot" data-shot="paso-6a">
+        <img src="assets/paso-06a-clusters.png" alt="Lista de clusters ECS" />
+        <figcaption>Paso 6a — Clústeres (TD <code>forms-server:4</code> ya creada)</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-6b">
+        <img src="assets/paso-06b-servicios-cluster.png" alt="Servicios del cluster forms_report" />
+        <figcaption>Paso 6b — Cluster <code>forms_report</code> → Crear servicio</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-6c">
+        <img src="assets/paso-06c-detalles-servicio.png" alt="Detalles del servicio forms-server" />
+        <figcaption>Paso 6c — Familia <code>forms-server</code>, revisión <code>4</code>, nombre <code>forms-server</code></figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-6d">
+        <img src="assets/paso-06d-compute.png" alt="Configuracion Fargate capacity provider" />
+        <figcaption>Paso 6d — Cómputo: Fargate (capacidad personalizada), plataforma LATEST y ECS Exec habilitado</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-6e">
+        <img src="assets/paso-06e-deploy.png" alt="Opciones de implementacion" />
+        <figcaption>Paso 6e — Réplica, desired=1, min 0 / max 200, AZ rebalancing ON</figcaption>
+      </figure>
+    </section>
+
+    <section class="step" id="paso-7">
+      <h2><span class="badge done">Paso 7</span> Opciones de implementación</h2>
+      <table>
+        <tr><th>Campo</th><th>Valor</th></tr>
+        <tr><td>Estrategia</td><td>Actualización acumulativa</td></tr>
+        <tr><td>Mín. healthy %</td><td>0</td></tr>
+        <tr><td>Máx. %</td><td>200 (si AZ rebalancing está ON)</td></tr>
+        <tr><td>ALB / Service Discovery / Auto scaling</td><td>No (por ahora)</td></tr>
+      </table>
+      <figure class="shot" data-shot="paso-7">
+        <img src="assets/paso-08-deploy.png" alt="Opciones de implementacion del servicio" />
+        <figcaption>Paso 7 — Actualización acumulativa, mín 0% / máx 200%</figcaption>
+      </figure>
+    </section>
+
+    <section class="step" id="paso-8">
+      <h2><span class="badge done">Paso 8</span> Redes</h2>
+      <table>
+        <tr><th>Campo</th><th>Valor</th></tr>
+        <tr><td>VPC</td><td><code>vpc-055a4007418b34e64</code></td></tr>
+        <tr><td>Subnets</td><td>Solo las 3 <code>pub-*</code></td></tr>
+        <tr><td>Security group</td><td><code>forms-sg-ecs</code></td></tr>
+        <tr><td>IP pública</td><td>ENABLED</td></tr>
+      </table>
+      <figure class="shot" data-shot="paso-8">
+        <img src="assets/paso-07-redes.png" alt="Redes del servicio forms-server" />
+        <figcaption>Paso 8 — VPC correcta, 3 subnets públicas, SG <code>forms-sg-ecs</code>, IP pública activada</figcaption>
+      </figure>
+
+      <h3>Apertura de puerto 9001 en el Security Group (sesión separada)</h3>
+      <div class="note">
+        Abrir puerto <strong>9001</strong> en el SG si vas a acceder desde tu IP.
+      </div>
+      <div class="note">
+        Este ajuste <strong>no se hace en la pantalla de creación del servicio ECS</strong>.
+        Ahí solo se <em>asocia</em> el Security Group a la tarea. Las reglas de entrada
+        (puertos, orígenes) se editan en una sesión aparte: consola <strong>EC2 → Grupos de seguridad</strong>.
+        Así se puede abrir o restringir acceso HTTP a Forms sin recrear el servicio.
+      </div>
+      <figure class="shot" data-shot="paso-8a">
+        <img src="assets/paso-07a-ec2-panel.png" alt="EC2 panel para entrar a Security Groups" />
+        <figcaption>Paso 8a — EC2 Panel: entrar a <strong>Grupos de seguridad</strong></figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-8b">
+        <img src="assets/paso-07b-sg-lista.png" alt="Lista de security groups con forms-sg-ecs" />
+        <figcaption>Paso 8b — Seleccionar SG <code>forms-sg-ecs</code></figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-8c">
+        <img src="assets/paso-07c-sg-detalle.png" alt="Detalle SG forms-sg-ecs sin reglas de entrada" />
+        <figcaption>Paso 8c — Detalle del SG y edición de reglas de entrada</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-8d">
+        <img src="assets/paso-07d-editar-regla-9001.png" alt="Edicion regla inbound 9001" />
+        <figcaption>Paso 8d — Crear regla inbound TCP 9001 (Forms HTTP)</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-8e">
+        <img src="assets/paso-07e-regla-creada.png" alt="Regla inbound 9001 guardada" />
+        <figcaption>Paso 8e — Regla de entrada guardada correctamente</figcaption>
+      </figure>
+      <div class="note warn-box">
+        En producción, evitar <code>0.0.0.0/0</code> para el puerto 9001. Limitar origen a <strong>My IP</strong> o red corporativa.
+      </div>
+      <div class="note warn-box">
+        <strong>NOTA IMPORTANTE:</strong> si temporalmente usas <code>0.0.0.0/0</code> en DEV, reemplázalo por la tabla exacta de acceso antes de pasar a QA/PROD:
+      </div>
+      <table>
+        <tr><th>Puerto</th><th>Uso</th><th>Origen recomendado</th></tr>
+        <tr><td><code>9001</code></td><td>Forms HTTP</td><td><strong>My IP /32</strong> o red corporativa</td></tr>
+        <tr><td><code>9501</code></td><td>Forms HTTPS</td><td><strong>My IP /32</strong> o red corporativa</td></tr>
+        <tr><td><code>7001</code></td><td>AdminServer console</td><td><strong>My IP /32</strong> o red corporativa</td></tr>
+        <tr><td><code>9991</code></td><td>Admin port managed server</td><td>Solo red interna / SG interno</td></tr>
+        <tr><td><code>5556</code></td><td>NodeManager</td><td>Solo red interna / SG interno</td></tr>
+      </table>
+      <figure class="shot" data-shot="paso-8f">
+        <img src="assets/paso-08f-crear-boton.png" alt="Boton Crear servicio ECS" />
+        <figcaption>Paso 8f — Etiquetas opcionales y botón <strong>Crear</strong> para lanzar el servicio</figcaption>
+      </figure>
+    </section>
+
+    <section class="step" id="paso-9">
+      <h2><span class="badge done">Paso 9</span> Verificar Running y ECS Exec</h2>
+      <ol>
+        <li>Esperar estado <strong>Running</strong> (pull puede tardar ~5 min)</li>
+        <li>Conectar:</li>
+      </ol>
+      <pre>aws ecs execute-command \
+  --cluster forms_report \
+  --task &lt;TASK_ID&gt; \
+          --container forms-server \
+  --interactive \
+  --command "/bin/bash"</pre>
+      <pre># Verificar montajes
+df -h
+ls /u01/oracle/user_projects/domains
+ls /u01/oracle/scripts
+
+# Arranque manual (si usaste sleep infinity)
+/u01/oracle/scripts/entrypoint.sh</pre>
+      <figure class="shot" data-shot="paso-9-deploy">
+        <img src="assets/paso-09a-deploy-en-curso.png" alt="Implementacion forms-server en curso" />
+        <figcaption>Paso 9 — Servicio <code>forms-server</code> creado; implementación en curso (0/1 → 1/1)</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-9-tareas">
+        <img src="assets/paso-09b-tareas.png" alt="Pestana Tareas del cluster" />
+        <figcaption>Paso 9 — Pestaña <strong>Tareas</strong>: <code>forms-admin:5</code> Running; <code>forms-server:4</code> Pending (pull/arranque)</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-9a">
+        <img src="assets/paso-09a-running.png" alt="forms-server tarea Running" />
+        <figcaption>Paso 9a — Servicio <code>forms-server</code> activo: 1/1 tarea <strong>Ejecutando</strong> (<code>forms-server:4</code>)</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-9b">
+        <img src="assets/paso-09b-exec.png" alt="ECS Exec y verificacion EFS en forms-server" />
+        <figcaption>Paso 9b — ECS Exec a <code>forms-server</code>: <code>su - oracle</code> y montajes <code>apps</code>/<code>domains</code>/<code>forms_domain</code></figcaption>
+      </figure>
+    </section>
+
+    <section class="step" id="anexo-cli">
+      <h2><span class="badge done">Anexo</span> Comandos AWS CLI (referencia admin)</h2>
+      <p>
+        Durante el levantamiento de <code>forms-admin</code>, la creación principal se hizo por consola.
+        La CLI se usó para <strong>exportar configuración</strong>, <strong>diagnosticar red/ECR/EFS</strong>,
+        <strong>abrir NFS</strong> y <strong>ECS Exec</strong>. Los mismos comandos aplican a
+        <code>forms-server</code> cambiando nombres de servicio/contenedor/revisión.
+      </p>
+      <div class="note">
+        Región usada: <code>us-east-1</code>. Cluster: <code>forms_report</code>.
+        Archivos locales de respaldo: <code>conf_json/forms-admin.json</code>, <code>conf_json/forms-server.json</code>.
+      </div>
+
+      <h3>1. Exportar servicio y task definition</h3>
+      <p><strong>Función:</strong> respaldar y revisar redes, SG, IP pública y definición de tarea.</p>
+      <pre>aws ecs describe-services \
+  --cluster forms_report \
+  --services forms-admin \
+  --region us-east-1 \
+  --output json \
+  &gt; conf_json/forms-admin-service.json
+
+aws ecs describe-services \
+  --cluster forms_report \
+  --services forms-admin \
+  --region us-east-1 \
+  --query 'services[0].{taskDefinition:taskDefinition,networkConfiguration:networkConfiguration,desiredCount:desiredCount,enableExecuteCommand:enableExecuteCommand,subnets:networkConfiguration.awsvpcConfiguration.subnets,securityGroups:networkConfiguration.awsvpcConfiguration.securityGroups,assignPublicIp:networkConfiguration.awsvpcConfiguration.assignPublicIp}' \
+  --output json \
+  &gt; conf_json/forms-admin-service-red.json
+
+aws ecs describe-task-definition \
+  --task-definition forms-admin:5 \
+  --region us-east-1 \
+  --query taskDefinition \
+  --output json \
+  &gt; conf_json/forms-admin.json</pre>
+
+      <h3>2. Diagnosticar subnets y salida a Internet (error ECR)</h3>
+      <p><strong>Función:</strong> identificar subnets <code>pub-*</code> vs privadas y si la ruta es IGW o NAT.
+      Útil ante <code>GetAuthorizationToken</code> / <code>i/o timeout</code> a ECR.</p>
+      <pre>aws ec2 describe-subnets \
+  --subnet-ids \
+    subnet-01212efd4a9ce759b subnet-0d27c63b4c25eabe1 subnet-0f4f99dc20cbd7798 \
+    subnet-0bf694b45c2cecab9 subnet-0db31aeca3adf4ee0 subnet-05b8ff497dca6e1e3 \
+  --region us-east-1 \
+  --query 'Subnets[*].{Id:SubnetId,Name:Tags[?Key==`Name`].Value|[0],Public:MapPublicIpOnLaunch,Az:AvailabilityZone}' \
+  --output table
+
+aws ec2 describe-route-tables \
+  --filters Name=association.subnet-id,Values=subnet-01212efd4a9ce759b \
+  --region us-east-1 \
+  --query 'RouteTables[0].Routes[*].{Dest:DestinationCidrBlock,Gateway:GatewayId,Nat:NatGatewayId,State:State}' \
+  --output table</pre>
+      <div class="note">
+        Conclusión operativa: usar solo las 3 subnets <code>pub-*</code> + <code>assignPublicIp=ENABLED</code>
+        (ruta <code>0.0.0.0/0 → igw-...</code>).
+      </div>
+
+      <h3>3. Revisar Security Groups</h3>
+      <p><strong>Función:</strong> verificar reglas de entrada/salida del SG de la tarea y del EFS.</p>
+      <pre># SG de la tarea ECS
+aws ec2 describe-security-groups \
+  --group-ids sg-0e1787d32bac71fcd \
+  --region us-east-1 \
+  --output json
+
+# SG del EFS (ESF-dev-sg / EFS-dev-sg)
+aws ec2 describe-security-groups \
+  --group-ids sg-0e39a7aa49ff6a22b \
+  --region us-east-1 \
+  --output json</pre>
+      <div class="note warn-box">
+        El SG <code>default | DO NOT USE</code> (<code>sg-04963b231db91fcf1</code>) tenía 0 reglas de entrada y salida;
+        no usarlo en servicios ECS.
+      </div>
+
+      <h3>4. Revisar mount targets de EFS</h3>
+      <p><strong>Función:</strong> confirmar IPs/subnets de montaje y SG asociado al filesystem.</p>
+      <pre>aws efs describe-mount-targets \
+  --file-system-id fs-08471cc88d2a8edc3 \
+  --region us-east-1 \
+  --output table
+
+# Sustituir &lt;fsmt-...&gt; por un MountTargetId del comando anterior
+aws efs describe-mount-target-security-groups \
+  --mount-target-id &lt;fsmt-...&gt; \
+  --region us-east-1</pre>
+
+      <h3>5. Abrir NFS 2049 desde ECS hacia EFS (fix aplicado)</h3>
+      <p><strong>Función:</strong> permitir montaje EFS desde tareas con SG <code>forms-sg-ecs</code>.
+      Corrige <code>mount.nfs4: Connection timed out</code>.</p>
+      <pre>aws ec2 authorize-security-group-ingress \
+  --group-id sg-0e39a7aa49ff6a22b \
+  --protocol tcp \
+  --port 2049 \
+  --source-group sg-0e1787d32bac71fcd \
+  --region us-east-1</pre>
+      <div class="note">
+        Origen: <code>forms-sg-ecs</code> (<code>sg-0e1787d32bac71fcd</code>) → destino EFS SG (<code>sg-0e39a7aa49ff6a22b</code>), puerto TCP 2049.
+      </div>
+
+      <h3>6. ECS Exec (entrar al contenedor)</h3>
+      <p><strong>Función:</strong> shell interactivo en una tarea Running (requiere Exec ON + Rol de tarea SSM).</p>
+      <pre># Prerrequisito local: Session Manager Plugin
+curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" \
+  -o session-manager-plugin.deb
+sudo dpkg -i session-manager-plugin.deb
+session-manager-plugin
+
+# Conexión (admin)
+aws ecs execute-command \
+  --cluster forms_report \
+  --task &lt;TASK_ID&gt; \
+  --container admin \
+  --interactive \
+  --command "/bin/bash"
+
+# Conexión (forms-server)
+aws ecs execute-command \
+  --cluster forms_report \
+  --task &lt;TASK_ID&gt; \
+  --container forms-server \
+  --interactive \
+  --command "/bin/bash"</pre>
+      <p>Dentro del contenedor (verificación típica):</p>
+      <pre>df -h
+ls /u01/oracle/user_projects/domains
+ls /u01/oracle/scripts
+# Arranque manual si el CMD es sleep infinity:
+# /u01/oracle/scripts/entrypoint_persistente.sh   # admin
+# /u01/oracle/scripts/entrypoint.sh               # forms</pre>
+
+      <h3>Equivalencia rápida admin → forms-server</h3>
+      <table>
+        <tr><th>Concepto</th><th>Admin</th><th>Forms</th></tr>
+        <tr><td>Servicio</td><td><code>forms-admin</code></td><td><code>forms-server</code></td></tr>
+        <tr><td>Task definition</td><td><code>forms-admin:5</code></td><td><code>forms-server:4</code></td></tr>
+        <tr><td>Contenedor</td><td><code>admin</code></td><td><code>forms-server</code></td></tr>
+        <tr><td>Log group</td><td><code>/ecs/forms-admin</code></td><td><code>/ecs/forms-server</code></td></tr>
+      </table>
+    </section>
+  </main>
+
+  <footer>
+    Documentación en construcción — capturas en <code>html/forms/assets/</code>.
+    Última actualización: forms-server Running + ECS Exec documentados; anexo AWS CLI.
+  </footer>
+</body>
+</html>
