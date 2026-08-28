@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RECTOR — Arquitectura WebLogic Forms &amp; Reports en AWS ECS — Propuesta Comercial</title>
+  <title>RECTOR — Sandbox Arquitectura WebLogic Forms &amp; Reports en AWS ECS — Propuesta Comercial</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="print.css" media="print">
   <style>
@@ -724,20 +724,24 @@
     .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr td {
       padding: 0.72rem 0.95rem;
     }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr.fila-modulo-infra td {
+      font-weight: 600;
+      color: #1b5e20;
+      border-left: none;
+      box-shadow: none;
+      padding-left: 1.25rem;
+      background: linear-gradient(to right, #2e7d32 0 4px, #e8f5e9 4px);
+    }
     .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr.fila-modulo-principal td {
-      background: #e4ecf6;
-    }
-    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr.fila-modulo-subpunto td {
-      background: #f8fafc;
-    }
-    /* Acento izquierdo vía gradient (fiable en PDF; box-shadow inset falla en Chromium) */
-    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr.fila-modulo-principal td:first-child {
       font-weight: 600;
       color: var(--primary-dark);
       border-left: none;
       box-shadow: none;
       padding-left: 1.25rem;
       background: linear-gradient(to right, var(--primary) 0 4px, #e4ecf6 4px);
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr.fila-modulo-subpunto td {
+      background: #f8fafc;
     }
     .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr.fila-modulo-subpunto td:first-child {
       font-weight: 400;
@@ -1252,7 +1256,7 @@
     <div class="plan-word-docx">
 <section class="plan-portada" aria-label="Portada">
   <div class="plan-portada-derecha">
-  <h1 class="plan-portada-titulo">IMPLEMENTACIÓN DE ARQUITECTURA<br>CONTENEDORES WEBLOGIC FORMS &amp; REPORTS<br>EN AWS ECS — APLICATIVO RECTOR</h1>
+  <h1 class="plan-portada-titulo">IMPLEMENTACIÓN DE SANDBOX ARQUITECTURA<br>CONTENEDORES WEBLOGIC FORMS &amp; REPORTS<br>EN AWS ECS — APLICATIVO RECTOR</h1>
   <p class="plan-portada-version">Versión 1.0</p>
   </div>
   <div class="plan-portada-imagen">
@@ -1272,7 +1276,7 @@
 <p class="plan-carta-left">Atención. Srta. Guaregua</p>
 <p class="plan-carta-left">Ciudad.-</p>
 <p class="plan-carta-saludo">Estimados Sres.:</p>
-<p class="plan-carta-body">De acuerdo con conversaciones sostenidas con usted recientemente, nos es grato hacerle entrega formal de nuestra propuesta de “<strong>IMPLEMENTACIÓN DE ARQUITECTURA CONTENEDORES WEBLOGIC FORMS &amp; REPORTS EN AWS ECS — APLICATIVO RECTOR</strong>”.</p>
+<p class="plan-carta-body">De acuerdo con conversaciones sostenidas con usted recientemente, nos es grato hacerle entrega formal de nuestra propuesta de “<strong>IMPLEMENTACIÓN DE SANDBOX ARQUITECTURA CONTENEDORES WEBLOGIC FORMS &amp; REPORTS EN AWS ECS — APLICATIVO RECTOR</strong>”.</p>
 <p class="plan-carta-sep" aria-hidden="true">|</p>
 <p class="plan-carta-body">Entendiendo la importancia que este proyecto tiene para ustedes, ratificamos nuestro mayor compromiso y dedicación para el logro de las metas planteadas.</p>
 <p class="plan-carta-body">Buscando a través del éxito de este proyecto, convertirnos en un verdadero socio tecnológico y estratégico, que los acompañe en el empuje y crecimiento que Banesco Seguros ha demostrado mantener durante estos últimos años en el sector.</p>
@@ -1386,7 +1390,7 @@ personal, directo o indirecto, en este contrato o propuesta.</span></span></font
     </section>
 
     <div class="card card-plan-estrategico-2026">
-      <div class="card-header">Arquitectura contenedores WebLogic Forms &amp; Reports en AWS ECS — RECTOR</div>
+      <div class="card-header">Sandbox Arquitectura contenedores WebLogic Forms &amp; Reports en AWS ECS — RECTOR</div>
       <div class="card-body">
         <p style="margin: 0 0 1rem 0; color: var(--text); text-align: justify;">La presente propuesta describe el proyecto para <strong>modernizar el despliegue del aplicativo RECTOR</strong> (Oracle Forms &amp; Reports 14.1.2 sobre WebLogic), migrando desde una arquitectura monolítica tradicional hacia una <strong>arquitectura distribuida en contenedores</strong>, primero validada en <strong>Docker Compose</strong> y luego operada en <strong>Amazon ECS Fargate</strong> con almacenamiento compartido en <strong>Amazon EFS</strong> y conectividad a <strong>Oracle Database 19c</strong>.</p>
         <p style="margin: 0 0 1rem 0; color: var(--text); text-align: justify;">El alcance comprende la construcción de imágenes Docker, la orquestación del dominio WebLogic distribuido (AdminServer, WLS_FORMS, WLS_REPORTS), la publicación en <strong>Amazon ECR</strong>, la creación de servicios ECS y la puesta en marcha operativa con acceso a la base de datos corporativa, preservando la funcionalidad del negocio sobre RECTOR.</p>
@@ -1587,7 +1591,7 @@ personal, directo o indirecto, en este contrato o propuesta.</span></span></font
             <div class="punto-clave texto-justificado" style="margin-bottom: 1rem;">
               <span class="numero">e</span>
               <div class="texto">
-                <h4>Carga de copia de dominio para ser compartido por los contenedores</h4>
+                <h4>Carga de dominio compartido por los contenedores</h4>
                 <p>Restauración del dominio WebLogic <code>forms_domain</code> y aplicaciones RECTOR en <strong>Amazon EFS</strong> (<code>rector-dev</code>). Montaje de volúmenes <code>efs-domains</code>, <code>efs-app</code> y <code>efs-scripts</code> en las rutas del contenedor. Ajuste de <code>nodemanager.properties</code> y <code>config.xml</code> para hostnames FQDN (<code>*.forms.local</code>).</p>
                 <ul class="etapa-detalle">
                   <li>Paths EFS: <code>domain_forms/domains</code>, <code>domain_forms/app</code>, <code>domain_forms/scripts</code></li>
@@ -1597,7 +1601,7 @@ personal, directo o indirecto, en este contrato o propuesta.</span></span></font
               </div>
             </div>
 
-            <div class="punto-clave texto-justificado" style="margin-bottom: 0;">
+            <div class="punto-clave texto-justificado" style="margin-bottom: 1rem;">
               <span class="numero">f</span>
               <div class="texto">
                 <h4>Ejecución de contenedores con acceso a Base de Datos Oracle 19c</h4>
@@ -1609,11 +1613,66 @@ personal, directo o indirecto, en este contrato o propuesta.</span></span></font
                 </ul>
               </div>
             </div>
+
+            <div class="punto-clave texto-justificado" style="margin-bottom: 1rem;">
+              <span class="numero">g</span>
+              <div class="texto">
+                <h4>Pruebas de compilación y ejecución de formas modelo</h4>
+                <p>Validación en el contenedor <strong>WLS_FORMS</strong> mediante <strong>formas modelo</strong> de referencia: pantallas básicas, sin lógica de negocio compleja, destinadas a comprobar que el módulo Forms se despliega correctamente en la arquitectura containerizada y que la <strong>conexión a la base de datos</strong> funciona desde la pantalla de inicio de sesión (login).</p>
+                <ul class="etapa-detalle">
+                  <li>Compilación y despliegue de formas modelo en el entorno Forms del contenedor</li>
+                  <li>Acceso vía navegador/JNLP y arranque del runtime <code>frmweb</code> en el servidor</li>
+                  <li>Prueba de login contra Oracle 19c: autenticación y apertura de la forma sin errores de conexión</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="punto-clave texto-justificado" style="margin-bottom: 1rem;">
+              <span class="numero">h</span>
+              <div class="texto">
+                <h4>Pruebas de compilación y ejecución de reportes modelo</h4>
+                <p>Validación en el contenedor <strong>WLS_REPORTS</strong> mediante <strong>reportes modelo</strong> de referencia: definiciones sencillas, sin lógica de negocio compleja, destinadas a comprobar que Reports Server se despliega correctamente en la arquitectura containerizada y que la <strong>conexión a la base de datos</strong> funciona al ejecutar un reporte de prueba.</p>
+                <ul class="etapa-detalle">
+                  <li>Compilación y despliegue de reportes modelo en el entorno Reports del contenedor</li>
+                  <li>Acceso a Reports Server vía navegador (<code>/reports/rwservlet</code>) y arranque del motor de reportes</li>
+                  <li>Generación de un reporte de prueba contra Oracle 19c: consulta a la BD y entrega del resultado sin errores de conexión</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="punto-clave texto-justificado" style="margin-bottom: 0;">
+              <span class="numero">i</span>
+              <div class="texto">
+                <h4>Pruebas de compilación y ejecución de ProC modelo</h4>
+                <p>Validación en el mismo contenedor <strong>WLS_FORMS</strong> mediante <strong>programas ProC modelo</strong> de referencia: código sencillo, sin lógica de negocio compleja, destinado a comprobar que el entorno de precompilación y enlace está operativo en la arquitectura containerizada. Los <strong>binarios resultantes se ejecutan a nivel de sistema operativo</strong> dentro del contenedor y se conectan a <strong>Oracle Database 19c</strong> para verificar acceso a datos desde procesos nativos.</p>
+                <ul class="etapa-detalle">
+                  <li>Compilación de programas ProC modelo en el contenedor Forms (precompilador, enlazado con librerías Oracle Client)</li>
+                  <li>Ejecución de binarios desde shell del contenedor (<code>ECS Exec</code> / línea de comandos)</li>
+                  <li>Prueba de conexión y consulta simple contra Oracle 19c sin errores de red ni autenticación</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
 
         <div class="punto-clave punto-clave-expandido texto-justificado">
           <span class="numero">3</span>
+          <div class="texto">
+            <h4>Entregables</h4>
+            <p>Los entregables de este proyecto corresponden a la <strong>documentación técnica generada en cada fase</strong>, que respalda la construcción, el despliegue y la puesta en marcha de la arquitectura containerizada para RECTOR. Incluye, entre otros:</p>
+            <ul class="etapa-detalle">
+              <li><strong>Creación de la imagen Docker:</strong> Dockerfile, scripts de entrypoint, configuración de <code>docker-compose.yml</code> y guía de build local</li>
+              <li><strong>Despliegue en Docker Compose:</strong> procedimiento de arranque, validación de servicios y registro de pruebas en entorno local</li>
+              <li><strong>Carga en AWS (ECR y ECS):</strong> pasos de publicación de imagen, roles IAM, security groups y configuración de red</li>
+              <li><strong>Task Definitions y servicios ECS:</strong> definición de tareas (<code>forms-admin</code>, <code>forms-server</code>, <code>reports-server</code>), volúmenes EFS, variables de entorno y Service Discovery</li>
+              <li><strong>Ejecución de contenedores:</strong> manual de operación, conexión a Oracle 19c, verificación de Forms/Reports/ProC modelo y lecciones aprendidas</li>
+            </ul>
+            <p>Cada documento se entrega al cierre de su fase correspondiente, de modo que Banesco Seguros disponga de material de referencia para operar, replicar y escalar la solución.</p>
+          </div>
+        </div>
+
+        <div class="punto-clave punto-clave-expandido texto-justificado">
+          <span class="numero">4</span>
           <div class="texto">
             <h4>Ventajas y beneficios de la nueva arquitectura</h4>
             <p>La migración del aplicativo <strong>RECTOR</strong> hacia contenedores en AWS ECS aporta beneficios estratégicos y operativos para Banesco Seguros:</p>
@@ -1673,33 +1732,42 @@ personal, directo o indirecto, en este contrato o propuesta.</span></span></font
                 </tr>
               </thead>
               <tbody>
-                <tr class="fila-modulo-principal">
+                <tr class="fila-modulo-infra">
                   <td colspan="2">2.a Creación y configuración de imágenes en Docker Compose</td>
                 </tr>
-                <tr class="fila-modulo-principal">
+                <tr class="fila-modulo-infra">
                   <td colspan="2">2.b Despliegue de arquitectura en Docker Compose</td>
                 </tr>
-                <tr class="fila-modulo-principal">
+                <tr class="fila-modulo-infra">
                   <td colspan="2">2.c Carga y configuración de imagen Docker en AWS (ECR)</td>
                 </tr>
-                <tr class="fila-modulo-principal">
+                <tr class="fila-modulo-infra">
                   <td colspan="2">2.d Creación de contenedores ECS: AdminServer, Forms y Reports</td>
                 </tr>
                 <tr class="fila-modulo-principal">
-                  <td colspan="2">2.e Carga de copia de dominio compartido (EFS)</td>
+                  <td colspan="2">2.e Carga de dominio compartido por los contenedores (EFS)</td>
                 </tr>
                 <tr class="fila-modulo-principal">
                   <td colspan="2">2.f Ejecución de contenedores con acceso a Oracle 19c</td>
+                </tr>
+                <tr class="fila-modulo-principal">
+                  <td colspan="2">2.g Pruebas de compilación y ejecución de formas modelo</td>
+                </tr>
+                <tr class="fila-modulo-principal">
+                  <td colspan="2">2.h Pruebas de compilación y ejecución de reportes modelo</td>
+                </tr>
+                <tr class="fila-modulo-principal">
+                  <td colspan="2">2.i Pruebas de compilación y ejecución de ProC modelo</td>
                 </tr>
               </tbody>
               <tfoot class="resumen-propuesta-totales">
                 <tr>
                   <th scope="row">Total alcance estimado</th>
-                  <td class="col-tiempo-resumen">180 horas</td>
+                  <td class="col-tiempo-resumen">240 horas</td>
                 </tr>
                 <tr>
                   <th scope="row">Total costo</th>
-                  <td class="col-tiempo-resumen">6.500,00 USD</td>
+                  <td class="col-tiempo-resumen">9.100,00 USD</td>
                 </tr>
               </tfoot>
             </table>
@@ -1711,7 +1779,6 @@ personal, directo o indirecto, en este contrato o propuesta.</span></span></font
                   <td>
                     <ul class="lista-forma-pago-propuesta">
                       <li><strong>Inicial:</strong> 20%</li>
-                      <li><strong>2 pagos mensuales</strong> del 10% cada uno</li>
                       <li><strong>Pago final:</strong> 50% según entregables</li>
                     </ul>
                   </td>
