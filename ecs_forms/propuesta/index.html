@@ -639,8 +639,16 @@
     }
     .bloque-propuesta-consolidada .tabla-resumen-servicios-total {
       margin: 0;
+      width: 100%;
+      table-layout: fixed;
       box-shadow: 0 4px 16px rgba(0, 33, 113, 0.14);
       border: 1px solid rgba(0, 33, 113, 0.12);
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total col.col-resumen-valor {
+      width: 12rem;
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr.fila-modulo-principal td[colspan] {
+      width: 100%;
     }
     .tabla-resumen-servicios-total th,
     .tabla-resumen-servicios-total td {
@@ -938,15 +946,37 @@
     }
     .beneficio-card {
       padding: 1rem 1.15rem;
-      background: linear-gradient(135deg, #e8f0f8 0%, #ffffff 100%);
-      border: 1px solid rgba(0, 33, 113, 0.14);
       border-radius: 8px;
-      border-left: 4px solid var(--primary);
+      border-left-width: 4px;
+      border-left-style: solid;
     }
+    .beneficios-grid .beneficio-card:nth-child(4n+1) {
+      background: linear-gradient(135deg, #fff4e8 0%, #ffffff 72%);
+      border: 1px solid rgba(230, 81, 0, 0.16);
+      border-left-color: #ef6c00;
+    }
+    .beneficios-grid .beneficio-card:nth-child(4n+1) h5 { color: #e65100; }
+    .beneficios-grid .beneficio-card:nth-child(4n+2) {
+      background: linear-gradient(135deg, #eaf6ec 0%, #ffffff 72%);
+      border: 1px solid rgba(46, 125, 50, 0.16);
+      border-left-color: #2e7d32;
+    }
+    .beneficios-grid .beneficio-card:nth-child(4n+2) h5 { color: #1b5e20; }
+    .beneficios-grid .beneficio-card:nth-child(4n+3) {
+      background: linear-gradient(135deg, #e8f0f8 0%, #ffffff 72%);
+      border: 1px solid rgba(13, 71, 161, 0.16);
+      border-left-color: #0d47a1;
+    }
+    .beneficios-grid .beneficio-card:nth-child(4n+3) h5 { color: #002171; }
+    .beneficios-grid .beneficio-card:nth-child(4n+4) {
+      background: linear-gradient(135deg, #fdecea 0%, #ffffff 72%);
+      border: 1px solid rgba(198, 40, 40, 0.16);
+      border-left-color: #c62828;
+    }
+    .beneficios-grid .beneficio-card:nth-child(4n+4) h5 { color: #b71c1c; }
     .beneficio-card h5 {
       margin: 0 0 0.45rem;
       font-size: 0.95rem;
-      color: var(--primary-dark);
     }
     .beneficio-card p {
       margin: 0;
@@ -1633,29 +1663,33 @@ personal, directo o indirecto, en este contrato o propuesta.</span></span></font
             <p class="titulo-resumen-servicios">Propuesta consolidada</p>
             <p class="intro-resumen-servicios">Síntesis del <strong>alcance</strong> por etapa del proyecto de implementación de la arquitectura contenedores WebLogic Forms &amp; Reports en AWS ECS para el aplicativo <strong>RECTOR</strong>. La <strong>propuesta económica</strong> global se presenta al final de la tabla.</p>
             <table class="tabla-resumen-servicios-total" role="table" aria-label="Resumen etapas del proyecto RECTOR ECS">
+              <colgroup>
+                <col>
+                <col class="col-resumen-valor">
+              </colgroup>
               <thead>
                 <tr>
-                  <th scope="col">Etapa del proyecto</th>
+                  <th scope="col" colspan="2">Etapa del proyecto</th>
                 </tr>
               </thead>
               <tbody>
                 <tr class="fila-modulo-principal">
-                  <td>2.a Creación y configuración de imágenes en Docker Compose</td>
+                  <td colspan="2">2.a Creación y configuración de imágenes en Docker Compose</td>
                 </tr>
                 <tr class="fila-modulo-principal">
-                  <td>2.b Despliegue de arquitectura en Docker Compose</td>
+                  <td colspan="2">2.b Despliegue de arquitectura en Docker Compose</td>
                 </tr>
                 <tr class="fila-modulo-principal">
-                  <td>2.c Carga y configuración de imagen Docker en AWS (ECR)</td>
+                  <td colspan="2">2.c Carga y configuración de imagen Docker en AWS (ECR)</td>
                 </tr>
                 <tr class="fila-modulo-principal">
-                  <td>2.d Creación de contenedores ECS: AdminServer, Forms y Reports</td>
+                  <td colspan="2">2.d Creación de contenedores ECS: AdminServer, Forms y Reports</td>
                 </tr>
                 <tr class="fila-modulo-principal">
-                  <td>2.e Carga de copia de dominio compartido (EFS)</td>
+                  <td colspan="2">2.e Carga de copia de dominio compartido (EFS)</td>
                 </tr>
                 <tr class="fila-modulo-principal">
-                  <td>2.f Ejecución de contenedores con acceso a Oracle 19c</td>
+                  <td colspan="2">2.f Ejecución de contenedores con acceso a Oracle 19c</td>
                 </tr>
               </tbody>
               <tfoot class="resumen-propuesta-totales">
@@ -1681,14 +1715,6 @@ personal, directo o indirecto, en este contrato o propuesta.</span></span></font
                       <li><strong>Pago final:</strong> 50% según entregables</li>
                     </ul>
                   </td>
-                </tr>
-              </tbody>
-            </table>
-            <table class="tabla-descuento-propuesta" role="table" aria-label="Descuento">
-              <tbody>
-                <tr>
-                  <th scope="row">Descuento</th>
-                  <td>Aplica descuento del <strong>20%</strong> (5.200,00 USD) en caso de que el pago se realice por medio de <strong>retiro de efectivo en banco</strong> o <strong>transferencia Banesco Panamá</strong>.</td>
                 </tr>
               </tbody>
             </table>
