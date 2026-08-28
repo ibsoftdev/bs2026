@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RECTOR — Arquitectura WebLogic Forms &amp; Reports en AWS ECS — Propuesta Comercial</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="print.css" media="print">
+  <style>
+    body {
+      hyphens: none;
+      -webkit-hyphens: none;
+      -ms-hyphens: none;
+    }
+    .comercial-header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      background-image: url('ImagenEmpresa.png');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: cover;
+      min-height: calc(120px + 1cm);
+    }
+    .comercial-header .title-wrap {
+      max-width: 65%;
+      min-width: 200px;
+      text-align: right;
+      padding: 0.6rem 0 0.75rem 0;
+      color: var(--primary-dark);
+      border-bottom: 2px solid rgba(0, 33, 113, 0.2);
+    }
+    .comercial-header .title-wrap h1 {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: var(--primary-dark);
+      font-weight: 600;
+      letter-spacing: 0.015em;
+      line-height: 1.5;
+      margin: 0;
+    }
+    .comercial-header .title-wrap h1 .header-line-1 {
+      display: block;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+    }
+    .comercial-header .title-wrap h1 .header-line-2,
+    .comercial-header .title-wrap h1 .header-line-3 {
+      display: block;
+      font-size: 1.18rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    .comercial-header .title-wrap h1 .header-line-2 { margin-bottom: 0.2rem; }
+    .comercial-header .title-wrap p {
+      color: var(--primary-dark);
+    }
+    .comercial-header .title-wrap .header-tagline {
+      font-size: 1.05rem;
+      line-height: 1.45;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      margin-top: 0.35rem;
+      opacity: 0.95;
+    }
+    .punto-clave {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      padding: 1rem 1.25rem;
+      background: #fafafa;
+      border-radius: 8px;
+    }
+    .punto-clave .numero {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .punto-clave .texto h4 {
+      margin-bottom: 0.25rem;
+      color: var(--primary-dark);
+      font-size: 1rem;
+    }
+    .punto-clave .texto p {
+      margin: 0;
+      color: var(--text);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    .punto-clave-expandido .texto p { margin-bottom: 0.75rem; }
+    .punto-clave-expandido .texto p:last-of-type { margin-bottom: 0; }
+    .ciclo-desarrollo {
+      margin: 0.75rem 0 0;
+      padding-left: 1.25rem;
+      color: var(--text);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .ciclo-desarrollo li {
+      margin-bottom: 0.5rem;
+    }
+    .ciclo-desarrollo li:last-child {
+      margin-bottom: 0;
+    }
+    .punto-clave.texto-justificado .texto p,
+    .punto-clave.texto-justificado .texto .ciclo-desarrollo,
+    .punto-clave.texto-justificado .texto .ciclo-desarrollo li {
+      text-align: justify;
+    }
+    .subpunto-item.subpunto-definicion-json .subpunto-texto { text-align: justify; }
+    .subpunto-item.subpunto-registro-tablas .subpunto-texto { text-align: justify; }
+    .subpunto-item.subpunto-backend-carga .subpunto-texto { text-align: justify; }
+    .subpunto-item.subpunto-dynamicform .subpunto-texto { text-align: justify; }
+    .subpunto-item.subpunto-componentes .subpunto-texto { text-align: justify; }
+    .subpunto-item.subpunto-consultas .subpunto-consultas-arriba { text-align: justify; }
+    .subpunto-item.subpunto-consultas .subpunto-consultas-fila .subpunto-texto { text-align: justify; }
+    .subpunto-item.subpunto-mantenimiento { flex-direction: column; align-items: stretch; }
+    .subpunto-mantenimiento-arriba { margin-bottom: 1rem; font-size: 0.95rem; line-height: 1.55; color: var(--text); text-align: justify; }
+    .subpunto-mantenimiento-arriba strong { color: var(--primary-dark); }
+    .subpunto-mantenimiento-fila { display: flex; flex-direction: row; align-items: flex-start; gap: 1.25rem; margin-left: -1rem; margin-right: -1rem; width: calc(100% + 2rem); }
+    .subpunto-mantenimiento-fila .subpunto-img { flex-shrink: 0; width: 400px; height: 257px; object-fit: contain; object-position: left top; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); order: 1; background: #fafafa; }
+    .subpunto-mantenimiento-fila .subpunto-texto { flex: 1; min-width: 0; margin: 0; order: 2; text-align: justify; }
+    .subpunto-item.subpunto-mantenimiento .subpunto-texto { text-align: justify; }
+    .subpunto-item.subpunto-despliegue .subpunto-texto { text-align: justify; }
+    .subpunto-item {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: #fafafa;
+      border-radius: 8px;
+    }
+    .subpunto-item:last-child { margin-bottom: 0; }
+    .subpunto-img {
+      flex-shrink: 0;
+      width: 280px;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    .subpunto-texto { flex: 1; min-width: 0; }
+    .subpunto-texto strong { color: var(--primary-dark); }
+    .subpunto-item.img-derecha { flex-direction: row-reverse; }
+    .subpunto-item.img-abajo { flex-direction: column; align-items: center; }
+    .subpunto-item.img-abajo .subpunto-img { width: 100%; max-width: 400px; height: auto; min-height: 180px; }
+    .subpunto-item.img-ampliada .subpunto-img { width: 420px; height: 260px; }
+    .subpunto-item.img-debajo { flex-direction: column; align-items: center; }
+    .subpunto-item.img-debajo .subpunto-img { order: 2; width: 100%; max-width: 480px; height: auto; min-height: 240px; margin-top: 0.75rem; }
+    .subpunto-item.p1-verde { background: rgba(27, 94, 32, 0.04); }
+    .subpunto-item.p1-verde .subpunto-texto strong { color: #2e7d32; }
+    .subpunto-item.p1-naranja { background: rgba(230, 81, 0, 0.04); }
+    .subpunto-item.p1-naranja .subpunto-texto strong { color: #ef6c00; }
+    .subpunto-item.subpunto-consultas { flex-direction: column; align-items: stretch; }
+    .subpunto-consultas-arriba { margin-bottom: 1rem; font-size: 0.95rem; line-height: 1.55; color: var(--text); }
+    .subpunto-consultas-arriba strong { color: var(--primary-dark); }
+    .subpunto-consultas-fila { display: flex; flex-direction: row; align-items: flex-start; gap: 1.25rem; }
+    .subpunto-consultas-fila .subpunto-texto { flex: 1; min-width: 0; margin: 0; }
+    .subpunto-consultas-fila .subpunto-img { flex-shrink: 0; width: 364px; height: 234px; object-fit: cover; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    .ilustracion {
+      margin-top: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .ilustracion h3 {
+      font-size: 1rem;
+      color: var(--primary-dark);
+      margin-bottom: 0.75rem;
+    }
+    .ilustracion-container {
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 1rem;
+      min-height: 320px;
+    }
+    .ilustracion-container object,
+    .ilustracion-container iframe {
+      width: 100%;
+      height: 400px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: white;
+    }
+    .ilustracion-container .pdf-link {
+      display: inline-block;
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .ilustracion-container .pdf-link:hover {
+      text-decoration: underline;
+    }
+    .ilustraciones-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    .ilustracion-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .ilustracion-card .card-header {
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+    }
+    .ilustracion-card .card-body {
+      padding: 1rem;
+    }
+    .highlight-box {
+      background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%);
+      border: 1px solid var(--primary);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    .highlight-box p {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .punto2-subpuntos { margin-top: 1rem; }
+    .punto2-item {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    .punto2-item:last-child { margin-bottom: 0; }
+    .punto2-item.item-verde { background: linear-gradient(to right, rgba(27, 94, 32, 0.06), transparent); }
+    .punto2-item.item-naranja { background: linear-gradient(to right, rgba(230, 81, 0, 0.06), transparent); }
+    .punto2-item .punto2-img {
+      flex-shrink: 0;
+      width: 280px;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(27, 94, 32, 0.15);
+    }
+    .punto2-item.item-naranja .punto2-img { box-shadow: 0 2px 8px rgba(230, 81, 0, 0.15); }
+    .punto2-item .punto2-texto { flex: 1; min-width: 0; }
+    .punto2-item .punto2-texto strong { color: #1b5e20; }
+    .punto2-item.item-naranja .punto2-texto strong { color: #e65100; }
+    .punto2-lista {
+      margin: 0.75rem 0 0;
+      padding-left: 1.5rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .punto2-lista li { margin-bottom: 0.6rem; }
+    .punto2-lista li:last-child { margin-bottom: 0; }
+    .punto2-item.img-derecha { flex-direction: row-reverse; }
+    .punto2-item.img-abajo { flex-direction: column; align-items: center; }
+    .punto2-item.img-abajo .punto2-img { width: 100%; max-width: 400px; height: auto; min-height: 180px; margin-top: 0.5rem; order: 2; }
+    .punto2-item.punto2-modulos.img-abajo .punto2-img { max-width: 600px; min-height: 270px; }
+    .punto2-desglose {
+      margin-top: 1.25rem;
+      padding: 1rem 1.25rem;
+      background: rgba(0, 0, 0, 0.03);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 100%;
+      order: 3;
+    }
+    .punto2-desglose p {
+      margin: 0 0 0.75rem 0;
+      font-size: 0.95rem;
+      line-height: 1.55;
+      color: var(--text);
+    }
+    .punto2-desglose p:last-of-type { margin-bottom: 0; }
+    .punto2-desglose ul {
+      margin: 0.5rem 0 1rem 1.5rem;
+      padding: 0;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .punto2-desglose li { margin-bottom: 0.5rem; }
+    .punto2-desglose li:last-child { margin-bottom: 0; }
+    .punto2-item.punto2-ibforms { flex-direction: column; align-items: stretch; }
+    .punto2-ibforms-arriba { margin-bottom: 1rem; font-size: 0.95rem; line-height: 1.55; color: var(--text); text-align: justify; }
+    .punto2-ibforms-arriba strong { color: #e65100; }
+    .punto2-ibforms-fila { display: flex; flex-direction: row; align-items: flex-start; gap: 1.25rem; }
+    .punto2-ibforms-fila .punto2-texto { flex: 1; min-width: 0; margin: 0; text-align: justify; }
+    .punto2-ibforms-fila .punto2-img { flex-shrink: 0; width: 364px; height: 234px; object-fit: cover; border-radius: 6px; box-shadow: 0 2px 8px rgba(230, 81, 0, 0.15); }
+    .punto2-item.punto2-ibforms .punto2-img { margin-top: 0; }
+    .punto2-item.punto2-modulos .punto2-texto { text-align: justify; }
+    .punto2-item.punto2-modulos .punto2-desglose p,
+    .punto2-item.punto2-modulos .punto2-desglose li { text-align: justify; }
+    .punto2-item.punto2-ibforms .punto2-texto { text-align: justify; }
+    .punto2-item.punto2-como-construir .punto2-texto { text-align: justify; }
+    .punto2-item.punto2-como-construir .punto2-lista,
+    .punto2-item.punto2-como-construir .punto2-lista li { text-align: justify; }
+    .punto2-item.punto2-como-construir.img-abajo .punto2-img { max-width: 560px; min-height: 200px; }
+    .punto2-item.punto2-despliegue.img-abajo .punto2-img { max-width: 520px; min-height: 235px; }
+    /* Comparativa y casos de uso */
+    .comparativa-tabla {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+    }
+    .comparativa-tabla th,
+    .comparativa-tabla td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    .comparativa-tabla th {
+      background: var(--primary-dark);
+      color: white;
+      font-weight: 600;
+    }
+    .comparativa-tabla tr:nth-child(even) { background: #fafafa; }
+    .comparativa-tabla .check { color: var(--success); font-weight: bold; }
+    .comparativa-tabla .cross { color: #c62828; }
+    .tabla-estimacion {
+      width: 100%;
+      max-width: 560px;
+      border-collapse: collapse;
+      margin: 1rem auto;
+      font-size: 0.95rem;
+    }
+    .tabla-estimacion th,
+    .tabla-estimacion td {
+      border: 1px solid var(--border);
+      padding: 0.6rem 1rem;
+      text-align: left;
+    }
+    .tabla-estimacion th {
+      background: var(--primary-dark);
+      color: white;
+      font-weight: 600;
+    }
+    .tabla-estimacion tr:nth-child(even) { background: #fafafa; }
+    .tabla-funcionalidades-portal {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.25rem 0;
+      font-size: 0.9rem;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .tabla-funcionalidades-portal th {
+      background: var(--primary-dark);
+      color: white;
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border: none;
+    }
+    .tabla-funcionalidades-portal td {
+      padding: 0.65rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      color: var(--text);
+    }
+    .tabla-funcionalidades-portal tr:last-child td { border-bottom: none; }
+    .tabla-funcionalidades-portal tr:nth-child(even) td { background: #fafafa; }
+    .tabla-funcionalidades-portal tr:hover td { background: #f5f8fa; }
+    .tabla-funcionalidades-portal .grupo-nombre { font-weight: 600; color: var(--primary-dark); white-space: nowrap; }
+    .tabla-funcionalidades-portal .grupo-items { margin: 0; padding-left: 1.1rem; line-height: 1.6; }
+    .tabla-modulo-alcance {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.5rem 0 0.75rem 0;
+      font-size: 0.9rem;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      table-layout: fixed;
+    }
+    .tabla-modulo-alcance th,
+    .tabla-modulo-alcance td {
+      border-bottom: 1px solid var(--border);
+      padding: 0.65rem 1rem;
+      text-align: left;
+      vertical-align: top;
+      color: var(--text);
+      line-height: 1.55;
+    }
+    .tabla-modulo-alcance thead tr:first-child th {
+      background: var(--primary-dark);
+      color: white;
+      font-weight: 700;
+      font-size: 1rem;
+      text-align: center;
+      padding: 0.75rem 1rem;
+      border-bottom: none;
+    }
+    .tabla-modulo-alcance thead tr:nth-child(2) th {
+      background: var(--primary-dark);
+      color: white;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border-top: 1px solid rgba(255,255,255,0.25);
+    }
+    .tabla-modulo-alcance col.col-modulo-caracteristicas { width: 85%; }
+    .tabla-modulo-alcance col.col-modulo-tiempo { width: 15%; }
+    .tabla-modulo-alcance tbody tr:last-child td { border-bottom: none; }
+    .tabla-modulo-alcance tbody tr:nth-child(even) td:first-child { background: #fafafa; }
+    .tabla-modulo-alcance .celda-tiempo-modulo {
+      vertical-align: middle;
+      text-align: center;
+      font-weight: 600;
+      color: var(--primary-dark);
+      background: #f0f4f8;
+      border-left: 1px solid var(--border);
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      text-transform: uppercase;
+      white-space: nowrap;
+      letter-spacing: 0.04em;
+    }
+    .modulo-alcance-observaciones {
+      margin: 0.65rem 0 0 0;
+      padding: 0.9rem 1.1rem 1rem;
+      background: linear-gradient(180deg, #fff9e6 0%, #fff3cc 100%);
+      border: 1px solid rgba(180, 110, 0, 0.38);
+      border-left: 5px solid #c67600;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(140, 80, 0, 0.08);
+    }
+    .modulo-alcance-observaciones-titulo {
+      margin: 0 0 0.55rem 0;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #7a4200;
+      letter-spacing: 0.02em;
+    }
+    .modulo-alcance-observaciones-texto {
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.58;
+      color: var(--text);
+      text-align: justify;
+    }
+    .modulo-alcance-observaciones-texto p { margin: 0 0 0.55rem 0; }
+    .modulo-alcance-observaciones-texto p:last-child { margin-bottom: 0; }
+    .modulo-alcance-observaciones-texto ul {
+      margin: 0.35rem 0 0;
+      padding-left: 1.2rem;
+    }
+    .modulo-alcance-observaciones-texto > ul:first-child {
+      margin-top: 0;
+    }
+    .modulo-alcance-observaciones-texto li { margin-bottom: 0.4rem; }
+    .modulo-alcance-observaciones-texto li:last-child { margin-bottom: 0; }
+
+    .servicios-bso-embed .servicios-subtitulo-presentacion {
+      margin: 1rem 0 0.65rem 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      letter-spacing: 0.02em;
+      border-bottom: 2px solid rgba(0, 33, 113, 0.15);
+      padding-bottom: 0.35rem;
+    }
+    .servicios-bso-embed .screen > .servicios-subtitulo-presentacion:first-of-type {
+      margin-top: 0.35rem;
+    }
+    .servicios-bso-embed .servicios-subtitulo-propuesta {
+      margin-top: 1.5rem;
+    }
+    .servicios-bso-embed .servicios-texto-propuesta {
+      margin: 0 0 0.25rem 0;
+      padding: 0.85rem 1rem;
+      font-size: 0.9rem;
+      font-style: italic;
+      color: var(--text-muted);
+      background: rgba(0, 33, 113, 0.04);
+      border-radius: 8px;
+      border: 1px dashed rgba(0, 33, 113, 0.2);
+    }
+    .servicios-bso-embed .servicios-bloque-actual {
+      margin-bottom: 0.15rem;
+    }
+    .servicios-bso-embed .servicios-bloque-propuesta {
+      margin-top: 0.35rem;
+      margin-bottom: 0.25rem;
+    }
+    /* Acceso al portal: imágenes al 65% del ancho útil (reducción del 35%) */
+    .servicios-bso-embed #pantalla-1.screen-acceso .figure-screen img {
+      width: 65%;
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    /* Afiliación: misma reducción del 35% */
+    .servicios-bso-embed #pantalla-2 .figure-screen img {
+      width: 65%;
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    /* Olvido de Clave: misma reducción del 35% */
+    .servicios-bso-embed #pantalla-3 .figure-screen img {
+      width: 65%;
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    /* Consultas → Pólizas: misma reducción del 35% */
+    .servicios-bso-embed #consulta-polizas .figure-screen img {
+      width: 65%;
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    /* Consultas → Siniestros: misma reducción del 35% */
+    .servicios-bso-embed #consulta-siniestros .figure-screen img {
+      width: 65%;
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .servicios-bso-embed .notificacion-tipo h4.consulta-intra-presentacion {
+      font-size: 0.97rem;
+      margin-top: 0.75rem;
+      margin-bottom: 0.45rem;
+    }
+    .servicios-bso-embed .notificacion-tipo h4.consulta-intra-presentacion.servicios-subtitulo-propuesta {
+      margin-top: 1.15rem;
+    }
+    .servicios-bso-embed .notificacion-tipo .consulta-bloque-actual {
+      margin-bottom: 0.15rem;
+    }
+    .servicios-bso-embed .consulta-propuesta-partes {
+      margin-top: 0.35rem;
+    }
+    .servicios-bso-embed .consulta-propuesta-parte + .consulta-propuesta-parte {
+      margin-top: 1.35rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(0, 33, 113, 0.12);
+    }
+    .servicios-bso-embed .consulta-propuesta-parte-titulo {
+      margin: 0 0 0.6rem 0;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+    .servicios-bso-embed .consulta-propuesta-provisional-nota {
+      margin: 0 0 0.65rem 0;
+      font-size: 0.85rem;
+      line-height: 1.45;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+    .servicios-bso-embed .resaltado-por-definir {
+      background: #ffe5e5;
+      border: 1px dashed #cc1f1f;
+      color: #8a1010;
+    }
+    /* Misma señalización en pantallas .screen fuera del embed (p. ej. Olvido de Clave) */
+    .screen .servicios-texto-propuesta.resaltado-por-definir {
+      margin: 0 0 0.25rem 0;
+      padding: 0.85rem 1rem;
+      font-size: 0.9rem;
+      background: #ffe5e5;
+      border: 1px dashed #cc1f1f;
+      color: #8a1010;
+    }
+    .servicios-bso-embed .recuadro-similar-reembolso {
+      background: #e8f5e9;
+      border: 1px solid #a5d6a7;
+      color: #1b5e20;
+      border-radius: 6px;
+    }
+
+    .apartado-propuesta-consolidada-final {
+      margin-top: 2rem;
+      padding-top: 0.25rem;
+    }
+    .apartado-propuesta-consolidada-final .bloque-propuesta-consolidada {
+      margin-top: 0;
+    }
+    .bloque-propuesta-consolidada {
+      margin-top: 1.75rem;
+      padding: 1.35rem 1.4rem 1.45rem;
+      background: linear-gradient(165deg, #e8f0f8 0%, #ffffff 42%, #f9fbfd 100%);
+      border: 1px solid rgba(0, 33, 113, 0.16);
+      border-radius: 10px;
+      box-shadow: 0 6px 22px rgba(0, 33, 113, 0.1);
+    }
+    .bloque-propuesta-consolidada .titulo-resumen-servicios {
+      margin: 0 0 0.55rem 0;
+      font-size: 1.12rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(13, 71, 161, 0.2);
+      letter-spacing: 0.02em;
+    }
+    .bloque-propuesta-consolidada .intro-resumen-servicios {
+      margin: 0 0 0.9rem 0;
+      font-size: 0.9rem;
+      color: var(--text);
+      text-align: justify;
+      line-height: 1.52;
+    }
+    .tabla-resumen-servicios-total {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.75rem 0 0.5rem 0;
+      font-size: 0.9rem;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total {
+      margin: 0;
+      box-shadow: 0 4px 16px rgba(0, 33, 113, 0.14);
+      border: 1px solid rgba(0, 33, 113, 0.12);
+    }
+    .tabla-resumen-servicios-total th,
+    .tabla-resumen-servicios-total td {
+      border-bottom: 1px solid var(--border);
+      padding: 0.6rem 0.85rem;
+      text-align: left;
+      vertical-align: top;
+      color: var(--text);
+    }
+    .tabla-resumen-servicios-total thead th {
+      background: var(--primary-dark);
+      color: white;
+      font-weight: 600;
+      border-bottom: none;
+      padding: 0.7rem 0.9rem;
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total thead th {
+      background: linear-gradient(180deg, #002a7a 0%, var(--primary-dark) 100%);
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total thead th:first-child,
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot th {
+      padding-left: 1.15rem;
+    }
+    .tabla-resumen-servicios-total tbody tr:nth-child(even) td { background: #fafafa; }
+    .tabla-resumen-servicios-total tfoot th,
+    .tabla-resumen-servicios-total tfoot td {
+      background: #e8eef4;
+      font-weight: 600;
+      color: var(--primary-dark);
+      border-bottom: none;
+      padding: 0.65rem 0.9rem;
+    }
+    /* Bloque de totales: separado visualmente del listado de módulos */
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales th,
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales td {
+      padding: 0.78rem 1rem;
+      border-bottom: none;
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales tr:first-child th,
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales tr:first-child td {
+      background: linear-gradient(180deg, #f0f5fb 0%, #e2ecf6 100%);
+      border-top: 3px solid var(--primary);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+      font-weight: 600;
+      color: var(--primary-dark);
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales tr:nth-child(2) th,
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales tr:nth-child(2) td {
+      background: linear-gradient(180deg, #d8e4f2 0%, #cadcf0 100%);
+      border-top: 1px solid rgba(0, 33, 113, 0.14);
+      font-weight: 700;
+      color: #0a2a66;
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales tr:last-child th,
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales tr:last-child td {
+      background: linear-gradient(165deg, #002a7a 0%, var(--primary-dark) 55%, #001d5c 100%);
+      color: #fff;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      font-weight: 700;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales tr:last-child td {
+      font-size: 1.08rem;
+      letter-spacing: 0.02em;
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales tr:last-child th {
+      border-bottom-left-radius: 10px;
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales tr:last-child td {
+      border-bottom-right-radius: 10px;
+    }
+    /* Filas de módulos: más contraste y lectura tipo “puntos” */
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr td {
+      padding: 0.72rem 0.95rem;
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr.fila-modulo-principal td {
+      background: #e4ecf6;
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr.fila-modulo-subpunto td {
+      background: #f8fafc;
+    }
+    /* Acento izquierdo vía gradient (fiable en PDF; box-shadow inset falla en Chromium) */
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr.fila-modulo-principal td:first-child {
+      font-weight: 600;
+      color: var(--primary-dark);
+      border-left: none;
+      box-shadow: none;
+      padding-left: 1.25rem;
+      background: linear-gradient(to right, var(--primary) 0 4px, #e4ecf6 4px);
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr.fila-modulo-subpunto td:first-child {
+      font-weight: 400;
+      color: var(--text);
+      border-left: none;
+      box-shadow: none;
+      padding-left: 2.5rem;
+      background: linear-gradient(to right, var(--primary) 0 4px, #f8fafc 4px);
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr .col-tiempo-resumen {
+      font-weight: 700;
+      color: var(--primary-dark);
+      font-size: 0.93rem;
+    }
+    .bloque-propuesta-consolidada .tabla-resumen-servicios-total tbody tr.fila-modulo-subpunto .col-tiempo-resumen {
+      font-weight: 600;
+      font-size: 0.88rem;
+    }
+    .bloque-propuesta-consolidada .subpunto-modulo-texto {
+      display: block;
+      line-height: 1.4;
+    }
+    .tabla-resumen-servicios-total .col-tiempo-resumen { white-space: nowrap; width: 12rem; }
+    .bloque-propuesta-consolidada .tabla-forma-pago-propuesta,
+    .bloque-propuesta-consolidada .tabla-descuento-propuesta {
+      width: 100%;
+      max-width: 34rem;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      border: 1px solid rgba(0, 33, 113, 0.12);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 33, 113, 0.08);
+    }
+    .bloque-propuesta-consolidada .tabla-forma-pago-propuesta {
+      margin: 1rem 0 0 0;
+    }
+    .bloque-propuesta-consolidada .tabla-descuento-propuesta {
+      margin: 0.65rem 0 0 0;
+    }
+    .bloque-propuesta-consolidada .tabla-forma-pago-propuesta th,
+    .bloque-propuesta-consolidada .tabla-forma-pago-propuesta td,
+    .bloque-propuesta-consolidada .tabla-descuento-propuesta th,
+    .bloque-propuesta-consolidada .tabla-descuento-propuesta td {
+      padding: 0.65rem 0.95rem;
+      text-align: left;
+      vertical-align: top;
+      color: var(--text);
+      border-bottom: 1px solid rgba(0, 33, 113, 0.1);
+    }
+    .bloque-propuesta-consolidada .tabla-forma-pago-propuesta th,
+    .bloque-propuesta-consolidada .tabla-descuento-propuesta th {
+      background: linear-gradient(180deg, #f0f5fb 0%, #e2ecf6 100%);
+      font-weight: 700;
+      color: var(--primary-dark);
+      width: 42%;
+    }
+    .bloque-propuesta-consolidada .tabla-forma-pago-propuesta td,
+    .bloque-propuesta-consolidada .tabla-descuento-propuesta td {
+      background: #fff;
+    }
+    .bloque-propuesta-consolidada .tabla-forma-pago-propuesta tr:last-child th,
+    .bloque-propuesta-consolidada .tabla-forma-pago-propuesta tr:last-child td,
+    .bloque-propuesta-consolidada .tabla-descuento-propuesta tr:last-child th,
+    .bloque-propuesta-consolidada .tabla-descuento-propuesta tr:last-child td {
+      border-bottom: none;
+    }
+    .bloque-propuesta-consolidada .lista-forma-pago-propuesta {
+      margin: 0;
+      padding-left: 1.2rem;
+      line-height: 1.55;
+    }
+    .bloque-propuesta-consolidada .lista-forma-pago-propuesta li {
+      margin-bottom: 0.35rem;
+    }
+    .bloque-propuesta-consolidada .lista-forma-pago-propuesta li:last-child {
+      margin-bottom: 0;
+    }
+    .titulo-resumen-servicios {
+      margin: 1.5rem 0 0.35rem 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+    .apartado-propuesta-consolidada-final .bloque-consideraciones-generales {
+      margin-top: 1.15rem;
+      margin-bottom: 0;
+    }
+    .bloque-consideraciones-generales {
+      margin-top: 1.35rem;
+      padding: 1.25rem 1.35rem 1.3rem;
+      background: linear-gradient(180deg, #f4f6f9 0%, #fafbfc 55%);
+      border-radius: 10px;
+    }
+    .titulo-consideraciones-generales {
+      margin: 0 0 0.8rem 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      padding-bottom: 0.45rem;
+      border-bottom: 2px solid rgba(13, 71, 161, 0.18);
+      letter-spacing: 0.015em;
+    }
+    .lista-consideraciones-generales {
+      margin: 0;
+      padding-left: 1.35rem;
+      line-height: 1.58;
+      font-size: 0.9rem;
+      color: var(--text);
+      text-align: justify;
+    }
+    .lista-consideraciones-generales li { margin-bottom: 0.7rem; }
+    .lista-consideraciones-generales li:last-child { margin-bottom: 0; }
+    .casos-uso-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .caso-uso-card {
+      background: linear-gradient(to bottom, #fafafa, #f5f5f5);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .caso-uso-card h4 {
+      color: var(--primary-dark);
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+    .caso-uso-card p { margin: 0; font-size: 0.9rem; line-height: 1.5; color: var(--text); }
+    .punto3-migracion-imagenes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      margin-top: 1.25rem;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .punto3-migracion-imagenes .punto3-img {
+      max-width: 100%;
+      width: 480px;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      object-fit: contain;
+    }
+    .punto4-fila-texto-imagen {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    .punto4-fila-texto-imagen .punto4-texto { flex: 1; min-width: 0; margin: 0; }
+    .punto4-fila-texto-imagen .punto4-img-wrap { flex-shrink: 0; }
+    .punto4-fila-texto-imagen .punto4-img-wrap img {
+      max-width: 320px; max-height: 200px; width: auto; height: auto;
+      object-fit: contain; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    /* Diagramas de arquitectura RECTOR / ECS */
+    .arch-diagram-wrap {
+      margin: 1.25rem 0 1.5rem;
+      padding: 1.25rem;
+      background: linear-gradient(180deg, #f8fafc 0%, #f0f4f8 100%);
+      border: 1px solid rgba(0, 33, 113, 0.12);
+      border-radius: 10px;
+      overflow-x: auto;
+    }
+    .arch-diagram-wrap h5 {
+      margin: 0 0 1rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      text-align: center;
+    }
+    .arch-diagram-wrap svg {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+    }
+    .arch-specs-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    .arch-specs-table th,
+    .arch-specs-table td {
+      border: 1px solid var(--border);
+      padding: 0.55rem 0.75rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    .arch-specs-table th {
+      background: var(--primary-dark);
+      color: white;
+      font-weight: 600;
+    }
+    .arch-specs-table tr:nth-child(even) td { background: #fafafa; }
+    .beneficios-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .beneficio-card {
+      padding: 1rem 1.15rem;
+      background: linear-gradient(135deg, #e8f0f8 0%, #ffffff 100%);
+      border: 1px solid rgba(0, 33, 113, 0.14);
+      border-radius: 8px;
+      border-left: 4px solid var(--primary);
+    }
+    .beneficio-card h5 {
+      margin: 0 0 0.45rem;
+      font-size: 0.95rem;
+      color: var(--primary-dark);
+    }
+    .beneficio-card p {
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: var(--text);
+      text-align: justify;
+    }
+    .etapa-detalle {
+      margin: 0.5rem 0 0;
+      padding-left: 1.2rem;
+      font-size: 0.92rem;
+      line-height: 1.55;
+      color: var(--text);
+    }
+    .etapa-detalle li { margin-bottom: 0.4rem; }
+    .etapa-detalle li:last-child { margin-bottom: 0; }
+    .subpunto-img:not([src]),
+    .subpunto-img[src=""],
+    .punto2-img:not([src]),
+    .punto2-img[src=""] {
+      background: linear-gradient(135deg, #e0e0e0 0%, #eeeeee 100%);
+      min-height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    /* Carta comercial: respiro horizontal lo da .plan-word-docx (padding = .card-body) */
+    .plan-word-docx .plan-carta-comercial {
+      margin: 2cm 0 1.25rem 0;
+      padding: 0;
+      font-family: "Times New Roman", Times, serif;
+      font-size: 12pt;
+      line-height: 1.45;
+      color: #00000a;
+    }
+    .plan-word-docx .plan-carta-comercial p {
+      margin: 0 0 0.4em 0;
+      text-indent: 0;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-fecha {
+      text-align: right;
+      margin-top: 3.5cm;
+      margin-bottom: 3cm;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-left {
+      text-align: left;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-body {
+      text-align: justify;
+      hyphens: none;
+      -webkit-hyphens: none;
+      -ms-hyphens: none;
+      margin-bottom: 0.85em;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-sep {
+      text-align: center;
+      margin: 0.35em 0 0.65em 0;
+      font-weight: normal;
+      line-height: 1.2;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-saludo {
+      text-align: left;
+      margin-top: 0.85em;
+      margin-bottom: 0.5em;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-cierre {
+      text-align: left;
+      margin-top: 0.85em;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-firma-sp {
+      height: 3.2em;
+      margin: 0.15em 0 0.35em 0;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-nombre {
+      text-align: left;
+      margin-top: 3cm;
+      margin-bottom: 0.35em;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-contact {
+      text-align: left;
+      font-size: 12pt;
+      line-height: 1.4;
+      margin-bottom: 0.15em;
+    }
+    .plan-word-docx .plan-carta-comercial .plan-carta-contact a {
+      color: inherit;
+      text-decoration: underline;
+    }
+    /* Portada plan Word: título y versión a la derecha; ilustración abajo a la izquierda.
+       Respiro horizontal lo da .plan-word-docx (padding = .card-body). */
+    .plan-word-docx .plan-portada {
+      display: flex;
+      flex-direction: column;
+      margin: 0 0 1.75rem 0;
+      min-height: auto;
+      padding-top: 7cm;
+      padding-left: 0;
+      padding-right: 0;
+      box-sizing: border-box;
+    }
+    /* Párrafos Word: sin margen cm extra; el wrap ya alinea con .card-body */
+    .plan-word-docx > p.western {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
+    /* padding-top solo en pantalla: en PDF/print ese 6cm quedaba activo (cascada tras print.css)
+       y empujaba CONFIDENCIALIDAD ~6cm hacia abajo en la página 3. */
+    .plan-word-docx > p.western.plan-titulo-confidencialidad {
+      margin-top: 0 !important;
+      box-sizing: border-box !important;
+    }
+    @media screen {
+      .plan-word-docx > p.western.plan-titulo-confidencialidad {
+        padding-top: 6cm !important;
+      }
+    }
+    .plan-word-docx .plan-portada-derecha {
+      text-align: right;
+      width: 100%;
+    }
+    .plan-word-docx .plan-portada-titulo {
+      margin: 0;
+      margin-left: auto;
+      max-width: 22em;
+      font-family: Verdana, "Segoe UI", Geneva, sans-serif;
+      font-size: 18pt;
+      font-weight: 700;
+      font-style: normal;
+      color: #17365d;
+      line-height: 1.4;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .plan-word-docx .plan-portada-version {
+      margin: 2.75rem 0 0 0;
+      text-align: right;
+      font-family: Verdana, "Segoe UI", Geneva, sans-serif;
+      font-size: 14pt;
+      font-weight: 700;
+      font-style: normal;
+      color: #1a1a1a;
+      line-height: 1.3;
+    }
+    .plan-word-docx .plan-portada-imagen {
+      margin-top: 6cm;
+      align-self: flex-start;
+    }
+    .plan-word-docx .plan-portada-imagen img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      width: 296px;
+    }
+    .plan-word-docx .plan-portada-pie {
+      margin-top: 2.5rem;
+      text-align: center;
+      width: 100%;
+    }
+    .plan-word-docx .plan-portada-pie-linea {
+      margin: 0;
+      font-family: Verdana, "Segoe UI", Geneva, sans-serif;
+      font-size: 10pt;
+      font-weight: 400;
+      color: #333;
+      line-height: 1.45;
+      text-align: center;
+    }
+    /* Encabezado y pie duplicados (pág. 2 / carta): solo visibles en impresión */
+    .plan-word-docx .plan-encabezado-pagina,
+    .plan-word-docx .plan-pie-pagina {
+      display: none;
+    }
+    @media (max-width: 600px) {
+      .plan-word-docx .plan-portada {
+        margin-left: 0;
+        margin-right: 0;
+        padding-top: 2rem;
+      }
+      .plan-word-docx .plan-portada-imagen {
+        margin-top: 1.75rem !important;
+      }
+      .plan-word-docx .plan-carta-comercial {
+        margin-top: 1.25rem !important;
+      }
+      .plan-word-docx .plan-portada-titulo {
+        font-size: clamp(0.95rem, 4.2vw, 18pt);
+        max-width: none;
+      }
+      .plan-word-docx .plan-portada-imagen img {
+        width: 100%;
+        max-width: 296px;
+      }
+      .punto2-item { flex-direction: column; align-items: center; }
+      .punto2-item .punto2-img { width: 100%; max-width: 320px; height: auto; }
+      .punto2-ibforms-fila { flex-direction: column; align-items: center; }
+      .punto2-ibforms-fila .punto2-img { width: 100%; max-width: 364px; height: auto; }
+      .punto3-migracion-imagenes { flex-direction: column; align-items: center; }
+      .punto3-migracion-imagenes .punto3-img { width: 100%; max-width: 320px; }
+      .punto4-fila-texto-imagen { flex-direction: column; align-items: center; }
+      .punto4-fila-texto-imagen .punto4-img-wrap img { max-width: 100%; }
+      .plan-word-docx-wrap {
+        margin-top: 2rem !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        max-width: none !important;
+        width: 100% !important;
+        padding: 0 !important;
+      }
+      .plan-word-docx-wrap .plan-word-docx {
+        padding: 1.5rem !important;
+      }
+      .comercial-header { flex-direction: column; align-items: flex-start; }
+      .ilustracion-container object, .ilustracion-container iframe { height: 280px; }
+      .subpunto-item { flex-direction: column; align-items: center; }
+      .subpunto-img { width: 100%; max-width: 320px; height: auto; min-height: 180px; }
+      .subpunto-item.img-ampliada .subpunto-img { width: 100%; max-width: 380px; height: auto; min-height: 200px; }
+      .subpunto-consultas-fila { flex-direction: column; align-items: center; }
+      .subpunto-consultas-fila .subpunto-img { width: 100%; max-width: 364px; height: auto; }
+      .subpunto-mantenimiento-fila { flex-direction: column; align-items: center; margin-left: 0; margin-right: 0; width: 100%; }
+      .subpunto-mantenimiento-fila .subpunto-img { width: 100%; max-width: 400px; height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-wrap">
+    <header class="flow-header comercial-header" role="banner" aria-label="Encabezado"></header>
+
+        <section class="plan-word-docx-wrap" aria-label="Plan 2026 v1, páginas 1 a 3">
+    <style type="text/css">
+
+    /* Mismo ancho exterior que .card; padding interno = .card-body (1.5rem) */
+    .plan-word-docx-wrap {
+      margin-top: 4cm;
+      margin-bottom: 1.5rem;
+      margin-left: 0;
+      margin-right: 0;
+      max-width: none;
+      width: 100%;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    .plan-word-docx-wrap .plan-word-docx {
+      max-width: none;
+      margin: 0;
+      background: #fff;
+      padding: 1.5rem;
+      box-sizing: border-box;
+    }
+    .plan-word-docx-wrap .plan-word-docx img {
+      max-width: 100%;
+      height: auto;
+    }
+    .plan-word-docx-wrap .plan-word-docx .plan-portada p {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
+
+		/* @page: definido en print.css (copia para PDF); el @page de Word desactivado aquí */
+		.plan-word-docx p { color: #00000a; line-height: 115%; text-align: justify; orphans: 0; widows: 0; margin-bottom: 0.25cm; direction: ltr; background: transparent; hyphens: none; -webkit-hyphens: none; -ms-hyphens: none }
+		.plan-word-docx p.western { font-family: "Times New Roman", serif; font-size: 10pt; so-language: en-US; font-weight: normal }
+		.plan-word-docx p.cjk { font-family: "Times New Roman"; font-size: 10pt; so-language: zh-CN; font-weight: normal }
+		.plan-word-docx p.ctl { font-family: "Times New Roman"; font-size: 10pt; so-language: ar-SA }
+		.plan-word-docx a:link { color: #000080; so-language: zxx; text-decoration: underline }
+		.plan-word-docx a:visited { color: #800080; so-language: zxx; text-decoration: underline }
+		.plan-word-docx a.sdfootnotesym-western { font-size: 10pt }
+		.plan-word-docx a.sdfootnotesym-cjk { font-size: 10pt }
+	
+  
+    </style>
+    <div class="plan-word-docx">
+<section class="plan-portada" aria-label="Portada">
+  <div class="plan-portada-derecha">
+  <h1 class="plan-portada-titulo">IMPLEMENTACIÓN DE ARQUITECTURA<br>CONTENEDORES WEBLOGIC FORMS &amp; REPORTS<br>EN AWS ECS — APLICATIVO RECTOR</h1>
+  <p class="plan-portada-version">Versión 1.0</p>
+  </div>
+  <div class="plan-portada-imagen">
+    <img src="banescovzla_plan_2026_v1_html_95f8590f.jpg" alt="Ilustración de dispositivos digitales" width="296" height="218" loading="lazy" decoding="async">
+  </div>
+  <footer class="plan-portada-pie">
+    <p class="plan-portada-pie-linea">Calle principal de los Pichachos, Urb. Los Picachos, Casa. 89. Los Teques</p>
+    <p class="plan-portada-pie-linea">Teléfono +58-412-2373320. www.ibsoftdev.com.ve</p>
+  </footer>
+</section>
+<section class="plan-pagina-carta" aria-label="Carta comercial">
+<header class="plan-encabezado-pagina" aria-label="Encabezado IB Soft"></header>
+<div class="plan-carta-comercial">
+<p class="plan-carta-fecha">Caracas, 27 de agosto de 2026</p>
+<p class="plan-carta-left">Señores</p>
+<p class="plan-carta-left">Ariana Guaregua</p>
+<p class="plan-carta-left">Atención. Srta. Guaregua</p>
+<p class="plan-carta-left">Ciudad.-</p>
+<p class="plan-carta-saludo">Estimados Sres.:</p>
+<p class="plan-carta-body">De acuerdo con conversaciones sostenidas con usted recientemente, nos es grato hacerle entrega formal de nuestra propuesta de “<strong>IMPLEMENTACIÓN DE ARQUITECTURA CONTENEDORES WEBLOGIC FORMS &amp; REPORTS EN AWS ECS — APLICATIVO RECTOR</strong>”.</p>
+<p class="plan-carta-sep" aria-hidden="true">|</p>
+<p class="plan-carta-body">Entendiendo la importancia que este proyecto tiene para ustedes, ratificamos nuestro mayor compromiso y dedicación para el logro de las metas planteadas.</p>
+<p class="plan-carta-body">Buscando a través del éxito de este proyecto, convertirnos en un verdadero socio tecnológico y estratégico, que los acompañe en el empuje y crecimiento que Banesco Seguros ha demostrado mantener durante estos últimos años en el sector.</p>
+<p class="plan-carta-cierre">En espera de su respuesta, se despide,</p>
+<p class="plan-carta-left">Atentamente,</p>
+<div class="plan-carta-firma-sp" aria-hidden="true"></div>
+<p class="plan-carta-left plan-carta-nombre"><strong>César Rodríguez</strong></p>
+<p class="plan-carta-left plan-carta-contact">Cel: +58 (412) 237.33.20</p>
+<p class="plan-carta-left plan-carta-contact">e-mail: <a href="mailto:ibsoftdev.info@gmail.com">ibsoftdev.info@gmail.com</a></p>
+</div>
+<footer class="plan-portada-pie plan-pie-pagina">
+  <p class="plan-portada-pie-linea">Calle principal de los Pichachos, Urb. Los Picachos, Casa. 89. Los Teques</p>
+  <p class="plan-portada-pie-linea">Teléfono +58-412-2373320. www.ibsoftdev.com.ve</p>
+</footer>
+</section>
+<p lang="es-VE" class="western" align="left" style="line-height: 100%; orphans: 2; widows: 2; margin-left: 0.05cm; margin-right: 0.91cm; margin-bottom: 0.21cm">
+<br/>
+<br/>
+
+</p>
+<p lang="es-VE" class="western" align="center" style="line-height: 0.85cm; orphans: 2; widows: 2; margin-left: 1cm; margin-right: 0.91cm; margin-top: 0.42cm; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" align="center" style="line-height: 0.85cm; orphans: 2; widows: 2; margin-left: 1cm; margin-right: 0.91cm; margin-top: 0.42cm; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="en-US" class="western plan-titulo-confidencialidad" align="center" style="line-height: 0.85cm; orphans: 2; widows: 2; margin-left: 1cm; margin-right: 0.91cm; margin-top: 0; margin-bottom: 0cm">
+<font size="5" style="font-size: 20pt"><span lang="es-VE"><b>CONFIDENCIALIDAD</b></span></font></p>
+<p lang="en-US" class="western" style="line-height: 0.64cm; orphans: 2; widows: 2; margin-left: 1cm; margin-right: 0.91cm; margin-top: 0.42cm; margin-bottom: 0cm">
+<font size="3" style="font-size: 12pt"><span lang="es-VE"><span style="font-weight: normal">El
+material presentado en esta propuesta representa información
+exclusiva de los productos y metodología de IBSOFT DEVELOPMENT, C.A.
+ Esta propuesta incluye información que no debe ser ofrecida ni
+divulgada fuera de Banesco Seguros  y no deberá ser duplicada,
+utilizada o revelada para ningún propósito que no sea el de evaluar
+esta propuesta.  En caso de que el contrato sea otorgado a IBSOFT
+DEVELOPMENT, C.A. por los resultados de esta propuesta, o en conjunto
+con la información suministrada,  Banesco Seguros tendrá el derecho
+de duplicar, utilizar y divulgar la información provista en el
+resultado del contrato.  Esta restricción no limita a Banesco
+Seguros el derecho de uso de información ofrecida en esta propuesta
+si es obtenida por otras fuentes sin restricción de
+confidencialidad.</span></span></font></p>
+<p lang="es-VE" class="western" align="center" style="line-height: 0.85cm; orphans: 2; widows: 2; margin-right: 0.91cm; margin-top: 0.42cm; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="en-US" class="western" align="center" style="line-height: 0.85cm; orphans: 2; widows: 2; margin-left: 1cm; margin-right: 0.91cm; margin-top: 0.42cm; margin-bottom: 0cm">
+<font size="5" style="font-size: 20pt"><span lang="es-VE"><b>CONFLICTO
+DE INTERESES</b></span></font></p>
+<p lang="en-US" class="western" style="line-height: 0.64cm; orphans: 2; widows: 2; margin-left: 1cm; margin-right: 0.91cm; margin-top: 0.42cm; margin-bottom: 0cm">
+<font size="3" style="font-size: 12pt"><span lang="es-VE"><span style="font-weight: normal">IBSOFT
+DEVELOPMENT, C.A. certifica que ningún empleado que ejerza alguna
+función o responsabilidad en la revisión o aprobación de este
+documento o en la ejecución de este proyecto, adquirirá
+voluntariamente, antes de finalizar el proyecto, algún interés
+personal, directo o indirecto, en este contrato o propuesta.</span></span></font></p>
+<p lang="es-VE" class="western" align="right" style="font-weight: normal; line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="font-weight: normal; line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+<p lang="es-VE" class="western" style="line-height: 100%; orphans: 2; widows: 2; margin-bottom: 0cm">
+<br/>
+
+</p>
+
+  
+    </div>
+    </section>
+
+    <div class="card card-plan-estrategico-2026">
+      <div class="card-header">Arquitectura contenedores WebLogic Forms &amp; Reports en AWS ECS — RECTOR</div>
+      <div class="card-body">
+        <p style="margin: 0 0 1rem 0; color: var(--text); text-align: justify;">La presente propuesta describe el proyecto para <strong>modernizar el despliegue del aplicativo RECTOR</strong> (Oracle Forms &amp; Reports 14.1.2 sobre WebLogic), migrando desde una arquitectura monolítica tradicional hacia una <strong>arquitectura distribuida en contenedores</strong>, primero validada en <strong>Docker Compose</strong> y luego operada en <strong>Amazon ECS Fargate</strong> con almacenamiento compartido en <strong>Amazon EFS</strong> y conectividad a <strong>Oracle Database 19c</strong>.</p>
+        <p style="margin: 0 0 1rem 0; color: var(--text); text-align: justify;">El alcance comprende la construcción de imágenes Docker, la orquestación del dominio WebLogic distribuido (AdminServer, WLS_FORMS, WLS_REPORTS), la publicación en <strong>Amazon ECR</strong>, la creación de servicios ECS y la puesta en marcha operativa con acceso a la base de datos corporativa, preservando la funcionalidad del negocio sobre RECTOR.</p>
+
+        <div class="punto-clave punto-clave-expandido texto-justificado">
+          <span class="numero">1</span>
+          <div class="texto">
+            <h4>Alcance del proyecto — Arquitectura objetivo</h4>
+            <p>Se implementará un <strong>dominio WebLogic 14.1.2 distribuido</strong> para Oracle Forms &amp; Reports, separando responsabilidades en contenedores independientes que comparten el mismo dominio y aplicaciones mediante volúmenes persistentes. La solución contempla los siguientes componentes:</p>
+
+            <table class="arch-specs-table" role="table" aria-label="Componentes de la arquitectura">
+              <thead>
+                <tr>
+                  <th>Componente</th>
+                  <th>Hostname / Servicio</th>
+                  <th>Función</th>
+                  <th>Puertos clave</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>AdminServer</strong></td>
+                  <td><code>weblogic-admin</code> / <code>weblogic-admin.forms.local</code></td>
+                  <td>Administración central del dominio, Node Manager y OHS (proxy/balanceo)</td>
+                  <td>7001, 5556, 7777, 4443</td>
+                </tr>
+                <tr>
+                  <td><strong>WLS_FORMS</strong></td>
+                  <td><code>weblogic-forms</code> / <code>weblogic-forms.forms.local</code></td>
+                  <td>Ejecución de módulos Oracle Forms del aplicativo RECTOR</td>
+                  <td>9001, 9501, 9991, 5556</td>
+                </tr>
+                <tr>
+                  <td><strong>WLS_REPORTS</strong></td>
+                  <td><code>weblogic-reports</code> / <code>weblogic-reports.forms.local</code></td>
+                  <td>Generación y distribución de reportes Oracle Reports</td>
+                  <td>9012, 9512, 9992, 5556</td>
+                </tr>
+                <tr>
+                  <td><strong>Almacenamiento</strong></td>
+                  <td>EFS <code>rector-dev</code> (AWS)</td>
+                  <td>Dominio, aplicaciones y scripts compartidos entre contenedores</td>
+                  <td>NFS 2049</td>
+                </tr>
+                <tr>
+                  <td><strong>Base de datos</strong></td>
+                  <td>Oracle 19c</td>
+                  <td>Persistencia de datos del sistema RECTOR</td>
+                  <td>1521</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p><strong>Diagrama 1 — Arquitectura local (Docker Compose)</strong></p>
+            <div class="arch-diagram-wrap">
+              <h5>Dominio WebLogic distribuido en contenedores Docker</h5>
+              <svg viewBox="0 0 820 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama arquitectura Docker Compose">
+                <defs>
+                  <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#0d47a1"/></marker>
+                </defs>
+                <rect x="20" y="30" width="780" height="280" rx="10" fill="#e8eef4" stroke="#90a4c4" stroke-width="1.5"/>
+                <text x="410" y="55" text-anchor="middle" font-size="13" font-weight="700" fill="#002171">Red Docker: weblogic-network</text>
+                <rect x="50" y="80" width="200" height="120" rx="8" fill="#d4edda" stroke="#28a745" stroke-width="2"/>
+                <text x="150" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="#1e3c72">AdminServer</text>
+                <text x="150" y="125" text-anchor="middle" font-size="10" fill="#333">weblogic-admin</text>
+                <text x="150" y="145" text-anchor="middle" font-size="10" fill="#555">:7001 consola</text>
+                <text x="150" y="162" text-anchor="middle" font-size="10" fill="#555">OHS :7777 / :4443</text>
+                <text x="150" y="179" text-anchor="middle" font-size="10" fill="#555">NodeManager :5556</text>
+                <rect x="310" y="80" width="200" height="120" rx="8" fill="#fff3cd" stroke="#ffc107" stroke-width="2"/>
+                <text x="410" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="#1e3c72">WLS_FORMS</text>
+                <text x="410" y="125" text-anchor="middle" font-size="10" fill="#333">weblogic-forms</text>
+                <text x="410" y="145" text-anchor="middle" font-size="10" fill="#555">HTTP :9001 / HTTPS :9501</text>
+                <text x="410" y="162" text-anchor="middle" font-size="10" fill="#555">cluster_forms</text>
+                <text x="410" y="179" text-anchor="middle" font-size="10" fill="#555">FormsMachine</text>
+                <rect x="570" y="80" width="200" height="120" rx="8" fill="#d1ecf1" stroke="#17a2b8" stroke-width="2"/>
+                <text x="670" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="#1e3c72">WLS_REPORTS</text>
+                <text x="670" y="125" text-anchor="middle" font-size="10" fill="#333">weblogic-reports</text>
+                <text x="670" y="145" text-anchor="middle" font-size="10" fill="#555">HTTP :9012 / HTTPS :9512</text>
+                <text x="670" y="162" text-anchor="middle" font-size="10" fill="#555">cluster_reports</text>
+                <text x="670" y="179" text-anchor="middle" font-size="10" fill="#555">ReportsMachine</text>
+                <line x1="250" y1="140" x2="310" y2="140" stroke="#0d47a1" stroke-width="2" marker-end="url(#arrow)"/>
+                <line x1="510" y1="140" x2="570" y2="140" stroke="#0d47a1" stroke-width="2" marker-end="url(#arrow)"/>
+                <text x="280" y="132" font-size="9" fill="#0d47a1">T3 / Admin</text>
+                <text x="540" y="132" font-size="9" fill="#0d47a1">T3 / Admin</text>
+                <rect x="120" y="230" width="580" height="60" rx="6" fill="#fff" stroke="#667eea" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <text x="410" y="252" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3c72">Volúmenes compartidos (bind mount)</text>
+                <text x="410" y="272" text-anchor="middle" font-size="10" fill="#555">domains/ · app/ · scripts/{admin,forms,reports}</text>
+              </svg>
+            </div>
+
+            <p><strong>Diagrama 2 — Arquitectura en AWS (ECS Fargate)</strong></p>
+            <div class="arch-diagram-wrap">
+              <h5>Despliegue en cluster ECS forms_report con EFS, ECR y Cloud Map</h5>
+              <svg viewBox="0 0 820 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama arquitectura AWS ECS">
+                <defs>
+                  <marker id="arrow2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#ff9900"/></marker>
+                </defs>
+                <rect x="15" y="15" width="790" height="370" rx="10" fill="#232f3e" stroke="#ff9900" stroke-width="2"/>
+                <text x="410" y="42" text-anchor="middle" font-size="14" font-weight="700" fill="#ff9900">AWS — VPC Banesco Seguros DEV</text>
+                <rect x="40" y="60" width="740" height="200" rx="8" fill="#1a2332" stroke="#3d8bfd" stroke-width="1.5"/>
+                <text x="410" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#9aa8bc">Cluster ECS Fargate: forms_report</text>
+                <rect x="70" y="100" width="180" height="90" rx="6" fill="#143528" stroke="#3dd68c"/>
+                <text x="160" y="125" text-anchor="middle" font-size="11" font-weight="700" fill="#3dd68c">forms-admin</text>
+                <text x="160" y="145" text-anchor="middle" font-size="9" fill="#e7ecf3">AdminServer</text>
+                <text x="160" y="162" text-anchor="middle" font-size="9" fill="#9aa8bc">SD: weblogic-admin.forms.local</text>
+                <text x="160" y="178" text-anchor="middle" font-size="9" fill="#9aa8bc">:7001</text>
+                <rect x="290" y="100" width="180" height="90" rx="6" fill="#3a2e14" stroke="#f5a524"/>
+                <text x="380" y="125" text-anchor="middle" font-size="11" font-weight="700" fill="#f5a524">forms-server</text>
+                <text x="380" y="145" text-anchor="middle" font-size="9" fill="#e7ecf3">WLS_FORMS</text>
+                <text x="380" y="162" text-anchor="middle" font-size="9" fill="#9aa8bc">:9001 / :9501</text>
+                <text x="380" y="178" text-anchor="middle" font-size="9" fill="#9aa8bc">ADMIN → forms.local</text>
+                <rect x="510" y="100" width="180" height="90" rx="6" fill="#152033" stroke="#3d8bfd"/>
+                <text x="600" y="125" text-anchor="middle" font-size="11" font-weight="700" fill="#3d8bfd">reports-server</text>
+                <text x="600" y="145" text-anchor="middle" font-size="9" fill="#e7ecf3">WLS_REPORTS</text>
+                <text x="600" y="162" text-anchor="middle" font-size="9" fill="#9aa8bc">:9012 / :9512</text>
+                <text x="600" y="178" text-anchor="middle" font-size="9" fill="#9aa8bc">ADMIN → forms.local</text>
+                <rect x="70" y="210" width="620" height="35" rx="4" fill="#121820" stroke="#9aa8bc" stroke-dasharray="3,2"/>
+                <text x="380" y="232" text-anchor="middle" font-size="10" fill="#9aa8bc">Imagen ECR: forms-docker · Cloud Map namespace: forms.local · Subnet pub-A + ruta BD</text>
+                <rect x="120" y="280" width="200" height="70" rx="6" fill="#2a3548" stroke="#ff9900"/>
+                <text x="220" y="305" text-anchor="middle" font-size="11" font-weight="700" fill="#ff9900">Amazon EFS</text>
+                <text x="220" y="325" text-anchor="middle" font-size="9" fill="#e7ecf3">domains · app · scripts</text>
+                <text x="220" y="340" text-anchor="middle" font-size="9" fill="#9aa8bc">rector-dev (NFS 2049)</text>
+                <rect x="500" y="280" width="200" height="70" rx="6" fill="#2a3548" stroke="#c0392b"/>
+                <text x="600" y="305" text-anchor="middle" font-size="11" font-weight="700" fill="#e74c3c">Oracle 19c</text>
+                <text x="600" y="325" text-anchor="middle" font-size="9" fill="#e7ecf3">RECTOR — METAPRD</text>
+                <text x="600" y="340" text-anchor="middle" font-size="9" fill="#9aa8bc">VPC Peering · :1521</text>
+                <line x1="320" y1="315" x2="500" y2="315" stroke="#ff9900" stroke-width="1.5" marker-end="url(#arrow2)"/>
+                <text x="410" y="308" text-anchor="middle" font-size="8" fill="#ff9900">JDBC / sqlplus</text>
+                <line x1="160" y1="190" x2="160" y2="280" stroke="#3dd68c" stroke-width="1" stroke-dasharray="3,2"/>
+                <line x1="380" y1="190" x2="220" y2="280" stroke="#f5a524" stroke-width="1" stroke-dasharray="3,2"/>
+                <line x1="600" y1="190" x2="260" y2="280" stroke="#3d8bfd" stroke-width="1" stroke-dasharray="3,2"/>
+              </svg>
+            </div>
+
+            <p>La imagen base <code>image_forms_14.1.2</code> (Oracle WebLogic 14.1.2 con Forms &amp; Reports) se reutiliza en los tres contenedores. El dominio <code>forms_domain</code> se monta de forma compartida, permitiendo administración centralizada con ejecución distribuida. En AWS, los hostnames se alinean con el namespace DNS privado <code>forms.local</code> (Cloud Map) para garantizar la resolución entre AdminServer y Managed Servers sin depender de IPs fijas.</p>
+          </div>
+        </div>
+
+        <div class="punto-clave punto-clave-expandido texto-justificado">
+          <span class="numero">2</span>
+          <div class="texto">
+            <h4>Etapas del proyecto</h4>
+            <p>El proyecto se ejecutará en fases secuenciales, validando cada componente en entorno local antes de su despliegue en la nube:</p>
+
+            <div class="punto-clave texto-justificado" style="margin-top: 1rem; margin-bottom: 1rem;">
+              <span class="numero">a</span>
+              <div class="texto">
+                <h4>Creación y configuración de imágenes en Docker Compose</h4>
+                <p>Construcción de la imagen Docker <code>image_forms_14.1.2</code> a partir de Oracle WebLogic 14.1.2 con Forms &amp; Reports. Inclusión de dependencias operativas (<code>libaio</code>, <code>net-tools</code>, herramientas de diagnóstico). Desarrollo de scripts de entrypoint por rol (admin, forms, reports). Definición del archivo <code>docker-compose.yml</code> con red <code>weblogic-network</code>, variables de entorno, mapeo de puertos y health checks.</p>
+                <ul class="etapa-detalle">
+                  <li>Dockerfile y scripts de arranque (<code>entrypoint.sh</code>, <code>startNodeManager.sh</code>)</li>
+                  <li>Configuración de hostnames con sufijo <code>.forms.local</code> para compatibilidad futura con Cloud Map</li>
+                  <li>Volúmenes bind mount: <code>domains/</code>, <code>app/</code>, <code>scripts/</code></li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="punto-clave texto-justificado" style="margin-bottom: 1rem;">
+              <span class="numero">b</span>
+              <div class="texto">
+                <h4>Despliegue de arquitectura en Docker Compose</h4>
+                <p>Levantamiento y validación del stack completo en entorno local: AdminServer con Node Manager y OHS, WLS_FORMS y WLS_REPORTS como Managed Servers. Verificación de comunicación T3 entre contenedores, arranque de clusters <code>cluster_forms</code> y <code>cluster_reports</code>, y acceso a consolas WebLogic, Forms y Reports.</p>
+                <ul class="etapa-detalle">
+                  <li>Secuencia de arranque: Node Manager → AdminServer → Managed Servers</li>
+                  <li>Validación de puertos HTTP/HTTPS y Node Manager por máquina</li>
+                  <li>Pruebas funcionales del aplicativo RECTOR en entorno containerizado</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="punto-clave texto-justificado" style="margin-bottom: 1rem;">
+              <span class="numero">c</span>
+              <div class="texto">
+                <h4>Carga y configuración de imagen Docker en AWS</h4>
+                <p>Publicación de la imagen validada en <strong>Amazon ECR</strong> (<code>forms-docker</code>). Configuración de roles IAM (<code>ecsTaskExecutionRole</code>, <code>ecs-forms-admin-task-role</code>), security groups (<code>forms-sg-ecs</code>), reglas NFS hacia EFS y almacenamiento efímero Fargate (~100 GiB) para imágenes de gran tamaño.</p>
+                <ul class="etapa-detalle">
+                  <li>Push de imagen a ECR y verificación de pull desde subnets ECS</li>
+                  <li>Configuración de logs en CloudWatch (<code>/ecs/forms-admin</code>, <code>/ecs/forms-server</code>)</li>
+                  <li>Habilitación de ECS Exec para diagnóstico remoto</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="punto-clave texto-justificado" style="margin-bottom: 1rem;">
+              <span class="numero">d</span>
+              <div class="texto">
+                <h4>Creación de contenedores: AdminServer, Forms Server y Report Server</h4>
+                <p>Creación del cluster ECS <code>forms_report</code> y de las task definitions y servicios para cada rol: <code>forms-admin</code>, <code>forms-server</code> y <code>reports-server</code>. Configuración de Fargate (2 vCPU, 4 GB), variables de entorno y puertos. Los contenedores se integran mediante <strong>AWS Service Discovery</strong> (Cloud Map) en el namespace DNS <code>forms.local</code>, de modo que AdminServer, Forms y Reports se comunican por <strong>nombres de host</strong> —por ejemplo <code>weblogic-admin.forms.local</code>— dentro del subdominio creado, <strong>sin depender de direcciones IP fijas</strong> aunque las tareas ECS se recreen o cambien de red.</p>
+                <ul class="etapa-detalle">
+                  <li><strong>Service Discovery:</strong> registro automático de servicios (<code>weblogic-admin</code>, <code>weblogic-forms</code>, <code>weblogic-reports</code>) con resolución DNS privada en VPC; comunicación estable basada en FQDN</li>
+                  <li>Task definitions con imagen ECR, comandos y secrets (migración a Secrets Manager)</li>
+                  <li>Red: subnet pública <code>pub-A</code>, IP pública habilitada, SG con puertos 7001/9001/9012</li>
+                  <li>Ruta VPC Peering hacia Oracle (<code>192.168.229.137/32</code>) en <code>Pub-RT</code></li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="punto-clave texto-justificado" style="margin-bottom: 1rem;">
+              <span class="numero">e</span>
+              <div class="texto">
+                <h4>Carga de copia de dominio para ser compartido por los contenedores</h4>
+                <p>Restauración del dominio WebLogic <code>forms_domain</code> y aplicaciones RECTOR en <strong>Amazon EFS</strong> (<code>rector-dev</code>). Montaje de volúmenes <code>efs-domains</code>, <code>efs-app</code> y <code>efs-scripts</code> en las rutas del contenedor. Ajuste de <code>nodemanager.properties</code> y <code>config.xml</code> para hostnames FQDN (<code>*.forms.local</code>).</p>
+                <ul class="etapa-detalle">
+                  <li>Paths EFS: <code>domain_forms/domains</code>, <code>domain_forms/app</code>, <code>domain_forms/scripts</code></li>
+                  <li>Mount points: <code>/u01/oracle/user_projects/domains</code>, <code>apps</code>, <code>scripts</code></li>
+                  <li>Verificación de montajes NFS y permisos entre servicios ECS</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="punto-clave texto-justificado" style="margin-bottom: 0;">
+              <span class="numero">f</span>
+              <div class="texto">
+                <h4>Ejecución de contenedores con acceso a Base de Datos Oracle 19c</h4>
+                <p>Puesta en marcha operativa de AdminServer, WLS_FORMS y WLS_REPORTS en ECS con conectividad JDBC hacia <strong>Oracle Database 19c</strong>. Validación de red (TCP 1521), pruebas con <code>sqlplus</code>, arranque estable de Managed Servers y verificación funcional del aplicativo RECTOR (Forms y Reports) contra la base de datos de producción/desarrollo.</p>
+                <ul class="etapa-detalle">
+                  <li>Diagnóstico de conectividad: route tables, SG egress, firewall listener Oracle</li>
+                  <li>Parametrización de URLs JDBC del dominio vía variables de entorno (entrypoint)</li>
+                  <li>Certificación de acceso a módulos Forms, generación de reportes y consola WebLogic</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="punto-clave punto-clave-expandido texto-justificado">
+          <span class="numero">3</span>
+          <div class="texto">
+            <h4>Ventajas y beneficios de la nueva arquitectura</h4>
+            <p>La migración del aplicativo <strong>RECTOR</strong> hacia contenedores en AWS ECS aporta beneficios estratégicos y operativos para Banesco Seguros:</p>
+            <div class="beneficios-grid">
+              <div class="beneficio-card">
+                <h5>Escalabilidad horizontal</h5>
+                <p>Posibilidad de agregar instancias adicionales de WLS_FORMS o WLS_REPORTS según demanda de usuarios, sin redimensionar servidores monolíticos.</p>
+              </div>
+              <div class="beneficio-card">
+                <h5>Alta disponibilidad</h5>
+                <p>Fallo aislado por contenedor: la caída de Forms no afecta Reports ni la administración del dominio. ECS puede reemplazar tareas automáticamente.</p>
+              </div>
+              <div class="beneficio-card">
+                <h5>Portabilidad y consistencia</h5>
+                <p>La misma imagen Docker validada en Compose se despliega en AWS sin divergencias entre entornos. En la nube, <strong>AWS Service Discovery</strong> mantiene la comunicación por nombres (<code>*.forms.local</code>) en lugar de IPs fijas, alineada con el patrón definido en desarrollo.</p>
+              </div>
+              <div class="beneficio-card">
+                <h5>Gestión centralizada</h5>
+                <p>Un único dominio WebLogic compartido (EFS) permite administrar RECTOR de forma unificada con ejecución distribuida en Fargate.</p>
+              </div>
+              <div class="beneficio-card">
+                <h5>Reducción de costos de infraestructura</h5>
+                <p>Fargate elimina la gestión de servidores EC2 dedicados; pago por uso de CPU/memoria según tareas activas.</p>
+              </div>
+              <div class="beneficio-card">
+                <h5>Despliegue ágil y CI/CD</h5>
+                <p>Imágenes versionadas en ECR, task definitions versionadas y despliegue controlado por revisión sin downtime prolongado.</p>
+              </div>
+              <div class="beneficio-card">
+                <h5>Aislamiento y seguridad</h5>
+                <p>Cada componente en su propio contenedor con security groups, IAM roles y secrets gestionados. Comunicación interna vía DNS privado Cloud Map.</p>
+              </div>
+              <div class="beneficio-card">
+                <h5>Continuidad del negocio RECTOR</h5>
+                <p>Se preserva Oracle Forms &amp; Reports 14.1.2 y el dominio existente, modernizando solo la capa de despliegue sin reescribir la aplicación.</p>
+              </div>
+              <div class="beneficio-card">
+                <h5>Ambientes paralelos para desarrollo y pruebas</h5>
+                <p>La misma arquitectura containerizada puede replicarse en entornos independientes —desarrollo, calidad o pilotos— con contenedores y volúmenes propios, de forma <strong>rápida y segura</strong>. Así se habilitan nuevos proyectos y pruebas controladas de RECTOR sin interferir con el ambiente operativo.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <section class="apartado-propuesta-consolidada-final" aria-label="Propuesta consolidada">
+            <div class="bloque-propuesta-consolidada propuesta-consolidada-pdf-una-pagina">
+            <p class="titulo-resumen-servicios">Propuesta consolidada</p>
+            <p class="intro-resumen-servicios">Síntesis del <strong>alcance</strong> por etapa del proyecto de implementación de la arquitectura contenedores WebLogic Forms &amp; Reports en AWS ECS para el aplicativo <strong>RECTOR</strong>. La <strong>propuesta económica</strong> global se presenta al final de la tabla.</p>
+            <table class="tabla-resumen-servicios-total" role="table" aria-label="Resumen etapas del proyecto RECTOR ECS">
+              <thead>
+                <tr>
+                  <th scope="col">Etapa del proyecto</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="fila-modulo-principal">
+                  <td>2.a Creación y configuración de imágenes en Docker Compose</td>
+                </tr>
+                <tr class="fila-modulo-principal">
+                  <td>2.b Despliegue de arquitectura en Docker Compose</td>
+                </tr>
+                <tr class="fila-modulo-principal">
+                  <td>2.c Carga y configuración de imagen Docker en AWS (ECR)</td>
+                </tr>
+                <tr class="fila-modulo-principal">
+                  <td>2.d Creación de contenedores ECS: AdminServer, Forms y Reports</td>
+                </tr>
+                <tr class="fila-modulo-principal">
+                  <td>2.e Carga de copia de dominio compartido (EFS)</td>
+                </tr>
+                <tr class="fila-modulo-principal">
+                  <td>2.f Ejecución de contenedores con acceso a Oracle 19c</td>
+                </tr>
+              </tbody>
+              <tfoot class="resumen-propuesta-totales">
+                <tr>
+                  <th scope="row">Total alcance estimado</th>
+                  <td class="col-tiempo-resumen">180 horas</td>
+                </tr>
+                <tr>
+                  <th scope="row">Total costo</th>
+                  <td class="col-tiempo-resumen">6.500,00 USD</td>
+                </tr>
+              </tfoot>
+            </table>
+            <div class="bloque-propuesta-forma-y-descuento">
+            <table class="tabla-forma-pago-propuesta" role="table" aria-label="Forma de pago">
+              <tbody>
+                <tr>
+                  <th scope="row">Forma de Pago</th>
+                  <td>
+                    <ul class="lista-forma-pago-propuesta">
+                      <li><strong>Inicial:</strong> 20%</li>
+                      <li><strong>2 pagos mensuales</strong> del 10% cada uno</li>
+                      <li><strong>Pago final:</strong> 50% según entregables</li>
+                    </ul>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <table class="tabla-descuento-propuesta" role="table" aria-label="Descuento">
+              <tbody>
+                <tr>
+                  <th scope="row">Descuento</th>
+                  <td>Aplica descuento del <strong>20%</strong> (5.200,00 USD) en caso de que el pago se realice por medio de <strong>retiro de efectivo en banco</strong> o <strong>transferencia Banesco Panamá</strong>.</td>
+                </tr>
+              </tbody>
+            </table>
+            </div>
+            </div>
+
+            <section class="bloque-consideraciones-generales" aria-label="Consideraciones generales">
+              <p class="titulo-consideraciones-generales">Consideraciones generales</p>
+              <ul class="lista-consideraciones-generales">
+                <li><strong>Los tiempos presentados son estimaciones aproximadas. Para poder establecer la línea de tiempo definitiva se debe contar con los documentos de especificación requeridos para cada funcionalidad.</strong></li>
+                <li><strong>El costo presentado en esta propuesta es cerrado, tomando en cuenta los siguientes aspectos:</strong>
+                  <ul style="margin: 0.4rem 0 0 1.25rem; padding-left: 1rem; list-style-type: disc;">
+                    <li>Los cambios de especificación una vez iniciado el ciclo de desarrollo pueden implicar el ajuste del costo de la funcionalidad que se desea modificar, lo cual será acordado por ambas partes.</li>
+                    <li>En caso de presentarse algún factor externo, como integración con plataformas de terceros desde el Portal BSO (Pasarela de Pagos, Gestor Documental, etc.) que no permitan la culminación del desarrollo de cualquiera de los módulos indicados y que se prolongue por más de 30 días continuos, entonces dicha funcionalidad se considerará entregada y se procederá a la facturación de la misma.</li>
+                  </ul>
+                </li>
+                <li>Para cada uno de los módulos indicados, se construirán las interfaces web de acuerdo con los ERF proporcionados por Banesco Seguros. También se construirán los programas en PL/SQL para llevar a cabo la integración con Rector, a partir de las especificaciones funcionales y técnicas proporcionadas por Banesco Seguros.</li>
+                <li>Una vez culminado el desarrollo de cada entregable, Banesco Seguros dispondrá de un período de 30 días continuos para realizar el proceso de certificación de esta funcionalidad. En caso de no reportar ningún incidente asociado a las especificaciones del documento ERF, se dará por entregado dicho entregable y se procederá a su facturación.</li>
+                <li>Esta propuesta solo considera la integración en los ambientes de desarrollo, calidad y producción de Banesco Seguros. Para integración en ambientes adicionales por causas no imputables a ibSoft Development, dichas horas adicionales serán facturadas a la misma tasa de las horas correspondientes a este presupuesto.</li>
+                <li>En caso de reinstalación de ambientes por causas no imputables a ibSoft Development, dichas horas adicionales serán facturadas a la misma tasa de las horas correspondientes a este presupuesto.</li>
+                <li>En caso de requerirse ciclos de pruebas adicionales por causas no imputables a ibSoft Development, dichas horas adicionales serán facturadas a la misma tasa de las horas correspondientes a este presupuesto.</li>
+                <li>Se extenderá una garantía de 30 días para corregir cualquier incidente, siempre y cuando el mismo corresponda a una falla en los programas asociados a la funcionalidad que presenta la falla y no sea derivado de:
+                  <ul style="margin: 0.4rem 0 0 1.25rem; padding-left: 1rem; list-style-type: disc;">
+                    <li>Mal funcionamiento de Rector.</li>
+                    <li>Fallas en la infraestructura donde se ejecutan las aplicaciones.</li>
+                    <li>Modificación en las reglas de negocio.</li>
+                    <li>Otros factores externos al componente desplegado.</li>
+                  </ul>
+                </li>
+                <li>No incluyen instalación ni puesta en marcha de Sistemas Operativos, Redes, Base de Datos, o elementos de Infraestructura.</li>
+                <li>No se requieren costos adicionales de licenciamiento de software, ya que el portal se ejecuta en una plataforma 100% open source: Linux, Java SpringBoot, React.</li>
+              </ul>
+            </section>
+        </section>
+
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

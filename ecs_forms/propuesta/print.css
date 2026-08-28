@@ -1,0 +1,580 @@
+/**
+ * Estilos solo para impresión / PDF (Chromium + Puppeteer con emulateMediaType('print')).
+ *
+ * Cómo se eligen los saltos de página
+ * ------------------------------------
+ * 1) Saltos "fuertes" (nueva página): break-after: page / page-break-after: always
+ *    en contenedores que marcan fases del documento (portada, cierre del bloque Word, etc.).
+ *    Puedes mover o quitar estas reglas según cómo quieras agrupar páginas.
+ *
+ * 2) Evitar cortes feos: break-inside: avoid en tablas, tarjetas y figuras para que,
+ *    si caben en una página, no se partan por la mitad. Si un bloque es más alto que
+ *    una página, el motor igual lo partirá.
+ *
+ * 3) Títulos: break-after: avoid en encabezados para no dejar el título solo al pie.
+ *
+ * 4) Ajuste fino: inspecciona con "Vista previa de impresión" en Chrome; es lo mismo
+ *    que verá Puppeteer con printBackground y preferCSSPageSize.
+ *
+ * Esquema acordado (PDF)
+ * ----------------------
+ * Pág. 1: banner IB Soft + portada; título/versión centrados en vertical; ilustración al pie.
+ * Pág. 2: carta comercial (y párrafos separadores Word si caben en la misma hoja).
+ * Pág. 3: CONFIDENCIALIDAD y cierre del bloque Word (huecos Word sin texto ocultos en PDF).
+ * Pág. 4: sección «Cambio de Imagen Banesco Seguros Online» (.card-plan-estrategico-2026, salto forzado).
+ */
+
+/*
+ * Márgenes Letter.
+ * - Pág. 1 (:first): a sangre.
+ * - Pág. 2 (nombre «carta»): margin-top 0 (banner al borde superior).
+ * - Pág. 3 en adelante (default): margin-top ≥ 2 cm.
+ */
+@page {
+  size: letter portrait;
+  margin-top: 2cm;
+  margin-bottom: 14mm;
+  margin-left: 6.5mm; /* 14mm − 7.5mm */
+  margin-right: 4mm; /* 14mm − 10mm */
+}
+
+/* Portada: a sangre (banner IB Soft de borde a borde). */
+@page :first {
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Carta comercial (pág. 2): sin margen superior para el banner */
+@page carta {
+  size: letter portrait;
+  margin-top: 0;
+  margin-bottom: 14mm;
+  margin-left: 6.5mm;
+  margin-right: 4mm;
+}
+
+@media print {
+  html,
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    /* Evita el “recuadro” gris/azul (#f5f7fa) bajo el texto corto de CONFIDENCIALIDAD */
+    background: #fff !important;
+  }
+
+  .app-wrap {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    background: #fff !important;
+  }
+
+  .plan-word-docx-wrap {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    background: #fff !important;
+  }
+
+  .plan-word-docx-wrap .plan-word-docx {
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    background: #fff !important;
+  }
+
+  /*
+   * Banner IB Soft (ImagenEmpresa.png): franja superior a sangre en pág. 1.
+   * Proporción del PNG 761×190 ≈ alto 54 mm en ancho Letter (215.9 mm).
+   */
+  .app-wrap > header.comercial-header.flow-header {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background-color: #fff !important;
+    background-image: url('ImagenEmpresa.png') !important;
+    background-repeat: no-repeat !important;
+    background-position: left top !important;
+    background-size: 100% auto !important;
+    min-height: 0 !important;
+    height: 54mm !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-after: avoid;
+    page-break-after: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* --- Saltos de página (esquema pág. 1–4) --- */
+
+  /*
+   * Portada: resto de la hoja bajo el banner.
+   * Grid: espacio | título | espacio | ilustración (abajo izq.) | pie centrado.
+   */
+  .plan-word-docx .plan-portada {
+    /* Letter 279.4 mm − banner 54 mm */
+    min-height: 225mm !important;
+    height: 225mm !important;
+    display: grid !important;
+    grid-template-rows: 1fr auto 1fr auto auto !important;
+    grid-template-columns: 100% !important;
+    align-items: start !important;
+    justify-items: stretch !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 18mm 8mm 16mm !important;
+    overflow: hidden !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    /* Salto a pág. 2: lo fuerza page: carta en .plan-pagina-carta (evitar doble break → hoja en blanco). */
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .plan-word-docx .plan-portada-derecha {
+    grid-row: 2;
+    text-align: right !important;
+    justify-self: end !important;
+    width: 100% !important;
+    max-width: 125mm !important;
+    margin-left: auto !important;
+  }
+
+  .plan-word-docx .plan-portada-titulo {
+    margin: 0 !important;
+    max-width: none !important;
+    font-family: Verdana, "Segoe UI", Geneva, Arial, sans-serif !important;
+    font-size: 17pt !important;
+    font-weight: 700 !important;
+    font-style: normal !important;
+    color: #17365d !important;
+    line-height: 1.4 !important;
+    letter-spacing: 0.01em !important;
+    text-align: right !important;
+    text-transform: uppercase !important;
+  }
+
+  .plan-word-docx .plan-portada-version {
+    margin: 1.6rem 0 0 0 !important;
+    text-align: right !important;
+    font-family: Verdana, "Segoe UI", Geneva, Arial, sans-serif !important;
+    font-size: 13pt !important;
+    font-weight: 700 !important;
+    font-style: normal !important;
+    color: #1a1a1a !important;
+    line-height: 1.3 !important;
+  }
+
+  .plan-word-docx .plan-portada-imagen {
+    grid-row: 4;
+    margin: 0 !important;
+    padding: 0 !important;
+    align-self: end;
+    justify-self: start;
+  }
+
+  .plan-word-docx .plan-portada-imagen img {
+    display: block !important;
+    width: 72mm !important;
+    max-width: 72mm !important;
+    height: auto !important;
+  }
+
+  .plan-word-docx .plan-portada-pie {
+    grid-row: 5;
+    margin: 6mm 0 0 0 !important;
+    padding: 0 !important;
+    text-align: center !important;
+    width: 100% !important;
+    justify-self: center !important;
+    align-self: end !important;
+  }
+
+  .plan-word-docx .plan-portada-pie-linea {
+    margin: 0 !important;
+    font-family: Verdana, "Segoe UI", Geneva, Arial, sans-serif !important;
+    font-size: 9pt !important;
+    font-weight: 400 !important;
+    font-style: normal !important;
+    color: #333 !important;
+    line-height: 1.4 !important;
+    text-align: center !important;
+  }
+
+  /* Pág. 2: banner + carta + pie; salto limpio (sin solapar el pie de la pág. 1) */
+  .plan-word-docx > .plan-pagina-carta {
+    page: carta;
+    display: flex !important;
+    flex-direction: column !important;
+    /* Letter 279.4 − margin-bottom 14 ≈ 265 mm útiles con margin-top 0 */
+    height: 262mm !important;
+    max-height: 262mm !important;
+    min-height: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    /* El salto lo marca la portada (break-after); no usar break-before aquí
+       (junto con break-after de portada generaría página en blanco). */
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  /*
+   * Mismo banner que pág. 1 (ImagenEmpresa.png), sin margins negativos
+   * (los negativos pintaban el encabezado al final de la página anterior).
+   */
+  .plan-word-docx .plan-encabezado-pagina {
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background-color: #fff !important;
+    background-image: url('ImagenEmpresa.png') !important;
+    background-repeat: no-repeat !important;
+    background-position: left top !important;
+    background-size: 100% auto !important;
+    min-height: 0 !important;
+    height: 54mm !important;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-before: avoid;
+    page-break-before: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Carta: compactar verticalmente (los márgenes de pantalla 3 cm no caben con banner+pie) */
+  .plan-word-docx .plan-carta-comercial {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-left: 12mm !important;
+    padding-right: 10mm !important;
+    box-sizing: border-box !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    font-size: 11pt !important;
+    line-height: 1.35 !important;
+    break-before: auto;
+    page-break-before: auto;
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .plan-word-docx .plan-carta-comercial p {
+    margin-bottom: 0.28em !important;
+  }
+
+  .plan-word-docx .plan-carta-comercial .plan-carta-fecha {
+    margin-top: 4mm !important;
+    margin-bottom: 8mm !important;
+  }
+
+  .plan-word-docx .plan-carta-comercial .plan-carta-body {
+    margin-bottom: 0.55em !important;
+  }
+
+  .plan-word-docx .plan-carta-comercial .plan-carta-firma-sp {
+    height: 1.4em !important;
+    margin: 0.1em 0 0.2em 0 !important;
+  }
+
+  .plan-word-docx .plan-carta-comercial .plan-carta-nombre {
+    margin-top: 6mm !important;
+    margin-bottom: 0.25em !important;
+  }
+
+  .plan-word-docx .plan-carta-comercial .plan-carta-contact {
+    margin-bottom: 0.1em !important;
+    line-height: 1.25 !important;
+  }
+
+  /* Pie al final de la misma hoja (no en pág. 3) */
+  .plan-word-docx .plan-pie-pagina {
+    display: block !important;
+    margin: 0 !important;
+    padding: 3mm 0 0 0 !important;
+    text-align: center !important;
+    width: 100% !important;
+    flex-shrink: 0 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-before: avoid;
+    page-break-before: avoid;
+  }
+
+  .plan-word-docx .plan-pie-pagina .plan-portada-pie-linea {
+    margin: 0 !important;
+    font-family: Verdana, "Segoe UI", Geneva, Arial, sans-serif !important;
+    font-size: 8.5pt !important;
+    font-weight: 400 !important;
+    font-style: normal !important;
+    color: #333 !important;
+    line-height: 1.35 !important;
+    text-align: center !important;
+  }
+
+  .plan-word-docx > p.western {
+    padding-left: 15mm !important;
+    padding-right: 12mm !important;
+    box-sizing: border-box !important;
+  }
+
+  /*
+   * NO usar page-break-before: always en el título CONFIDENCIALIDAD: si la carta ya llena la
+   * página anterior, Chromium inserta un salto “natural” y el always del título añade otro;
+   * los <p> vacíos entre carta y título quedan solos en una hoja → página en blanco.
+   */
+  .plan-word-docx > p.western.plan-titulo-confidencialidad {
+    page: auto;
+    break-before: auto;
+    page-break-before: auto;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  /* Huecos Word (export) sin texto real: solo <br/>, sin <font>. Ocupan muchas líneas al pie y empujan el módulo a la pág. siguiente. */
+  .plan-word-docx > p.western:not(:has(font)) {
+    display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 0 !important;
+    min-height: 0 !important;
+  }
+
+  /* Nueva página antes de «Cambio de Imagen Banesco Seguros Online». */
+  .card.card-plan-estrategico-2026 {
+    page: auto;
+    break-before: page;
+    page-break-before: always;
+  }
+
+  .bloque-consideraciones-generales {
+    page: auto;
+    break-before: page;
+    page-break-before: always;
+  }
+
+  /* Consultas → nueva página desde el 2.º tipo en adelante (Pólizas va con «Tipos de consulta»). */
+  .consultas-tipos-detalle > .notificacion-tipo ~ .notificacion-tipo {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  /* --- Evitar partir bloques cuando quepan en una página --- */
+
+  .tabla-modulo-alcance,
+  .tabla-resumen-servicios-total,
+  .bloque-propuesta-forma-y-descuento,
+  .tabla-forma-pago-propuesta,
+  .tabla-descuento-propuesta,
+  .punto-clave,
+  .card,
+  figure,
+  aside.modulo-alcance-observaciones,
+  .comparativa-tabla {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* El expandido es muy alto; break-inside: avoid lo mandaba entero a la siguiente página. */
+  /* Tras la tabla de módulos/tiempos: Forma de pago y Descuento juntos y no huérfanos del bloque. */
+  .bloque-propuesta-forma-y-descuento {
+    break-before: avoid;
+    page-break-before: avoid;
+  }
+
+  /**
+   * «Propuesta consolidada» hasta «Descuento»: una sola página en PDF.
+   * Compactación para caber en Letter; el contenedor lleva break-inside: avoid.
+   * Las tablas internas usan break-inside: auto para no competir con el contenedor.
+   */
+  .propuesta-consolidada-pdf-una-pagina {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    padding: 0.85rem 1rem 0.95rem !important;
+  }
+  .propuesta-consolidada-pdf-una-pagina .titulo-resumen-servicios {
+    margin: 0 0 0.4rem 0 !important;
+    padding-bottom: 0.35rem !important;
+    font-size: 1.02rem !important;
+  }
+  .propuesta-consolidada-pdf-una-pagina .intro-resumen-servicios {
+    margin: 0 0 0.5rem 0 !important;
+    font-size: 0.82rem !important;
+    line-height: 1.42 !important;
+  }
+  .propuesta-consolidada-pdf-una-pagina .tabla-resumen-servicios-total {
+    margin: 0.35rem 0 0.3rem 0 !important;
+    font-size: 0.78rem !important;
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+  .propuesta-consolidada-pdf-una-pagina .tabla-resumen-servicios-total th,
+  .propuesta-consolidada-pdf-una-pagina .tabla-resumen-servicios-total td {
+    padding: 0.38rem 0.55rem !important;
+  }
+  /* Restaurar sangría / acento: el padding !important anterior aplastaba padding-left */
+  .propuesta-consolidada-pdf-una-pagina .tabla-resumen-servicios-total tbody tr.fila-modulo-principal td:first-child {
+    padding-left: 1.05rem !important;
+    background: linear-gradient(to right, var(--primary) 0 4px, #e4ecf6 4px) !important;
+  }
+  .propuesta-consolidada-pdf-una-pagina .tabla-resumen-servicios-total tbody tr.fila-modulo-subpunto td:first-child {
+    padding-left: 2.1rem !important;
+    background: linear-gradient(to right, var(--primary) 0 4px, #f8fafc 4px) !important;
+  }
+  .propuesta-consolidada-pdf-una-pagina .tabla-resumen-servicios-total thead th {
+    padding: 0.45rem 0.58rem !important;
+  }
+  .propuesta-consolidada-pdf-una-pagina .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales th,
+  .propuesta-consolidada-pdf-una-pagina .tabla-resumen-servicios-total tfoot.resumen-propuesta-totales td {
+    padding: 0.42rem 0.58rem !important;
+  }
+  .propuesta-consolidada-pdf-una-pagina .tabla-forma-pago-propuesta,
+  .propuesta-consolidada-pdf-una-pagina .tabla-descuento-propuesta {
+    break-inside: auto;
+    page-break-inside: auto;
+    font-size: 0.78rem !important;
+  }
+  .propuesta-consolidada-pdf-una-pagina .tabla-forma-pago-propuesta {
+    margin: 0.5rem 0 0 0 !important;
+  }
+  .propuesta-consolidada-pdf-una-pagina .tabla-descuento-propuesta {
+    margin: 0.45rem 0 0 0 !important;
+  }
+  .propuesta-consolidada-pdf-una-pagina .tabla-forma-pago-propuesta th,
+  .propuesta-consolidada-pdf-una-pagina .tabla-forma-pago-propuesta td,
+  .propuesta-consolidada-pdf-una-pagina .tabla-descuento-propuesta th,
+  .propuesta-consolidada-pdf-una-pagina .tabla-descuento-propuesta td {
+    padding: 0.45rem 0.75rem !important;
+  }
+  .propuesta-consolidada-pdf-una-pagina .bloque-propuesta-forma-y-descuento {
+    break-inside: auto;
+    page-break-inside: auto;
+    break-before: auto;
+    page-break-before: auto;
+  }
+  .propuesta-consolidada-pdf-una-pagina .lista-forma-pago-propuesta {
+    line-height: 1.4 !important;
+  }
+
+  .punto-clave.punto-clave-expandido {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
+  /* .card también tenía avoid junto a .punto-clave: el contenedor entero saltaba de página. */
+  .app-wrap .card {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
+  h2,
+  h3,
+  h4 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /**
+   * Acceso al portal — «Presentación actual» (hasta 02-seleccion-roles.png) en una sola página PDF.
+   * Imágenes limitadas en altura para que quepan título + dos capturas en Letter con @page 14 mm.
+   */
+  #pantalla-1.screen-acceso .acceso-bloque-pdf-una-pagina {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  #pantalla-1.screen-acceso .acceso-bloque-pdf-una-pagina .screen-header {
+    margin-bottom: 0.35rem;
+  }
+
+  #pantalla-1.screen-acceso .acceso-bloque-pdf-una-pagina .servicios-subtitulo-presentacion {
+    margin-top: 0.35rem;
+    margin-bottom: 0.35rem;
+  }
+
+  #pantalla-1.screen-acceso .acceso-bloque-pdf-una-pagina .acceso-paso {
+    margin-bottom: 0.5rem;
+  }
+
+  #pantalla-1.screen-acceso .acceso-bloque-pdf-una-pagina .acceso-paso-titulo {
+    margin-bottom: 0.25rem;
+  }
+
+  #pantalla-1.screen-acceso .acceso-bloque-pdf-una-pagina .figure-screen {
+    margin: 0.35rem 0 0 0;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Misma reducción del 35% que en pantalla (ancho al 65% del contenedor) */
+  #pantalla-1.screen-acceso .figure-screen img {
+    width: 65% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    object-fit: contain;
+  }
+
+  #pantalla-2 .figure-screen img {
+    width: 65% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    object-fit: contain;
+  }
+
+  #pantalla-3 .figure-screen img {
+    width: 65% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    object-fit: contain;
+  }
+
+  #consulta-polizas .figure-screen img {
+    width: 65% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    object-fit: contain;
+  }
+
+  #consulta-siniestros .figure-screen img {
+    width: 65% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    object-fit: contain;
+  }
+}
