@@ -1,0 +1,2522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía · Contenedor Reports en ECS Fargate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/estilos-demo.css">
+  <style>
+    :root {
+      --font-display: "Outfit", "Segoe UI", sans-serif;
+      --font-body: "Source Sans 3", "Segoe UI", sans-serif;
+      --font-mono: "JetBrains Mono", "Courier New", monospace;
+      --text-desc: #2f3540;
+      --size-desc: 1.05rem;
+      --leading-desc: 1.7;
+      --c-admin: #2e7d32;
+      --c-forms: #ef6c00;
+      --c-reports: #00838f;
+      --c-ohs: #0d47a1;
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--text-desc);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .app-wrap {
+      max-width: 960px;
+      overflow: visible;
+    }
+    .card,
+    .card-body {
+      overflow: visible;
+    }
+
+    /* Cabecera */
+    .comercial-header {
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: nowrap;
+      background-image: url('../../assets/ImagenEmpresa.png');
+      background-repeat: no-repeat;
+      background-position: left center;
+      background-size: cover;
+      background-color: #eef3f8;
+      min-height: 148px;
+      padding: 0.85rem 0.9rem;
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+    .comercial-header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.12) 0%,
+        rgba(255, 255, 255, 0.5) 40%,
+        rgba(255, 255, 255, 0.9) 62%,
+        #ffffff 78%
+      );
+      pointer-events: none;
+    }
+    .comercial-header .title-wrap {
+      position: relative;
+      z-index: 1;
+      margin-left: auto;
+      max-width: 58%;
+      min-width: 280px;
+      text-align: left;
+      padding: 0.95rem 1.15rem 1rem;
+      color: #0a1f4d;
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid rgba(13, 71, 161, 0.12);
+      border-left: 5px solid #0d47a1;
+      box-shadow: 0 6px 20px rgba(0, 33, 113, 0.12);
+    }
+    .comercial-header .title-wrap h1 {
+      font-family: var(--font-display);
+      color: #0a1f4d;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.28;
+      margin: 0;
+    }
+    .comercial-header .title-wrap h1 .header-line-1 {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      color: #0d47a1;
+    }
+    .comercial-header .title-wrap h1 .header-line-2 {
+      display: block;
+      font-size: 1.42rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+      color: #061433;
+    }
+    .comercial-header .title-wrap h1 .header-line-3 {
+      display: block;
+      font-size: 1.02rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: #1565c0;
+    }
+    .comercial-header .title-wrap .header-tagline {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      line-height: 1.45;
+      margin-top: 0.55rem;
+      margin-bottom: 0;
+      font-weight: 500;
+      color: #475569;
+      letter-spacing: 0.01em;
+      padding-top: 0.5rem;
+      border-top: 1px solid rgba(13, 71, 161, 0.15);
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 1rem;
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #0d47a1;
+      text-decoration: none;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    /* Introducción */
+    .intro-propuesta {
+      max-width: calc(100% - 1cm - 1.5rem - 1cm);
+      margin: 0 0 1.5rem 1cm;
+    }
+    .intro-propuesta h2 {
+      font-family: var(--font-display);
+      font-size: 1.28rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      color: var(--primary-dark);
+      margin: 0 0 0.75rem 0;
+    }
+    .intro-propuesta p {
+      text-align: justify;
+      color: var(--text-desc);
+      font-size: var(--size-desc);
+      line-height: var(--leading-desc);
+      font-weight: 400;
+      margin: 0 0 0.85rem;
+    }
+    .intro-propuesta p:last-child { margin-bottom: 0; }
+    .intro-propuesta .slogan {
+      margin-top: 1rem;
+      margin-bottom: 0;
+      text-align: left;
+      font-family: var(--font-display);
+      font-size: 1.12rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #0d47a1;
+      line-height: 1.4;
+    }
+
+    /* Índice */
+    .toc {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0 0 1.5rem 1cm;
+    }
+    .toc a {
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--primary);
+      background: #fff;
+      border: 1px solid #bbdefb;
+      border-radius: 999px;
+      padding: 0.3rem 0.8rem;
+      box-shadow: var(--shadow-sm);
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .toc a:hover { background: #e3f2fd; border-color: #90caf9; }
+
+    /* Bloques numerados */
+    .slide-block {
+      margin-bottom: 1.75rem;
+      padding: 1.25rem 1.4rem;
+      background: #fafafa;
+      border-radius: var(--radius);
+      border-left: 4px solid var(--primary);
+      scroll-margin-top: 1rem;
+    }
+    .slide-block h3 {
+      font-family: var(--font-display);
+      margin: 0 0 0.75rem 0;
+      color: var(--primary-dark);
+      font-size: 1.22rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    .slide-block h3 .num {
+      flex-shrink: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+    .slide-block p {
+      margin: 0 0 0.9rem 0;
+      color: var(--text-desc);
+      font-size: var(--size-desc);
+      line-height: var(--leading-desc);
+      font-weight: 400;
+      text-align: justify;
+    }
+    .slide-block p:last-child { margin-bottom: 0; }
+    .slide-block h4.sub {
+      font-family: var(--font-display);
+      margin: 1.35rem 0 0.65rem;
+      color: var(--primary-dark);
+      font-size: 1.08rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.86em;
+      background: #eef3f8;
+      color: #0a1f4d;
+      padding: 0.08rem 0.35rem;
+      border-radius: 4px;
+    }
+
+    /* Diagrama de arquitectura */
+    .arq {
+      margin: 1rem 0 0.5rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      padding: 1.1rem 1.1rem 1.2rem;
+    }
+    .arq-users {
+      display: flex;
+      justify-content: center;
+    }
+    .arq-users .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--primary-dark);
+      background: #e3f2fd;
+      border: 1px solid #90caf9;
+      border-radius: 999px;
+      padding: 0.45rem 1rem;
+    }
+    .arq-users .pill svg { width: 20px; height: 20px; fill: var(--primary); }
+    .arq-flow {
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      line-height: 1.2;
+      margin: 0.3rem 0;
+    }
+    .arq-flow .arrow {
+      display: block;
+      font-size: 1.3rem;
+      color: var(--primary);
+      line-height: 1;
+    }
+    .arq-host {
+      border: 2px dashed #90a4ae;
+      border-radius: 12px;
+      padding: 0.9rem 0.9rem 1rem;
+      background: #f7f9fc;
+      position: relative;
+    }
+    .arq-host-label {
+      font-family: var(--font-display);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #546e7a;
+      margin-bottom: 0.65rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .arq-host-label .net {
+      color: var(--primary);
+      background: #e3f2fd;
+      border-radius: 999px;
+      padding: 0.05rem 0.6rem;
+      letter-spacing: 0.04em;
+    }
+    .arq-containers {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+      align-items: stretch;
+    }
+    .ctr {
+      min-width: 0;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--c-admin);
+      border-radius: 10px;
+      box-shadow: var(--shadow-sm);
+      padding: 0.75rem 0.8rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .ctr.forms { border-top-color: var(--c-forms); }
+    .ctr.reports { border-top-color: var(--c-reports); }
+    .ctr-head {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+    .ctr-head .ico {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e8f5e9;
+      color: var(--c-admin);
+    }
+    .ctr.forms .ctr-head .ico { background: #fff3e0; color: var(--c-forms); }
+    .ctr.reports .ctr-head .ico { background: #e0f2f1; color: var(--c-reports); }
+    .ctr-head .ico svg { width: 20px; height: 20px; fill: currentColor; }
+    .ctr-head .t {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: var(--primary-dark);
+      line-height: 1.15;
+    }
+    .ctr-head .h {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    .comp {
+      border: 1px solid #e3e8ef;
+      border-radius: 8px;
+      padding: 0.45rem 0.6rem;
+      background: #fafbfd;
+    }
+    .comp .n {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      line-height: 1.25;
+    }
+    .comp .n em {
+      display: block;
+      font-style: normal;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      overflow-wrap: anywhere;
+    }
+    .comp .ports {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-top: 0.3rem;
+    }
+    .port {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 0.05rem 0.45rem;
+      border-radius: 999px;
+      background: #eef3f8;
+      color: #0a1f4d;
+      border: 1px solid #dbe4ee;
+      white-space: nowrap;
+    }
+    .comp.ohs { border-color: #bbdefb; background: #f3f8fe; }
+    .comp.nm { border-style: dashed; }
+    .ctr-machine {
+      margin-top: auto;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+    }
+    .arq-mounts {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    .mount {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 44px;
+    }
+    .mount::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 4px;
+      left: 50%;
+      border-left: 3px solid #8e24aa;
+      transform: translateX(-50%);
+    }
+    .mount::after {
+      content: "";
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 8px solid #8e24aa;
+    }
+    .mount span {
+      position: relative;
+      font-family: var(--font-display);
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #6a1b9a;
+      background: #fff;
+      border: 1px solid #e1bee7;
+      border-radius: 999px;
+      padding: 0.05rem 0.55rem;
+    }
+    .arq-domain {
+      position: relative;
+      background: linear-gradient(135deg, #f3e5f5 0%, #ede7f6 55%, #e8eaf6 100%);
+      border: 2px solid #8e24aa;
+      border-radius: 12px;
+      padding: 0.85rem 1rem 0.95rem;
+      box-shadow: 0 6px 18px rgba(106, 27, 154, 0.15);
+    }
+    .dom-head {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .dom-ico {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: #6a1b9a;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .dom-ico svg { width: 24px; height: 24px; fill: currentColor; }
+    .dom-kicker {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #6a1b9a;
+    }
+    .dom-name {
+      font-family: var(--font-mono);
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: #2a0a3d;
+      line-height: 1.2;
+    }
+    .dom-badge {
+      margin-left: auto;
+      font-family: var(--font-display);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #fff;
+      background: #6a1b9a;
+      border-radius: 999px;
+      padding: 0.3rem 0.8rem;
+    }
+    .dom-path {
+      margin-top: 0.65rem;
+      font-size: 0.85rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .dom-path code { background: #fff; }
+    .dom-path .to { color: #6a1b9a; font-weight: 700; }
+    .dom-parts {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.5rem;
+      margin-top: 0.65rem;
+    }
+    .dom-parts .part {
+      background: #fff;
+      border: 1px solid #e1bee7;
+      border-left: 4px solid var(--c-admin);
+      border-radius: 8px;
+      padding: 0.35rem 0.55rem;
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      overflow-wrap: anywhere;
+    }
+    .dom-parts .part.forms { border-left-color: var(--c-forms); }
+    .dom-parts .part.reports { border-left-color: var(--c-reports); }
+    .dom-parts .part code { font-size: 0.78em; font-weight: 500; }
+    .slide-block .arq-domain .dom-note,
+    .dom-note {
+      margin: 0.65rem 0 0;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: #3c2a4d;
+      text-align: left;
+    }
+    .arq-volumes {
+      margin-top: 0.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 0.75rem;
+      background: #eceff1;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      color: #37474f;
+    }
+    .arq-volumes .lbl {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.74rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #455a64;
+      margin-right: 0.25rem;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      justify-content: center;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+    .legend i {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+    .figure .caption,
+    .caption {
+      font-family: var(--font-body);
+      margin-top: 0.6rem;
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.45;
+      letter-spacing: 0.01em;
+    }
+
+    /* Componentes clave */
+    .capacidades-label {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin: 1.1rem 0 0.65rem;
+    }
+    .capacidades-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.65rem;
+    }
+    .capacidad {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.7rem 0.85rem;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.15s ease;
+    }
+    .capacidad:hover { border-color: #90caf9; }
+    .capacidad .nro {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #0d47a1, #1565c0);
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.05rem;
+    }
+    .capacidad .txt {
+      font-size: 0.95rem;
+      line-height: 1.4;
+      color: var(--text-desc);
+      padding-top: 0.2rem;
+      font-weight: 400;
+    }
+    .capacidad .txt strong {
+      font-family: var(--font-display);
+      color: var(--primary-dark);
+      font-weight: 700;
+    }
+
+    /* Especificaciones por contenedor */
+    .specs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin: 1rem 0 0.25rem;
+    }
+    .spec {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--c-admin);
+      overflow: hidden;
+    }
+    .spec.forms { border-top-color: var(--c-forms); }
+    .spec.reports { border-top-color: var(--c-reports); }
+    .spec h4 {
+      font-family: var(--font-display);
+      font-size: 1.02rem;
+      font-weight: 700;
+      margin: 0;
+      padding: 0.75rem 0.9rem 0.6rem;
+      color: var(--primary-dark);
+      letter-spacing: -0.01em;
+      border-bottom: 1px solid #eef2f6;
+    }
+    .spec dl {
+      margin: 0;
+      padding: 0.35rem 0.9rem 0.7rem;
+    }
+    .spec .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.36rem 0;
+      border-bottom: 1px dashed #eef2f6;
+      font-size: 0.9rem;
+    }
+    .spec .row:last-child { border-bottom: none; }
+    .spec dt { color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+    .spec dd {
+      margin: 0;
+      text-align: right;
+      color: var(--primary-dark);
+      font-weight: 600;
+    }
+    .spec .sep {
+      font-family: var(--font-display);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--c-ohs);
+      background: #f3f8fe;
+      padding: 0.4rem 0.9rem;
+      border-top: 1px solid #e3f2fd;
+      border-bottom: 1px solid #e3f2fd;
+    }
+
+    .badge {
+      font-family: var(--font-display);
+      display: inline-block;
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .badge-ok {
+      background: #e8f5e9;
+      color: #1b5e20;
+      border: 1px solid #a5d6a7;
+    }
+    .badge-manual {
+      background: #fff3e0;
+      color: #e65100;
+      border: 1px solid #ffcc80;
+    }
+
+    /* Tablas */
+    .tabla {
+      margin-top: 0.85rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .tabla table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    .tabla th {
+      font-family: var(--font-display);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-align: left;
+      color: var(--text-muted);
+      background: #f7f9fc;
+      padding: 0.65rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .tabla td {
+      padding: 0.55rem 0.9rem;
+      border-top: 1px solid #eef2f6;
+      color: var(--text-desc);
+      vertical-align: middle;
+    }
+    .tabla tr:first-child td { border-top: none; }
+    .tabla tbody tr:hover td { background: #fafcff; }
+    .tabla td.svc {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--primary-dark);
+      white-space: nowrap;
+    }
+    .tabla td.svc::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+      background: var(--c-admin);
+    }
+    .tabla td.svc.ohs::before { background: var(--c-ohs); }
+    .tabla td.svc.forms::before { background: var(--c-forms); }
+    .tabla td.svc.reports::before { background: var(--c-reports); }
+    .tabla td.num {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+    .tabla td.num.diff { color: #b26a00; font-weight: 600; }
+
+    /* Fichas de detalle técnico */
+    .detalles {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 1rem 0 0.25rem;
+    }
+    .detalle {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 1rem 1.15rem 1.1rem;
+      border-left: 4px solid var(--primary);
+    }
+    .detalle.d-2 { border-left-color: #00838f; }
+    .detalle.d-3 { border-left-color: #2e7d32; }
+    .detalle.d-4 { border-left-color: #558b2f; }
+    .detalle.d-5 { border-left-color: #6a1b9a; }
+    .detalle.d-6 { border-left-color: #546e7a; }
+    .detalle h4 {
+      font-family: var(--font-display);
+      margin: 0 0 0.55rem 0;
+      color: var(--primary-dark);
+      font-size: 1.08rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+    .detalle h4 .d-num {
+      flex-shrink: 0;
+      min-width: 1.7rem;
+      height: 1.7rem;
+      padding: 0 0.45rem;
+      border-radius: 999px;
+      background: var(--primary);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .detalle.d-2 h4 .d-num { background: #00838f; }
+    .detalle.d-3 h4 .d-num { background: #2e7d32; }
+    .detalle.d-4 h4 .d-num { background: #558b2f; }
+    .detalle.d-5 h4 .d-num { background: #6a1b9a; }
+    .detalle.d-6 h4 .d-num { background: #546e7a; }
+    .detalle h4 .d-tag {
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0;
+    }
+    .detalle p {
+      margin: 0 0 0.65rem 0;
+      font-size: 0.98rem;
+      line-height: 1.6;
+      text-align: justify;
+      color: var(--text-desc);
+    }
+    .detalle p:last-child { margin-bottom: 0; }
+
+    .cta-list {
+      margin: 0.35rem 0 0.65rem;
+      padding-left: 1.2rem;
+      color: var(--text-desc);
+      line-height: 1.65;
+      font-size: 0.98rem;
+      font-weight: 400;
+    }
+    .cta-list:last-child { margin-bottom: 0; }
+    .cta-list li { margin-bottom: 0.3rem; }
+    .cta-list strong {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    /* Bloques de código */
+    pre.code {
+      margin: 0.5rem 0 0.75rem;
+      background: #0f1b2d;
+      color: #e6edf3;
+      padding: 0.9rem 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.6;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+    }
+    pre.code:last-child { margin-bottom: 0; }
+    pre.code .c { color: #7d8ea3; }
+    pre.code .k { color: #79c0ff; }
+    pre.code .s { color: #a5d6ff; }
+
+    /* Comandos (plegables) */
+    .cmds {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      margin-top: 0.9rem;
+    }
+    .cmd {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .cmd summary {
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.75rem 0.95rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: var(--primary-dark);
+    }
+    .cmd summary::-webkit-details-marker { display: none; }
+    .cmd summary::after {
+      content: "+";
+      margin-left: auto;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+    .cmd[open] summary::after { content: "–"; }
+    .cmd summary .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+      flex-shrink: 0;
+    }
+    .cmd.admin summary .dot { background: var(--c-admin); }
+    .cmd.forms summary .dot { background: var(--c-forms); }
+    .cmd.reports summary .dot { background: var(--c-reports); }
+    .cmd summary .sub {
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .cmd .body {
+      padding: 0 0.95rem 0.95rem;
+      border-top: 1px solid #eef2f6;
+    }
+    .cmd .body p {
+      font-size: 0.92rem;
+      margin: 0.7rem 0 0.2rem;
+      text-align: left;
+    }
+
+    /* Beneficios */
+    .benefits {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.85rem;
+    }
+    .benefit {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 0.95rem 1.05rem;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    .benefit h4 {
+      font-family: var(--font-display);
+      margin: 0 0 0.4rem 0;
+      color: var(--primary-dark);
+      font-size: 1.02rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .benefit p {
+      margin: 0;
+      font-size: 0.98rem;
+      text-align: left;
+      color: var(--text-desc);
+      line-height: 1.55;
+      font-weight: 400;
+    }
+
+    .message-box {
+      margin-top: 1rem;
+      padding: 1.05rem 1.25rem;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%);
+      border: 1px solid rgba(13, 71, 161, 0.25);
+      font-size: var(--size-desc);
+      line-height: var(--leading-desc);
+      font-weight: 400;
+      color: var(--text-desc);
+    }
+    .message-box strong {
+      font-family: var(--font-display);
+      font-weight: 700;
+    }
+
+    .doc-footer {
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin: 0.5rem 0 1rem;
+    }
+    .doc-footer strong {
+      font-family: var(--font-display);
+      color: var(--primary-dark);
+    }
+
+    @media (max-width: 820px) {
+      .arq-containers { grid-template-columns: 1fr; }
+      .arq-mounts { display: none; }
+      .dom-parts { grid-template-columns: 1fr; }
+      .specs { grid-template-columns: 1fr; }
+      .capacidades-grid { grid-template-columns: 1fr; }
+      .tabla { overflow-x: auto; }
+    }
+
+    @media (max-width: 700px) {
+      .comercial-header {
+        flex-wrap: wrap;
+        background-position: top left;
+        min-height: auto;
+      }
+      .comercial-header::before {
+        background: rgba(255, 255, 255, 0.88);
+      }
+      .comercial-header .title-wrap {
+        max-width: 100%;
+        min-width: 0;
+        width: 100%;
+        text-align: left;
+      }
+      .comercial-header .title-wrap h1 .header-line-2 { font-size: 1.22rem; }
+      .intro-propuesta, .toc { margin-left: 0; max-width: 100%; }
+    }
+
+    @media print {
+      body { font-size: 12pt; }
+      .comercial-header .title-wrap h1 .header-line-2 { font-size: 16pt; }
+      .toc { display: none; }
+      .cmd .body { display: block !important; }
+      .slide-block { break-inside: avoid-page; }
+    }
+  </style>
+  <style>
+    a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    a code { color: var(--primary); }
+
+    /* Notas destacadas */
+    .callout {
+      margin: 0.9rem 0;
+      padding: 0.85rem 1.05rem;
+      border-radius: var(--radius);
+      border: 1px solid #bbdefb;
+      border-left: 4px solid var(--primary);
+      background: #f3f8fe;
+      font-size: 0.97rem;
+      line-height: 1.6;
+      color: var(--text-desc);
+    }
+    .callout:last-child { margin-bottom: 0; }
+    .callout .lbl {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 0.25rem;
+    }
+    .callout.warn { background: #fff8e1; border-color: #ffe082; border-left-color: #f9a825; }
+    .callout.warn .lbl { color: #b26a00; }
+    .callout.ok { background: #f1f8f2; border-color: #c8e6c9; border-left-color: var(--success); }
+    .callout.ok .lbl { color: #1b5e20; }
+    .callout ul { margin: 0.3rem 0 0; padding-left: 1.2rem; }
+    .callout li { margin-bottom: 0.2rem; }
+    .intro-propuesta .callout { text-align: left; }
+
+    /* Flujo del build multi-stage */
+    .pipeline {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+      margin: 0.9rem 0 1rem;
+      padding: 0.85rem 0.95rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+    .pipeline .stage-lbl {
+      flex-basis: 100%;
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+    .pipeline .stage-lbl:first-child { margin-top: 0; }
+    .step-chip {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary-dark);
+      background: #f3f8fe;
+      border: 1px solid #bbdefb;
+      border-radius: 999px;
+      padding: 0.2rem 0.7rem;
+      white-space: nowrap;
+    }
+    .step-chip.base { background: #eceff1; border-color: #cfd8dc; color: #37474f; }
+    .step-chip.final { background: #e8f5e9; border-color: #a5d6a7; color: #1b5e20; }
+    .step-chip.check { background: #fff3e0; border-color: #ffcc80; color: #e65100; }
+    .pipeline .sep { color: var(--primary); font-weight: 700; }
+
+    /* Tablas genéricas */
+    .tabla td code { font-size: 0.8rem; }
+    .tabla td.lib { font-family: var(--font-mono); font-size: 0.82rem; white-space: nowrap; }
+    .lib-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.45rem;
+      margin: 0.6rem 0 0.8rem;
+    }
+    .lib-grid span {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      text-align: center;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.3rem 0.35rem;
+      color: var(--primary-dark);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .detalle ol.cta-list,
+    .slide-block ol.cta-list { padding-left: 1.4rem; }
+    .cta-list ul { margin: 0.25rem 0 0.2rem; padding-left: 1.1rem; }
+
+    .env-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.45rem;
+      margin-top: 0.4rem;
+    }
+    .env-grid div {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      background: #fff;
+      border: 1px solid #dbe4ee;
+      border-radius: 6px;
+      padding: 0.3rem 0.55rem;
+      color: #0a1f4d;
+      overflow-wrap: anywhere;
+    }
+
+    pre.code.full { max-height: 640px; }
+
+    @media (max-width: 820px) {
+      .lib-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .env-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+  <style>
+
+    a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    a code { color: var(--primary); }
+
+    .slide-block h3 .num {
+      min-width: 30px;
+      width: auto;
+      padding: 0 0.55rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+    }
+    .slide-block h3 .num.anexo {
+      background: #546e7a;
+      letter-spacing: 0.02em;
+    }
+    .slide-block h3 .num.lecciones {
+      background: var(--success);
+    }
+    .slide-block.anexo { border-left-color: #546e7a; }
+    .slide-block.lecciones { border-left-color: var(--success); }
+
+    .slide-block h4.sub {
+      padding-top: 0.75rem;
+      border-top: 1px dashed #dfe6ee;
+      scroll-margin-top: 1rem;
+    }
+    .slide-block > h4.sub:first-of-type { border-top: none; padding-top: 0; }
+
+    .slide-block ul,
+    .slide-block ol {
+      margin: 0.4rem 0 0.9rem;
+      padding-left: 1.4rem;
+      font-size: 0.98rem;
+      line-height: 1.6;
+      color: var(--text-desc);
+    }
+    .slide-block li { margin-bottom: 0.3rem; }
+    .slide-block li > ul,
+    .slide-block li > ol { margin: 0.3rem 0 0.2rem; }
+    .slide-block li > pre.code { margin: 0.4rem 0 0.5rem; }
+
+    pre.code {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    pre.code code {
+      background: none;
+      padding: 0;
+      color: inherit;
+      font-size: inherit;
+      font-family: inherit;
+      border-radius: 0;
+    }
+    :not(pre) > code { overflow-wrap: anywhere; }
+
+    .callout {
+      margin: 0.9rem 0;
+      padding: 0.85rem 1.05rem;
+      border-radius: var(--radius);
+      border: 1px solid #bbdefb;
+      border-left: 4px solid var(--primary);
+      background: #f3f8fe;
+      font-size: 0.97rem;
+      line-height: 1.6;
+      color: var(--text-desc);
+    }
+    .callout.warn { background: #fff8e1; border-color: #ffe082; border-left-color: #f9a825; }
+    .callout.ok { background: #f1f8f2; border-color: #c8e6c9; border-left-color: var(--success); }
+    .callout p {
+      margin: 0 0 0.45rem !important;
+      font-size: 0.97rem !important;
+      line-height: 1.6 !important;
+      text-align: left !important;
+    }
+    .callout p:last-child { margin-bottom: 0 !important; }
+    .callout ul, .callout ol { margin: 0.3rem 0 0.45rem; font-size: 0.96rem; }
+    .callout pre.code { margin: 0.45rem 0; }
+    .callout .tabla { margin: 0.5rem 0; }
+
+    .tabla { overflow-x: auto; margin: 0.85rem 0; }
+    .tabla table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    .tabla th {
+      font-family: var(--font-display);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-align: left;
+      color: var(--text-muted);
+      background: #f7f9fc;
+      padding: 0.65rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .tabla td {
+      padding: 0.55rem 0.9rem;
+      border-top: 1px solid #eef2f6;
+      color: var(--text-desc);
+      vertical-align: top;
+    }
+    .tabla tbody tr:hover td { background: #fafcff; }
+    .tabla td ul, .tabla td ol { margin: 0; padding-left: 1.1rem; font-size: 0.9rem; }
+
+    figure.shot {
+      margin: 1rem 0 1.15rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem;
+      box-shadow: var(--shadow-sm);
+    }
+    figure.shot img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+      border-radius: 8px;
+      border: 1px solid #eef2f6;
+      background: #fff;
+    }
+    figure.shot figcaption {
+      margin-top: 0.55rem;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.4;
+    }
+    figure.shot .placeholder {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      padding: 1.4rem 1rem;
+      text-align: center;
+      background: #f7f9fc;
+      border-radius: 8px;
+      border: 1px dashed #cfd8dc;
+    }
+
+    .status {
+      font-family: var(--font-display);
+      display: inline-block;
+      margin-left: 0.45rem;
+      padding: 0.12rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      vertical-align: middle;
+    }
+    .status.done { background: #e8f5e9; color: #1b5e20; border: 1px solid #a5d6a7; }
+    .status.pending { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+
+    .fixed {
+      font-family: var(--font-mono);
+      font-size: 0.82em;
+      background: #eef3f8;
+      color: #0a1f4d;
+      padding: 0.08rem 0.35rem;
+      border-radius: 4px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app-wrap">
+    <a class="back-link" href="../../index.html">← Regresar a la documentación del proyecto</a>
+
+    <header class="comercial-header">
+      <div class="title-wrap">
+        <h1>
+          <span class="header-line-1">AWS ECS · Fargate</span>
+          <span class="header-line-2">Crear el contenedor Reports</span>
+          <span class="header-line-3">Task definition · Servicio · Cloud Map · rwservlet</span>
+        </h1>
+        <p class="header-tagline">reports-server sobre el cluster forms_report, alineado con Forms</p>
+      </div>
+    </header>
+
+    <div class="intro intro-propuesta">
+      <h2>Visión general</h2>
+      <p>
+        Guía paso a paso para crear la <strong>task definition</strong> <code>reports-server</code>
+      y el <strong>servicio</strong> correspondiente en el cluster <code>forms_report</code>
+      (Managed Server <code>WLS_REPORTS</code>), reutilizando la imagen ECR, el EFS
+      <code>rector-dev</code>, la red y el namespace Cloud Map <code>forms.local</code>
+      ya validados con los servicios <code>forms-admin</code> y <code>forms-server</code>
+      (ver <a href="../forms/index.html">guía ECS Forms</a>).
+      </p>
+      <p class="slogan">Service Discovery, dominio en EFS y validación funcional de Reports.</p>
+    </div>
+
+    <nav class="toc" aria-label="Contenido"><a href="#paso-0">0 · Preparación y valores fijos</a><a href="#paso-1">1 · Crear task definition — inicio</a><a href="#paso-2">2 · Infraestructura y roles</a><a href="#paso-3">3 · Contenedor: imagen, puertos, entorno…</a><a href="#paso-4">4 · Almacenamiento efímero + volúmenes E…</a><a href="#paso-5">5 · Puntos de montaje, logs y crear</a><a href="#paso-6">6 · Crear servicio en el cluster</a><a href="#paso-7">7 · Opciones de implementación</a><a href="#paso-8">8 · Service Discovery weblogic-reports</a><a href="#paso-9">9 · Redes + puerto 9012 en el Security G…</a><a href="#paso-10">10 · Verificar Running y ECS Exec</a><a href="#paso-11">11 · Ajustes del dominio para weblogic-re…</a><a href="#paso-12">12 · Arranque de Node Manager y WLS_REPOR…</a><a href="#paso-13">13 · Validación funcional de Reports</a><a href="#anexo-json">Anexo · Task definition JSON (reports-server)</a><a href="#anexo-r2">Anexo · Imagen r2: construir, subir a ECR y actual…</a><a href="#anexo-cli">Anexo · Comandos AWS CLI</a><a href="#lecciones-criticas">★ · Lecciones críticas</a></nav>
+
+    <div class="card">
+      <div class="card-body">
+
+        <section class="slide-block" id="paso-0">
+          <h3><span class="num">0</span> Preparación y valores fijos<span class="status pending">Pendiente</span></h3>
+
+      <p>
+        La infraestructura compartida (cluster, EFS, VPC, SG, roles, namespace Cloud Map,
+        ruta a la BD en <code>Pub-RT</code>) ya existe desde el levantamiento de Forms.
+        Para Reports solo cambian nombres, puertos, el script de entrada y el registro DNS.
+      </p>
+      <div class="tabla"><table>
+        <tr><th>Concepto</th><th>Valor</th></tr>
+        <tr><td>Cluster</td><td><code>forms_report</code></td></tr>
+        <tr><td>Imagen ECR</td><td><code>730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:r2</code> (o su digest <code>@sha256:…</code>). <strong>No usar <code>r1</code></strong>: le faltan las librerías Motif/X11 del motor de Reports. Usar la misma imagen en <code>forms-admin</code>, <code>forms-server</code> y <code>reports-server</code>.</td></tr>
+        <tr><td>EFS</td><td><code>fs-08471cc88d2a8edc3</code> (rector-dev)</td></tr>
+        <tr><td>VPC</td><td><code>vpc-055a4007418b34e64</code></td></tr>
+        <tr><td>Subnet</td><td>
+          <strong>Solo pública:</strong> <code>subnet-01212efd4a9ce759b</code> (<code>pub-A-SN</code>)<br />
+          Acceso a Oracle <code>192.168.229.137</code> vía ruta ya existente en <code>Pub-RT</code>.
+        </td></tr>
+        <tr><td>SG tarea</td><td><code>sg-0e1787d32bac71fcd</code> (<code>forms-sg-ecs</code>) — ya tiene NFS 2049 hacia EFS</td></tr>
+        <tr><td>Rol ejecución</td><td><code>ecsTaskExecutionRole</code></td></tr>
+        <tr><td>Rol tarea (Exec)</td><td><code>ecs-forms-admin-task-role</code> (reutilizable)</td></tr>
+        <tr><td>Namespace Cloud Map</td><td><code>forms.local</code> (<code>ns-r3zqawwpjtp5pzue</code>)</td></tr>
+        <tr><td>Nombre familia TD</td><td><code>reports-server</code></td></tr>
+        <tr><td>Nombre servicio</td><td><code>reports-server</code></td></tr>
+        <tr><td>Nombre contenedor</td><td><code>reports-server</code></td></tr>
+        <tr><td>Managed Server</td><td><code>WLS_REPORTS</code> (Machine <code>ReportsMachine</code>)</td></tr>
+        <tr><td>DNS Discovery</td><td><code>weblogic-reports.forms.local</code></td></tr>
+      </table></div>
+
+      <h4 class="sub">Nombres Cloud Map en el dominio (antes del primer arranque)</h4>
+      <p>
+        Los tres hosts del dominio se usan con FQDN desde el principio, igual que en la guía de Forms
+        (Paso 0 — nombres Cloud Map):
+      </p>
+      <div class="tabla"><table>
+        <tr><th>Machine</th><th><code>listen-address</code> / <code>ListenAddress</code></th><th>Node Manager</th></tr>
+        <tr><td><code>AdminServerMachine</code></td><td><code>weblogic-admin.forms.local</code></td><td><code>nodemanager/</code></td></tr>
+        <tr><td><code>FormsMachine</code></td><td><code>weblogic-forms.forms.local</code></td><td><code>nodemanager_forms/</code></td></tr>
+        <tr><td><code>ReportsMachine</code></td><td><code>weblogic-reports.forms.local</code></td><td><code>nodemanager_reports/</code></td></tr>
+      </table></div>
+      <p>Con AdminServer y managed servers detenidos, desde el contenedor <code>admin</code> como <code>oracle</code>:</p>
+      <pre class="code">/u01/oracle/scripts/set-cloudmap-hostnames.sh --check
+/u01/oracle/scripts/set-cloudmap-hostnames.sh</pre>
+      <div class="callout">
+        Si ya se ejecutó al levantar Forms, <code>--check</code> debe mostrar las tres líneas con
+        <code>.forms.local</code> y no hay que hacer nada más (el Paso 11 queda como verificación).
+        Requiere también la regla interna <strong>Todo el tráfico</strong> en <code>forms-sg-ecs</code> (Paso 9).
+      </div>
+
+      <h4 class="sub">Diferencias respecto a <code>forms-server</code></h4>
+      <div class="tabla"><table>
+        <tr><th>Concepto</th><th>Forms</th><th>Reports</th></tr>
+        <tr><td>Servicio compose</td><td><code>forms</code> / <code>weblogic-forms</code></td><td><code>reports</code> / <code>weblogic-reports</code></td></tr>
+        <tr><td>Managed Server</td><td><code>WLS_FORMS</code></td><td><code>WLS_REPORTS</code></td></tr>
+        <tr><td>Puerto HTTP / HTTPS</td><td><code>9001</code> / <code>9501</code></td><td><code>9012</code> / <code>9512</code></td></tr>
+        <tr><td>Administration Port</td><td><code>9991</code></td><td><code>9992</code></td></tr>
+        <tr><td>Node Manager</td><td><code>5556</code> (<code>nodemanager_forms</code>)</td><td><code>5556</code> (<code>nodemanager_reports</code>)</td></tr>
+        <tr><td>Scripts EFS</td><td><code>.../scripts/forms</code></td><td><code>.../scripts/reports</code></td></tr>
+        <tr><td><code>JAVA_OPTIONS</code></td><td><code>-Dforms.instance=forms1</code></td><td>No aplica</td></tr>
+        <tr><td>Variables de compilación (rev. 9)</td><td><code>FORMS_PATH</code>, <code>FORMS_MODULE_PATH</code>, <code>FORMS_INSTANCE</code>, <code>FRMCMP</code>, <code>PROC</code>, <code>PCSCFG</code>, <code>PROC_INCLUDE</code>, <code>CC</code></td><td>No aplica (se compila en <code>forms-server</code>)</td></tr>
+        <tr><td><code>TNS_ADMIN</code></td><td><code>$DOMAIN_HOME/config/fmwconfig</code></td><td>Igual</td></tr>
+        <tr><td>Log group</td><td><code>/ecs/forms-server</code></td><td><code>/ecs/reports-server</code></td></tr>
+        <tr><td>URL de prueba</td><td><code>/forms/frmservlet</code></td><td><code>/reports/rwservlet</code></td></tr>
+      </table></div>
+
+      <div class="callout warn">
+        <strong>Paths EFS (sin <code>/domain</code>):</strong><br />
+        domains → <code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/domains</code><br />
+        app → <code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/app</code><br />
+        scripts → <code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/scripts/reports</code>
+      </div>
+      <div class="callout">
+        <strong>Verificar antes de crear la TD</strong> que la carpeta <code>scripts/reports</code> exista en
+        el EFS con <code>entrypoint.sh</code>, <code>startNodeManager.sh</code>,
+        <code>create-reports-machine.py</code>, <code>startWLSReports.sh</code>,
+        <code>create-reports-tools.py</code> y <code>prepare-reports-domain.sh</code>
+        (origen: <code>dist/scripts/reports/</code> del proyecto compose).
+        Si el <code>rootDirectory</code> no existe, la tarea falla al montar el volumen
+        (<code>ResourceInitializationError … mount.nfs4: … No such file or directory</code>).
+        Se puede comprobar desde el contenedor <code>forms-admin</code> (ECS Exec), que monta
+        <code>domains</code> con el mismo EFS, o montando temporalmente la raíz del EFS.
+      </div>
+      <figure class="shot" data-shot="paso-0a">
+        <img src="assets/paso-00a-cluster-servicios.png" alt="Cluster forms_report, pestaña Servicios: admin, forms y reports-server activos" />
+        <figcaption>
+          Paso 0a — Cluster <code>forms_report</code> (Activo), pestaña <strong>Servicios</strong>: <code>admin</code>
+          (<code>forms-admin:6</code>), <code>forms</code> (<code>forms-server:9</code>) y <code>reports-server</code>
+          (<code>reports-server:2</code>), cada uno con 1/1 tareas en ejecución
+        </figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-0b">
+        <img src="assets/paso-00b-cluster-tareas.png" alt="Cluster forms_report, pestaña Tareas: tres tareas en ejecución" />
+        <figcaption>
+          Paso 0b — Pestaña <strong>Tareas</strong>: las tres tareas en <em>Ejecutando</em>, con su definición de tarea y su grupo
+          (<code>service:admin</code>, <code>service:forms</code>, <code>service:reports-server</code>)
+        </figcaption>
+      </figure>
+        </section>
+
+        <section class="slide-block" id="paso-1">
+          <h3><span class="num">1</span> Crear task definition — inicio<span class="status pending">Pendiente</span></h3>
+
+      <ol>
+        <li>ECS → <strong>Definiciones de tareas</strong> → <strong>Crear nueva definición de tarea</strong></li>
+        <li>Familia: <code>reports-server</code></li>
+      </ol>
+      <div class="callout">
+        Alternativa: abrir <code>forms-server</code> (última revisión) → <strong>Crear nueva revisión</strong>
+        no sirve, porque cambiaría la familia de Forms. Para partir de la configuración de Forms usar
+        el <a href="#anexo-json">JSON del anexo</a> con <strong>Crear nueva definición de tarea con JSON</strong>.
+      </div>
+      <figure class="shot" data-shot="paso-1">
+        <img src="assets/paso-01-02-familia-infra.png" alt="Familia de definición de tareas reports-server, revisión de fuente 2" />
+        <figcaption>Paso 1 — Familia <code>reports-server</code> (pantalla de nueva revisión a partir de la revisión 2)</figcaption>
+      </figure>
+        </section>
+
+        <section class="slide-block" id="paso-2">
+          <h3><span class="num">2</span> Infraestructura y roles<span class="status pending">Pendiente</span></h3>
+
+      <div class="tabla"><table>
+        <tr><th>Campo</th><th>Valor</th></tr>
+        <tr><td>Tipo de inicio</td><td>AWS Fargate</td></tr>
+        <tr><td>SO / Arquitectura</td><td>Linux / X86_64</td></tr>
+        <tr><td>CPU</td><td>2 vCPU</td></tr>
+        <tr><td>Memoria</td><td>4 GB (subir a 8 GB si hay reportes pesados o varios engines <code>rwEng</code>)</td></tr>
+        <tr><td>Rol de tarea</td><td><code>ecs-forms-admin-task-role</code></td></tr>
+        <tr><td>Rol de ejecución</td><td><code>ecsTaskExecutionRole</code></td></tr>
+      </table></div>
+      <div class="callout">
+        Reports lanza procesos engine (<code>rwEngine</code>) adicionales a la JVM de
+        <code>WLS_REPORTS</code>; con 4 GB alcanza para pruebas con reportes modelo. Si aparece
+        <code>OutOfMemoryError</code> o la tarea se detiene con <code>OutOfMemory</code> /
+        exit code <code>137</code>, crear una nueva revisión con 8 GB.
+      </div>
+      <figure class="shot" data-shot="paso-2">
+        <img src="assets/paso-01-02-familia-infra.png" alt="Requisitos de infraestructura: AWS Fargate, Linux/X86_64, awsvpc, 2 vCPU, 4 GB" />
+        <figcaption>Paso 2 — Fargate, Linux/X86_64, 2 vCPU, 4 GB</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-2b">
+        <img src="assets/paso-02b-03a-roles-imagen.png" alt="Rol de tarea ecs-forms-admin-task-role y rol de ejecución ecsTaskExecutionRole" />
+        <figcaption>Paso 2b — Rol de tarea <code>ecs-forms-admin-task-role</code> + ejecución <code>ecsTaskExecutionRole</code></figcaption>
+      </figure>
+        </section>
+
+        <section class="slide-block" id="paso-3">
+          <h3><span class="num">3</span> Contenedor: imagen, puertos, entorno, comando<span class="status pending">Pendiente</span></h3>
+
+      <div class="tabla"><table>
+        <tr><th>Campo</th><th>Valor</th></tr>
+        <tr><td>Nombre</td><td><code>reports-server</code></td></tr>
+        <tr><td>Esencial</td><td>Sí</td></tr>
+        <tr><td>URI imagen</td><td><code>730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:r2</code> (ver <a href="#anexo-r2">Anexo — imagen r2</a>)</td></tr>
+        <tr><td>Puertos</td><td>9012 / 9512 / 9992 / 5556</td></tr>
+        <tr><td>Comando (pruebas)</td><td>Entrypoint <code>sh,-c</code> + comando <code>sleep infinity</code></td></tr>
+        <tr><td>Comando (producción)</td><td><code>/u01/oracle/scripts/entrypoint.sh</code></td></tr>
+        <tr><td>Directorio de trabajo</td><td><code>/u01/oracle</code></td></tr>
+      </table></div>
+
+      <h4 class="sub">Mapeos de puertos</h4>
+      <div class="tabla"><table>
+        <tr><th>Puerto</th><th>Protocolo</th><th>Nombre</th><th>App protocol</th><th>Uso</th></tr>
+        <tr><td><code>9012</code></td><td>TCP</td><td><code>wls-reports-http</code></td><td>HTTP</td><td><code>WLS_REPORTS</code> HTTP (<code>/reports/rwservlet</code>)</td></tr>
+        <tr><td><code>9512</code></td><td>TCP</td><td><code>wls-reports-https</code></td><td>HTTP</td><td><code>WLS_REPORTS</code> HTTPS</td></tr>
+        <tr><td><code>9992</code></td><td>TCP</td><td><code>wls-reports-admin</code></td><td>—</td><td>Administration Port del managed</td></tr>
+        <tr><td><code>5556</code></td><td>TCP</td><td><code>nodemanager</code></td><td>—</td><td>Node Manager <code>ReportsMachine</code></td></tr>
+      </table></div>
+      <div class="callout">
+        En compose el Node Manager de Reports se publicaba como <code>5558:5556</code> para no chocar
+        con admin y forms en el mismo host. En Fargate cada tarea tiene su propia ENI/IP, así que se
+        usa <code>5556</code> directo.
+      </div>
+
+      <p>Variables de entorno (equivalentes al servicio <code>reports</code> del compose):</p>
+      <pre class="code">ORACLE_HOME=/u01/oracle
+DOMAIN_NAME=forms_domain
+DOMAIN_HOME=/u01/oracle/user_projects/domains/forms_domain
+TNS_ADMIN=/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig
+ADMIN_SERVER_NAME=AdminServer
+ADMIN_SERVER_HOST=weblogic-admin.forms.local
+ADMIN_SERVER_PORT=7001
+ADMIN_USER=weblogic
+ADMIN_PASSWORD=&lt;usar Secrets Manager luego&gt;
+MANAGED_SERVER_NAME=WLS_REPORTS
+MANAGED_SERVER_PORT=9012
+NODE_MANAGER_PORT=5556
+LD_LIBRARY_PATH=/u01/oracle/lib:/u01/oracle/oracle_common/lib</pre>
+      <div class="callout warn">
+        <strong>No</strong> copiar la línea del compose <code>PATH=/u01/oracle/bin:…:${PATH}</code>:
+        ECS <strong>no</strong> expande <code>${PATH}</code> y el contenedor falla con
+        <code>exec: "sleep": executable file not found in $PATH</code>. Omitir <code>PATH</code>
+        o definirlo completo:
+        <code>/u01/oracle/bin:/u01/oracle/oracle_common/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin</code>.
+      </div>
+      <div class="callout">
+        <code>ADMIN_SERVER_HOST=weblogic-admin.forms.local</code> ya resuelve vía Cloud Map
+        (registro creado en el servicio <code>forms-admin</code>). No usar el short name
+        <code>weblogic-admin</code> del compose.
+      </div>
+      <figure class="shot" data-shot="paso-3a">
+        <img src="assets/paso-02b-03a-roles-imagen.png" alt="Contenedor reports-server esencial, URI de imagen forms-docker@sha256:fbdf8505..." />
+        <figcaption>Paso 3a — Contenedor <code>reports-server</code> (esencial) con imagen ECR fijada por digest
+          <code>forms-docker@sha256:fbdf850571115d74a8abb6324c1471db7be03428c2fd9d2413fb02899365896f</code> (imagen <code>r2</code>)</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-3b">
+        <img src="assets/paso-03b-puertos.png" alt="Mapeos de puertos 9012, 9512, 9992 y 5556 TCP" />
+        <figcaption>Paso 3b — Puertos 9012, 9512, 9992, 5556</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-3c">
+        <img src="assets/paso-03c-env.png" alt="Variables de entorno de reports-server" />
+        <figcaption>Paso 3c — Environment (password en claro solo para pruebas; migrar a Secrets Manager)</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-3d">
+        <img src="assets/paso-03d-comando.png" alt="Configuración de Docker: punto de entrada sh,-c, comando sleep infinity, directorio /u01/oracle" />
+        <figcaption>
+          Paso 3d — Docker config: punto de entrada <code>sh,-c</code>, comando
+          <code>sleep infinity</code>, directorio de trabajo <code>/u01/oracle</code>
+        </figcaption>
+      </figure>
+      <div class="callout warn">
+        Con <code>sleep infinity</code> la tarea queda <strong>RUNNING</strong> sin arrancar WebLogic,
+        para entrar con ECS Exec, ajustar el dominio (Paso 11) y arrancar Node Manager /
+        <code>WLS_REPORTS</code> a mano (Paso 12). Cuando el arranque sea estable, crear una nueva
+        revisión con <code>/u01/oracle/scripts/entrypoint.sh</code> como comando.
+      </div>
+        </section>
+
+        <section class="slide-block" id="paso-4">
+          <h3><span class="num">4</span> Almacenamiento efímero + volúmenes EFS<span class="status pending">Pendiente</span></h3>
+
+      <div class="tabla"><table>
+        <tr><th>Campo</th><th>Valor</th></tr>
+        <tr><td>Almacenamiento efímero</td><td><strong>100</strong> GiB (la imagen es grande; con el default de 20 GiB falla con <code>no space left on device</code>)</td></tr>
+      </table></div>
+      <div class="tabla"><table>
+        <tr><th>Volumen</th><th>File system</th><th>Root directory</th><th>Cifrado en tránsito</th></tr>
+        <tr>
+          <td><code>efs-domains</code></td>
+          <td><code>fs-08471cc88d2a8edc3</code></td>
+          <td><code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/domains</code></td>
+          <td>Habilitado</td>
+        </tr>
+        <tr>
+          <td><code>efs-app</code></td>
+          <td><code>fs-08471cc88d2a8edc3</code></td>
+          <td><code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/app</code></td>
+          <td>Habilitado</td>
+        </tr>
+        <tr>
+          <td><code>efs-scripts</code></td>
+          <td><code>fs-08471cc88d2a8edc3</code></td>
+          <td><code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/scripts/reports</code></td>
+          <td>Habilitado</td>
+        </tr>
+      </table></div>
+      <div class="callout warn">
+        No anteponer <code>/domain</code> al root directory. El único cambio respecto a Forms es
+        <code>scripts/forms</code> → <code>scripts/reports</code>.
+      </div>
+      <figure class="shot" data-shot="paso-4a">
+        <img src="assets/paso-04a-ephemeral-efs-domains.png" alt="Almacenamiento efímero 100 GiB y volumen 1 efs-domains" />
+        <figcaption>Paso 4a — Almacenamiento efímero configurado en 100 GiB</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-4b">
+        <img src="assets/paso-04a-ephemeral-efs-domains.png" alt="Volumen efs-domains en EFS rector-dev, directorio raíz domain_forms/domains" />
+        <figcaption>Paso 4b.1 — Volumen <code>efs-domains</code> en EFS</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-4b-app">
+        <img src="assets/paso-04b-efs-app.png" alt="Volumen efs-app en EFS rector-dev, directorio raíz domain_forms/app" />
+        <figcaption>Paso 4b.2 — Volumen <code>efs-app</code> en EFS</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-4b-scripts">
+        <img src="assets/paso-04b-efs-scripts.png" alt="Volumen efs-scripts en EFS rector-dev, directorio raíz domain_forms/scripts/reports" />
+        <figcaption>Paso 4b.3 — Volumen <code>efs-scripts</code> apuntando a <code>scripts/reports</code></figcaption>
+      </figure>
+        </section>
+
+        <section class="slide-block" id="paso-5">
+          <h3><span class="num">5</span> Puntos de montaje, logs y crear<span class="status pending">Pendiente</span></h3>
+
+      <div class="tabla"><table>
+        <tr><th>Volumen</th><th>Ruta contenedor</th><th>Solo lectura</th></tr>
+        <tr><td>efs-domains</td><td><code>/u01/oracle/user_projects/domains</code></td><td>No</td></tr>
+        <tr><td>efs-app</td><td><code>/u01/oracle/user_projects/apps</code></td><td>No</td></tr>
+        <tr><td>efs-scripts</td><td><code>/u01/oracle/scripts</code></td><td>No</td></tr>
+      </table></div>
+      <div class="tabla"><table>
+        <tr><th>Recopilación de logs</th><th>Valor</th></tr>
+        <tr><td>Driver</td><td><code>awslogs</code> (CloudWatch)</td></tr>
+        <tr><td><code>awslogs-group</code></td><td><code>/ecs/reports-server</code></td></tr>
+        <tr><td><code>awslogs-create-group</code></td><td><code>true</code></td></tr>
+        <tr><td><code>awslogs-region</code></td><td><code>us-east-1</code></td></tr>
+        <tr><td><code>awslogs-stream-prefix</code></td><td><code>ecs</code></td></tr>
+      </table></div>
+      <p>Crear la definición → queda <code>reports-server:1</code>.</p>
+      <figure class="shot" data-shot="paso-5a">
+        <img src="assets/paso-05a-mounts.png" alt="Puntos de montaje efs-domains, efs-app y efs-scripts en reports-server" />
+        <figcaption>Paso 5a — Puntos de montaje: <code>efs-domains</code> → <code>/u01/oracle/user_projects/domains</code>,
+          <code>efs-app</code> → <code>/u01/oracle/user_projects/apps</code>, <code>efs-scripts</code> → <code>/u01/oracle/scripts</code> (lectura/escritura)</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-5f">
+        <img src="assets/paso-05f-td-registro.png" alt="Recopilación de registros en CloudWatch: awslogs-group /ecs/reports-server" />
+        <figcaption>Paso 5 — Registro en CloudWatch: <code>awslogs-group=/ecs/reports-server</code>, <code>awslogs-region=us-east-1</code>,
+          <code>awslogs-stream-prefix=ecs</code>. <code>awslogs-create-group=true</code> no basta: el grupo se crea a mano (ver abajo)</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-5b">
+        <img src="assets/paso-05b-td-creada.png" alt="Familia reports-server con revisiones 1 y 2 en estado Activo" />
+        <figcaption>Paso 5b — Definiciones de tareas → <code>reports-server</code>: revisiones <code>reports-server:1</code>
+          (creación inicial, imagen <code>r1</code>) y <code>reports-server:2</code> (imagen <code>r2</code>), ambas activas</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-5b2">
+        <img src="assets/paso-05b2-td-revision2.png" alt="Detalle de reports-server:2: ACTIVE, Fargate, Linux/X86_64, awsvpc, 2 vCPU, 4 GiB" />
+        <figcaption>Paso 5b — Detalle de <code>reports-server:2</code>, la revisión vigente del servicio: ACTIVE, creada el 4 de octubre de 2026,
+          Fargate, Linux/X86_64, <code>awsvpc</code>, roles <code>ecs-forms-admin-task-role</code> / <code>ecsTaskExecutionRole</code>,
+          2 vCPU / 4 GiB y 3 volúmenes</figcaption>
+      </figure>
+
+      <h4 class="sub">Crear el log group <code>/ecs/reports-server</code> en CloudWatch (obligatorio)</h4>
+      <div class="callout warn">
+        Aunque la TD lleva <code>awslogs-create-group=true</code>, <code>ecsTaskExecutionRole</code> no tiene
+        <code>logs:CreateLogGroup</code>. Si el grupo no existe, la tarea queda <strong>Detenido</strong> con
+        <code>ResourceInitializationError: failed to validate logger args ... AccessDeniedException ...
+        logs:CreateLogGroup</code>. <code>/ecs/forms-admin</code> y <code>/ecs/forms-server</code> ya existían, por
+        eso no ocurrió con Forms.
+      </div>
+      <ol>
+        <li>CloudWatch → <strong>Registros</strong> → <strong>Administración de registros</strong> →
+          <strong>Crear un grupo de registros</strong></li>
+        <li>Nombre: <code>/ecs/reports-server</code> (con la barra inicial)</li>
+        <li>Retención: <em>No vence nunca</em> (igual que los grupos de Forms); clase <em>Estándar</em>; sin KMS</li>
+        <li><strong>Crear</strong></li>
+      </ol>
+      <pre class="code">aws logs create-log-group --log-group-name /ecs/reports-server --region us-east-1</pre>
+      <figure class="shot" data-shot="paso-5c">
+        <img src="assets/paso-05c-cloudwatch-grupos.png" alt="CloudWatch Administración de registros: lista de grupos y botón Crear un grupo de registros" />
+        <figcaption>Paso 5c — CloudWatch → Administración de registros → <strong>Crear un grupo de registros</strong></figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-5d">
+        <img src="assets/paso-05d-crear-log-group.png" alt="Formulario Crear un grupo de registros con nombre /ecs/reports-server, retención No vence nunca, clase Estándar" />
+        <figcaption>Paso 5d — Nombre <code>/ecs/reports-server</code>, retención <em>No vence nunca</em>, clase <em>Estándar</em></figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-5e">
+        <img src="assets/paso-05e-log-group-creado.png" alt="Grupo /ecs/reports-server creado junto a /ecs/forms-admin y /ecs/forms-server" />
+        <figcaption>Paso 5e — Grupo creado: <code>/ecs/reports-server</code> junto a <code>/ecs/forms-admin</code> y <code>/ecs/forms-server</code></figcaption>
+      </figure>
+      <p>
+        Si el servicio ya se había creado y sus tareas fallaron por este motivo: <code>reports-server</code> →
+        <strong>Actualizar servicio</strong> → <strong>Forzar nueva implementación</strong>.
+      </p>
+        </section>
+
+        <section class="slide-block" id="paso-6">
+          <h3><span class="num">6</span> Crear servicio en el cluster<span class="status pending">Pendiente</span></h3>
+
+      <ol>
+        <li>Cluster <code>forms_report</code> → Servicios → <strong>Crear</strong></li>
+        <li>Task definition: familia <code>reports-server</code>, revisión más reciente</li>
+        <li>Nombre servicio: <code>reports-server</code></li>
+        <li>Tareas deseadas: <code>1</code></li>
+        <li>Cómputo: Fargate (capacity provider), plataforma <code>LATEST</code></li>
+        <li>Encender <strong>ECS Exec</strong></li>
+      </ol>
+      <div class="callout warn">
+        <strong>Antes de pulsar Crear</strong>, completar la sección de
+        <strong>Detección de servicios</strong> (Paso 8). En ECS el Service Discovery solo se
+        asocia al <strong>crear</strong> el servicio; si se omite, hay que eliminar y recrear el servicio.
+      </div>
+      <figure class="shot" data-shot="paso-6a">
+        <img src="assets/paso-06a-servicios-cluster.png" alt="Cluster forms_report con los servicios admin y forms activos, botón Crear" />
+        <figcaption>
+          Paso 6a — Cluster <code>forms_report</code> → Servicios: <code>admin</code> (<code>forms-admin:6</code>)
+          y <code>forms</code> (<code>forms-server:9</code>) en ejecución → <strong>Crear</strong>
+        </figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-6b">
+        <img src="assets/paso-06b-detalles-servicio.png" alt="Detalles del servicio reports-server, revisión 1, proveedor de capacidad FARGATE" />
+        <figcaption>
+          Paso 6b — Familia <code>reports-server</code> revisión <code>1</code>, nombre <code>reports-server</code>;
+          estrategia de proveedor de capacidad personalizada: <code>FARGATE</code>, base 0, peso 1
+        </figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-6c">
+        <img src="assets/paso-06c-compute.png" alt="Plataforma LATEST, ECS Exec encendido, réplica con 1 tarea deseada" />
+        <figcaption>
+          Paso 6c — Plataforma <code>LATEST</code>, <strong>ECS Exec</strong> encendido; implementación
+          Réplica con <code>1</code> tarea deseada y reequilibrio de zonas de disponibilidad habilitado
+        </figcaption>
+      </figure>
+        </section>
+
+        <section class="slide-block" id="paso-7">
+          <h3><span class="num">7</span> Opciones de implementación<span class="status pending">Pendiente</span></h3>
+
+      <div class="tabla"><table>
+        <tr><th>Campo</th><th>Valor</th></tr>
+        <tr><td>Tipo de servicio</td><td>Réplica, desired = 1</td></tr>
+        <tr><td>Estrategia</td><td>Actualización acumulativa</td></tr>
+        <tr><td>Mín. healthy %</td><td>0</td></tr>
+        <tr><td>Máx. %</td><td>200 (si AZ rebalancing está ON)</td></tr>
+        <tr><td>Balanceador de carga / Auto scaling</td><td>No (por ahora)</td></tr>
+      </table></div>
+      <div class="callout">
+        Mín. 0 % evita que durante un redeploy convivan dos tareas <code>WLS_REPORTS</code>
+        escribiendo sobre el mismo dominio en EFS (no es un cluster activo-activo).
+      </div>
+      <figure class="shot" data-shot="paso-7">
+        <img src="assets/paso-07-deploy.png" alt="Réplica con 1 tarea, controlador ECS, actualización acumulativa, mínimo 0 % y máximo 200 %" />
+        <figcaption>
+          Paso 7 — Réplica con <code>1</code> tarea deseada, reequilibrio de zonas habilitado;
+          controlador <code>ECS</code>, <strong>Actualización acumulativa</strong>, mín <code>0</code> % / máx <code>200</code> %
+        </figcaption>
+      </figure>
+        </section>
+
+        <section class="slide-block" id="paso-8">
+          <h3><span class="num">8</span> Service Discovery <code>weblogic-reports</code><span class="status pending">Pendiente</span></h3>
+
+      <p>
+        Mismo esquema que <code>weblogic-admin</code> en el servicio <code>forms-admin</code>.
+        Registra la IP privada de la tarea como <code>weblogic-reports.forms.local</code>, que es el
+        host que usan <code>ReportsMachine</code>, el Node Manager de Reports y Coherence WKA.
+      </p>
+      <div class="tabla"><table>
+        <tr><th>Campo</th><th>Valor</th></tr>
+        <tr><td>Utilizar la detección de servicios</td><td>Marcado</td></tr>
+        <tr><td>Espacio de nombres</td><td>Existente: <code>forms.local</code> (<code>ns-r3zqawwpjtp5pzue</code>)</td></tr>
+        <tr><td>Servicio de detección</td><td><strong>Crear un nuevo servicio de detección</strong></td></tr>
+        <tr><td>Nombre de detección</td><td><code>weblogic-reports</code></td></tr>
+        <tr><td>DNS resultante</td><td><code>weblogic-reports.forms.local</code></td></tr>
+        <tr><td>Propagación estado ECS</td><td>Habilitada</td></tr>
+        <tr><td>Tipo de registro DNS</td><td><code>A</code></td></tr>
+        <tr><td>TTL</td><td><code>15</code></td></tr>
+      </table></div>
+      <figure class="shot" data-shot="paso-8">
+        <img src="assets/paso-08-service-discovery-weblogic-reports.png" alt="Detección de servicios: namespace existente ns-r3zqawwpjtp5pzue, nuevo servicio weblogic-reports, registro A TTL 15" />
+        <figcaption>
+          Paso 8 — Detección de servicios: namespace existente <code>forms.local</code>
+          (<code>ns-r3zqawwpjtp5pzue</code>), nuevo servicio <code>weblogic-reports</code>,
+          propagación de estado ECS habilitada, registro <code>A</code>, TTL 15
+        </figcaption>
+      </figure>
+        </section>
+
+        <section class="slide-block" id="paso-9">
+          <h3><span class="num">9</span> Redes + puerto 9012 en el Security Group<span class="status pending">Pendiente</span></h3>
+
+      <div class="tabla"><table>
+        <tr><th>Campo</th><th>Valor</th></tr>
+        <tr><td>VPC</td><td><code>vpc-055a4007418b34e64</code></td></tr>
+        <tr><td>Subnet del servicio</td><td><strong>Solo</strong> <code>subnet-01212efd4a9ce759b</code> / <code>vpc-Banesco-Seguros-VE-dev-pub-A-SN</code></td></tr>
+        <tr><td>Security group</td><td><code>sg-0e1787d32bac71fcd</code> (<code>forms-sg-ecs</code>)</td></tr>
+        <tr><td>IP pública</td><td>ENABLED</td></tr>
+        <tr><td>BD Oracle</td><td><code>192.168.229.137</code> vía peering <code>pcx-0ad20c217472c7080</code> (ruta ya existente en <code>Pub-RT</code>)</td></tr>
+      </table></div>
+      <div class="callout warn">
+        <strong>No asociar <code>database-A</code>.</strong> Si el servicio incluye ambas subnets, ECS puede
+        colocar la tarea en la privada: la IP pública queda asignada pero no responde desde Internet
+        (salida por NAT, no por IGW). La ruta <code>192.168.229.137/32 → pcx</code> en <code>Pub-RT</code>
+        ya da acceso a Oracle desde <code>pub-A</code>.
+      </div>
+      <figure class="shot" data-shot="paso-9a">
+        <img src="assets/paso-09a-redes-servicio.png" alt="Redes: VPC vpc-055a4007418b34e64, solo subnet pub-A, SG forms-sg-ecs, IP pública activada" />
+        <figcaption>
+          Paso 9a — Red del servicio: VPC <code>vpc-055a4007418b34e64</code>, solo
+          <code>subnet-01212efd4a9ce759b</code> (<code>pub-A-SN</code>, us-east-1a, <code>10.171.240.0/25</code>),
+          SG <code>forms-sg-ecs</code>, IP pública activada
+        </figcaption>
+      </figure>
+
+      <h4 class="sub">Reglas de entrada en <code>forms-sg-ecs</code> (consola EC2, sesión aparte)</h4>
+      <p>
+        Las reglas no se editan en el asistente del servicio: EC2 → <strong>Grupos de seguridad</strong>
+        → <code>forms-sg-ecs</code> → <strong>Editar reglas de entrada</strong>.
+      </p>
+      <div class="tabla"><table>
+        <tr><th>Puerto</th><th>Uso</th><th>Origen recomendado</th></tr>
+        <tr><td><code>9012</code></td><td>Reports HTTP (<code>rwservlet</code>)</td><td><strong>My IP /32</strong> o red corporativa</td></tr>
+        <tr><td><code>9512</code></td><td>Reports HTTPS</td><td>No se abre (HTTPS no se usa en DEV)</td></tr>
+        <tr><td><code>9992</code></td><td>Administration Port <code>WLS_REPORTS</code></td><td>Solo SG interno (<code>forms-sg-ecs</code> → <code>forms-sg-ecs</code>)</td></tr>
+        <tr><td><code>5556</code></td><td>Node Manager <code>ReportsMachine</code></td><td>Solo SG interno (el AdminServer lo usa para arrancar <code>WLS_REPORTS</code>)</td></tr>
+        <tr><td><code>7574</code> UDP</td><td>Coherence (descubrimiento WKA entre <code>WLS_FORMS</code> y <code>WLS_REPORTS</code>)</td><td>Solo SG interno</td></tr>
+      </table></div>
+      <div class="callout">
+        Como admin, forms y reports comparten <code>forms-sg-ecs</code>, una sola regla
+        <strong>Todo el tráfico</strong> con origen <code>sg-0e1787d32bac71fcd</code> (el propio SG) cubre
+        AdminServer ↔ Node Manager ↔ managed (TCP) y Coherence (UDP <code>7574</code>; el cluster
+        <code>defaultCoherenceCluster</code> lo comparten <code>cluster_forms</code> y <code>cluster_reports</code>)
+        sin abrir esos puertos a Internet. Si ya existe <strong>Todos los TCP</strong> desde el SG, agregar
+        <strong>Todos los UDP</strong> con el mismo origen.
+      </div>
+      <figure class="shot" data-shot="paso-9b">
+        <img src="assets/paso-09b-regla-9012.png" alt="Editar reglas de entrada de forms-sg-ecs: 9001, 7001, 9012 desde 0.0.0.0/0 y Todos los TCP desde sg-0e1787d32bac71fcd" />
+        <figcaption>
+          Paso 9b — Reglas de entrada de <code>forms-sg-ecs</code>: se agregan <code>9012</code>
+          (<em>Anywhere-IPv4</em>, <code>Reports HTTP access</code>) y <strong>Todos los TCP</strong> con origen
+          <code>sg-0e1787d32bac71fcd</code> (<code>Interno admin-forms-reports</code>), elegido en el buscador
+          bajo <em>Grupos de seguridad</em>
+        </figcaption>
+      </figure>
+      <div class="callout warn">
+        En DEV se puede usar temporalmente <code>0.0.0.0/0</code> en 9012; reemplazar por la tabla
+        anterior antes de pasar a QA/PROD.
+      </div>
+      <p>
+        Revisar el resumen y pulsar <strong>Crear</strong>. La consola vuelve al clúster con el aviso
+        <em>“La implementación de reports-server está en curso”</em> (se despliega vía CloudFormation).
+      </p>
+      <figure class="shot" data-shot="paso-9c">
+        <img src="assets/paso-09c-servicio-creado.png" alt="Clúster forms_report: admin y forms 1/1, reports-server 0/1 con implementación En curso" />
+        <figcaption>
+          Paso 9c — Tras <strong>Crear</strong>: clúster <code>forms_report</code> con 3 servicios;
+          <code>admin</code> y <code>forms</code> en 1/1, <code>reports-server</code> en 0/1 con la implementación
+          <strong>En curso</strong> (pasa a 1/1 en unos minutos)
+        </figcaption>
+      </figure>
+        </section>
+
+        <section class="slide-block" id="paso-10">
+          <h3><span class="num">10</span> Verificar Running y ECS Exec<span class="status pending">Pendiente</span></h3>
+
+      <ol>
+        <li>Esperar estado <strong>Running</strong> (el pull de la imagen puede tardar ~5 min).</li>
+        <li>Cloud Map → <code>forms.local</code> → <code>weblogic-reports</code>: debe aparecer una instancia con la IP privada de la tarea.</li>
+        <li>Conectar como <code>oracle</code> (para que apliquen las variables de la TD):</li>
+      </ol>
+      <pre class="code">aws ecs execute-command \
+  --cluster forms_report \
+  --task &lt;TASK_ID&gt; \
+  --container reports-server \
+  --interactive \
+  --command "su - oracle"</pre>
+      <pre class="code"># Montajes
+df -h | grep -E 'domains|apps|scripts'
+ls /u01/oracle/user_projects/domains/forms_domain
+ls /u01/oracle/scripts          # entrypoint.sh, startNodeManager.sh, create-reports-machine.py
+
+# Variables
+env | grep -E 'ADMIN_|MANAGED_|DOMAIN_'
+
+# DNS Cloud Map: debe coincidir con la IP VPC de la tarea (eth1), no con 169.254.x.x
+getent hosts weblogic-reports.forms.local
+getent hosts weblogic-admin.forms.local
+ip -4 -o addr show | awk '{print $2,$4}'
+
+# AdminServer alcanzable
+timeout 5 bash -c 'echo &gt;/dev/tcp/weblogic-admin.forms.local/7001' &amp;&amp; echo OK || echo FAIL
+
+# BD Oracle alcanzable
+timeout 5 bash -c 'echo &gt;/dev/tcp/192.168.229.137/1521' &amp;&amp; echo OK || echo FAIL</pre>
+      <figure class="shot" data-shot="paso-10a">
+        <img src="assets/paso-10a-running.png" alt="Tarea 5fcf8f1eafd546bba1f853972468cccd de reports-server:1 en estado Ejecutando; ciclo de vida completo" />
+        <figcaption>
+          Paso 10a — Tarea de <code>reports-server:1</code> en <strong>Ejecutando</strong> (2 vCPU / 4 GiB, Fargate).
+          La extracción de la imagen tardó ~5 min, por lo que el primer arranque toma 6–7 min.
+        </figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-10b">
+        <img src="assets/paso-10b1-cloudmap-namespace.png" alt="Cloud Map: espacio de nombres forms.local (ns-r3zqawwpjtp5pzue)" />
+        <figcaption>Paso 10b.1 — Cloud Map → Espacios de nombres: <code>forms.local</code> (<code>ns-r3zqawwpjtp5pzue</code>),
+          "DNS interno Forms/Reports"</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-10b2">
+        <img src="assets/paso-10b2-cloudmap-servicios.png" alt="Servicios de forms.local: weblogic-admin, weblogic-reports, weblogic-forms" />
+        <figcaption>Paso 10b.2 — Servicios de <code>forms.local</code>: <code>weblogic-admin</code>, <code>weblogic-forms</code> y
+          <code>weblogic-reports</code> (<code>srv-rxsfsgokofubju6e</code>, creado el 4 de octubre de 2026 al crear el servicio ECS)</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-10b3">
+        <img src="assets/paso-10b-cloudmap-weblogic-reports.png" alt="weblogic-reports: una instancia de servicio en buen estado" />
+        <figcaption>Paso 10b.3 — <code>weblogic-reports</code>: una instancia registrada, cuyo ID es el de la tarea ECS
+          (<code>5b2e0e86a89e45adb1e1f0a4da67e967</code>), en buen estado. Las etiquetas muestran que la creó la consola ECS
+          (stack <code>ECS-Console-V2-Service-reports-server-…</code>)</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-10b4">
+        <img src="assets/paso-10b4-getent-weblogic-reports.png" alt="getent hosts weblogic-reports.forms.local devuelve 10.171.240.80" />
+        <figcaption>Paso 10b.4 — Resolución DNS desde un contenedor: <code>weblogic-reports.forms.local</code> → <code>10.171.240.80</code>
+          (IP privada de la tarea; cambia en cada redeploy)</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-10c">
+        <img src="assets/paso-10c-exec.png" alt="ECS Exec en reports-server: montajes EFS, DNS Cloud Map, 7001 OK y 1521 OK" />
+        <figcaption>Paso 10c — ECS Exec a <code>reports-server</code>: los tres montajes EFS (<code>domains</code>, <code>app</code>,
+          <code>scripts/reports</code>); Cloud Map resuelve <code>weblogic-admin</code> (10.171.240.90), <code>weblogic-forms</code>
+          (10.171.240.110) y <code>weblogic-reports</code> (10.171.240.80); AdminServer <code>7001 OK</code> y BD
+          <code>192.168.229.137:1521 OK</code></figcaption>
+      </figure>
+        </section>
+
+        <section class="slide-block" id="paso-11">
+          <h3><span class="num">11</span> Ajustes del dominio para <code>weblogic-reports.forms.local</code><span class="status pending">Pendiente</span></h3>
+
+      <p>
+        El dominio se creó con hostnames de compose (<code>weblogic-reports</code>). En ECS ese short
+        name no resuelve; hay que llevarlo al FQDN de Cloud Map, igual que se hizo con
+        <code>weblogic-admin</code> en la guía de Forms (Paso 12).
+      </p>
+      <div class="callout">
+        <strong>Si se ejecutó <code>set-cloudmap-hostnames.sh</code></strong> (Paso 0), este paso es solo de
+        verificación: <code>/u01/oracle/scripts/set-cloudmap-hostnames.sh --check</code> en el contenedor
+        <code>admin</code>. La edición manual de abajo queda como referencia (es lo que hace el script).
+      </div>
+      <div class="callout warn">
+        El dominio está en EFS y lo comparten los tres contenedores. Hacer respaldo antes de editar y
+        aplicar los cambios con el AdminServer detenido o desde la consola WebLogic
+        (<strong>Lock &amp; Edit → Activate</strong>) para que <code>config.xml</code> no se sobrescriba.
+      </div>
+      <div class="tabla"><table>
+        <tr><th>Archivo / objeto</th><th>Cambio</th></tr>
+        <tr>
+          <td><code>$DOMAIN_HOME/nodemanager_reports/nodemanager.properties</code></td>
+          <td><code>ListenAddress=weblogic-reports.forms.local</code></td>
+        </tr>
+        <tr>
+          <td><code>$DOMAIN_HOME/config/config.xml</code> → Machine <code>ReportsMachine</code></td>
+          <td>Node Manager <code>&lt;listen-address&gt;weblogic-reports.forms.local&lt;/listen-address&gt;</code>, puerto <code>5556</code></td>
+        </tr>
+        <tr>
+          <td><code>$DOMAIN_HOME/config/config.xml</code> → Server <code>WLS_REPORTS</code></td>
+          <td><code>listen-address</code> vacío o <code>weblogic-reports.forms.local</code> (nunca el short name)</td>
+        </tr>
+      </table></div>
+      <p>Auditoría rápida:</p>
+      <pre class="code">cd "$DOMAIN_HOME"
+cp -a config/config.xml config/config.xml.bak-$(date +%Y%m%d%H%M%S)
+cp -a nodemanager_reports/nodemanager.properties nodemanager_reports/nodemanager.properties.bak-$(date +%Y%m%d%H%M%S)
+
+grep -RIn --exclude-dir=tmp --exclude-dir=cache --exclude='*.log' \
+  -E 'weblogic-reports([^.]|$)' \
+  "$DOMAIN_HOME/nodemanager_reports" "$DOMAIN_HOME/config" /u01/oracle/scripts 2&gt;/dev/null | head -80
+
+grep -n 'ListenAddress' "$DOMAIN_HOME/nodemanager_reports/nodemanager.properties"</pre>
+      <p>Ejemplo de ajuste del Node Manager:</p>
+      <pre class="code">sed -i 's/^ListenAddress=.*/ListenAddress=weblogic-reports.forms.local/' \
+  "$DOMAIN_HOME/nodemanager_reports/nodemanager.properties"</pre>
+      <div class="callout">
+        <code>scripts/reports/create-reports-machine.py</code> ya usa por defecto
+        <code>weblogic-reports.forms.local</code> y <code>t3://weblogic-admin.forms.local:7001</code>
+        (toma <code>ADMIN_SERVER_HOST</code> del entorno; en compose exportar <code>CLOUDMAP_NAMESPACE=''</code>
+        para volver a los short names).
+      </div>
+      <figure class="shot" data-shot="paso-11">
+        <img src="assets/paso-11-reportsmachine.png" alt="sed sobre config.xml línea 893 y nodemanager_reports/nodemanager.properties con weblogic-reports.forms.local" />
+        <figcaption>
+          Paso 11 — Con el AdminServer detenido (y respaldo de <code>config.xml</code>): línea 893 de
+          <code>config/config.xml</code> (<code>ReportsMachine</code>) y <code>nodemanager_reports/nodemanager.properties</code>
+          pasan a <code>weblogic-reports.forms.local</code>; las tres máquinas quedan con FQDN
+        </figcaption>
+      </figure>
+        </section>
+
+        <section class="slide-block" id="paso-12">
+          <h3><span class="num">12</span> Arranque de Node Manager y <code>WLS_REPORTS</code><span class="status pending">Pendiente</span></h3>
+
+      <p>Requisito: <code>forms-admin</code> Running con AdminServer arriba en <code>weblogic-admin.forms.local:7001</code>.</p>
+
+      <h4 class="sub">12a. Credenciales de arranque (<code>boot.properties</code>)</h4>
+      <pre class="code">mkdir -p "$DOMAIN_HOME/servers/WLS_REPORTS/security"
+cat &gt; "$DOMAIN_HOME/servers/WLS_REPORTS/security/boot.properties" &lt;&lt;EOF
+username=weblogic
+password=&lt;clave&gt;
+EOF
+chmod 600 "$DOMAIN_HOME/servers/WLS_REPORTS/security/boot.properties"</pre>
+      <div class="callout">
+        WebLogic cifra el archivo en el primer arranque. <code>export WLS_USER</code> /
+        <code>WLS_PW</code> no sirve: <code>startManagedWebLogic.sh</code> las reinicia vacías.
+        No confundir con el <code>boot.properties</code> de Node Manager bajo <code>.../data/nodemanager/</code>.
+      </div>
+
+      <h4 class="sub">12b. Node Manager de <code>ReportsMachine</code></h4>
+      <pre class="code"># En segundo plano, con log en el dominio
+nohup /u01/oracle/scripts/startNodeManager.sh \
+  &gt; "$DOMAIN_HOME/nodemanager_reports/nm_console.out" 2&gt;&amp;1 &amp;
+
+tail -f "$DOMAIN_HOME/nodemanager_reports/nodemanager.log"
+# Esperado: "Secure socket listener started on port 5556, host weblogic-reports.forms.local"</pre>
+
+      <div class="callout">
+        El Node Manager de <code>ReportsMachine</code> también es obligatorio para crear la instancia de
+        Reports Tools (Paso 12e). La regla <em>Todo el tráfico</em> del SG (Paso 9) cubre el puerto 5556
+        entre <code>forms-admin</code> y <code>reports-server</code>.
+      </div>
+
+      <h4 class="sub">12c. Arrancar <code>WLS_REPORTS</code></h4>
+      <p><strong>Opción recomendada — script <code>startWLSReports.sh</code></strong> (como <code>root</code> o
+        <code>oracle</code>): valida <code>boot.properties</code> y el AdminServer, limpia <code>.lok</code>,
+        arranca en segundo plano y espera RUNNING + HTTP 200 de <code>/reports/rwservlet</code>:</p>
+      <pre class="code">/u01/oracle/scripts/startWLSReports.sh
+# Reinicio:
+pkill -f 'weblogic.Name=WLS_REPORTS'; sleep 10; /u01/oracle/scripts/startWLSReports.sh</pre>
+      <p><strong>Opción A — vía Node Manager</strong>: WebLogic 14.1.2 no trae la consola clásica; usar WebLogic Remote Console
+        (Servidores → <code>WLS_REPORTS</code> → Iniciar) o WLST:
+        <code>connect(...); start('WLS_REPORTS','Server')</code>.</p>
+      <p><strong>Opción B — script directo en el contenedor:</strong></p>
+      <pre class="code">cd "$DOMAIN_HOME"
+nohup ./bin/startManagedWebLogic.sh WLS_REPORTS t3://weblogic-admin.forms.local:7001 \
+  &gt; "$DOMAIN_HOME/servers/WLS_REPORTS/logs/WLS_REPORTS.out" 2&gt;&amp;1 &amp;
+
+tail -f "$DOMAIN_HOME/servers/WLS_REPORTS/logs/WLS_REPORTS.out"
+# Esperado: &lt;Server state changed to RUNNING.&gt;</pre>
+      <div class="callout warn">
+        <strong>ECS RUNNING ≠ WebLogic RUNNING.</strong> Con <code>sleep infinity</code> la tarea sigue
+        activa aunque la JVM muera. Validar con <code>ps -ef | grep -E 'WLS_REPORTS|NodeManager'</code>
+        y <code>grep 'Server state changed to RUNNING' $DOMAIN_HOME/servers/WLS_REPORTS/logs/WLS_REPORTS.out</code> (ver Paso 12b).
+      </div>
+
+      <h4 class="sub">12d. Targets de la aplicación <code>reports</code></h4>
+      <p>
+        Remote Console (o WLST) → Deployments → <code>reports#14.1.2</code> → Targets: desmarcar <code>AdminServer</code>
+        y marcar <code>WLS_REPORTS</code> (o <code>cluster_reports</code>), si no se hizo al crear el dominio.
+      </p>
+
+      <h4 class="sub" id="paso-12e">12e. Completar Reports en el dominio (una sola vez, queda en EFS)</h4>
+      <p>
+        El Configuration Wizard no crea la instancia de Reports Tools ni <code>$DOMAIN_HOME/reports</code>.
+        <code>WLS_REPORTS</code> llega a RUNNING y <code>/reports/rwservlet</code> responde 200, pero el primer
+        reporte falla con <code>REP-52266</code> / <code>REP-51002</code>. Detalle completo en la
+        guía de creación del dominio, <em>Paso 7: Completar Reports</em>.
+      </p>
+      <ol>
+        <li><strong>Node Manager de <code>ReportsMachine</code> arriba</strong> (12b).</li>
+        <li><strong>Instancia de Reports Tools</strong>: en <code>reports-server</code> (ECS Exec, <code>su - oracle</code>);
+          WLST se conecta al AdminServer por <code>t3://weblogic-admin.forms.local:7001</code>:
+          <pre class="code">/u01/oracle/oracle_common/common/bin/wlst.sh /u01/oracle/scripts/create-reports-tools.py</pre>
+          Equivalente manual en WLST:
+          <pre class="code">connect('weblogic','&lt;clave&gt;','t3://weblogic-admin.forms.local:7001')
+createReportsToolsInstance(instanceName='reptools1', machine='ReportsMachine')</pre>
+          Si responde <em>"Node Manager is not available on machine ReportsMachine"</em>, la instancia queda
+          registrada <strong>sin archivos</strong>. Levantar el Node Manager y crear otra (<code>reptools2</code>).
+        </li>
+        <li><strong>Directorios y lanzadores</strong>: en <code>reports-server</code> como <code>oracle</code>:
+          <pre class="code">/u01/oracle/scripts/prepare-reports-domain.sh --check
+/u01/oracle/scripts/prepare-reports-domain.sh \
+  --source-dir /u01/oracle/user_projects/apps/reports_app/src \
+  --disable-security</pre>
+          Crea <code>reports/{bin,server,cache,temp,fonts}</code> y copia <code>rwengine.sh</code>, <code>reports.sh</code>, etc.
+          desde <code>$ORACLE_HOME/bin</code>, sustituyendo <code>$$domain_home$$</code>, <code>$$mw_home$$</code>,
+          <code>$$component_name$$</code> y <code>%HOME%</code>. Además fija <code>sourceDir</code> en
+          <code>rwserver.conf</code> y quita <code>securityId="rwJaznSec"</code> (DEV).
+        </li>
+        <li><strong>Reiniciar <code>WLS_REPORTS</code></strong> con <code>startWLSReports.sh</code> (12c).</li>
+      </ol>
+      <div class="tabla"><table>
+        <tr><th>Error (navegador / <code>rwserver_diagnostic.log</code>)</th><th>Elemento faltante</th></tr>
+        <tr><td><code>REP-54005</code> cache directory cannot be created</td><td><code>reports/cache</code></td></tr>
+        <tr><td><code>REP-56022</code> / <code>REP-50125</code> <code>rwengine.sh: error=2</code></td><td><code>reports/bin</code> (lanzadores)</td></tr>
+        <tr><td><code>REP-50141</code> <code>rep_wls_reports_weblogic-reports.dat</code> cannot be opened</td><td><code>reports/server</code></td></tr>
+        <tr><td>Pantalla "System User Authentication" / <code>REP-51019</code></td><td>Seguridad activa (<code>securityId</code>)</td></tr>
+      </table></div>
+      <pre class="code">grep -E 'REP-|rwEng' $DOMAIN_HOME/servers/WLS_REPORTS/logs/reports/rwserver_diagnostic.log | tail -15</pre>
+      <figure class="shot" data-shot="paso-12a">
+        <img src="assets/paso-12a-nodemanager.png" alt="Node Manager de ReportsMachine: Secure socket listener started on port 5556, host weblogic-reports.forms.local" />
+        <figcaption>Paso 12a — Node Manager de <code>ReportsMachine</code> corriendo y escuchando en 5556. La última línea del log
+          (5 de octubre de 2026) ya muestra <code>host weblogic-reports.forms.local/10.171.240.80</code>; las de enero son del entorno
+          compose (<code>weblogic-reports/172.21.0.4</code>). La conexión a <code>weblogic-reports.forms.local:5556</code> responde OK</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-12b">
+        <img src="assets/paso-12b-wls-reports-running.png" alt="WLS_REPORTS: un proceso, Server state changed to RUNNING, rwservlet HTTP 200" />
+        <figcaption>Paso 12b — <code>WLS_REPORTS</code> en estado <strong>RUNNING</strong>: un proceso <code>weblogic.Name=WLS_REPORTS</code>,
+          <code>&lt;Server state changed to RUNNING.&gt;</code> (BEA-000365, 5 de octubre de 2026) en <code>WLS_REPORTS.out</code> y
+          <code>/reports/rwservlet</code> responde <code>HTTP 200</code>. WebLogic 14.1.2 no trae la consola clásica, así que la
+          verificación se hace por terminal (o con WebLogic Remote Console)</figcaption>
+      </figure>
+        </section>
+
+        <section class="slide-block" id="paso-13">
+          <h3><span class="num">13</span> Validación funcional de Reports<span class="status pending">Pendiente</span></h3>
+
+      <p>
+        Validación con <strong>reportes modelo</strong> de referencia (definiciones sencillas, sin lógica
+        de negocio), para comprobar que Reports Server responde en la arquitectura containerizada y que
+        la conexión a la BD funciona.
+      </p>
+      <div class="tabla"><table class="fixed">
+        <colgroup><col style="width:22%" /><col style="width:46%" /><col style="width:32%" /></colgroup>
+        <tr><th>Prueba</th><th>URL / comando</th><th>Resultado esperado</th></tr>
+        <tr>
+          <td>Servlet activo</td>
+          <td><code>http://&lt;IP_PUBLICA&gt;:9012/reports/rwservlet</code></td>
+          <td>Página de bienvenida de Oracle Reports Services</td>
+        </tr>
+        <tr>
+          <td>Info del server in-process</td>
+          <td><code>http://&lt;IP_PUBLICA&gt;:9012/reports/rwservlet/getserverinfo?authid=weblogic/&lt;clave&gt;</code></td>
+          <td>Nombre del Reports Server, engines y estado. Sin <code>authid</code> responde <code>REP-51019</code>, lo cual es normal
+            (es un comando administrativo). Con <code>REP-56071</code>, falta el rol <code>RW_ADMINISTRATOR</code> (opcional).</td>
+        </tr>
+        <tr>
+          <td>Cola de trabajos</td>
+          <td><code>http://&lt;IP_PUBLICA&gt;:9012/reports/rwservlet/showjobs</code></td>
+          <td>Lista de jobs (vacía al inicio)</td>
+        </tr>
+        <tr>
+          <td>Reporte modelo con BD</td>
+          <td><code>…/rwservlet?report=&lt;modelo&gt;.rdf&amp;userid=&lt;usr&gt;/&lt;pwd&gt;@&lt;TNS&gt;&amp;destype=cache&amp;desformat=PDF</code></td>
+          <td>PDF generado con datos de la BD</td>
+        </tr>
+        <tr>
+          <td><strong>Caso de prueba validado:</strong> <code>CARR30015.rdf</code></td>
+          <td><code>http://&lt;IP_PUBLICA&gt;:9012/reports/rwservlet?report=CARR30015.rdf&amp;userid=uspan/&lt;clave&gt;@BANESCO_DEV&amp;destype=cache&amp;desformat=pdf&amp;nu_sec=205873</code></td>
+          <td>PDF con datos (probado OK sobre <code>54.81.150.92</code>)</td>
+        </tr>
+      </table></div>
+      <div class="callout warn">
+        <strong>Requisitos del caso <code>CARR30015.rdf</code>:</strong>
+        <ul>
+          <li>El parámetro <code>nu_sec=205873</code> es una secuencia que <strong>debe existir y ser válida en la BD
+            <code>BANESCO_DEV</code></strong>. Si no existe, o la BD se refresca y cambia, el reporte sale vacío o con error:
+            usar una secuencia vigente.</li>
+          <li><code>userid</code> es obligatorio. Sin él, el motor no puede compilar el PL/SQL del RDF contra la BD y responde
+            <code>REP-1247: Uncompiled program units exist</code>.</li>
+          <li>No requiere <code>mode=bitmap</code>, a diferencia de <code>SINR30032.rdf</code>, que está definido en modo carácter
+            (<code>REP-1920</code>).</li>
+          <li>El alias <code>BANESCO_DEV</code> debe existir en <code>$TNS_ADMIN/tnsnames.ora</code>, y la BD debe estar encendida.</li>
+        </ul>
+      </div>
+      <p>Desde dentro del contenedor (sin depender del SG):</p>
+      <pre class="code">curl -s -o /dev/null -w '%{http_code}\n' http://localhost:9012/reports/rwservlet
+curl -s http://localhost:9012/reports/rwservlet/getserverinfo | head -50</pre>
+      <div class="callout">
+        El alias TNS debe existir en el <code>tnsnames.ora</code> que lee Reports
+        (<code>$DOMAIN_HOME/config/fmwconfig/tnsnames.ora</code> o el definido en <code>TNS_ADMIN</code>),
+        apuntando a <code>192.168.229.137:1521</code>. Los <code>.rdf</code> se leen del <code>sourceDir</code>
+        configurado en el Paso 12e (<code>/u01/oracle/user_projects/apps/reports_app/src</code>, EFS).
+      </div>
+      <div class="tabla"><table class="fixed">
+        <colgroup><col style="width:38%" /><col style="width:62%" /></colgroup>
+        <tr><th>Respuesta al invocar el reporte</th><th>Causa / acción</th></tr>
+        <tr><td><code>REP-52266</code> / <code>REP-51002</code></td><td>Falta algún elemento del Paso 12e; ver <code>rwserver_diagnostic.log</code>.</td></tr>
+        <tr><td>Petición colgada + incidente <code>DFW-99998 UnsatisfiedLinkError: librwu.so: libXm.so.4</code></td><td>Imagen <code>r1</code>: pasar la TD a <code>r2</code> (<a href="#anexo-r2">anexo</a>).</td></tr>
+        <tr><td>Pantalla "System User Authentication"</td><td>Seguridad de Reports activa: <code>prepare-reports-domain.sh --disable-security</code> o agregar <code>&amp;authid=</code>.</td></tr>
+        <tr><td><code>REP-1247: Uncompiled program units exist</code></td><td>Falta <code>userid</code> en la URL (el motor no puede compilar el PL/SQL), faltan <code>.pll</code> adjuntas en <code>sourceDir</code> o hay objetos inválidos en la BD. Diagnóstico: <code>rwconverter.sh ... compile_all=yes logfile=...</code>.</td></tr>
+        <tr><td><code>REP-1920: Character mode runtime is incompatible with DESFORMAT of PDF...</code></td><td>RDF en modo carácter: agregar <code>&amp;mode=bitmap</code> o cambiar <em>Mode = Bitmap</em> en Reports Builder.</td></tr>
+        <tr><td>PDF en blanco</td><td>Sin datos (parámetros faltantes; probar <code>desformat=XML</code>) o sin fuentes en <code>$DOMAIN_HOME/reports/fonts</code>.</td></tr>
+      </table></div>
+      <div class="callout warn">
+        Si el reporte falla con <code>REP-0501</code> / <code>ORA-12170</code>, revisar primero la conectividad
+        TCP a <code>192.168.229.137:1521</code> (Paso 10) y el alias TNS; ver el
+        <a href="../forms/index.html#anexo-cli-red-bd">anexo de red hacia BD</a> de la guía Forms.
+      </div>
+      <figure class="shot" data-shot="paso-13a">
+        <img src="assets/paso-13a-rwservlet.png" alt="curl a http://54.81.150.92:9012/reports/rwservlet devuelve HTTP 200 y Oracle Reports Services - Servlet" />
+        <figcaption>
+          Paso 13a — <code>rwservlet</code> respondiendo en el puerto 9012 desde fuera de AWS:
+          <code>curl</code> a <code>http://54.81.150.92:9012/reports/rwservlet</code> devuelve <code>HTTP 200</code> y la página
+          "Oracle Reports Services - Servlet"
+        </figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-13b">
+        <img src="assets/paso-13b-carr30015-pdf.png" alt="PDF generado por CARR30015.rdf: Cuadro Póliza - Recibo Prima, Vida Integral Plus, con datos de BANESCO_DEV" />
+        <figcaption>
+          Paso 13b — Caso de prueba <code>CARR30015.rdf</code> con <code>nu_sec=205873</code>: PDF "Cuadro Póliza - Recibo Prima"
+          (Vida Integral Plus) generado por <code>WLS_REPORTS</code> con datos de <code>BANESCO_DEV</code>
+          (<code>…/rwservlet?report=CARR30015.rdf&amp;userid=uspan/&lt;clave&gt;@BANESCO_DEV&amp;destype=cache&amp;desformat=pdf&amp;nu_sec=205873</code>)
+        </figcaption>
+      </figure>
+        </section>
+
+        <section class="slide-block anexo" id="anexo-json">
+          <h3><span class="num anexo">Anexo</span> Task definition JSON (<code>reports-server</code>)</h3>
+
+      <p>
+        Equivalente a los Pasos 1–5, derivado de <code>forms-server:9</code>. Puede pegarse en
+        ECS → <strong>Crear nueva definición de tarea con JSON</strong> o registrarse por CLI.
+        Usa la imagen <code>forms-docker:r2</code> (librerías del motor de Reports); se puede fijar al digest
+        de <code>r2</code> que muestra ECR. Sustituir la contraseña.
+      </p>
+      <div class="callout">
+        <strong>Ajustes de <code>forms-server:9</code></strong> (respecto de la revisión 8): se agregaron
+        variables de entorno de compilación y conexión. En Reports solo aplica <code>TNS_ADMIN</code>
+        (mismo dominio, conexión a la BD). No se copian las de compilación Forms
+        (<code>FORMS_PATH</code>, <code>FORMS_MODULE_PATH</code>, <code>FORMS_INSTANCE</code>,
+        <code>FRMCMP</code>) ni las de ProC (<code>PROC</code>, <code>PCSCFG</code>,
+        <code>PROC_INCLUDE</code>, <code>CC</code>): esa compilación se hace en <code>forms-server</code>.
+      </div>
+      <pre class="code">{
+  "family": "reports-server",
+  "taskRoleArn": "arn:aws:iam::730335573515:role/ecs-forms-admin-task-role",
+  "executionRoleArn": "arn:aws:iam::730335573515:role/ecsTaskExecutionRole",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "runtimePlatform": { "cpuArchitecture": "X86_64", "operatingSystemFamily": "LINUX" },
+  "cpu": "2048",
+  "memory": "4096",
+  "ephemeralStorage": { "sizeInGiB": 100 },
+  "containerDefinitions": [
+    {
+      "name": "reports-server",
+      "image": "730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:r2",
+      "essential": true,
+      "entryPoint": ["sh", "-c"],
+      "command": ["sleep infinity"],
+      "workingDirectory": "/u01/oracle",
+      "portMappings": [
+        { "containerPort": 9012, "hostPort": 9012, "protocol": "tcp", "name": "wls-reports-http",  "appProtocol": "http" },
+        { "containerPort": 9512, "hostPort": 9512, "protocol": "tcp", "name": "wls-reports-https", "appProtocol": "http" },
+        { "containerPort": 9992, "hostPort": 9992, "protocol": "tcp", "name": "wls-reports-admin" },
+        { "containerPort": 5556, "hostPort": 5556, "protocol": "tcp", "name": "nodemanager" }
+      ],
+      "environment": [
+        { "name": "ORACLE_HOME",         "value": "/u01/oracle" },
+        { "name": "DOMAIN_NAME",         "value": "forms_domain" },
+        { "name": "DOMAIN_HOME",         "value": "/u01/oracle/user_projects/domains/forms_domain" },
+        { "name": "TNS_ADMIN",           "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig" },
+        { "name": "ADMIN_SERVER_NAME",   "value": "AdminServer" },
+        { "name": "ADMIN_SERVER_HOST",   "value": "weblogic-admin.forms.local" },
+        { "name": "ADMIN_SERVER_PORT",   "value": "7001" },
+        { "name": "ADMIN_USER",          "value": "weblogic" },
+        { "name": "ADMIN_PASSWORD",      "value": "&lt;CLAVE&gt;" },
+        { "name": "MANAGED_SERVER_NAME", "value": "WLS_REPORTS" },
+        { "name": "MANAGED_SERVER_PORT", "value": "9012" },
+        { "name": "NODE_MANAGER_PORT",   "value": "5556" },
+        { "name": "LD_LIBRARY_PATH",     "value": "/u01/oracle/lib:/u01/oracle/oracle_common/lib" },
+        { "name": "PATH",                "value": "/u01/oracle/bin:/u01/oracle/oracle_common/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" }
+      ],
+      "mountPoints": [
+        { "sourceVolume": "efs-domains", "containerPath": "/u01/oracle/user_projects/domains", "readOnly": false },
+        { "sourceVolume": "efs-app",     "containerPath": "/u01/oracle/user_projects/apps",    "readOnly": false },
+        { "sourceVolume": "efs-scripts", "containerPath": "/u01/oracle/scripts",               "readOnly": false }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/reports-server",
+          "awslogs-create-group": "true",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ],
+  "volumes": [
+    {
+      "name": "efs-domains",
+      "efsVolumeConfiguration": {
+        "fileSystemId": "fs-08471cc88d2a8edc3",
+        "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/domains",
+        "transitEncryption": "ENABLED"
+      }
+    },
+    {
+      "name": "efs-app",
+      "efsVolumeConfiguration": {
+        "fileSystemId": "fs-08471cc88d2a8edc3",
+        "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/app",
+        "transitEncryption": "ENABLED"
+      }
+    },
+    {
+      "name": "efs-scripts",
+      "efsVolumeConfiguration": {
+        "fileSystemId": "fs-08471cc88d2a8edc3",
+        "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/scripts/reports",
+        "transitEncryption": "ENABLED"
+      }
+    }
+  ]
+}</pre>
+      <div class="callout">
+        Guardado como <code>conf_json/reports-server.json</code> junto a
+        <code>forms-admin.json</code> y <code>forms-server.json</code>. Ese archivo ya trae la
+        contraseña de pruebas (igual que <code>forms-server.json</code>) para registrarlo directo por CLI.
+      </div>
+        </section>
+
+        <section class="slide-block anexo" id="anexo-r2">
+          <h3><span class="num anexo">Anexo</span> Imagen <code>r2</code>: construir, subir a ECR y actualizar servicios</h3>
+
+      <p>
+        <code>r2</code> = <code>r1</code> + <code>motif libX11 libXext libXt libXp</code>, necesarias para <code>librw.so</code> /
+        <code>librwu.so</code> del motor de Reports. Las imágenes nuevas construidas con el <code>Dockerfile.wls</code> actual
+        ya las incluyen (<a href="../../docker/crear_imagen/index.html">Crear imagen</a>, puntos 4.e y 7.a).
+      </p>
+      <h4 class="sub">1. Construir <code>r2</code> a partir de <code>r1</code> (local)</h4>
+      <pre class="code">cd dist/html/docker/crear_imagen
+docker build -f Dockerfile.r2 \
+  --build-arg BASE_IMAGE=image_forms_14.1.2:r1 \
+  --build-arg RUN_USER=$(docker inspect -f '{{.Config.User}}' image_forms_14.1.2:r1) \
+  -t image_forms_14.1.2:r2 .</pre>
+      <h4 class="sub">2. Subir a ECR</h4>
+      <pre class="code">aws ecr get-login-password --region us-east-1 | \
+  docker login --username AWS --password-stdin 730335573515.dkr.ecr.us-east-1.amazonaws.com
+docker tag image_forms_14.1.2:r2 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:r2
+docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:r2</pre>
+      <h4 class="sub">3. Nueva revisión de TD + forzar despliegue (los tres servicios)</h4>
+      <p>Consola: TD → última revisión → <strong>Crear nueva revisión</strong> → contenedor → URI de imagen
+        <code>…/forms-docker:r2</code> → Crear. Luego, en el servicio: <strong>Actualizar</strong> → nueva revisión →
+        <strong>Forzar nueva implementación</strong>. Repetir para <code>forms-admin</code>, <code>forms-server</code> y
+        <code>reports-server</code>.</p>
+      <pre class="code">aws ecs update-service --cluster forms_report --service reports-server \
+  --task-definition reports-server --force-new-deployment --region us-east-1</pre>
+      <div class="callout warn">
+        Con <code>sleep infinity</code>, cada redeploy reinicia el contenedor sin WebLogic: hay que volver a arrancar
+        AdminServer, Node Manager y los managed (Pasos 12b–12c). El dominio, <code>reports/</code> y los scripts
+        persisten en EFS, así que el Paso 12e no se repite.
+      </div>
+      <h4 class="sub">4. Verificar en el contenedor</h4>
+      <pre class="code">for f in /u01/oracle/lib/librw*.so; do ldd "$f" | grep 'not found'; done | sort -u
+# Sin salida = OK</pre>
+        </section>
+
+        <section class="slide-block anexo" id="anexo-cli">
+          <h3><span class="num anexo">Anexo</span> Comandos AWS CLI</h3>
+
+      <div class="callout">
+        Región <code>us-east-1</code>, cluster <code>forms_report</code>. Los comandos de diagnóstico de
+        subnets, rutas, SG y EFS son los mismos de la
+        <a href="../forms/index.html#anexo-cli">guía Forms</a>.
+      </div>
+
+      <h4 class="sub">1. Registrar la task definition</h4>
+      <pre class="code">aws ecs register-task-definition \
+  --cli-input-json file://conf_json/reports-server.json \
+  --region us-east-1</pre>
+
+      <h4 class="sub">2. Obtener el ARN del servicio Cloud Map <code>weblogic-reports</code></h4>
+      <p>Solo si se crea el servicio ECS por CLI (desde la consola se crea en el Paso 8).</p>
+      <pre class="code">aws servicediscovery create-service \
+  --name weblogic-reports \
+  --namespace-id ns-r3zqawwpjtp5pzue \
+  --dns-config 'NamespaceId=ns-r3zqawwpjtp5pzue,RoutingPolicy=MULTIVALUE,DnsRecords=[{Type=A,TTL=15}]' \
+  --health-check-custom-config FailureThreshold=1 \
+  --region us-east-1 \
+  --query 'Service.Arn' --output text</pre>
+
+      <h4 class="sub">3. Crear el servicio ECS</h4>
+      <pre class="code">aws ecs create-service \
+  --cluster forms_report \
+  --service-name reports-server \
+  --task-definition reports-server \
+  --desired-count 1 \
+  --launch-type FARGATE \
+  --platform-version LATEST \
+  --enable-execute-command \
+  --deployment-configuration 'minimumHealthyPercent=0,maximumPercent=200' \
+  --network-configuration 'awsvpcConfiguration={subnets=[subnet-01212efd4a9ce759b],securityGroups=[sg-0e1787d32bac71fcd],assignPublicIp=ENABLED}' \
+  --service-registries 'registryArn=&lt;ARN_SERVICIO_CLOUDMAP_WEBLOGIC_REPORTS&gt;' \
+  --region us-east-1</pre>
+
+      <h4 class="sub">4. Abrir 9012 en el SG (desde una IP concreta)</h4>
+      <pre class="code">aws ec2 authorize-security-group-ingress \
+  --group-id sg-0e1787d32bac71fcd \
+  --protocol tcp --port 9012 \
+  --cidr &lt;MI_IP&gt;/32 \
+  --region us-east-1</pre>
+
+      <h4 class="sub">5. Tarea, IP pública y logs</h4>
+      <pre class="code">TASK_ARN=$(aws ecs list-tasks --cluster forms_report --service-name reports-server \
+  --region us-east-1 --query 'taskArns[0]' --output text)
+
+ENI=$(aws ecs describe-tasks --cluster forms_report --tasks "$TASK_ARN" --region us-east-1 \
+  --query "tasks[0].attachments[0].details[?name=='networkInterfaceId'].value" --output text)
+
+aws ec2 describe-network-interfaces --network-interface-ids "$ENI" --region us-east-1 \
+  --query 'NetworkInterfaces[0].{Privada:PrivateIpAddress,Publica:Association.PublicIp}' --output table
+
+# Motivo de parada si la tarea no queda RUNNING
+aws ecs describe-tasks --cluster forms_report --tasks "$TASK_ARN" --region us-east-1 \
+  --query 'tasks[0].{status:lastStatus,stopped:stoppedReason,container:containers[0].reason}'
+
+aws logs tail /ecs/reports-server --follow --region us-east-1</pre>
+
+      <h4 class="sub">6. Respaldar la configuración</h4>
+      <pre class="code">aws ecs describe-services --cluster forms_report --services reports-server \
+  --region us-east-1 --output json &gt; conf_json/reports-server-service.json
+
+aws ecs describe-task-definition --task-definition reports-server \
+  --region us-east-1 --query taskDefinition --output json &gt; conf_json/reports-server.json</pre>
+
+      <h4 class="sub">Equivalencia rápida admin / forms / reports</h4>
+      <div class="tabla"><table>
+        <tr><th>Concepto</th><th>Admin</th><th>Forms</th><th>Reports</th></tr>
+        <tr><td>Servicio</td><td><code>forms-admin</code></td><td><code>forms-server</code></td><td><code>reports-server</code></td></tr>
+        <tr><td>Contenedor</td><td><code>admin</code></td><td><code>forms-server</code></td><td><code>reports-server</code></td></tr>
+        <tr><td>Discovery</td><td><code>weblogic-admin</code></td><td><code>weblogic-forms</code></td><td><code>weblogic-reports</code></td></tr>
+        <tr><td>Scripts EFS</td><td><code>scripts/admin</code></td><td><code>scripts/forms</code></td><td><code>scripts/reports</code></td></tr>
+        <tr><td>Log group</td><td><code>/ecs/forms-admin</code></td><td><code>/ecs/forms-server</code></td><td><code>/ecs/reports-server</code></td></tr>
+      </table></div>
+        </section>
+
+        <section class="slide-block lecciones" id="lecciones-criticas">
+          <h3><span class="num lecciones">★</span> Lecciones críticas</h3>
+
+      <p><strong>Heredadas del levantamiento de Forms (aplican igual a Reports):</strong></p>
+      <ol>
+        <li><strong>Espacio efímero 100 GiB</strong> (Paso 4) — con el default, <code>no space left on device</code> al descomprimir la imagen.</li>
+        <li><strong><code>sleep infinity</code> y <code>PATH</code></strong> (Paso 3) — no redefinir <code>PATH</code> con <code>${PATH}</code>: ECS no lo expande y <code>sleep</code> deja de encontrarse.</li>
+        <li><strong>Log group <code>/ecs/reports-server</code> creado a mano</strong> (Paso 5) — <code>ecsTaskExecutionRole</code> no tiene <code>logs:CreateLogGroup</code>; aunque la TD lleva <code>awslogs-create-group=true</code>, la tarea falla con <code>ResourceInitializationError ... AccessDeniedException ... logs:CreateLogGroup</code>. Crear el grupo en CloudWatch y forzar nueva implementación.</li>
+        <li><strong>Solo <code>pub-A</code> en el servicio</strong> (Paso 9) — si la tarea cae en <code>database-A</code>, la IP pública no responde.</li>
+        <li><strong>Ruta BD en <code>Pub-RT</code></strong> — <code>192.168.229.137/32 → pcx-0ad20c217472c7080</code> ya configurada; no hay que repetirla.</li>
+        <li><strong>EFS NFS 2049</strong> — el SG del EFS ya permite 2049 desde <code>forms-sg-ecs</code>; si Reports usara otro SG, habría que añadirlo.</li>
+        <li><strong>Service Discovery solo al crear el servicio</strong> (Paso 8) — no se agrega con un update.</li>
+        <li><strong>Coherence WKA usa UDP 7574</strong> (Paso 9) — la regla SG → mismo SG debe incluir UDP (o <em>Todo el tráfico</em>), no solo TCP. Si no, <code>WLS_REPORTS</code> queda en <code>Delaying formation of a new cluster</code> y a los 300 s pasa a <code>FAILED</code> (<code>RequestTimeoutException ... Name=Cluster</code>).</li>
+        <li><strong>FQDN en el dominio desde el principio</strong> (Paso 0 / Paso 11) — <code>weblogic-reports</code> sin sufijo provoca <code>UnknownHostException</code> en Node Manager y deja a <code>WLS_REPORTS</code> fuera del WKA de Coherence (<code>Hostname weblogic-reports ... failed to resolve</code>): si <code>WLS_FORMS</code> no responde, Reports pasa a <code>FAILED</code> a los 300 s. Ejecutar <code>set-cloudmap-hostnames.sh</code> antes del primer arranque.</li>
+        <li><strong>Usuario <code>oracle</code></strong> (Paso 10) — trabajar con <code>su - oracle</code>, no como <code>root</code>.</li>
+        <li><strong><code>boot.properties</code> del managed</strong> (Paso 12a) — necesario para arranque sin prompt de credenciales.</li>
+        <li><strong>Librerías X11/Motif en la imagen</strong> (Paso 13) — el motor de Reports (<code>librw.so</code>, <code>librwu.so</code>) necesita <code>libXm.so.4</code>, <code>libX11</code>, <code>libXext</code>, <code>libXt</code>, <code>libXp</code>. Sin ellas, la primera petición a <code>rwservlet</code> queda colgada y aparece el incidente <code>DFW-99998 [java.lang.UnsatisfiedLinkError][oracle.reports.util.EnvironmentGlobal.&lt;init&gt;]</code>. Instalar <code>motif libX11 libXext libXt libXp</code> en el Dockerfile (runtime stage); en ECR es el tag <code>r2</code> (<a href="#anexo-r2">anexo</a>).</li>
+        <li><strong>libaio / net-tools / nano en la imagen</strong> — instalarlos con ECS Exec se pierde al recrear la tarea.</li>
+        <li><strong>Redeploy = nueva IP</strong> — Cloud Map actualiza el registro A; respetar TTL 15 antes de arrancar.</li>
+      </ol>
+      <p><strong>Específicas de Reports:</strong></p>
+      <ol>
+        <li><strong>Puertos propios</strong> — 9012/9512/9992; el mapeo <code>5558:5556</code> de compose no aplica en Fargate (usar 5556).</li>
+        <li><strong>Carpeta <code>scripts/reports</code> en EFS</strong> (Paso 0) — debe existir antes de lanzar la tarea, o falla el montaje del volumen.</li>
+        <li><strong>Node Manager separado</strong> — Reports usa <code>nodemanager_reports</code> (no el <code>nodemanager</code> del admin); su <code>ListenAddress</code> debe ser <code>weblogic-reports.forms.local</code>.</li>
+        <li><strong>Memoria</strong> (Paso 2) — los engines <code>rwEng</code> consumen memoria aparte de la JVM; subir a 8 GB si hay <code>OutOfMemory</code> / exit 137.</li>
+        <li><strong>Target de <code>reports#14.1.2</code></strong> (Paso 12d) — si sigue en <code>AdminServer</code>, <code>/reports/rwservlet</code> no responde en 9012.</li>
+        <li><strong>TNS y <code>sourceDir</code></strong> (Paso 12e / 13) — el alias de BD y la ruta de los <code>.rdf</code> deben estar en EFS para que sobrevivan a un redeploy.</li>
+        <li><strong>El Wizard no completa Reports</strong> (Paso 12e) — faltan la instancia de Reports Tools y <code>$DOMAIN_HOME/reports/{bin,server,cache,temp,fonts}</code>. <code>rwservlet</code> responde 200, pero el reporte da <code>REP-52266</code>/<code>REP-51002</code>; la causa real (<code>REP-54005</code>, <code>REP-56022</code>, <code>REP-50141</code>) solo aparece en <code>rwserver_diagnostic.log</code>.</li>
+        <li><strong><code>createReportsToolsInstance</code> necesita el Node Manager de <code>ReportsMachine</code></strong> — sin él, la instancia queda registrada pero sin archivos.</li>
+        <li><strong>Lanzadores con marcadores</strong> — <code>$ORACLE_HOME/bin/rwengine.sh</code> y <code>reports.sh</code> traen <code>$$domain_home$$</code>, <code>$$mw_home$$</code>, <code>$$component_name$$</code> y <code>%HOME%</code>; copiarlos sin sustituir no funciona (<code>prepare-reports-domain.sh</code> lo hace).</li>
+        <li><strong>Seguridad de Reports activa por defecto</strong> — <code>securityId="rwJaznSec"</code> pide usuario en cada reporte; en DEV se elimina del job.</li>
+        <li><strong>RDF en modo carácter</strong> — <code>REP-1920</code> con <code>desformat=PDF</code>; usar <code>mode=bitmap</code>.</li>
+        <li><strong>URL de BD quemada en el dominio</strong> — <em>pendiente por resolver</em> (mismo punto que en Forms: <code>jps-config-jse.xml</code>, <code>opss-datasource-jdbc.xml</code>, etc.).</li>
+      </ol>
+        </section>
+
+      </div>
+    </div>
+
+    <p class="doc-footer">
+      Documentación ECS Reports — capturas en <code>assets/</code>. Basada en <a href="../forms/index.html">ECS Forms</a>.
+    </p>
+
+    <p style="margin: 1rem 0 2rem; text-align: center;">
+      <a class="back-link" href="../../index.html">← Regresar a la documentación del proyecto</a>
+    </p>
+  </div>
+</body>
+</html>

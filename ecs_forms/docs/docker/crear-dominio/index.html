@@ -1,0 +1,3946 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía · Crear el dominio WebLogic y pasos posteriores</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/estilos-demo.css">
+  <style>
+    :root {
+      --font-display: "Outfit", "Segoe UI", sans-serif;
+      --font-body: "Source Sans 3", "Segoe UI", sans-serif;
+      --font-mono: "JetBrains Mono", "Courier New", monospace;
+      --text-desc: #2f3540;
+      --size-desc: 1.05rem;
+      --leading-desc: 1.7;
+      --c-admin: #2e7d32;
+      --c-forms: #ef6c00;
+      --c-reports: #00838f;
+      --c-ohs: #0d47a1;
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--text-desc);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .app-wrap {
+      max-width: 960px;
+      overflow: visible;
+    }
+    .card,
+    .card-body {
+      overflow: visible;
+    }
+
+    /* Cabecera */
+    .comercial-header {
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: nowrap;
+      background-image: url('../../assets/ImagenEmpresa.png');
+      background-repeat: no-repeat;
+      background-position: left center;
+      background-size: cover;
+      background-color: #eef3f8;
+      min-height: 148px;
+      padding: 0.85rem 0.9rem;
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+    .comercial-header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.12) 0%,
+        rgba(255, 255, 255, 0.5) 40%,
+        rgba(255, 255, 255, 0.9) 62%,
+        #ffffff 78%
+      );
+      pointer-events: none;
+    }
+    .comercial-header .title-wrap {
+      position: relative;
+      z-index: 1;
+      margin-left: auto;
+      max-width: 58%;
+      min-width: 280px;
+      text-align: left;
+      padding: 0.95rem 1.15rem 1rem;
+      color: #0a1f4d;
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid rgba(13, 71, 161, 0.12);
+      border-left: 5px solid #0d47a1;
+      box-shadow: 0 6px 20px rgba(0, 33, 113, 0.12);
+    }
+    .comercial-header .title-wrap h1 {
+      font-family: var(--font-display);
+      color: #0a1f4d;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.28;
+      margin: 0;
+    }
+    .comercial-header .title-wrap h1 .header-line-1 {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      color: #0d47a1;
+    }
+    .comercial-header .title-wrap h1 .header-line-2 {
+      display: block;
+      font-size: 1.42rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+      color: #061433;
+    }
+    .comercial-header .title-wrap h1 .header-line-3 {
+      display: block;
+      font-size: 1.02rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: #1565c0;
+    }
+    .comercial-header .title-wrap .header-tagline {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      line-height: 1.45;
+      margin-top: 0.55rem;
+      margin-bottom: 0;
+      font-weight: 500;
+      color: #475569;
+      letter-spacing: 0.01em;
+      padding-top: 0.5rem;
+      border-top: 1px solid rgba(13, 71, 161, 0.15);
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 1rem;
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #0d47a1;
+      text-decoration: none;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    /* Introducción */
+    .intro-propuesta {
+      max-width: calc(100% - 1cm - 1.5rem - 1cm);
+      margin: 0 0 1.5rem 1cm;
+    }
+    .intro-propuesta h2 {
+      font-family: var(--font-display);
+      font-size: 1.28rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      color: var(--primary-dark);
+      margin: 0 0 0.75rem 0;
+    }
+    .intro-propuesta p {
+      text-align: justify;
+      color: var(--text-desc);
+      font-size: var(--size-desc);
+      line-height: var(--leading-desc);
+      font-weight: 400;
+      margin: 0 0 0.85rem;
+    }
+    .intro-propuesta p:last-child { margin-bottom: 0; }
+    .intro-propuesta .slogan {
+      margin-top: 1rem;
+      margin-bottom: 0;
+      text-align: left;
+      font-family: var(--font-display);
+      font-size: 1.12rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #0d47a1;
+      line-height: 1.4;
+    }
+
+    /* Índice */
+    .toc {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0 0 1.5rem 1cm;
+    }
+    .toc a {
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--primary);
+      background: #fff;
+      border: 1px solid #bbdefb;
+      border-radius: 999px;
+      padding: 0.3rem 0.8rem;
+      box-shadow: var(--shadow-sm);
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .toc a:hover { background: #e3f2fd; border-color: #90caf9; }
+
+    /* Bloques numerados */
+    .slide-block {
+      margin-bottom: 1.75rem;
+      padding: 1.25rem 1.4rem;
+      background: #fafafa;
+      border-radius: var(--radius);
+      border-left: 4px solid var(--primary);
+      scroll-margin-top: 1rem;
+    }
+    .slide-block h3 {
+      font-family: var(--font-display);
+      margin: 0 0 0.75rem 0;
+      color: var(--primary-dark);
+      font-size: 1.22rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    .slide-block h3 .num {
+      flex-shrink: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+    .slide-block p {
+      margin: 0 0 0.9rem 0;
+      color: var(--text-desc);
+      font-size: var(--size-desc);
+      line-height: var(--leading-desc);
+      font-weight: 400;
+      text-align: justify;
+    }
+    .slide-block p:last-child { margin-bottom: 0; }
+    .slide-block h4.sub {
+      font-family: var(--font-display);
+      margin: 1.35rem 0 0.65rem;
+      color: var(--primary-dark);
+      font-size: 1.08rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.86em;
+      background: #eef3f8;
+      color: #0a1f4d;
+      padding: 0.08rem 0.35rem;
+      border-radius: 4px;
+    }
+
+    /* Diagrama de arquitectura */
+    .arq {
+      margin: 1rem 0 0.5rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      padding: 1.1rem 1.1rem 1.2rem;
+    }
+    .arq-users {
+      display: flex;
+      justify-content: center;
+    }
+    .arq-users .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--primary-dark);
+      background: #e3f2fd;
+      border: 1px solid #90caf9;
+      border-radius: 999px;
+      padding: 0.45rem 1rem;
+    }
+    .arq-users .pill svg { width: 20px; height: 20px; fill: var(--primary); }
+    .arq-flow {
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      line-height: 1.2;
+      margin: 0.3rem 0;
+    }
+    .arq-flow .arrow {
+      display: block;
+      font-size: 1.3rem;
+      color: var(--primary);
+      line-height: 1;
+    }
+    .arq-host {
+      border: 2px dashed #90a4ae;
+      border-radius: 12px;
+      padding: 0.9rem 0.9rem 1rem;
+      background: #f7f9fc;
+      position: relative;
+    }
+    .arq-host-label {
+      font-family: var(--font-display);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #546e7a;
+      margin-bottom: 0.65rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .arq-host-label .net {
+      color: var(--primary);
+      background: #e3f2fd;
+      border-radius: 999px;
+      padding: 0.05rem 0.6rem;
+      letter-spacing: 0.04em;
+    }
+    .arq-containers {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+      align-items: stretch;
+    }
+    .ctr {
+      min-width: 0;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--c-admin);
+      border-radius: 10px;
+      box-shadow: var(--shadow-sm);
+      padding: 0.75rem 0.8rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .ctr.forms { border-top-color: var(--c-forms); }
+    .ctr.reports { border-top-color: var(--c-reports); }
+    .ctr-head {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+    .ctr-head .ico {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e8f5e9;
+      color: var(--c-admin);
+    }
+    .ctr.forms .ctr-head .ico { background: #fff3e0; color: var(--c-forms); }
+    .ctr.reports .ctr-head .ico { background: #e0f2f1; color: var(--c-reports); }
+    .ctr-head .ico svg { width: 20px; height: 20px; fill: currentColor; }
+    .ctr-head .t {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: var(--primary-dark);
+      line-height: 1.15;
+    }
+    .ctr-head .h {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    .comp {
+      border: 1px solid #e3e8ef;
+      border-radius: 8px;
+      padding: 0.45rem 0.6rem;
+      background: #fafbfd;
+    }
+    .comp .n {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      line-height: 1.25;
+    }
+    .comp .n em {
+      display: block;
+      font-style: normal;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      overflow-wrap: anywhere;
+    }
+    .comp .ports {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-top: 0.3rem;
+    }
+    .port {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 0.05rem 0.45rem;
+      border-radius: 999px;
+      background: #eef3f8;
+      color: #0a1f4d;
+      border: 1px solid #dbe4ee;
+      white-space: nowrap;
+    }
+    .comp.ohs { border-color: #bbdefb; background: #f3f8fe; }
+    .comp.nm { border-style: dashed; }
+    .ctr-machine {
+      margin-top: auto;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+    }
+    .arq-mounts {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    .mount {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 44px;
+    }
+    .mount::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 4px;
+      left: 50%;
+      border-left: 3px solid #8e24aa;
+      transform: translateX(-50%);
+    }
+    .mount::after {
+      content: "";
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 8px solid #8e24aa;
+    }
+    .mount span {
+      position: relative;
+      font-family: var(--font-display);
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #6a1b9a;
+      background: #fff;
+      border: 1px solid #e1bee7;
+      border-radius: 999px;
+      padding: 0.05rem 0.55rem;
+    }
+    .arq-domain {
+      position: relative;
+      background: linear-gradient(135deg, #f3e5f5 0%, #ede7f6 55%, #e8eaf6 100%);
+      border: 2px solid #8e24aa;
+      border-radius: 12px;
+      padding: 0.85rem 1rem 0.95rem;
+      box-shadow: 0 6px 18px rgba(106, 27, 154, 0.15);
+    }
+    .dom-head {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .dom-ico {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: #6a1b9a;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .dom-ico svg { width: 24px; height: 24px; fill: currentColor; }
+    .dom-kicker {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #6a1b9a;
+    }
+    .dom-name {
+      font-family: var(--font-mono);
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: #2a0a3d;
+      line-height: 1.2;
+    }
+    .dom-badge {
+      margin-left: auto;
+      font-family: var(--font-display);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #fff;
+      background: #6a1b9a;
+      border-radius: 999px;
+      padding: 0.3rem 0.8rem;
+    }
+    .dom-path {
+      margin-top: 0.65rem;
+      font-size: 0.85rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .dom-path code { background: #fff; }
+    .dom-path .to { color: #6a1b9a; font-weight: 700; }
+    .dom-parts {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.5rem;
+      margin-top: 0.65rem;
+    }
+    .dom-parts .part {
+      background: #fff;
+      border: 1px solid #e1bee7;
+      border-left: 4px solid var(--c-admin);
+      border-radius: 8px;
+      padding: 0.35rem 0.55rem;
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      overflow-wrap: anywhere;
+    }
+    .dom-parts .part.forms { border-left-color: var(--c-forms); }
+    .dom-parts .part.reports { border-left-color: var(--c-reports); }
+    .dom-parts .part code { font-size: 0.78em; font-weight: 500; }
+    .slide-block .arq-domain .dom-note,
+    .dom-note {
+      margin: 0.65rem 0 0;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: #3c2a4d;
+      text-align: left;
+    }
+    .arq-volumes {
+      margin-top: 0.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 0.75rem;
+      background: #eceff1;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      color: #37474f;
+    }
+    .arq-volumes .lbl {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.74rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #455a64;
+      margin-right: 0.25rem;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      justify-content: center;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+    .legend i {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+    .figure .caption,
+    .caption {
+      font-family: var(--font-body);
+      margin-top: 0.6rem;
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.45;
+      letter-spacing: 0.01em;
+    }
+
+    /* Componentes clave */
+    .capacidades-label {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin: 1.1rem 0 0.65rem;
+    }
+    .capacidades-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.65rem;
+    }
+    .capacidad {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.7rem 0.85rem;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.15s ease;
+    }
+    .capacidad:hover { border-color: #90caf9; }
+    .capacidad .nro {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #0d47a1, #1565c0);
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.05rem;
+    }
+    .capacidad .txt {
+      font-size: 0.95rem;
+      line-height: 1.4;
+      color: var(--text-desc);
+      padding-top: 0.2rem;
+      font-weight: 400;
+    }
+    .capacidad .txt strong {
+      font-family: var(--font-display);
+      color: var(--primary-dark);
+      font-weight: 700;
+    }
+
+    /* Especificaciones por contenedor */
+    .specs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin: 1rem 0 0.25rem;
+    }
+    .spec {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--c-admin);
+      overflow: hidden;
+    }
+    .spec.forms { border-top-color: var(--c-forms); }
+    .spec.reports { border-top-color: var(--c-reports); }
+    .spec h4 {
+      font-family: var(--font-display);
+      font-size: 1.02rem;
+      font-weight: 700;
+      margin: 0;
+      padding: 0.75rem 0.9rem 0.6rem;
+      color: var(--primary-dark);
+      letter-spacing: -0.01em;
+      border-bottom: 1px solid #eef2f6;
+    }
+    .spec dl {
+      margin: 0;
+      padding: 0.35rem 0.9rem 0.7rem;
+    }
+    .spec .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.36rem 0;
+      border-bottom: 1px dashed #eef2f6;
+      font-size: 0.9rem;
+    }
+    .spec .row:last-child { border-bottom: none; }
+    .spec dt { color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+    .spec dd {
+      margin: 0;
+      text-align: right;
+      color: var(--primary-dark);
+      font-weight: 600;
+    }
+    .spec .sep {
+      font-family: var(--font-display);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--c-ohs);
+      background: #f3f8fe;
+      padding: 0.4rem 0.9rem;
+      border-top: 1px solid #e3f2fd;
+      border-bottom: 1px solid #e3f2fd;
+    }
+
+    .badge {
+      font-family: var(--font-display);
+      display: inline-block;
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .badge-ok {
+      background: #e8f5e9;
+      color: #1b5e20;
+      border: 1px solid #a5d6a7;
+    }
+    .badge-manual {
+      background: #fff3e0;
+      color: #e65100;
+      border: 1px solid #ffcc80;
+    }
+
+    /* Tablas */
+    .tabla {
+      margin-top: 0.85rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .tabla table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    .tabla th {
+      font-family: var(--font-display);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-align: left;
+      color: var(--text-muted);
+      background: #f7f9fc;
+      padding: 0.65rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .tabla td {
+      padding: 0.55rem 0.9rem;
+      border-top: 1px solid #eef2f6;
+      color: var(--text-desc);
+      vertical-align: middle;
+    }
+    .tabla tr:first-child td { border-top: none; }
+    .tabla tbody tr:hover td { background: #fafcff; }
+    .tabla td.svc {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--primary-dark);
+      white-space: nowrap;
+    }
+    .tabla td.svc::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+      background: var(--c-admin);
+    }
+    .tabla td.svc.ohs::before { background: var(--c-ohs); }
+    .tabla td.svc.forms::before { background: var(--c-forms); }
+    .tabla td.svc.reports::before { background: var(--c-reports); }
+    .tabla td.num {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+    .tabla td.num.diff { color: #b26a00; font-weight: 600; }
+
+    /* Fichas de detalle técnico */
+    .detalles {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 1rem 0 0.25rem;
+    }
+    .detalle {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 1rem 1.15rem 1.1rem;
+      border-left: 4px solid var(--primary);
+    }
+    .detalle.d-2 { border-left-color: #00838f; }
+    .detalle.d-3 { border-left-color: #2e7d32; }
+    .detalle.d-4 { border-left-color: #558b2f; }
+    .detalle.d-5 { border-left-color: #6a1b9a; }
+    .detalle.d-6 { border-left-color: #546e7a; }
+    .detalle h4 {
+      font-family: var(--font-display);
+      margin: 0 0 0.55rem 0;
+      color: var(--primary-dark);
+      font-size: 1.08rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+    .detalle h4 .d-num {
+      flex-shrink: 0;
+      min-width: 1.7rem;
+      height: 1.7rem;
+      padding: 0 0.45rem;
+      border-radius: 999px;
+      background: var(--primary);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .detalle.d-2 h4 .d-num { background: #00838f; }
+    .detalle.d-3 h4 .d-num { background: #2e7d32; }
+    .detalle.d-4 h4 .d-num { background: #558b2f; }
+    .detalle.d-5 h4 .d-num { background: #6a1b9a; }
+    .detalle.d-6 h4 .d-num { background: #546e7a; }
+    .detalle h4 .d-tag {
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0;
+    }
+    .detalle p {
+      margin: 0 0 0.65rem 0;
+      font-size: 0.98rem;
+      line-height: 1.6;
+      text-align: justify;
+      color: var(--text-desc);
+    }
+    .detalle p:last-child { margin-bottom: 0; }
+
+    .cta-list {
+      margin: 0.35rem 0 0.65rem;
+      padding-left: 1.2rem;
+      color: var(--text-desc);
+      line-height: 1.65;
+      font-size: 0.98rem;
+      font-weight: 400;
+    }
+    .cta-list:last-child { margin-bottom: 0; }
+    .cta-list li { margin-bottom: 0.3rem; }
+    .cta-list strong {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    /* Bloques de código */
+    pre.code {
+      margin: 0.5rem 0 0.75rem;
+      background: #0f1b2d;
+      color: #e6edf3;
+      padding: 0.9rem 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.6;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+    }
+    pre.code:last-child { margin-bottom: 0; }
+    pre.code .c { color: #7d8ea3; }
+    pre.code .k { color: #79c0ff; }
+    pre.code .s { color: #a5d6ff; }
+
+    /* Comandos (plegables) */
+    .cmds {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      margin-top: 0.9rem;
+    }
+    .cmd {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .cmd summary {
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.75rem 0.95rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: var(--primary-dark);
+    }
+    .cmd summary::-webkit-details-marker { display: none; }
+    .cmd summary::after {
+      content: "+";
+      margin-left: auto;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+    .cmd[open] summary::after { content: "–"; }
+    .cmd summary .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+      flex-shrink: 0;
+    }
+    .cmd.admin summary .dot { background: var(--c-admin); }
+    .cmd.forms summary .dot { background: var(--c-forms); }
+    .cmd.reports summary .dot { background: var(--c-reports); }
+    .cmd summary .sub {
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .cmd .body {
+      padding: 0 0.95rem 0.95rem;
+      border-top: 1px solid #eef2f6;
+    }
+    .cmd .body p {
+      font-size: 0.92rem;
+      margin: 0.7rem 0 0.2rem;
+      text-align: left;
+    }
+
+    /* Beneficios */
+    .benefits {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.85rem;
+    }
+    .benefit {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 0.95rem 1.05rem;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    .benefit h4 {
+      font-family: var(--font-display);
+      margin: 0 0 0.4rem 0;
+      color: var(--primary-dark);
+      font-size: 1.02rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .benefit p {
+      margin: 0;
+      font-size: 0.98rem;
+      text-align: left;
+      color: var(--text-desc);
+      line-height: 1.55;
+      font-weight: 400;
+    }
+
+    .message-box {
+      margin-top: 1rem;
+      padding: 1.05rem 1.25rem;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%);
+      border: 1px solid rgba(13, 71, 161, 0.25);
+      font-size: var(--size-desc);
+      line-height: var(--leading-desc);
+      font-weight: 400;
+      color: var(--text-desc);
+    }
+    .message-box strong {
+      font-family: var(--font-display);
+      font-weight: 700;
+    }
+
+    .doc-footer {
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin: 0.5rem 0 1rem;
+    }
+    .doc-footer strong {
+      font-family: var(--font-display);
+      color: var(--primary-dark);
+    }
+
+    @media (max-width: 820px) {
+      .arq-containers { grid-template-columns: 1fr; }
+      .arq-mounts { display: none; }
+      .dom-parts { grid-template-columns: 1fr; }
+      .specs { grid-template-columns: 1fr; }
+      .capacidades-grid { grid-template-columns: 1fr; }
+      .tabla { overflow-x: auto; }
+    }
+
+    @media (max-width: 700px) {
+      .comercial-header {
+        flex-wrap: wrap;
+        background-position: top left;
+        min-height: auto;
+      }
+      .comercial-header::before {
+        background: rgba(255, 255, 255, 0.88);
+      }
+      .comercial-header .title-wrap {
+        max-width: 100%;
+        min-width: 0;
+        width: 100%;
+        text-align: left;
+      }
+      .comercial-header .title-wrap h1 .header-line-2 { font-size: 1.22rem; }
+      .intro-propuesta, .toc { margin-left: 0; max-width: 100%; }
+    }
+
+    @media print {
+      body { font-size: 12pt; }
+      .comercial-header .title-wrap h1 .header-line-2 { font-size: 16pt; }
+      .toc { display: none; }
+      .cmd .body { display: block !important; }
+      .slide-block { break-inside: avoid-page; }
+    }
+  </style>
+  <style>
+    a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    a code { color: var(--primary); }
+
+    /* Notas destacadas */
+    .callout {
+      margin: 0.9rem 0;
+      padding: 0.85rem 1.05rem;
+      border-radius: var(--radius);
+      border: 1px solid #bbdefb;
+      border-left: 4px solid var(--primary);
+      background: #f3f8fe;
+      font-size: 0.97rem;
+      line-height: 1.6;
+      color: var(--text-desc);
+    }
+    .callout:last-child { margin-bottom: 0; }
+    .callout .lbl {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 0.25rem;
+    }
+    .callout.warn { background: #fff8e1; border-color: #ffe082; border-left-color: #f9a825; }
+    .callout.warn .lbl { color: #b26a00; }
+    .callout.ok { background: #f1f8f2; border-color: #c8e6c9; border-left-color: var(--success); }
+    .callout.ok .lbl { color: #1b5e20; }
+    .callout ul { margin: 0.3rem 0 0; padding-left: 1.2rem; }
+    .callout li { margin-bottom: 0.2rem; }
+    .intro-propuesta .callout { text-align: left; }
+
+    /* Flujo del build multi-stage */
+    .pipeline {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+      margin: 0.9rem 0 1rem;
+      padding: 0.85rem 0.95rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+    .pipeline .stage-lbl {
+      flex-basis: 100%;
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+    .pipeline .stage-lbl:first-child { margin-top: 0; }
+    .step-chip {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary-dark);
+      background: #f3f8fe;
+      border: 1px solid #bbdefb;
+      border-radius: 999px;
+      padding: 0.2rem 0.7rem;
+      white-space: nowrap;
+    }
+    .step-chip.base { background: #eceff1; border-color: #cfd8dc; color: #37474f; }
+    .step-chip.final { background: #e8f5e9; border-color: #a5d6a7; color: #1b5e20; }
+    .step-chip.check { background: #fff3e0; border-color: #ffcc80; color: #e65100; }
+    .pipeline .sep { color: var(--primary); font-weight: 700; }
+
+    /* Tablas genéricas */
+    .tabla td code { font-size: 0.8rem; }
+    .tabla td.lib { font-family: var(--font-mono); font-size: 0.82rem; white-space: nowrap; }
+    .lib-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.45rem;
+      margin: 0.6rem 0 0.8rem;
+    }
+    .lib-grid span {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      text-align: center;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.3rem 0.35rem;
+      color: var(--primary-dark);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .detalle ol.cta-list,
+    .slide-block ol.cta-list { padding-left: 1.4rem; }
+    .cta-list ul { margin: 0.25rem 0 0.2rem; padding-left: 1.1rem; }
+
+    .env-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.45rem;
+      margin-top: 0.4rem;
+    }
+    .env-grid div {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      background: #fff;
+      border: 1px solid #dbe4ee;
+      border-radius: 6px;
+      padding: 0.3rem 0.55rem;
+      color: #0a1f4d;
+      overflow-wrap: anywhere;
+    }
+
+    pre.code.full { max-height: 640px; }
+
+    @media (max-width: 820px) {
+      .lib-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .env-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+  <style>
+    .card-header.part {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: var(--font-display);
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      background: linear-gradient(135deg, #e3f2fd 0%, #f3f8fe 100%);
+      border-bottom: 1px solid #bbdefb;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      scroll-margin-top: 1rem;
+    }
+    .card-header.part .tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #fff;
+      background: var(--primary);
+      border-radius: 999px;
+      padding: 0.2rem 0.7rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .card-header.part .sub-intro {
+      display: block;
+      font-family: var(--font-body);
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    .part-b .card-header.part { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f2 100%); border-bottom-color: #c8e6c9; }
+    .part-b .card-header.part .tag { background: var(--success); }
+    .part-b .slide-block { border-left-color: var(--success); }
+    .part-b .slide-block h3 .num { background: var(--success); }
+
+    .toc-group {
+      margin: 0 0 0.35rem 1cm;
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .toc + .toc-group { margin-top: -0.6rem; }
+    .toc.toc-b a { color: #1b5e20; border-color: #c8e6c9; }
+    .toc.toc-b a:hover { background: #e8f5e9; border-color: #a5d6a7; }
+
+    .slide-block h3 .num { min-width: 30px; width: auto; padding: 0 0.4rem; border-radius: 999px; }
+    .slide-block h4.sub {
+      padding-top: 0.75rem;
+      border-top: 1px dashed #dfe6ee;
+      scroll-margin-top: 1rem;
+    }
+    .slide-block > h4.sub:first-of-type { border-top: none; padding-top: 0; }
+
+    .slide-block ul,
+    .slide-block ol {
+      margin: 0.4rem 0 0.9rem;
+      padding-left: 1.4rem;
+      font-size: 0.98rem;
+      line-height: 1.6;
+      color: var(--text-desc);
+    }
+    .slide-block li { margin-bottom: 0.3rem; }
+    .slide-block li > ul,
+    .slide-block li > ol { margin: 0.3rem 0 0.2rem; }
+    .slide-block li > pre.code { margin: 0.4rem 0 0.5rem; }
+
+    pre.code code {
+      background: none;
+      padding: 0;
+      color: inherit;
+      font-size: inherit;
+      font-family: inherit;
+      border-radius: 0;
+    }
+
+    .callout p {
+      margin: 0 0 0.45rem !important;
+      font-size: 0.97rem !important;
+      line-height: 1.6 !important;
+      text-align: left !important;
+    }
+    .callout p:last-child { margin-bottom: 0 !important; }
+    .callout ul, .callout ol { margin: 0.3rem 0 0.45rem; font-size: 0.96rem; }
+    .callout pre.code { margin: 0.45rem 0; }
+    .callout .tabla { margin: 0.5rem 0; }
+
+    :not(pre) > code { overflow-wrap: anywhere; }
+    .tabla { overflow-x: auto; }
+    .tabla td { vertical-align: top; }
+    .tabla td ul, .tabla td ol { margin: 0; padding-left: 1.1rem; font-size: 0.9rem; }
+    .tabla td pre.code { margin: 0.3rem 0; font-size: 0.75rem; }
+
+    .slide-block img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 1rem auto 0.45rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      background: #fff;
+    }
+    .slide-block .image-caption {
+      text-align: center !important;
+      font-size: 0.88rem !important;
+      font-style: normal;
+      color: var(--text-muted) !important;
+      margin: 0 0 1.2rem !important;
+    }
+    .slide-block blockquote {
+      margin: 0.8rem 0;
+      padding: 0.7rem 1rem;
+      background: #f5f7fa;
+      border-left: 3px solid #90a4ae;
+      border-radius: 0 8px 8px 0;
+      color: #455a64;
+      font-size: 0.95rem;
+    }
+    .slide-block blockquote p { margin: 0 0 0.4rem; font-size: 0.95rem; text-align: left; }
+    .slide-block blockquote p:last-child { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+  <div class="app-wrap">
+    <a class="back-link" href="../../index.html">← Regresar a la documentación del proyecto</a>
+
+    <header class="comercial-header">
+      <div class="title-wrap">
+        <h1>
+          <span class="header-line-1">Oracle Forms &amp; Reports 14.1.2</span>
+          <span class="header-line-2">Crear el dominio WebLogic</span>
+          <span class="header-line-3">Configuration Wizard · RCU · Docker Compose</span>
+        </h1>
+        <p class="header-tagline">Desde la preparación de los contenedores hasta Forms y Reports operativos</p>
+      </div>
+    </header>
+
+    <div class="intro intro-propuesta">
+      <h2>Visión general</h2>
+      <p>
+        Esta guía te ayudará a crear el dominio WebLogic usando el Configuration Wizard con interfaz gráfica. El dominio se crea sobre la infraestructura de contenedores
+        <code>admin</code>, <code>forms</code> y <code>reports</code> orquestada con
+        <strong>Docker Compose</strong>, a partir de la imagen <code>image_forms_14.1.2</code>
+        (ver <a href="../crear_imagen/index.html">Crear imagen</a>) y con el dominio compartido
+        en una carpeta del host.
+      </p>
+      <p>
+        La guía tiene dos partes: la <strong>creación del dominio</strong> (preparación de los
+        contenedores, schemas RCU y Configuration Wizard) y los <strong>pasos posteriores</strong>
+        (AdminServer, OHS, Node Manager, Managed Servers y completar Reports).
+      </p>
+      <p class="slogan">Un dominio, creado una vez, compartido por los tres contenedores.</p>
+    </div>
+
+    <div class="toc-group">Parte 1 · Crear el dominio</div>
+    <nav class="toc" aria-label="Contenido parte 1"><a href="#requisitos">R · Requisitos</a><a href="#paso-0">0 · Preparar contenedores</a><a href="#paso-1">1 · Schemas RCU</a><a href="#paso-2">2 · Configuration Wizard</a><a href="#paso-3">3 · Conectar VNC</a><a href="#paso-4">4 · Configurar el dominio</a><a href="#problemas">? · Solución de problemas</a><a href="#siguiente">→ · Siguiente paso</a></nav>
+    <div class="toc-group">Parte 2 · Después de crear el dominio</div>
+    <nav class="toc toc-b" aria-label="Contenido parte 2"><a href="#d-verificacion">✓ · Verificación inicial</a><a href="#d-paso-1">1 · Iniciar AdminServer</a><a href="#d-paso-2">2 · ohs_updateInstances()</a><a href="#d-paso-3">3 · Verificar configuración</a><a href="#d-paso-4">4 · Node Manager</a><a href="#d-paso-5">5 · Compose forms/reports</a><a href="#d-paso-6">6 · Reasignar deployments</a><a href="#paso-7-reports">7 · Completar Reports</a><a href="#d-resumen">Σ · Resumen de estado</a><a href="#d-comandos">$ · Comandos rápidos</a><a href="#d-siguiente">→ · Siguiente paso</a></nav>
+
+    <div class="card part-a" id="guia-crear-dominio">
+      <div class="card-header part">
+        <span class="tag">Parte 1</span>
+        <span>Crear el dominio con el Configuration Wizard (GUI)</span>
+      </div>
+      <div class="card-body">
+
+        <section class="slide-block" id="requisitos">
+          <h3><span class="num">R</span> Requisitos Previos</h3>
+
+        <ol>
+            <li><strong>VNC Viewer instalado en tu máquina host</strong>
+                <ul>
+                    <li>Windows: <a href="https://www.tightvnc.com/" target="_blank">TightVNC</a> o <a href="https://www.realvnc.com/" target="_blank">RealVNC</a></li>
+                    <li>Linux: <code>sudo apt install tigervnc-viewer</code> o <code>sudo yum install tigervnc</code></li>
+                    <li>Mac: <a href="https://www.realvnc.com/download/viewer/" target="_blank">RealVNC Viewer</a></li>
+                </ul>
+            </li>
+            <li><strong>Docker y Docker Compose v2 instalados</strong> (detalle en el <a href="#paso-0-2">Paso 0.2</a>)</li>
+            <li><strong>Imagen <code>image_forms_14.1.2</code> disponible localmente</strong>
+                (ver <a href="../crear_imagen/index.html">Crear imagen</a>)</li>
+            <li><strong>Archivo <code>docker-compose.yml</code></strong> en <code>dist/</code> (se crea en el <a href="#paso-0-4">Paso 0.4</a>)</li>
+            <li><strong>Servidor de Base de Datos Oracle</strong> accesible desde el host Docker
+                <ul>
+                    <li>Necesario para la configuración del dominio: el Repository Creation Utility (RCU) crea en ella los schemas (<code>OPSS</code>, <code>MDS</code>, <code>IAU</code>, <code>STB</code>, etc.) que el dominio JRF / Forms &amp; Reports usa mediante sus Data Sources JDBC.</li>
+                    <li>Datos requeridos: host, puerto, nombre de servicio (PDB) y un usuario con privilegios <code>SYSDBA</code> para ejecutar RCU.</li>
+                    <li>Versión certificada para FMW 14.1.2 (p. ej. Oracle Database 19c).</li>
+                </ul>
+            </li>
+        </ol>
+        </section>
+
+        <section class="slide-block" id="paso-0">
+          <h3><span class="num">0</span> Preparar la ejecución de contenedores con Docker Compose</h3>
+
+        <p>
+            El dominio WebLogic no se crea en un único contenedor “monolítico”, sino en una
+            infraestructura de varios contenedores orquestada con <strong>Docker Compose</strong>.
+            Todos parten de la misma imagen (<code>image_forms_14.1.2</code>, construida según
+            <a href="../crear_imagen/index.html">Crear imagen</a>) y comparten el
+            dominio a través de una carpeta del host. Antes de crear el dominio hay que preparar
+            ese entorno: prerrequisitos, estructura de carpetas y el archivo
+            <code>docker-compose.yml</code>.
+        </p>
+
+        <h4 class="sub" id="paso-0-1">0.1. Visión general: cómo se ejecutarán los contenedores</h4>
+
+        <p>Docker Compose define y levanta, con un solo archivo, los siguientes servicios:</p>
+
+        <div class="tabla"><table>
+            <thead>
+                <tr>
+                    <th>Servicio (compose)</th>
+                    <th>Contenedor / hostname</th>
+                    <th>Función</th>
+                    <th>Cuándo se usa</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>admin</code></td>
+                    <td><code>weblogic-admin</code></td>
+                    <td>AdminServer + Node Manager. Es donde se crean los schemas RCU y el dominio
+                        (Configuration Wizard vía VNC).</td>
+                    <td>Desde el Paso 0 (único servicio necesario para crear el dominio).</td>
+                </tr>
+                <tr>
+                    <td><code>forms</code></td>
+                    <td><code>weblogic-forms</code></td>
+                    <td>Managed Server <code>WLS_FORMS</code> con su Node Manager (FormsMachine).
+                        También se usa para compilar Forms y Pro*C.</td>
+                    <td>Después de crear el dominio.</td>
+                </tr>
+                <tr>
+                    <td><code>reports</code></td>
+                    <td><code>weblogic-reports</code></td>
+                    <td>Managed Server <code>WLS_REPORTS</code> con su Node Manager (ReportsMachine).</td>
+                    <td>Después de crear el dominio.</td>
+                </tr>
+            </tbody>
+        </table></div>
+
+        <p>Elementos compartidos entre los tres servicios:</p>
+        <ul>
+            <li><strong>Imagen común:</strong> <code>image_forms_14.1.2</code> (con el software
+                FMW, Forms &amp; Reports ya instalado). Los contenedores no instalan WebLogic; solo lo ejecutan.</li>
+            <li><strong>Red interna</strong> <code>weblogic-network</code>: permite que los contenedores
+                se resuelvan por hostname (p. ej. <code>forms</code> contacta a
+                <code>weblogic-admin:7001</code>).</li>
+            <li><strong>Dominio en el host</strong> (<code>./domains</code>): el dominio vive fuera
+                de los contenedores, por lo que sobrevive a su recreación y es el mismo para los tres.</li>
+            <li><strong>Aplicaciones en el host</strong> (<code>./app</code>): fuentes y ejecutables
+                (<code>.fmb</code>, <code>.fmx</code>, <code>.pc</code>, etc.).</li>
+            <li><strong>Scripts por servicio</strong> (<code>./scripts/&lt;servicio&gt;</code>):
+                entrypoints y utilidades (RCU, GUI, Node Manager).</li>
+        </ul>
+
+        <pre class="code"><code>                       Host Docker
+ ┌──────────────────────────────────────────────────────────┐
+ │  dist/                                                   │
+ │   ├─ docker-compose.yml                                  │
+ │   ├─ domains/  ──────────┐ (bind mount compartido)       │
+ │   ├─ app/      ────────┐ │                               │
+ │   └─ scripts/          │ │                               │
+ │                        ▼ ▼                               │
+ │   ┌───────────────┐ ┌───────────────┐ ┌───────────────┐  │
+ │   │ weblogic-admin│ │ weblogic-forms│ │weblogic-reports│ │
+ │   │ AdminServer   │ │ WLS_FORMS     │ │ WLS_REPORTS   │  │
+ │   │ NodeManager   │ │ NodeManager   │ │ NodeManager   │  │
+ │   └───────┬───────┘ └───────┬───────┘ └───────┬───────┘  │
+ │           └──────── weblogic-network (bridge) ┘          │
+ └──────────────────────────────────────────────────────────┘</code></pre>
+
+        <div class="callout">
+            <p><strong>Secuencia de trabajo:</strong> primero se levanta <strong>solo</strong> el
+            servicio <code>admin</code> (Paso 0), se crean los schemas RCU (Paso 1) y el dominio
+            con el Configuration Wizard (Pasos 2–4). Una vez que el dominio existe en
+            <code>./domains</code>, se levantan <code>forms</code> y <code>reports</code>
+            (ver “Pasos Después de Crear el Dominio”).</p>
+        </div>
+
+        <h4 class="sub" id="paso-0-2">0.2. Prerrequisitos</h4>
+
+        <div class="tabla"><table>
+            <thead>
+                <tr>
+                    <th>Prerrequisito</th>
+                    <th>Cómo verificarlo</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Docker Engine</strong> instalado y el usuario con permisos para usarlo</td>
+                    <td><code>docker version</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Docker Compose v2</strong> (comando <code>docker compose</code>, no
+                        <code>docker-compose</code> v1, que falla con Python 3.12+ por
+                        <code>distutils</code>)</td>
+                    <td><code>docker compose version</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Imagen</strong> <code>image_forms_14.1.2</code> disponible localmente
+                        (construida o cargada desde un <code>.tar</code>)</td>
+                    <td><code>docker images | grep image_forms_14.1.2</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Base de datos Oracle</strong> accesible desde el host (para RCU y JDBC
+                        del dominio), con usuario SYS/DBA</td>
+                    <td>Host, puerto y servicio conocidos; p. ej. <code>nc -zv &lt;host&gt; &lt;puerto&gt;</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Puertos libres</strong> en el host: 7001, 9002, 5556, 7777, 4443, 5902
+                        (admin); 9001, 9501, 9991, 5557 (forms); 9012, 9512, 9992, 5558 (reports)</td>
+                    <td><code>ss -tlnp | grep -E '7001|5902|9001|9012'</code></td>
+                </tr>
+                <tr>
+                    <td><strong>VNC Viewer</strong> en el host (para el Configuration Wizard)</td>
+                    <td>Ver “Requisitos Previos”</td>
+                </tr>
+                <tr>
+                    <td><strong>Espacio en disco</strong> para el dominio y los logs en <code>./domains</code></td>
+                    <td><code>df -h .</code></td>
+                </tr>
+            </tbody>
+        </table></div>
+
+        <p>Si la imagen se recibió como archivo <code>.tar</code>, cargarla en las imágenes del Docker local antes de continuar:</p>
+        <pre class="code"><code>docker load -i image_forms_14.1.2_r1.tar
+# o, si está comprimida:
+gunzip -c image_forms_14.1.2_r1_gzip.tar.gz | docker load
+
+docker images | grep image_forms_14.1.2</code></pre>
+
+        <h4 class="sub" id="paso-0-3">0.3. Estructura de directorios del proyecto</h4>
+
+        <p>Todo el trabajo con Compose se hace desde el directorio <code>dist/</code>, que debe tener esta estructura:</p>
+
+        <pre class="code"><code>dist/
+├── docker-compose.yml        ← definición de servicios, red y volúmenes
+├── domains/                  ← dominio WebLogic (inicialmente vacío)
+├── app/                      ← aplicaciones (forms_app/, proc_app/, ...)
+└── scripts/
+    ├── admin/                ← entrypoint_persistente.sh, run-rcu.sh,
+    │                           install-gui-packages.sh, setup-gui.sh, ...
+    ├── forms/                ← entrypoint.sh, startNodeManager.sh, create-forms-machine.py
+    └── reports/              ← entrypoint.sh, startNodeManager.sh, create-reports-machine.py</code></pre>
+
+        <pre class="code"><code>cd dist
+mkdir -p domains app scripts/admin scripts/forms scripts/reports
+chmod +x scripts/*/*.sh</code></pre>
+
+        <div class="callout warn">
+            <p><strong>Permisos:</strong> los contenedores se ejecutan como el usuario
+            <code>oracle</code> (uid 1000). Las carpetas <code>domains/</code> y <code>app/</code>
+            deben ser escribibles por ese uid; de lo contrario el Configuration Wizard no podrá
+            crear el dominio. Si es necesario:</p>
+            <pre class="code"><code>sudo chown -R 1000:1000 domains app</code></pre>
+        </div>
+
+        <h4 class="sub" id="paso-0-4">0.4. Crear el archivo <code>docker-compose.yml</code></h4>
+
+        <p>
+            El archivo <code>docker-compose.yml</code> describe <em>qué</em> contenedores se
+            ejecutan, <em>con qué</em> imagen, <em>cómo</em> se conectan entre sí y <em>qué</em>
+            carpetas del host comparten. A continuación se describen sus partes, tomando como
+            ejemplo el servicio <code>admin</code>.
+        </p>
+
+        <h4 class="sub">Partes del archivo</h4>
+
+        <div class="tabla"><table>
+            <thead>
+                <tr>
+                    <th>Clave</th>
+                    <th>Ejemplo (servicio <code>admin</code>)</th>
+                    <th>Papel en el proceso</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>services</code></td>
+                    <td><code>admin</code>, <code>forms</code>, <code>reports</code></td>
+                    <td>Lista de contenedores que Compose gestiona. Cada uno se puede levantar por separado (<code>docker compose up -d admin</code>).</td>
+                </tr>
+                <tr>
+                    <td><code>image</code></td>
+                    <td><code>image_forms_14.1.2:r1</code></td>
+                    <td>Imagen a partir de la cual se crea el contenedor. Debe existir localmente.</td>
+                </tr>
+                <tr>
+                    <td><code>container_name</code> / <code>hostname</code></td>
+                    <td><code>weblogic-admin</code></td>
+                    <td>Nombre fijo del contenedor y hostname interno. El hostname queda registrado en la configuración del dominio (Listen Address, Machines), por lo que no debe cambiarse después de crearlo.</td>
+                </tr>
+                <tr>
+                    <td><code>user</code></td>
+                    <td><code>oracle</code></td>
+                    <td>Usuario con el que corren los procesos. El dominio debe pertenecer a <code>oracle</code>. Para instalar paquetes se usa <code>--user root</code> puntualmente.</td>
+                </tr>
+                <tr>
+                    <td><code>networks</code></td>
+                    <td><code>weblogic-network</code></td>
+                    <td>Red bridge compartida; habilita la resolución de nombres entre contenedores.</td>
+                </tr>
+                <tr>
+                    <td><code>volumes</code></td>
+                    <td><code>./domains:/u01/oracle/user_projects/domains</code><br>
+                        <code>./app:/u01/oracle/user_projects/apps</code><br>
+                        <code>./scripts/admin:/u01/oracle/scripts</code></td>
+                    <td>Bind mounts del host. El dominio y las aplicaciones persisten fuera del contenedor; los scripts se pueden editar sin reconstruir la imagen.</td>
+                </tr>
+                <tr>
+                    <td><code>environment</code></td>
+                    <td><code>ORACLE_HOME</code>, <code>DOMAIN_NAME</code>, <code>DOMAIN_HOME</code>, <code>ADMIN_PORT</code>, <code>NODE_MANAGER_PORT</code>, <code>PATH</code>, <code>LD_LIBRARY_PATH</code></td>
+                    <td>Variables que leen los scripts y las herramientas Oracle (<code>sqlplus</code>, <code>rcu</code>, WLST).</td>
+                </tr>
+                <tr>
+                    <td><code>ports</code></td>
+                    <td><code>7001:7001</code>, <code>5556:5556</code>, <code>5902:5900</code>, ...</td>
+                    <td>Publica puertos del contenedor en el host (<code>host:contenedor</code>). <code>5902:5900</code> expone el VNC del Configuration Wizard.</td>
+                </tr>
+                <tr>
+                    <td><code>command</code></td>
+                    <td><code>/u01/oracle/scripts/entrypoint_persistente.sh</code></td>
+                    <td>Proceso principal. Si el dominio aún no existe, el script mantiene el contenedor vivo en “modo configuración” para poder ejecutar RCU y el Wizard; si existe, arranca Node Manager y AdminServer.</td>
+                </tr>
+                <tr>
+                    <td><code>stdin_open</code> / <code>tty</code></td>
+                    <td><code>true</code></td>
+                    <td>Mantienen una terminal abierta para que el contenedor no termine y se pueda entrar con <code>docker compose exec</code>.</td>
+                </tr>
+                <tr>
+                    <td><code>depends_on</code> <em>(forms, reports)</em></td>
+                    <td><code>admin</code></td>
+                    <td>Los Managed Servers se inician después del contenedor del AdminServer.</td>
+                </tr>
+                <tr>
+                    <td><code>healthcheck</code></td>
+                    <td><code>forms</code>: <code>nc -z localhost 9001</code><br>
+                        <code>reports</code>: <code>nc -z localhost 9012</code><br>
+                        <code>admin</code>: <code>healthcheck.sh</code> (opcional, comentado)</td>
+                    <td>Comprueba que el servicio escucha en su puerto. Intervalo típico: <code>30s</code>;
+                        <code>timeout: 10s</code>; <code>retries: 3</code>;
+                        <code>start_period</code> ~180&nbsp;s en Managed Servers (arranque lento).
+                        En <code>admin</code> el healthcheck del compose suele ir comentado; el script
+                        <code>healthcheck.sh</code> se puede ejecutar a mano con
+                        <code>docker compose exec admin /u01/oracle/scripts/healthcheck.sh</code>.</td>
+                </tr>
+                <tr>
+                    <td><code>networks</code> (nivel raíz)</td>
+                    <td><code>weblogic-network: driver: bridge</code></td>
+                    <td>Declara la red que usan los servicios.</td>
+                </tr>
+            </tbody>
+        </table></div>
+
+        <h4 class="sub">Contenido mínimo para la fase de creación del dominio</h4>
+
+        <p>Para crear el dominio basta con el servicio <code>admin</code>. Crear <code>dist/docker-compose.yml</code> con:</p>
+
+        <pre class="code"><code>services:
+  # AdminServer + NodeManager
+  admin:
+    image: image_forms_14.1.2:r1
+    container_name: weblogic-admin
+    hostname: weblogic-admin
+    user: oracle
+    networks:
+      - weblogic-network
+    volumes:
+      - ./domains:/u01/oracle/user_projects/domains   # dominio (persistente)
+      - ./app:/u01/oracle/user_projects/apps          # aplicaciones
+      - ./scripts/admin:/u01/oracle/scripts           # scripts del servicio
+    environment:
+      - ORACLE_HOME=/u01/oracle
+      - DOMAIN_NAME=forms_domain
+      - DOMAIN_HOME=/u01/oracle/user_projects/domains/forms_domain
+      - ADMIN_PORT=7001
+      # NO definir durante la creación del dominio (ver advertencia):
+      #- ADMIN_USER=weblogic
+      #- ADMIN_PASSWORD=********
+      #- ADMIN_URL=t3://weblogic-admin:7001
+      - NODE_MANAGER_PORT=5556
+      - LD_LIBRARY_PATH=/u01/oracle/lib:/u01/oracle/oracle_common/lib
+      - PATH=/u01/oracle/bin:/u01/oracle/oracle_common/bin:${PATH}
+    ports:
+      - "7001:7001"   # AdminServer
+      - "9002:9002"   # Administration Port
+      - "5556:5556"   # Node Manager
+      - "7777:7777"   # OHS HTTP
+      - "4443:4443"   # OHS HTTPS
+      - "5902:5900"   # VNC (Configuration Wizard)
+    command: ["/u01/oracle/scripts/entrypoint_persistente.sh"]
+    stdin_open: true
+    tty: true
+
+networks:
+  weblogic-network:
+    driver: bridge</code></pre>
+
+        <div class="callout warn">
+            <p><strong>⚠️ IMPORTANTE - Variables de administración:</strong> durante la creación del
+            dominio, <code>ADMIN_USER</code>, <code>ADMIN_PASSWORD</code> y especialmente
+            <code>ADMIN_URL</code> deben estar <strong>comentadas o sin valor</strong>. Si tienen
+            valor, pueden provocar:</p>
+            <ul>
+                <li>Un <code>boot.properties</code> generado incorrectamente.</li>
+                <li>Credenciales del dominio que no coinciden con las del Wizard.</li>
+                <li>Errores de configuración o de autenticación al iniciar el AdminServer.</li>
+            </ul>
+            <p>Una vez creado el dominio, se pueden habilitar si algún script las necesita.</p>
+        </div>
+
+        <div class="callout">
+            <p><strong>Servicios <code>forms</code> y <code>reports</code>:</strong> no hacen falta
+            para crear el dominio. Se agregan al mismo <code>docker-compose.yml</code> en la
+            <a href="#d-paso-5">Parte 2 · Paso 5</a>, con el YAML completo (imagen, red, volúmenes,
+            variables del Managed Server, <code>depends_on</code>, <code>healthcheck</code> y
+            mapeo de Node Manager <code>5557:5556</code> / <code>5558:5556</code>).
+            La referencia operativa es <code>dist/docker-compose.yml</code>.</p>
+        </div>
+
+        <h4 class="sub" id="paso-0-5">0.5. Validar el archivo y levantar el contenedor <code>admin</code></h4>
+
+        <pre class="code"><code>cd dist
+
+# Validar sintaxis y ver la configuración resultante
+docker compose config
+
+# Crear y arrancar solo el servicio admin en segundo plano
+docker compose up -d admin
+
+# Estado y logs
+docker compose ps
+docker compose logs -f admin</code></pre>
+
+        <p>
+            Como el dominio todavía no existe, el log de <code>entrypoint_persistente.sh</code>
+            mostrará <em>“Contenedor en modo de configuración”</em>. Es el estado esperado: el
+            contenedor queda activo para ejecutar RCU y el Configuration Wizard.
+        </p>
+
+        <pre class="code"><code># Entrar al contenedor (como oracle o como root)
+docker compose exec admin bash
+docker compose exec --user root admin bash</code></pre>
+
+        <div class="callout">
+            <p><strong>Comandos de Compose usados en esta guía:</strong></p>
+            <ul>
+                <li><code>docker compose up -d &lt;servicio&gt;</code>: crea/arranca un contenedor persistente.</li>
+                <li><code>docker compose exec &lt;servicio&gt; ...</code>: ejecuta un comando en un contenedor que ya está corriendo.</li>
+                <li><code>docker compose run --rm &lt;servicio&gt; ...</code>: crea un contenedor <em>temporal</em> con la misma definición y lo elimina al terminar (usado para RCU; el Wizard se ejecuta con <code>exec</code> en el contenedor <code>admin</code>).</li>
+                <li><code>docker compose down</code>: detiene y elimina los contenedores (el dominio en <code>./domains</code> se conserva).</li>
+            </ul>
+        </div>
+
+        <h4 class="sub" id="paso-0-6">0.6. Instalar librerías gráficas</h4>
+
+        <div class="callout">
+            <p><strong>Nota:</strong> si la imagen se construyó con la versión actual de
+            <a href="../crear_imagen/index.html#gui">Crear imagen</a>, estas librerías ya
+            vienen instaladas y este paso solo sirve como verificación (el script detecta que existen
+            y no reinstala nada). Es necesario únicamente con imágenes anteriores.</p>
+        </div>
+
+        <p>Para ejecutar el Configuration Wizard con interfaz gráfica, instala las librerías gráficas en el contenedor <code>admin</code> que está corriendo:</p>
+
+        <pre class="code"><code>docker compose exec --user root admin /u01/oracle/scripts/install-gui-packages.sh</code></pre>
+
+        <p>Este script instala los siguientes paquetes:</p>
+        <div class="tabla"><table>
+            <thead>
+                <tr>
+                    <th>Paquete</th>
+                    <th>Función</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>xorg-x11-server-Xvfb</code></td>
+                    <td>Xvfb (X Virtual Framebuffer): display virtual para ejecutar aplicaciones gráficas sin pantalla física.</td>
+                </tr>
+                <tr>
+                    <td><code>xorg-x11-twm</code>, <code>xorg-x11-xinit</code></td>
+                    <td>twm (Tab Window Manager): gestor de ventanas básico, y utilidades de arranque de X.</td>
+                </tr>
+                <tr>
+                    <td><code>x11vnc</code></td>
+                    <td>Servidor VNC para ver el display virtual desde el host (si no está en los repositorios base, el script lo instala desde EPEL).</td>
+                </tr>
+                <tr>
+                    <td><code>xorg-x11-utils</code>, <code>xorg-x11-server-utils</code></td>
+                    <td>Utilidades X11; incluyen <code>xauth</code> y <code>xhost</code>, necesarias para que Java se conecte al display.</td>
+                </tr>
+                <tr>
+                    <td><code>dbus-x11</code></td>
+                    <td>Sistema de mensajería que requieren algunas aplicaciones gráficas Java.</td>
+                </tr>
+            </tbody>
+        </table></div>
+
+        <div class="callout">
+            <p><strong>¿Por qué como <code>root</code> y cuándo repetirlo?</strong></p>
+            <ul>
+                <li>Instalar paquetes con <code>yum</code> requiere privilegios de administrador; por eso se usa <code>--user root</code>. El contenedor sigue ejecutando WebLogic como <code>oracle</code>.</li>
+                <li>Lo que se instala con <code>docker compose exec</code> queda en el <strong>contenedor</strong>, no en la imagen. Se mantiene mientras el contenedor <code>admin</code> exista, pero hay que repetir este paso cada vez que se recrea (p. ej. tras <code>docker compose down</code> o <code>docker compose up --force-recreate</code>).</li>
+                <li>No usar <code>docker compose run --rm</code> para esta instalación: crea un contenedor temporal que se elimina al terminar, y los paquetes se pierden.</li>
+            </ul>
+        </div>
+
+        <div class="callout ok">
+            <p><strong>✓ Verificación:</strong> al finalizar, el script comprueba que los comandos
+            (<code>Xvfb</code>, <code>twm</code>, <code>x11vnc</code>, <code>xhost</code>) estén
+            disponibles y muestra <em>"✓ Instalación de paquetes GUI completada"</em>. Si muestra
+            <em>"Instalación completada con advertencias"</em>, revisar los logs en
+            <code>/tmp/yum-*.log</code> dentro del contenedor.</p>
+        </div>
+
+        <div class="callout">
+            <p><strong>Nota:</strong> Si el script <code>install-gui-packages.sh</code> no está disponible, puedes instalar los paquetes manualmente:</p>
+            <pre class="code"><code>docker compose exec --user root admin yum install -y xorg-x11-server-Xvfb xorg-x11-twm xorg-x11-xinit x11vnc xorg-x11-utils xorg-x11-server-utils dbus-x11</code></pre>
+        </div>
+
+        <h4 class="sub" id="paso-0-7">0.7. Configurar e iniciar el entorno gráfico</h4>
+
+        <p>Después de instalar los paquetes, configura e inicia el entorno gráfico:</p>
+
+        <pre class="code"><code>docker compose exec --user root admin /u01/oracle/scripts/setup-gui.sh</code></pre>
+
+        <p>Este script:</p>
+        <ul>
+            <li>Inicia Xvfb en el display <code>:99</code></li>
+            <li>Inicia twm (window manager)</li>
+            <li>Inicia x11vnc en el puerto <code>5900</code> (mapeado al puerto <code>5902</code> del host)</li>
+            <li>Configura las variables de entorno <code>DISPLAY</code> y <code>XAUTHORITY</code></li>
+        </ul>
+
+        <div class="callout">
+            <p><strong>Verificar que el entorno gráfico está funcionando:</strong></p>
+            <pre class="code"><code># Verificar que Xvfb está corriendo
+docker compose exec admin pgrep -f "Xvfb.*:99"
+
+# Verificar que x11vnc está corriendo
+docker compose exec admin pgrep x11vnc
+
+# Verificar que el puerto VNC está escuchando
+docker compose exec admin netstat -tlnp | grep 5900</code></pre>
+        </div>
+
+        <h4 class="sub" id="paso-0-8">0.8. Conectar con VNC Viewer</h4>
+
+        <p>Desde tu máquina host, conecta con VNC Viewer al puerto <code>5902</code>:</p>
+
+        <ul>
+            <li><strong>URL</strong>: <code>localhost:5902</code></li>
+            <li><strong>Sin contraseña</strong> (configurado sin autenticación para facilitar el desarrollo)</li>
+        </ul>
+
+        <p>Deberías ver una pantalla negra o gris (el display virtual). Esto es normal y significa que el entorno gráfico está funcionando.</p>
+        </section>
+
+        <section class="slide-block" id="paso-1">
+          <h3><span class="num">1</span> Crear los Schemas RCU (Repository Creation Utility)</h3>
+
+        <div class="callout warn">
+            <p><strong>⚠️ IMPORTANTE:</strong> Los schemas RCU deben crearse <strong>ANTES</strong> de ejecutar el Configuration Wizard. El dominio WebLogic requiere estos schemas para funcionar correctamente con JRF (Java Required Files).</p>
+        </div>
+        
+        <p>Los schemas se crean con RCU en modo silencioso, desde el contenedor <code>admin</code> que quedó corriendo en el <a href="#paso-0-5">Paso 0.5</a>. No requiere entorno gráfico.</p>
+
+        <h4 class="sub">1.1. Ejecutar RCU</h4>
+
+        <p>Abrir una shell en el contenedor:</p>
+        <pre class="code"><code>cd dist
+docker compose exec admin bash</code></pre>
+
+        <p>Dentro del contenedor, ejecutar:</p>
+        <pre class="code"><code>/u01/oracle/oracle_common/bin/rcu -silent -createRepository \
+  -connectString 192.168.1.109:33118:ORA193PDB1 \
+  -dbUser sys -dbRole sysdba \
+  -schemaPrefix DIST \
+  -component MDS \
+  -component OPSS \
+  -component IAU \
+  -component IAU_APPEND \
+  -component IAU_VIEWER \
+  -component STB \
+  -component WLS</code></pre>
+
+        <div class="tabla"><table>
+            <thead>
+                <tr><th>Parámetro</th><th>Descripción</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>-connectString</code></td><td>Servidor de base de datos en formato <code>host:puerto:servicio</code>. Ajustar al entorno.</td></tr>
+                <tr><td><code>-dbUser sys -dbRole sysdba</code></td><td>Usuario con privilegios para crear usuarios y tablespaces</td></tr>
+                <tr><td><code>-schemaPrefix DIST</code></td><td>Prefijo de los schemas, <strong>sin guion bajo</strong>. RCU lo agrega automáticamente: <code>DIST_&lt;COMPONENTE&gt;</code>. No escribas <code>DIST_</code> como prefijo.</td></tr>
+                <tr><td><code>-component ...</code></td><td>Componentes que requieren JRF, Forms y Reports. <code>WLS</code> es obligatorio: crea <code>DIST_WLS</code> y <code>DIST_WLS_RUNTIME</code>, que el Wizard pide en la Pantalla 7.</td></tr>
+            </tbody>
+        </table></div>
+
+        <h4 class="sub">1.2. Responder las contraseñas</h4>
+
+        <p>RCU solicita las contraseñas de forma interactiva:</p>
+        <ol>
+            <li>Primero, la contraseña del usuario <code>sys</code> de la base de datos.</li>
+            <li>Luego, una contraseña <strong>por cada schema</strong> que va a crear.</li>
+        </ol>
+
+        <div class="callout warn">
+            <p><strong>⚠️ Usa la misma contraseña para todos los schemas</strong>, por ejemplo <code>oracle01</code>. En la Pantalla 6 del Configuration Wizard se ingresa una única contraseña que se aplica a todos los datasources. Si algún schema tiene una clave distinta, la prueba de la Pantalla 8 (JDBC Test) fallará para ese schema.</p>
+        </div>
+
+        <div class="callout">
+            <p><strong>Tip:</strong> para no responder la contraseña schema por schema, agrega esta opción al comando. RCU pedirá solo dos claves: la de <code>sys</code> y una común para todos los schemas.</p>
+            <pre class="code"><code>  -useSamePasswordForAllSchemaUsers true</code></pre>
+        </div>
+
+        <h4 class="sub">1.3. Schemas creados</h4>
+
+        <div class="tabla"><table>
+            <thead>
+                <tr><th>Schema</th><th>Componente</th><th>Datasource del dominio</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>DIST_STB</code></td><td>Service Table (registro de los componentes RCU)</td><td><code>LocalSvcTblDataSource</code></td></tr>
+                <tr><td><code>DIST_OPSS</code></td><td>Oracle Platform Security Services</td><td><code>opss-data-source</code></td></tr>
+                <tr><td><code>DIST_IAU</code></td><td>Auditoría (schema principal)</td><td>&mdash;</td></tr>
+                <tr><td><code>DIST_IAU_APPEND</code></td><td>Auditoría (escritura)</td><td><code>opss-audit-DBDS</code></td></tr>
+                <tr><td><code>DIST_IAU_VIEWER</code></td><td>Auditoría (lectura)</td><td><code>opss-audit-viewDS</code></td></tr>
+                <tr><td><code>DIST_MDS</code></td><td>Metadata Services</td><td>&mdash;</td></tr>
+                <tr><td><code>DIST_WLS</code></td><td>WebLogic Services</td><td><code>WLSSchemaDataSource</code></td></tr>
+                <tr><td><code>DIST_WLS_RUNTIME</code></td><td>WebLogic Runtime (se crea junto con <code>WLS</code>)</td><td><code>WLSRuntimeSchemaDataSource</code></td></tr>
+            </tbody>
+        </table></div>
+
+        <h4 class="sub">1.4. Verificar</h4>
+
+        <p>Al terminar, RCU muestra un resumen con el estado <code>Success</code> por componente. También se pueden listar los schemas con el script de verificación:</p>
+        <pre class="code"><code>docker compose exec admin /u01/oracle/scripts/check-rcu-schemas.sh</code></pre>
+
+        <h4 class="sub" id="paso-1-5">1.5. Borrar los schemas RCU (si hay que recrearlos)</h4>
+
+        <p><strong>Opción A: con RCU.</strong> Dentro del contenedor <code>admin</code>, usa el mismo comando de creación con <code>-dropRepository</code> e incluye <strong>todos</strong> los componentes:</p>
+        <pre class="code"><code>/u01/oracle/oracle_common/bin/rcu -silent -dropRepository \
+  -connectString 192.168.1.109:33118:ORA193PDB1 \
+  -dbUser sys -dbRole sysdba \
+  -schemaPrefix DIST \
+  -component MDS -component OPSS -component IAU \
+  -component IAU_APPEND -component IAU_VIEWER \
+  -component STB -component WLS</code></pre>
+        <p>Si algún schema ya no existe, RCU muestra <code>Failed</code> para ese componente. Es esperado.</p>
+
+        <p><strong>Opción B: manualmente con SQL (si RCU falla o deja residuos).</strong> <code>-dropRepository</code> puede dejar usuarios huérfanos, por ejemplo si se omitió <code>WLS</code>, o el prefijo registrado en la metadata de RCU. En ese caso, al recrear los schemas RCU responde que el prefijo <code>DIST</code> ya está en uso.</p>
+
+        <p>Conectarse a la base de datos desde el contenedor (SQL*Plus pedirá la contraseña de <code>sys</code>):</p>
+        <pre class="code"><code>cd dist
+docker compose exec admin sqlplus sys@//192.168.1.109:33118/ORA193PDB1 as sysdba</code></pre>
+
+        <p>Dentro de SQL*Plus:</p>
+        <pre class="code"><code>-- Borrar los schemas
+DROP USER DIST_OPSS CASCADE;
+DROP USER DIST_IAU_APPEND CASCADE;
+DROP USER DIST_IAU_VIEWER CASCADE;
+DROP USER DIST_IAU CASCADE;
+DROP USER DIST_MDS CASCADE;
+DROP USER DIST_STB CASCADE;
+DROP USER DIST_WLS_RUNTIME CASCADE;
+DROP USER DIST_WLS CASCADE;
+
+-- Limpiar la metadata de RCU
+DELETE FROM SYSTEM.SCHEMA_VERSION_REGISTRY WHERE MRC_NAME = 'DIST';
+COMMIT;
+
+-- Verificar: ambas consultas no deben devolver filas
+SELECT username FROM dba_users WHERE username LIKE 'DIST\_%' ESCAPE '\';
+SELECT mrc_name, comp_id FROM SYSTEM.SCHEMA_VERSION_REGISTRY WHERE MRC_NAME = 'DIST';
+EXIT;</code></pre>
+
+        <p>Si un <code>DROP USER</code> responde <code>ORA-01918: user does not exist</code>, ese schema ya estaba borrado y se puede continuar.</p>
+
+        <div class="callout warn">
+            <p><strong>⚠️ Precaución:</strong> estas sentencias borran los schemas y sus datos de forma irreversible. Confirma que el prefijo es <code>DIST</code> y que ningún otro dominio usa esos schemas. Después del borrado, el dominio existente deja de funcionar hasta que se recreen los schemas y el dominio.</p>
+        </div>
+
+        <div class="callout warn">
+            <p><strong>Sobre <code>scripts/admin/run-rcu.sh</code>:</strong> el dominio no se creó con este script. En su versión actual <strong>no incluye el componente <code>WLS</code></strong>, así que no crea <code>DIST_WLS</code> ni <code>DIST_WLS_RUNTIME</code> y el Wizard fallaría en la Pantalla 7. No lo uses hasta corregirlo.</p>
+        </div>
+        </section>
+
+        <section class="slide-block" id="paso-2">
+          <h3><span class="num">2</span> Ejecutar el Configuration Wizard</h3>
+
+        <p>
+            El Configuration Wizard se ejecuta <strong>dentro del contenedor <code>admin</code></strong>
+            que quedó corriendo en el <a href="#paso-0-5">Paso 0.5</a>, usando el entorno gráfico
+            (display <code>:99</code> y VNC) preparado en el <a href="#paso-0-7">Paso 0.7</a>. No se
+            crea ningún contenedor adicional.
+        </p>
+
+        <h4 class="sub">2.1. Verificaciones previas</h4>
+
+        <div class="tabla"><table>
+            <thead>
+                <tr>
+                    <th>Verificación</th>
+                    <th>Comando / referencia</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>El contenedor <code>admin</code> está corriendo</td>
+                    <td><code>docker compose ps admin</code></td>
+                </tr>
+                <tr>
+                    <td>Los schemas RCU existen (Paso 1)</td>
+                    <td><code>docker compose exec admin /u01/oracle/scripts/check-rcu-schemas.sh</code></td>
+                </tr>
+                <tr>
+                    <td><code>ADMIN_USER</code>, <code>ADMIN_PASSWORD</code> y <code>ADMIN_URL</code> comentadas en <code>docker-compose.yml</code></td>
+                    <td>Ver advertencia del <a href="#paso-0-4">Paso 0.4</a>. Si se modificó el archivo, recrear: <code>docker compose up -d admin</code></td>
+                </tr>
+                <tr>
+                    <td>El dominio todavía no existe</td>
+                    <td><code>ls dist/domains/</code> no debe contener <code>forms_domain</code></td>
+                </tr>
+            </tbody>
+        </table></div>
+
+        <h4 class="sub">2.2. Iniciar el Wizard</h4>
+
+        <pre class="code"><code>cd dist
+docker compose exec admin /u01/oracle/scripts/run-config-wizard.sh</code></pre>
+
+        <p>El script <code>run-config-wizard.sh</code>:</p>
+        <ol>
+            <li>Comprueba que <code>Xvfb</code> esté instalado; si no está corriendo en el display
+                <code>:99</code>, ejecuta <code>setup-gui.sh</code> para iniciarlo.</li>
+            <li>Define <code>DISPLAY=:99</code> y <code>XAUTHORITY</code>.</li>
+            <li>Comprueba <code>x11vnc</code> y lo inicia en el puerto <code>5900</code> si no está corriendo
+                (publicado en el host como <code>5902</code>).</li>
+            <li>Ejecuta el Configuration Wizard:
+                <code>$ORACLE_HOME/oracle_common/common/bin/config.sh</code>.</li>
+        </ol>
+
+        <p>
+            La terminal queda ocupada mientras el Wizard está abierto; al cerrarlo, el comando termina.
+            El Wizard se maneja desde VNC Viewer (<a href="#paso-3">Paso 3</a>).
+        </p>
+
+        <div class="callout warn">
+            <p><strong>⚠️ Ejecutar como <code>oracle</code>, no como <code>root</code>:</strong> el comando
+            anterior no usa <code>--user root</code> a propósito. El servicio <code>admin</code> corre como
+            <code>oracle</code> y el dominio debe crearse con ese propietario; si se crea como
+            <code>root</code>, el AdminServer y los Managed Servers tendrán problemas de permisos al
+            iniciar. <code>--user root</code> solo se usa para instalar paquetes (Paso 0.6) o iniciar el
+            entorno gráfico (Paso 0.7).</p>
+        </div>
+
+        <div class="callout">
+            <p><strong>No usar <code>docker compose run</code> para el Wizard.</strong> Un contenedor
+            temporal con <code>-p 5902:5900</code> falla porque el puerto 5902 ya lo publica el contenedor
+            <code>admin</code>, y además no tendría el entorno gráfico preparado en el Paso 0.7.</p>
+        </div>
+
+        <div class="callout">
+            <p><strong>Si el script indica que falta <code>Xvfb</code> o <code>x11vnc</code></strong>
+            (imágenes anteriores a la que incluye las librerías gráficas), volver a los Pasos
+            <a href="#paso-0-6">0.6</a> y <a href="#paso-0-7">0.7</a> y repetir este paso.</p>
+        </div>
+        </section>
+
+        <section class="slide-block" id="paso-3">
+          <h3><span class="num">3</span> Conectar con VNC Viewer</h3>
+
+        <p><strong>Desde tu máquina host</strong>, abre VNC Viewer y conecta a:</p>
+        <pre class="code"><code>localhost:5902</code></pre>
+        
+        <p>O si el puerto no está mapeado, usa la IP del contenedor:</p>
+        <pre class="code"><code># Obtener IP del contenedor
+docker inspect $(docker ps -q -f name=weblogic-admin) | grep IPAddress
+
+# Conectar a: &lt;IP&gt;:5900  (puerto interno del contenedor)</code></pre>
+        </section>
+
+        <section class="slide-block" id="paso-4">
+          <h3><span class="num">4</span> Configurar el dominio en el Wizard</h3>
+
+        <p>Una vez conectado con VNC, verás el Configuration Wizard. Sigue las siguientes pantallas en orden:</p>
+        
+        <h4 class="sub">Pantalla 1: Configuration Type (Tipo de Configuración)</h4>
+        <p>Esta es la primera pantalla del Configuration Wizard. Aquí debes seleccionar qué tipo de operación deseas realizar.</p>
+        
+        <p><strong>Configuración:</strong></p>
+        <ul>
+            <li>Selecciona: <strong>"Create a new domain"</strong> (Crear un nuevo dominio)</li>
+            <li><strong>Domain Location</strong>: <code>/u01/oracle/user_projects/domains/forms_domain</code>
+                <ul>
+                    <li><strong>Importante</strong>: Esta ruta corresponde al volumen montado desde el host (<code>./domains</code> en el host se mapea a <code>/u01/oracle/user_projects/domains</code> en el contenedor)</li>
+                    <li>El dominio se creará en el volumen compartido, por lo que persistirá incluso si el contenedor se elimina</li>
+                    <li>Puedes usar el botón <strong>"Browse"</strong> para verificar o cambiar la ubicación si es necesario</li>
+                </ul>
+            </li>
+        </ul>
+        
+        <img src="images/image-05a2d76c-ec52-423b-a04d-a215c473f6c1.png" alt="Pantalla Configuration Type - Primera pantalla del Wizard">
+        <p class="image-caption">Pantalla 1: Configuration Type - Selecciona "Create a new domain" y verifica la ubicación del dominio</p>
+        
+        <div class="callout">
+            <p><strong>Nota sobre la ubicación del dominio:</strong></p>
+            <p>La ruta <code>/u01/oracle/user_projects/domains/forms_domain</code> dentro del contenedor corresponde a la carpeta <code>./domains/forms_domain</code> en el host, gracias al volumen montado en <code>docker-compose.yml</code>. Esto permite que el dominio persista en el sistema de archivos del host.</p>
+        </div>
+        
+        <p>Haz clic en <strong>"Next"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 2: Templates (Plantillas de Dominio)</h4>
+        <p>En esta pantalla debes seleccionar las plantillas de producto que definirán los componentes y funcionalidades que estarán disponibles en el dominio.</p>
+        
+        <p><strong>Configuración:</strong></p>
+        <ul>
+            <li>Selecciona la opción: <strong>"Create Domain Using Product Templates"</strong> (Crear dominio usando plantillas de producto)</li>
+            <li>En la lista de <strong>"Available Templates"</strong>, selecciona las siguientes plantillas marcando sus casillas:
+                <ul>
+                    <li>✅ <strong>Basic WebLogic Server Domain - 14.1.2.0.0 [wlserver]</strong>
+                        <ul>
+                            <li>Esta plantilla es <strong>obligatoria</strong> (indicada con el asterisco *) y proporciona la funcionalidad base de WebLogic Server</li>
+                        </ul>
+                    </li>
+                    <li>✅ <strong>Oracle Forms - 14.1.2.0.0 [forms]</strong>
+                        <ul>
+                            <li>Incluye la funcionalidad de Oracle Forms para ejecutar aplicaciones Forms</li>
+                        </ul>
+                    </li>
+                    <li>✅ <strong>Oracle Reports Application - 14.1.2.0.0 [reports]</strong>
+                        <ul>
+                            <li>Incluye la funcionalidad de Oracle Reports para generar y servir reportes</li>
+                        </ul>
+                    </li>
+                    <li>✅ <strong>Oracle Enterprise Manager - 14.1.2.0.0 [em]</strong>
+                        <ul>
+                            <li>Proporciona capacidades de monitoreo y administración del dominio</li>
+                        </ul>
+                    </li>
+                    <li>✅ <strong>Oracle HTTP Server (Collocated) - 14.1.2.0.0 [ohs]</strong>
+                        <ul>
+                            <li>Incluye Oracle HTTP Server como componente del sistema para servir como front-end HTTP</li>
+                            <li>La versión "Collocated" significa que OHS puede ejecutarse en el mismo servidor que WebLogic</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li>Continúa desplazándote hacia abajo en la lista de plantillas y selecciona también las siguientes (pueden requerir hacer scroll):
+                <ul>
+                    <li>✅ <strong>Oracle Reports Tools - 14.1.2.0.0 [ReportsToolsComponent]</strong>
+                        <ul>
+                            <li>Herramientas necesarias para trabajar con Oracle Reports</li>
+                        </ul>
+                    </li>
+                    <li>✅ <strong>Oracle Reports Server - 14.1.2.0.0 [ReportsServerComponent]</strong>
+                        <ul>
+                            <li>Servidor de Reports necesario para ejecutar y servir reportes</li>
+                        </ul>
+                    </li>
+                    <li>✅ <strong>Oracle Reports Bridge - 14.1.2.0.0 [ReportsBridgeComponent]</strong>
+                        <ul>
+                            <li>Componente puente que permite la comunicación entre Reports y otros componentes del sistema</li>
+                        </ul>
+                    </li>
+                    <li>✅ <strong>Oracle JRF - 14.1.2.0.0 [oracle_common]</strong>
+                        <ul>
+                            <li><strong>IMPORTANTE:</strong> Oracle JRF (Java Required Files) debe seleccionarse explícitamente</li>
+                            <li>Proporciona las librerías y servicios base necesarios para Forms, Reports y otras aplicaciones Oracle</li>
+                            <li>Incluye servicios de seguridad, políticas y otras infraestructuras comunes</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        
+        <img src="images/image-0c9e751e-c13d-4878-9493-a5f0cbc9c07f.png" alt="Pantalla Templates - Primera parte de plantillas seleccionadas">
+        <p class="image-caption">Pantalla 2 (Parte 1): Templates - Plantillas principales: Basic WebLogic Server Domain, Forms, Reports Application, Enterprise Manager y OHS</p>
+        
+        <img src="images/image-04e1c141-5db1-4a75-abf1-df9fc071ec45.png" alt="Pantalla Templates - Segunda parte con plantillas adicionales de Reports y JRF">
+        <p class="image-caption">Pantalla 2 (Parte 2): Templates - Plantillas adicionales: Reports Tools, Reports Server, Reports Bridge y Oracle JRF</p>
+        
+        <div class="callout">
+            <p><strong>Resumen de todas las plantillas a seleccionar:</strong></p>
+            <ol>
+                <li>Basic WebLogic Server Domain - 14.1.2.0.0 [wlserver] * (obligatoria)</li>
+                <li>Oracle Forms - 14.1.2.0.0 [forms]</li>
+                <li>Oracle Reports Application - 14.1.2.0.0 [reports]</li>
+                <li>Oracle Enterprise Manager - 14.1.2.0.0 [em]</li>
+                <li>Oracle HTTP Server (Collocated) - 14.1.2.0.0 [ohs]</li>
+                <li>Oracle Reports Tools - 14.1.2.0.0 [ReportsToolsComponent]</li>
+                <li>Oracle Reports Server - 14.1.2.0.0 [ReportsServerComponent]</li>
+                <li>Oracle Reports Bridge - 14.1.2.0.0 [ReportsBridgeComponent]</li>
+                <li>Oracle JRF - 14.1.2.0.0 [oracle_common]</li>
+            </ol>
+        </div>
+        
+        <div class="callout">
+            <p><strong>Plantillas no seleccionadas (opcionales):</strong></p>
+            <p>En la lista también verás otras plantillas que <strong>NO</strong> debes seleccionar para esta configuración, como:</p>
+            <ul>
+                <li>Oracle Forms Application Deployment Service (FADS)</li>
+                <li>Oracle Forms Development</li>
+                <li>Oracle Reports Tools</li>
+                <li>Otras variantes de OHS con JRF restringido</li>
+            </ul>
+            <p>Estas plantillas son para casos de uso específicos y no son necesarias para la arquitectura distribuida estándar.</p>
+        </div>
+        
+        <p>Haz clic en <strong>"Next"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 3: Application Location (Ubicación de Aplicaciones)</h4>
+        <p>En esta pantalla debes especificar el nombre del dominio y las ubicaciones donde se almacenarán los archivos del dominio y las aplicaciones desplegadas.</p>
+        
+        <p><strong>Configuración:</strong></p>
+        <ul>
+            <li><strong>Domain name</strong>: <code>forms_domain</code>
+                <ul>
+                    <li>Este es el nombre que identificará tu dominio WebLogic</li>
+                </ul>
+            </li>
+            <li><strong>Domain location</strong>: <code>/u01/oracle/user_projects/domains</code>
+                <ul>
+                    <li>Esta es la ubicación base donde se creará el directorio del dominio</li>
+                    <li>El dominio completo se creará en: <code>/u01/oracle/user_projects/domains/forms_domain</code></li>
+                    <li>Esta ruta corresponde al volumen montado <code>./domains</code> en el host</li>
+                </ul>
+            </li>
+            <li><strong>Application location</strong>: <code>/u01/oracle/user_projects/apps/forms_domain</code>
+                <ul>
+                    <li><strong>IMPORTANTE:</strong> Esta es la carpeta compartida donde se almacenarán las aplicaciones desplegadas en el dominio</li>
+                    <li>Esta ruta corresponde al volumen montado <code>./app</code> en el host</li>
+                    <li>Las aplicaciones desplegadas (Forms, Reports, etc.) se guardarán en esta ubicación compartida</li>
+                    <li>Puedes usar el botón <strong>"Browse"</strong> para verificar o cambiar la ubicación si es necesario</li>
+                </ul>
+            </li>
+        </ul>
+        
+        <img src="images/image-d2276445-b233-4b76-b50d-5aef8266a487.png" alt="Pantalla Application Location - Configuración de ubicaciones del dominio y aplicaciones">
+        <p class="image-caption">Pantalla 3: Application Location - Configura el nombre del dominio y las ubicaciones para el dominio y las aplicaciones</p>
+        
+        <div class="callout">
+            <p><strong>Nota sobre las ubicaciones:</strong></p>
+            <ul>
+                <li><strong>Domain location</strong> (<code>/u01/oracle/user_projects/domains</code>): 
+                    <ul>
+                        <li>En el host: <code>./domains</code></li>
+                        <li>Contiene la configuración del dominio, servidores, seguridad, etc.</li>
+                    </ul>
+                </li>
+                <li><strong>Application location</strong> (<code>/u01/oracle/user_projects/apps/forms_domain</code>):
+                    <ul>
+                        <li>En el host: <code>./app/forms_domain</code></li>
+                        <li>Contiene las aplicaciones desplegadas (archivos .ear, .war, .jar, etc.)</li>
+                        <li>Esta carpeta es compartida entre todos los contenedores de la arquitectura distribuida</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        
+        <p>Haz clic en <strong>"Next"</strong> para continuar.</p>
+        
+        <h4 class="sub" id="pantalla-4">Pantalla 4: Configuración del Administrador</h4>
+        <p>En esta pantalla debes configurar las credenciales del usuario administrador del dominio.</p>
+        
+        <p><strong>Configuración:</strong></p>
+        <ul>
+            <li><strong>Nombre de usuario</strong>: <code>weblogic</code></li>
+            <li><strong>Contraseña</strong>: <strong>NO uses <code>oracle01</code></strong>
+                <ul>
+                    <li><strong>⚠️ IMPORTANTE</strong>: La contraseña <code>oracle01</code> causa problemas con la inicialización del embedded LDAP durante la creación del dominio</li>
+                    <li>Usa una contraseña diferente, por ejemplo: <code>t.123456</code> o <code>weblogic123</code></li>
+                    <li>Esta contraseña debe cumplir con los requisitos de seguridad (mínimo 8 caracteres, al menos 1 número o carácter especial)</li>
+                </ul>
+            </li>
+            <li><strong>Confirmar contraseña</strong>: Ingresa la misma contraseña nuevamente</li>
+        </ul>
+        
+        <div class="callout warn">
+            <p><strong>⚠️ Advertencia sobre la contraseña:</strong></p>
+            <p>Se ha identificado que usar la contraseña <code>oracle01</code> durante la creación del dominio puede causar que el embedded LDAP no se inicialice correctamente, resultando en errores de autenticación al intentar iniciar el AdminServer.</p>
+            <p><strong>Recomendación:</strong> Usa una contraseña diferente desde el inicio, como <code>t.123456</code> o cualquier otra que cumpla con los requisitos de seguridad.</p>
+        </div>
+        
+        <div class="callout warn">
+            <p><strong>📷 Captura pendiente:</strong> falta la imagen de la pantalla <em>Administrator Account</em>. Se agregará en la próxima ejecución del Wizard.</p>
+        </div>
+        
+        <p>Haz clic en <strong>"Next"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 5: Domain Mode and JDK (Modo del Dominio y JDK)</h4>
+        <p>En esta pantalla se define el modo de operación del dominio y el JDK que usarán los servidores.</p>
+        
+        <p><strong>Configuración:</strong></p>
+        <ul>
+            <li><strong>Domain Mode</strong>: modo de seguridad del dominio. WebLogic 14.1.2 ofrece:
+                <ul>
+                    <li><strong>Secured Production</strong>: aplica la configuración de seguridad más estricta (puertos no seguros deshabilitados por defecto, Administration Port habilitado).</li>
+                    <li><strong>Production</strong>: modo de producción sin las restricciones adicionales de Secured Production.</li>
+                    <li><strong>Development</strong>: modo de desarrollo (despliegue automático, menos validaciones).</li>
+                </ul>
+                Selecciona el modo acordado para el entorno. El modo elegido determina qué puertos (HTTP, SSL, Administration Port) quedan habilitados en las pantallas siguientes.
+            </li>
+            <li><strong>JDK</strong>: <code>/u01/jdk</code> (JDK 17 instalado en la imagen; ver <a href="../crear_imagen/index.html">Crear imagen</a>). Normalmente aparece preseleccionado.</li>
+        </ul>
+        
+        <div class="callout warn">
+            <p><strong>📷 Captura pendiente:</strong> falta la imagen de la pantalla <em>Domain Mode and JDK</em>. Se agregará en la próxima ejecución del Wizard.</p>
+        </div>
+        
+        <p>Haz clic en <strong>"Next"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 6: Database Configuration Type (Configuración de Base de Datos para RCU)</h4>
+        <p>En esta pantalla debes configurar la conexión a la base de datos donde se encuentran los schemas RCU creados previamente. El Wizard usará esta información para configurar automáticamente los datasources necesarios para los componentes del dominio.</p>
+        
+        <p><strong>Configuración:</strong></p>
+        <ul>
+            <li><strong>AutoConfiguration Options</strong>: Selecciona <strong>"RCU Data"</strong>
+                <ul>
+                    <li>Esta opción permite que el Wizard use automáticamente la información de los schemas RCU para configurar los datasources</li>
+                    <li>La opción "Manual Configuration" no debe seleccionarse</li>
+                </ul>
+            </li>
+            <li><strong>Vendor</strong>: <code>Oracle</code> (seleccionado en el dropdown)</li>
+            <li><strong>Driver</strong>: <code>Oracle's Driver (Thin) for Service connections</code> (seleccionado en el dropdown)</li>
+            <li><strong>Connection Type</strong>: Selecciona <strong>"Connection Parameters"</strong>
+                <ul>
+                    <li>Esta opción permite especificar los parámetros de conexión individualmente</li>
+                    <li>La opción "Connection URL String" no debe seleccionarse</li>
+                </ul>
+            </li>
+            <li><strong>Parámetros de conexión:</strong>
+                <ul>
+                    <li><strong>Host Name</strong>: <code>192.168.1.109</code> (IP o hostname de tu servidor de base de datos)</li>
+                    <li><strong>DBMS/Service</strong>: <code>ORA193PDB1</code> (nombre del servicio/PDB de Oracle)</li>
+                    <li><strong>Port</strong>: <code>33118</code> (puerto de escucha de la base de datos)</li>
+                    <li><strong>Schema Owner</strong>: <code>DIST_STB</code>
+                        <ul>
+                            <li>Este es el schema prefix usado durante la creación de los RCU (en este caso, "DIST" con el componente STB - Service Table)</li>
+                            <li>El schema completo es: <code>DIST_STB</code></li>
+                        </ul>
+                    </li>
+                    <li><strong>Schema Password</strong>: Ingresa la contraseña del schema RCU
+                        <ul>
+                            <li>Esta es la contraseña que especificaste durante la creación de los schemas RCU (por ejemplo: <code>oracle01</code> o la que hayas configurado)</li>
+                            <li>El campo mostrará la contraseña enmascarada (•••••••)</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        
+        <img src="images/image-3467766d-6d96-4a74-b3d4-e75d2df9fbba.png" alt="Pantalla Database Configuration Type - Configuración de conexión a BD para RCU">
+        <p class="image-caption">Pantalla 6: Database Configuration Type - Configura los parámetros de conexión a la base de datos donde están los schemas RCU</p>
+        
+        <div class="callout">
+            <p><strong>Importante sobre los schemas RCU:</strong></p>
+            <ul>
+                <li>Los schemas RCU deben haber sido creados <strong>antes</strong> de ejecutar el Configuration Wizard</li>
+                <li>El <strong>Schema Owner</strong> debe corresponder al schema prefix usado durante la creación de RCU (en este caso, "DIST")</li>
+                <li>El schema <code>DIST_STB</code> es el schema de "Service Table" que contiene la información de los componentes RCU instalados</li>
+                <li>El Wizard leerá este schema para determinar qué componentes están disponibles y configurará automáticamente los datasources necesarios</li>
+            </ul>
+        </div>
+        
+        <p><strong>Pasos a seguir:</strong></p>
+        <ol>
+            <li>Completa todos los campos de conexión con los valores correctos de tu base de datos</li>
+            <li>Haz clic en el botón <strong>"Get RCU Configuration"</strong> para probar la conexión</li>
+            <li>Revisa el <strong>"Connection Result Log"</strong> que aparecerá debajo del botón para verificar que la conexión fue exitosa</li>
+            <li>Si la conexión es exitosa, el botón <strong>"Next"</strong> se activará automáticamente</li>
+            <li>Si hay errores, verifica:
+                <ul>
+                    <li>Que la base de datos esté accesible desde el contenedor</li>
+                    <li>Que el schema prefix sea correcto (DIST_STB en este caso)</li>
+                    <li>Que la contraseña del schema sea la correcta</li>
+                    <li>Que el puerto y el servicio/PDB sean correctos</li>
+                </ul>
+            </li>
+        </ol>
+        
+        <div class="callout warn">
+            <p><strong>⚠️ Nota sobre la conexión:</strong></p>
+            <p>Si el contenedor no puede conectarse a la base de datos, verifica que:</p>
+            <ul>
+                <li>La IP/hostname de la base de datos sea accesible desde la red del contenedor</li>
+                <li>El puerto esté abierto y accesible</li>
+                <li>Los schemas RCU existan y tengan los permisos correctos</li>
+            </ul>
+        </div>
+        
+        <p>Una vez que la conexión sea exitosa, haz clic en <strong>"Next"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 7: Component Datasources (Datasources de los Componentes)</h4>
+        <p>Con la opción <strong>RCU Data</strong> de la pantalla anterior, el Wizard lee el schema <code>DIST_STB</code> y precarga un datasource por cada schema RCU. En esta pantalla solo hay que revisar que los valores sean correctos.</p>
+        
+        <p><strong>Configuración (parte superior, aplica a todas las filas marcadas):</strong></p>
+        <ul>
+            <li><strong>Vendor</strong>: <code>Oracle</code></li>
+            <li><strong>Driver</strong>: <code>Oracle's Driver (Thin) for Service connections</code></li>
+            <li><strong>Connection URL String</strong>: URL de la base de datos, por ejemplo:
+                <code>jdbc:oracle:thin:@(description=(address=(host=192.168.1.109)(protocol=tcp)(port=33118))(connect_data=(service_name=ORA193PDB1)(server=dedicated)))</code></li>
+            <li><strong>Schema Password</strong>: contraseña de los schemas RCU (la usada en el Paso 1).</li>
+            <li><strong>Oracle RAC configuration</strong>: <strong>Don't convert</strong> (base de datos de instancia única).</li>
+        </ul>
+        
+        <p><strong>Schemas que deben aparecer en la tabla:</strong></p>
+        <div class="tabla"><table>
+            <thead>
+                <tr>
+                    <th>Component Schema</th>
+                    <th>Schema Owner</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>LocalSvcTbl Schema</td><td><code>DIST_STB</code></td></tr>
+                <tr><td>WLS Runtime Schema</td><td><code>DIST_WLS_RUNTIME</code></td></tr>
+                <tr><td>WLS Schema</td><td><code>DIST_WLS</code></td></tr>
+                <tr><td>OPSS Audit Schema</td><td><code>DIST_IAU_APPEND</code></td></tr>
+                <tr><td>OPSS Audit Viewer Schema</td><td><code>DIST_IAU_VIEWER</code></td></tr>
+                <tr><td>OPSS Schema</td><td><code>DIST_OPSS</code></td></tr>
+            </tbody>
+        </table></div>
+        
+        <img src="images/image-0e2fb6f5-3de2-44a2-9987-c21b44412c28.png" alt="Pantalla Component Datasources - Schemas RCU precargados">
+        <p class="image-caption">Pantalla 7: Component Datasources - Schemas RCU precargados por el Wizard</p>
+        
+        <div class="callout">
+            <p><strong>Nota:</strong> los cambios en la parte superior se aplican a todas las filas marcadas. Si un schema tiene otra contraseña o usuario, desmárcalo o edita su fila directamente en la tabla.</p>
+        </div>
+        
+        <p>Haz clic en <strong>"Next"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 8: JDBC Test (Prueba de Conexiones JDBC)</h4>
+        <p>El Wizard prueba la conexión de cada datasource definido en la pantalla anterior.</p>
+        
+        <p><strong>Pasos a seguir:</strong></p>
+        <ol>
+            <li>Verifica que todos los schemas estén marcados.</li>
+            <li>Haz clic en <strong>"Test Selected Connections"</strong>.</li>
+            <li>Comprueba que cada fila muestre una marca verde en la columna <strong>Status</strong>.</li>
+            <li>En <strong>Connection Result Log</strong> debe aparecer <code>CFGFWK-64213: Test Successful!</code> para cada schema.</li>
+        </ol>
+        
+        <img src="images/image-b3de3e2d-be66-4ca1-9fe9-a6265f545053.png" alt="Pantalla JDBC Test - Conexiones probadas exitosamente">
+        <p class="image-caption">Pantalla 8: JDBC Test - Las 6 conexiones de los schemas RCU probadas con éxito</p>
+        
+        <div class="callout warn">
+            <p><strong>⚠️ Si alguna conexión falla:</strong> revisa en el log el error (por ejemplo <code>ORA-01017</code> credenciales inválidas, o <code>ORA-12514</code> servicio desconocido) y vuelve a <strong>Component Datasources</strong> con <strong>"&lt; Back"</strong> para corregir la URL, el usuario o la contraseña. No continúes hasta que todas las pruebas sean exitosas.</p>
+        </div>
+        
+        <p>Haz clic en <strong>"Next"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 9: Advanced Configuration (Configuración Avanzada)</h4>
+        <p>Esta pantalla permite seleccionar qué aspectos avanzados del dominio deseas configurar.</p>
+        
+        <div class="callout">
+            <p><strong>Para una arquitectura distribuida, selecciona TODAS las opciones:</strong></p>
+            <ul>
+                <li>✅ <strong>Administration Server</strong> - Necesario para configurar el AdminServer</li>
+                <li>✅ <strong>Node Manager</strong> - <strong>CRÍTICO</strong> para gestionar servidores remotos (Forms, Reports) en contenedores separados</li>
+                <li>✅ <strong>Topology</strong> - <strong>CRÍTICO</strong> para crear Managed Servers (Forms Server, Reports Server) que correrán en contenedores separados</li>
+                <li>✅ <strong>System Components</strong> - <strong>CRÍTICO</strong> para configurar Forms, Reports y OHS como componentes del sistema</li>
+                <li>✅ <strong>Domain Frontend Host Capture</strong> - Recomendado para entornos distribuidos con proxy/load balancer</li>
+                <li>✅ <strong>Deployments and Services</strong> - Necesario para desplegar aplicaciones y servicios en los Managed Servers</li>
+            </ul>
+        </div>
+        
+        <img src="images/image-52ef4311-efdc-4825-bd7a-80974d6f0ec2.png" alt="Pantalla Advanced Configuration">
+        <p class="image-caption">Pantalla 9: Advanced Configuration - Selecciona todas las opciones</p>
+        
+        <blockquote>
+            <strong>Importante</strong>: En una arquitectura distribuida, <strong>Topology</strong> y <strong>System Components</strong> son esenciales porque te permitirán definir y configurar los servidores que correrán en contenedores separados.
+        </blockquote>
+        
+        <p>Haz clic en <strong>"Next"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 10: Administration Server (Configuración del Servidor de Administración)</h4>
+        <p>Esta pantalla permite configurar los detalles del AdminServer.</p>
+        
+        <p><strong>Configuración recomendada:</strong></p>
+        <ul>
+            <li><strong>Server Name</strong>: <code>AdminServer</code> (mantener el valor por defecto)
+                <ul><li>Este es el nombre estándar del servidor de administración</li></ul>
+            </li>
+            <li><strong>Listen Address</strong>: <code>All Local Addresses</code> (mantener)
+                <ul><li>En Docker, esto permite que el servidor escuche en todas las interfaces del contenedor</li></ul>
+            </li>
+            <li><strong>Enable Listen Port</strong>: ✅ <strong>Marcado</strong>
+                <ul><li><strong>Listen Port</strong>: <code>7001</code> (mantener)</li></ul>
+            </li>
+            <li><strong>Enable SSL Listen Port</strong>: ❌ <strong>Desmarcado</strong> (opcional)
+                <ul><li>Para desarrollo no es necesario habilitar SSL</li></ul>
+            </li>
+            <li><strong>Administration Port</strong>: <code>9002</code> (si está habilitado)</li>
+            <li><strong>Server Groups</strong>: <code>Unspecified</code> (mantener)</li>
+        </ul>
+        
+        <img src="images/image-5ae31dec-777e-4fcf-a0f3-1aa1749f4e81.png" alt="Pantalla Administration Server">
+        <p class="image-caption">Pantalla 10: Administration Server</p>
+        
+        <blockquote>
+            <strong>Nota</strong>: Los puertos configurados aquí deben coincidir con los mapeos en <code>docker-compose.yml</code>:
+            <ul>
+                <li>Puerto 7001: AdminServer</li>
+                <li>Puerto 9002: Administration Port (opcional)</li>
+            </ul>
+        </blockquote>
+        
+        <p>Haz clic en <strong>"Next &gt;"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 11: Node Manager (Configuración del Node Manager)</h4>
+        <p>Esta pantalla permite configurar el Node Manager, que es esencial para gestionar servidores remotos en una arquitectura distribuida.</p>
+        
+        <p><strong>Configuración recomendada:</strong></p>
+        
+        <p><strong>1. Node Manager Topology:</strong></p>
+        <ul>
+            <li>✅ <strong>Per Domain Default Location</strong> (mantener seleccionado)
+                <ul>
+                    <li>Ubicación: <code>/user_projects/domains/forms_domain/nodemanager</code></li>
+                    <li>Esta ubicación coincide con la configuración en <code>entrypoint.sh</code></li>
+                </ul>
+            </li>
+        </ul>
+        
+        <p><strong>2. Node Manager Credentials:</strong></p>
+        <p>Usa las mismas credenciales del administrador para mantener consistencia y simplificar la gestión:</p>
+        <ul>
+            <li><strong>Username</strong>: <code>weblogic</code></li>
+            <li><strong>Password</strong>: la misma contraseña del administrador definida en la <a href="#pantalla-4">Pantalla 4</a></li>
+            <li><strong>Confirm Password</strong>: repetir la misma contraseña</li>
+        </ul>
+
+        <div class="callout warn">
+            <p><strong>⚠️ No uses <code>oracle01</code></strong> como contraseña del Node Manager ni del administrador. Por la misma razón que se explica en la Pantalla 4, puede impedir que el embedded LDAP se inicialice correctamente. <code>oracle01</code> solo se usa como contraseña de los schemas RCU (Pantallas 6 y 7).</p>
+        </div>
+        
+        <img src="images/image-7164a8c6-b5bb-4241-a506-a88a64cfe5aa.png" alt="Pantalla Node Manager">
+        <p class="image-caption">Pantalla 11: Node Manager</p>
+        
+        <blockquote>
+            <strong>Nota</strong>:
+            <ul>
+                <li>Node Manager puede usar credenciales diferentes del administrador, pero usar las mismas simplifica la gestión en entornos Docker</li>
+                <li>El Node Manager se ubicará en <code>dist/domains/forms_domain/nodemanager/</code> (en el host)</li>
+                <li>El puerto del Node Manager (5556) ya está configurado en <code>docker-compose.yml</code></li>
+            </ul>
+        </blockquote>
+        
+        <p>Haz clic en <strong>"Next &gt;"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 12: Managed Servers (Servidores Gestionados)</h4>
+        <p>Esta pantalla muestra los Managed Servers que se crearán automáticamente para Forms y Reports.</p>
+
+        <p><strong>¿Qué es un Managed Server?</strong></p>
+        <p>Un dominio WebLogic tiene dos tipos de servidores, cada uno con su propia JVM:</p>
+        <ul>
+            <li><strong>AdminServer</strong> (Pantalla 10): administra el dominio. Aloja la consola (<code>/console</code>), Enterprise Manager (<code>/em</code>) y la configuración central. <strong>No</strong> ejecuta las aplicaciones de negocio.</li>
+            <li><strong>Managed Servers</strong>: ejecutan las aplicaciones. Reciben su configuración del AdminServer al arrancar y se pueden iniciar, detener y reiniciar de forma independiente, normalmente a través del Node Manager.</li>
+        </ul>
+        <p>Al seleccionar las plantillas de Forms y Reports en la Pantalla 2, el Wizard crea un Managed Server para cada producto. En esta arquitectura cada uno corre en su propio contenedor:</p>
+
+        <div class="tabla"><table>
+            <thead>
+                <tr><th>Managed Server</th><th>Contenedor</th><th>Aplicación desplegada</th><th>URL de acceso</th><th>Server Group</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>WLS_FORMS</code></td><td><code>weblogic-forms</code></td><td><code>formsapp</code></td><td><code>http://&lt;host&gt;:9001/forms/frmservlet</code></td><td><code>FORMS-MAN-SVR</code></td></tr>
+                <tr><td><code>WLS_REPORTS</code></td><td><code>weblogic-reports</code></td><td><code>reports</code></td><td><code>http://&lt;host&gt;:9012/reports/rwservlet</code></td><td><code>REPORTS-APP-SERVERS</code></td></tr>
+            </tbody>
+        </table></div>
+
+        <p><strong>WLS_FORMS (Oracle Forms Services):</strong></p>
+        <ul>
+            <li>Aloja la aplicación <code>formsapp</code>, que contiene el <em>Forms Listener Servlet</em> (<code>/forms/frmservlet</code>). Es el punto de entrada de los usuarios, que se conectan mediante Java Web Start o FSAL (Forms Standalone Launcher).</li>
+            <li>Por cada sesión de usuario, el servlet lanza un proceso nativo <code>frmweb</code> (Forms Runtime) que ejecuta los módulos compilados <code>.fmx</code>, <code>.mmx</code> y <code>.plx</code> y se conecta a la base de datos de la aplicación.</li>
+            <li>Como <code>frmweb</code> es un binario nativo, este servidor depende de las librerías compartidas generadas con <code>genshlib</code> y de <code>libaio</code>, que ya incluye la imagen (ver <a href="../crear_imagen/index.html">Crear imagen</a>).</li>
+            <li>Su configuración está en <code>formsweb.cfg</code> (parámetros de cada aplicación Forms) y en <code>default.env</code> (variables de entorno del runtime, como <code>FORMS_PATH</code> y <code>TNS_ADMIN</code>).</li>
+        </ul>
+
+        <p><strong>WLS_REPORTS (Oracle Reports Services):</strong></p>
+        <ul>
+            <li>Aloja la aplicación <code>reports</code>, que expone el servlet <code>/reports/rwservlet</code> para solicitar la ejecución de reportes.</li>
+            <li>Incluye el <em>Reports Server in-process</em>: ejecuta los reportes <code>.rdf</code> y <code>.rep</code>, gestiona la cola de trabajos y genera la salida (PDF, HTML, etc.).</li>
+            <li>Las aplicaciones Forms lo invocan con <code>RUN_REPORT_OBJECT</code> o <code>WEB.SHOW_DOCUMENT</code> apuntando a <code>rwservlet</code>. También puede llamarse directamente por URL.</li>
+        </ul>
+
+        <div class="callout">
+            <p><strong>Server Groups:</strong> el valor <code>FORM...</code> o <code>REPO...</code> que se ve truncado en la columna "Server Groups" corresponde a <code>FORMS-MAN-SVR</code> y <code>REPORTS-APP-SERVERS</code>. Esos grupos le indican al Wizard qué aplicaciones, librerías y servicios desplegar en cada servidor. <strong>No los cambies</strong>: si un Managed Server queda sin su grupo, no tendrá desplegado <code>formsapp</code> o <code>reports</code>.</p>
+        </div>
+
+        <p>Si solo necesitas uno de los dos productos, igual conviene mantener ambos servidores. Un servidor que no se arranca no consume recursos, y agregarlo después requiere reconfigurar el dominio.</p>
+        
+        <p><strong>Configuración predefinida:</strong></p>
+        
+        <p><strong>1. WLS_FORMS:</strong></p>
+        <ul>
+            <li><strong>Server Name</strong>: <code>WLS_FORMS</code></li>
+            <li><strong>Listen Address</strong>: <code>All Local Addresses</code> (mantener)</li>
+            <li><strong>Enable Listen</strong>: ✅ Marcado</li>
+            <li><strong>Listen Port</strong>: <code>9001</code> (puerto estándar para Forms)</li>
+            <li><strong>Enable SSL Port</strong>: ✅ Marcado (opcional, puedes desmarcarlo para desarrollo)</li>
+            <li><strong>SSL Listen Port</strong>: <code>9501</code></li>
+            <li><strong>Administration Port</strong>: <code>Disabled</code></li>
+            <li><strong>Server Groups</strong>: <code>FORM...</code> (mantener)</li>
+        </ul>
+        
+        <p><strong>2. WLS_REPORTS:</strong></p>
+        <ul>
+            <li><strong>Server Name</strong>: <code>WLS_REPORTS</code></li>
+            <li><strong>Listen Address</strong>: <code>All Local Addresses</code> (mantener)</li>
+            <li><strong>Enable Listen</strong>: ✅ Marcado</li>
+            <li><strong>Listen Port</strong>: <code>9012</code> (valor por defecto en 14.1.2, mantener)
+                <ul><li>⚠️ No lo cambies: <code>docker-compose.yml</code> (<code>MANAGED_SERVER_PORT=9012</code> y el mapeo <code>9012:9012</code>) y <code>scripts/reports/entrypoint.sh</code> esperan este puerto</li></ul>
+            </li>
+            <li><strong>Enable SSL Port</strong>: ✅ Marcado (opcional, puedes desmarcarlo para desarrollo)</li>
+            <li><strong>SSL Listen Port</strong>: <code>9512</code></li>
+            <li><strong>Administration Port</strong>: <code>Disabled</code></li>
+            <li><strong>Server Groups</strong>: <code>REPO...</code> (mantener)</li>
+        </ul>
+        
+        <img src="images/image-54874a5c-420c-487d-8855-09ee95b9072c.png" alt="Pantalla Managed Servers">
+        <p class="image-caption">Pantalla 12: Managed Servers - WLS_FORMS (9001/9501) y WLS_REPORTS (9012/9512), con sus Server Groups FORMS-MAN-SVR y REPORTS-APP-SERVERS</p>
+        
+        <blockquote>
+            <strong>Nota</strong>:
+            <ul>
+                <li>Estos Managed Servers correrán en contenedores separados (Forms y Reports)</li>
+                <li>Los puertos configurados aquí deben coincidir con los mapeos en <code>docker-compose.yml</code> cuando crees los servicios</li>
+                <li>Para desarrollo, puedes desmarcar "Enable SSL Port" en ambos servidores</li>
+            </ul>
+        </blockquote>
+        
+        <p>Haz clic en <strong>"Next &gt;"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 13: Clusters (Clusters)</h4>
+        <p>Esta pantalla permite configurar clusters para alta disponibilidad y balanceo de carga.</p>
+        
+        <div class="callout">
+            <p><strong>Configuración recomendada:</strong></p>
+            <ul>
+                <li><strong>Clusters</strong>: <strong>Dejar vacío</strong> (sin clusters)</li>
+            </ul>
+        </div>
+        
+        <blockquote>
+            <strong>Nota</strong>:
+            <ul>
+                <li>Los clusters solo son necesarios si quieres alta disponibilidad o balanceo de carga automático</li>
+                <li>Para una arquitectura distribuida básica (un contenedor para Forms y otro para Reports), <strong>no es necesario crear clusters</strong></li>
+            </ul>
+        </blockquote>
+        
+        <p>Haz clic en <strong>"Next &gt;"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 14: Server Templates (Plantillas de Servidor)</h4>
+        <p>Esta pantalla muestra plantillas de servidor que se pueden usar para crear servidores dinámicos o aplicar configuraciones comunes.</p>
+        
+        <p><strong>Configuración recomendada:</strong></p>
+        <ul>
+            <li><strong>Template existente: <code>wsm-cache-server-temp</code></strong>
+                <ul>
+                    <li>Puerto: <code>7100</code> (configuración por defecto)</li>
+                    <li>SSL: Deshabilitado (normal para desarrollo)</li>
+                    <li><strong>No es necesario modificarlo</strong> para Forms y Reports</li>
+                </ul>
+            </li>
+        </ul>
+        
+        <img src="images/image-6fedd238-8982-4c60-9e91-827369c49a8f.png" alt="Pantalla Server Templates">
+        <p class="image-caption">Pantalla 14: Server Templates</p>
+        
+        <p>Haz clic en <strong>"Next &gt;"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 15: Dynamic Servers (Servidores Dinámicos)</h4>
+        <p>Esta pantalla permite configurar servidores dinámicos que se crean automáticamente en clusters.</p>
+        
+        <div class="callout">
+            <p><strong>Configuración recomendada:</strong></p>
+            <ul>
+                <li><strong>Dynamic Servers</strong>: <strong>Dejar deshabilitado o eliminar entradas existentes</strong></li>
+            </ul>
+        </div>
+        
+        <img src="images/image-9a540d2e-3954-458a-a9ae-870b4349f28e.png" alt="Pantalla Dynamic Servers">
+        <p class="image-caption">Pantalla 15: Dynamic Servers</p>
+        
+        <blockquote>
+            <strong>Nota</strong>: Los Dynamic Servers se usan para escalado dinámico. Para tu arquitectura distribuida con contenedores fijos, <strong>no es necesario configurarlos</strong>.
+        </blockquote>
+        
+        <p>Haz clic en <strong>"Next &gt;"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 16: Assign Servers to Clusters (Asignar Servidores a Clusters)</h4>
+        <p>Esta pantalla permite asignar servidores gestionados a clusters para alta disponibilidad y balanceo de carga.</p>
+        
+        <div class="callout">
+            <p><strong>Configuración recomendada:</strong></p>
+            <ul>
+                <li><strong>Panel "Servers" (izquierda)</strong>: Probablemente esté vacío - No hacer cambios</li>
+                <li><strong>Panel "Clusters" (derecha)</strong>: Puede mostrar clusters predefinidos - No hacer cambios</li>
+            </ul>
+        </div>
+        
+        <img src="images/image-f0ce4205-681d-4091-b99a-93bfb13b0f57.png" alt="Pantalla Assign Servers to Clusters">
+        <p class="image-caption">Pantalla 16: Assign Servers to Clusters</p>
+        
+        <p>Haz clic en <strong>"Next &gt;"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 17: Coherence Clusters (Clusters de Coherence)</h4>
+        <p>Esta pantalla permite configurar clusters de Oracle Coherence para caché distribuido.</p>
+        
+        <div class="callout">
+            <p><strong>Configuración recomendada:</strong></p>
+            <ul>
+                <li><strong>Cluster existente: <code>defaultCoherenceCluster</code></strong>
+                    <ul><li>Puerto: <code>7574</code> (configuración por defecto)</li></ul>
+                </li>
+                <li><strong>Dejar la configuración como está</strong> (no modificar)</li>
+            </ul>
+        </div>
+        
+        <img src="images/image-82abe9bd-d643-4fc6-9ec7-57ded62af56e.png" alt="Pantalla Coherence Clusters">
+        <p class="image-caption">Pantalla 17: Coherence Clusters</p>
+        
+        <p>Haz clic en <strong>"Next &gt;"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 18: Machines (Máquinas)</h4>
+        <p>Una <strong>Machine</strong> es la representación lógica de un host donde corre un Node Manager. WebLogic la usa para saber a qué Node Manager pedirle que arranque o detenga cada servidor. En esta arquitectura cada contenedor es un host distinto, así que hay que crear <strong>tres Machines</strong>, una por contenedor. En la Pantalla 19 se les asigna cada servidor.</p>
+
+        <div class="callout warn">
+            <p><strong>📌 Regla: una Machine por cada servidor.</strong> En esta arquitectura cada servidor (<code>AdminServer</code>, <code>WLS_FORMS</code>, <code>WLS_REPORTS</code>) corre en su propio contenedor, así que cada uno necesita su propia Machine, con el Node Manager apuntando a ese contenedor. Si más adelante se agrega otro Managed Server en otro contenedor, también necesitará su propia Machine.</p>
+            <p><strong>Por qué importa:</strong> por defecto el Wizard crea solo <code>AdminServerMachine</code> y le asigna todos los servidores. En el dominio original se dejó así, y <code>WLS_FORMS</code> quedó atascado en <code>STANDBY</code> con un timeout de Coherence (<code>RequestTimeoutException ... Name=Cluster</code>): el servidor corría en <code>weblogic-forms</code> pero su Machine apuntaba a <code>weblogic-admin</code>.</p>
+        </div>
+
+        <p>En la pestaña <strong>Machine</strong>, usa <strong>"Add"</strong> para crear las tres. Si el Wizard ya muestra una Machine por defecto, renómbrala como <code>AdminServerMachine</code>.</p>
+
+        <div class="tabla"><table>
+            <thead>
+                <tr><th>Name</th><th>Node Manager Listen Address</th><th>Node Manager Listen Port</th><th>Servidor que alojará</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>AdminServerMachine</code></td><td><code>weblogic-admin</code></td><td><code>5556</code></td><td><code>AdminServer</code></td></tr>
+                <tr><td><code>FormsMachine</code></td><td><code>weblogic-forms</code></td><td><code>5556</code></td><td><code>WLS_FORMS</code></td></tr>
+                <tr><td><code>ReportsMachine</code></td><td><code>weblogic-reports</code></td><td><code>5556</code></td><td><code>WLS_REPORTS</code></td></tr>
+            </tbody>
+        </table></div>
+
+        <div class="callout warn">
+            <p><strong>⚠️ IMPORTANTE para arquitectura distribuida en Docker:</strong></p>
+            <ul>
+                <li><strong>Node Manager Listen Address</strong>: usa el nombre del contenedor (<code>container_name</code> en <code>docker-compose.yml</code>). <strong>No uses <code>localhost</code></strong>: cada contenedor es un host distinto y desde el AdminServer <code>localhost</code> apunta a sí mismo.</li>
+                <li><strong>Node Manager Listen Port</strong>: <code>5556</code> en las tres. Es el puerto <em>dentro</em> de cada contenedor. En el host, <code>docker-compose.yml</code> los publica como <code>5556</code> (admin), <code>5557</code> (forms) y <code>5558</code> (reports) para que no choquen, pero entre contenedores se usa siempre <code>5556</code>.</li>
+                <li><strong>Node Manager Type</strong>: <code>SSL</code> (valor por defecto). Usa el mismo tipo en las tres Machines.</li>
+            </ul>
+        </div>
+        
+        <img src="images/30ea47c2-bc53-4845-949a-5baf66788119-2b1b0a04-5966-4646-ac53-d562d7e60f9a.png" alt="Pantalla Machines">
+        <p class="image-caption">Pantalla 18: Machines - AdminServerMachine con Node Manager Listen Address <code>weblogic-admin</code>, tipo SSL y puerto 5556</p>
+
+        <div class="callout warn">
+            <p><strong>📷 Captura pendiente:</strong> la imagen muestra solo <code>AdminServerMachine</code>. Falta una captura con <code>FormsMachine</code> y <code>ReportsMachine</code> también creadas, según la tabla.</p>
+        </div>
+        
+        <p><strong>Cómo verificar los nombres de los contenedores:</strong></p>
+        <pre class="code"><code># Ver en docker-compose.yml
+grep "container_name" dist/docker-compose.yml
+# container_name: weblogic-admin
+# container_name: weblogic-forms
+# container_name: weblogic-reports</code></pre>
+        
+        <p>Haz clic en <strong>"Next &gt;"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 19: Assign Servers to Machines (Asignar Servidores a Máquinas)</h4>
+        <p>Esta pantalla asigna cada servidor a la Machine creada en la Pantalla 18. Así, el AdminServer sabe a qué Node Manager pedirle que arranque cada Managed Server.</p>
+
+        <div class="callout warn">
+            <p><strong>📌 Regla: cada servidor en su propia Machine.</strong> Ninguna Machine debe tener más de un servidor, y cada servidor debe estar en la Machine del contenedor donde va a correr. No dejes <code>WLS_FORMS</code> ni <code>WLS_REPORTS</code> en <code>AdminServerMachine</code>, aunque el Wizard los asigne ahí por defecto.</p>
+        </div>
+        
+        <p><strong>Pasos a seguir</strong>, para cada fila de la tabla:</p>
+        <ol>
+            <li>Seleccionar el servidor en el panel izquierdo <strong>"Servers"</strong>.</li>
+            <li>Seleccionar la Machine correspondiente en el panel derecho <strong>"Machines"</strong>.</li>
+            <li>Hacer clic en el botón <code>&gt;</code> (flecha derecha) para asignarlo.</li>
+        </ol>
+
+        <div class="tabla"><table>
+            <thead>
+                <tr><th>Servidor</th><th>Machine</th><th>Contenedor</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>AdminServer</code></td><td><code>AdminServerMachine</code></td><td><code>weblogic-admin</code></td></tr>
+                <tr><td><code>WLS_FORMS</code></td><td><code>FormsMachine</code></td><td><code>weblogic-forms</code></td></tr>
+                <tr><td><code>WLS_REPORTS</code></td><td><code>ReportsMachine</code></td><td><code>weblogic-reports</code></td></tr>
+            </tbody>
+        </table></div>
+
+        <p><strong>Resultado esperado</strong> en el panel "Machines":</p>
+        <pre class="code"><code>AdminServerMachine
+  └── AdminServer
+FormsMachine
+  └── WLS_FORMS
+ReportsMachine
+  └── WLS_REPORTS</code></pre>
+
+        <blockquote>
+            <strong>Nota:</strong> por defecto el Wizard asigna <code>WLS_FORMS</code> y <code>WLS_REPORTS</code> a <code>AdminServerMachine</code>, como se ve en la captura. Desasígnalos con el botón <code>&lt;</code> y asígnalos a su Machine. Los system components (<code>forms1</code>, <code>ohs1</code>) no se asignan aquí sino en la Pantalla 23.
+            <br><br>
+            <strong>Si el dominio ya se creó con todos los servidores en <code>AdminServerMachine</code></strong>, como pasó con el dominio original, se corrige sin recrearlo. Con el AdminServer en marcha, ejecuta los scripts WLST que crean cada Machine y reasignan su servidor:
+            <pre class="code"><code>docker compose exec forms /u01/oracle/oracle_common/common/bin/wlst.sh /u01/oracle/scripts/create-forms-machine.py
+docker compose exec reports /u01/oracle/oracle_common/common/bin/wlst.sh /u01/oracle/scripts/create-reports-machine.py</code></pre>
+            Se ejecutan desde los contenedores <code>forms</code> y <code>reports</code>, porque cada uno monta su carpeta <code>scripts/forms/</code> o <code>scripts/reports/</code> en <code>/u01/oracle/scripts</code>. Se conectan al AdminServer por <code>t3://weblogic-admin:7001</code>. Luego reinicia <code>WLS_FORMS</code> y <code>WLS_REPORTS</code>. Los scripts tienen la contraseña del administrador escrita en la variable <code>ADMIN_PASSWORD</code>. Ajústala antes de ejecutarlos.
+        </blockquote>
+        
+        <img src="images/image-85bde05b-6bef-4b9b-a60c-8fc8058c3e8c.png" alt="Pantalla Assign Servers to Machines">
+        <p class="image-caption">Pantalla 19: Assign Servers to Machines - Estado inicial: el Wizard asigna WLS_FORMS y WLS_REPORTS a AdminServerMachine y deja AdminServer sin asignar</p>
+
+        <div class="callout warn">
+            <p><strong>📷 Captura pendiente:</strong> falta una captura con la asignación final de la tabla (cada servidor en su Machine).</p>
+        </div>
+        
+        <p>Haz clic en <strong>"Next &gt;"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 20: System Components (Componentes del Sistema)</h4>
+        <p>Esta pantalla permite configurar los componentes del sistema como Forms, Reports y OHS.</p>
+        
+        <p><strong>Configuración recomendada:</strong></p>
+        
+        <p><strong>Componente existente: <code>forms1</code></strong></p>
+        <ul>
+            <li><strong>System Component</strong>: <code>forms1</code> (mantener)</li>
+            <li><strong>Component Type</strong>: <code>FORMS</code> (mantener)</li>
+            <li><strong>Restart Interval</strong>: <code>3600</code> (1 hora, mantener)</li>
+            <li><strong>Restart Delay Seconds</strong>: <code>0</code> (mantener)</li>
+        </ul>
+        
+        <p><strong>Agregar componente OHS:</strong></p>
+        <ol>
+            <li>Clic en el botón <strong>"Add"</strong> (verde con signo +)</li>
+            <li>Configurar:
+                <ul>
+                    <li><strong>System Component</strong>: <code>ohs1</code></li>
+                    <li><strong>Component Type</strong>: Seleccionar <code>OHS</code> del dropdown</li>
+                    <li><strong>Restart Interval</strong>: <code>3600</code> (1 hora) o el valor que prefieras</li>
+                    <li><strong>Restart Delay Seconds</strong>: <code>0</code></li>
+                </ul>
+            </li>
+        </ol>
+        
+        <div class="callout warn">
+            <p><strong>Sobre Reports:</strong></p>
+            <ul>
+                <li>⚠️ <strong>Reports NO aparece como opción en "Component Type"</strong></li>
+                <li>Esto es normal - Reports se configura automáticamente cuando se selecciona la plantilla "Oracle Reports"</li>
+                <li>El Managed Server <code>WLS_REPORTS</code> ya está creado</li>
+                <li>No es necesario agregar Reports como System Component manualmente</li>
+            </ul>
+        </div>
+        
+        <img src="images/image-f997991e-85c3-47be-bb79-703569d186fb.png" alt="Pantalla System Components">
+        <p class="image-caption">Pantalla 20: System Components - forms1 y agregar ohs1</p>
+        
+        <p>Haz clic en <strong>"Next &gt;"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 21: OHS Server (Configuración del Servidor OHS)</h4>
+        <p>Esta pantalla permite configurar los detalles del componente OHS (<code>ohs1</code>) que agregaste en la pantalla anterior.</p>
+        
+        <p><strong>Configuración recomendada:</strong></p>
+        <ul>
+            <li><strong>System Component</strong>: <code>ohs1</code> (ya seleccionado)</li>
+            <li><strong>Admin Host</strong>: <code>127.0.0.1</code> (mantener por ahora)</li>
+            <li><strong>Admin Port</strong>: <code>7779</code> (mantener)</li>
+            <li><strong>Listen Address</strong>: Dejar vacío o seleccionar <code>All Local Addresses</code></li>
+            <li><strong>Listen Port</strong>: <code>7777</code> (mantener)</li>
+            <li><strong>SSL Listen Port</strong>: <code>4443</code> (mantener)</li>
+            <li><strong>ServerName</strong>: <code>http://localhost:7777</code> (mantener)</li>
+        </ul>
+        
+        <img src="images/image-cdc29984-d249-4be2-ac2d-c021efb00a99.png" alt="Pantalla OHS Server">
+        <p class="image-caption">Pantalla 21: OHS Server</p>
+        
+        <blockquote>
+            <strong>Nota</strong>:
+            <ul>
+                <li>El contenedor OHS (<code>weblogic-ohs</code>) aún no está creado en <code>docker-compose.yml</code> (está pendiente)</li>
+                <li>Esta configuración inicial es válida para empezar</li>
+                <li>Cuando crees el servicio OHS, podrás ajustar Admin Host y ServerName si es necesario</li>
+            </ul>
+        </blockquote>
+        
+        <p>Haz clic en <strong>"Next &gt;"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 22: Domain Frontend Host (Host Frontend del Dominio)</h4>
+        <p>Esta pantalla permite configurar el host frontend del dominio, que se usa para generar URLs correctas cuando hay proxy o load balancer.</p>
+        
+        <p><strong>Configuración recomendada:</strong></p>
+        <ul>
+            <li><strong>Configure Domain Frontend Host</strong>: ✅ <strong>Marcado</strong></li>
+            <li><strong>Plain (HTTP)</strong>: <code>http://localhost:7777</code></li>
+            <li><strong>SSL (HTTPS)</strong>: Dejar vacío (opcional)</li>
+            <li><strong>Default</strong>: Seleccionar <strong>"Plain"</strong></li>
+        </ul>
+        
+        <img src="images/image-eeea6138-1ec6-44a7-b7f3-0b4fa9cfdf10.png" alt="Pantalla Domain Frontend Host">
+        <p class="image-caption">Pantalla 22: Domain Frontend Host</p>
+        
+        <p>Haz clic en <strong>"Next &gt;"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 23: Assign System Components to Machines (Asignar Componentes del Sistema a Máquinas)</h4>
+        <p>Esta pantalla permite asignar los componentes del sistema (Forms, Reports, OHS) a las máquinas lógicas definidas anteriormente.</p>
+        
+        <p><strong>Pasos a seguir:</strong></p>
+        <ol>
+            <li><strong>Asignar <code>ohs1</code> a <code>AdminServerMachine</code>:</strong>
+                <ul>
+                    <li>Seleccionar <code>ohs1</code> en el panel izquierdo "SystemComponent"</li>
+                    <li>Seleccionar <code>AdminServerMachine</code> en el panel derecho "Machines"</li>
+                    <li>Hacer clic en el botón <code>&gt;</code> (flecha derecha) para asignar</li>
+                </ul>
+            </li>
+        </ol>
+        
+        <p><strong>Resultado esperado:</strong></p>
+        <ul>
+            <li><code>AdminServerMachine</code> debería contener:
+                <ul>
+                    <li><code>forms1</code> (ya asignado)</li>
+                    <li><code>ohs1</code> (recién asignado)</li>
+                </ul>
+            </li>
+        </ul>
+        
+        <img src="images/image-2ee4429f-32c5-4f1f-8f12-0887724e514f.png" alt="Pantalla Assign System Components to Machines">
+        <p class="image-caption">Pantalla 23: Assign System Components to Machines</p>
+        
+        <p>Haz clic en <strong>"Next &gt;"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 24: Deployments Targeting (Asignación de Despliegues)</h4>
+        <p>Esta pantalla permite asignar aplicaciones y librerías (deployments) a servidores o clusters específicos.</p>
+        
+        <div class="callout">
+            <p><strong>Configuración recomendada:</strong></p>
+            <ul>
+                <li><strong>No hacer cambios</strong> - Dejar la configuración como está</li>
+                <li>Todos los deployments ya están asignados al <code>AdminServer</code></li>
+            </ul>
+        </div>
+        
+        <img src="images/image-345859de-af4f-4b5a-aa10-f747b5a0ca27.png" alt="Pantalla Deployments Targeting">
+        <p class="image-caption">Pantalla 24: Deployments Targeting</p>
+        
+        <blockquote>
+            <strong>Nota</strong>: Para la configuración inicial, dejar los deployments en <code>AdminServer</code> es válido. Más adelante puedes reasignar <code>formsapp#14.1.2</code> a <code>WLS_FORMS</code> y <code>reports#14.1.2</code> a <code>WLS_REPORTS</code> desde la consola de administración.
+        </blockquote>
+        
+        <p>Haz clic en <strong>"Next &gt;"</strong> para continuar.</p>
+        
+        <div class="callout">
+            <p><strong>Nota sobre los datasources de OPSS:</strong> el Wizard no tiene una pantalla aparte para configurar los datasources de OPSS. Se cargan en la <strong>Pantalla 7 (Component Datasources)</strong> a partir de los schemas RCU y se validan en la <strong>Pantalla 8 (JDBC Test)</strong>:</p>
+            <div class="tabla"><table>
+                <thead>
+                    <tr><th>Datasource</th><th>Schema</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>opss-data-source</code></td><td><code>DIST_OPSS</code></td></tr>
+                    <tr><td><code>opss-audit-DBDS</code></td><td><code>DIST_IAU_APPEND</code></td></tr>
+                    <tr><td><code>opss-audit-viewDS</code></td><td><code>DIST_IAU_VIEWER</code></td></tr>
+                </tbody>
+            </table></div>
+            <p>Si hay que corregir un usuario, una URL o una contraseña, vuelve a la Pantalla 7 con <strong>"&lt; Back"</strong>.</p>
+        </div>
+
+        <h4 class="sub">Pantalla 25: Services Targeting (Asignación de Servicios)</h4>
+        <p>Esta pantalla permite asignar servicios del sistema (JDBC, Startup Classes, Shutdown Classes, etc.) a servidores o clusters específicos.</p>
+        
+        <div class="callout">
+            <p><strong>Configuración recomendada:</strong></p>
+            <ul>
+                <li><strong>No hacer cambios</strong> - Dejar la configuración como está</li>
+                <li>Los servicios críticos (JDBC data sources, startup/shutdown classes) ya están asignados a <code>AdminServer</code></li>
+            </ul>
+        </div>
+        
+        <img src="images/image-a3c72a16-6f29-42ec-a402-1c60854fe4cf.png" alt="Pantalla Services Targeting">
+        <p class="image-caption">Pantalla 25: Services Targeting</p>
+        
+        <p>Haz clic en <strong>"Next &gt;"</strong> para continuar.</p>
+        
+        <h4 class="sub">Pantalla 26: Configuration Summary (Resumen de Configuración)</h4>
+        <p>Esta es la última pantalla antes de crear el dominio. Muestra un resumen completo de toda la configuración.</p>
+        
+        <p><strong>Vista del dominio:</strong></p>
+        <ul>
+            <li><strong>Dominio</strong>: <code>forms_domain</code></li>
+            <li><strong>Ubicación</strong>: <code>/u01/oracle/user_projects/domains/forms_domain</code></li>
+            <li><strong>Servers</strong>: <code>WLS_FORMS</code>, <code>WLS_REPORTS</code></li>
+            <li><strong>AdminServer</strong>: Con aplicaciones y librerías desplegadas</li>
+        </ul>
+        
+        <p><strong>Plantillas incluidas:</strong></p>
+        <ul>
+            <li>Basic WebLogic Server Domain</li>
+            <li>Oracle JRF</li>
+            <li>Oracle Forms</li>
+            <li>Oracle Reports Server</li>
+            <li>Oracle Reports Bridge</li>
+            <li>Oracle Reports Application</li>
+            <li>Oracle Reports Tools</li>
+        </ul>
+        
+        <img src="images/image-8cfa6eec-c379-47bd-881f-8d3276845a31.png" alt="Pantalla Configuration Summary">
+        <p class="image-caption">Pantalla 26: Configuration Summary</p>
+        
+        <p><strong>Acción final:</strong></p>
+        <ol>
+            <li><strong>Revisar el resumen:</strong>
+                <ul>
+                    <li>Verifica que todo esté correcto</li>
+                    <li>Puedes expandir las secciones del árbol para ver más detalles</li>
+                    <li>Usa el dropdown "View:" para cambiar la vista (Deployment, Services, etc.)</li>
+                </ul>
+            </li>
+            <li><strong>Crear el dominio:</strong>
+                <ul>
+                    <li>Haz clic en el botón <strong>"Create"</strong> (o <strong>"Finish"</strong>) para iniciar la creación</li>
+                    <li>Esto puede tomar varios minutos</li>
+                    <li>Verás el progreso de la creación en la ventana del wizard</li>
+                </ul>
+            </li>
+        </ol>
+        
+        <div class="callout warn">
+            <p><strong>Nota</strong>:
+            </p><ul>
+                <li>Esta es la última oportunidad para revisar y cambiar cualquier configuración</li>
+                <li>Si necesitas cambiar algo, usa el botón "Back" o haz clic en el paso correspondiente en el panel izquierdo</li>
+                <li>Una vez que hagas clic en "Create", el proceso de creación comenzará y no se puede cancelar</li>
+            </ul>
+            <p></p>
+        </div>
+        
+        <p>Haz clic en <strong>"Create"</strong> para iniciar la creación del dominio.</p>
+        
+        <h4 class="sub">Pantalla 27: Configuration Progress (Progreso de Configuración)</h4>
+        <p>Esta pantalla aparece inmediatamente después de hacer clic en "Create" y muestra el progreso de la creación del dominio.</p>
+        
+        <p><strong>Elementos de la pantalla:</strong></p>
+        
+        <p><strong>1. Barra de progreso:</strong></p>
+        <ul>
+            <li>Muestra el porcentaje de completado (0% a 100%)</li>
+            <li>Se actualiza en tiempo real durante el proceso</li>
+            <li>Cuando llega al 100%, indica que la creación del dominio ha finalizado</li>
+        </ul>
+        
+        <p><strong>2. Lista de tareas completadas:</strong></p>
+        <ul>
+            <li>Cada tarea muestra un checkmark verde (✔) cuando se completa</li>
+            <li>Las tareas que se ejecutan incluyen:
+                <ul>
+                    <li><strong>Copy Unprocessed Artifacts</strong> - Copia de artefactos no procesados</li>
+                    <li><strong>OPSS Processing</strong> - Procesamiento de OPSS (Oracle Platform Security Services)</li>
+                    <li><strong>Security Processing</strong> - Procesamiento de seguridad</li>
+                    <li><strong>Artifacts Generation</strong> - Generación de artefactos</li>
+                    <li><strong>String Substitution</strong> - Sustitución de cadenas</li>
+                    <li><strong>Post Processing</strong> - Procesamiento posterior</li>
+                </ul>
+            </li>
+        </ul>
+        
+        <p><strong>3. Panel de navegación (izquierda):</strong></p>
+        <ul>
+            <li>Muestra todos los pasos de configuración que se completaron</li>
+            <li>Indica que el proceso está en la fase "Create Domain"</li>
+        </ul>
+        
+        <img src="images/image-6a21ce2e-f8c8-4313-ae67-aa3ee5acd120.png" alt="Pantalla Configuration Progress">
+        <p class="image-caption">Pantalla 27: Configuration Progress - Progreso de creación del dominio</p>
+        
+        <p><strong>Qué esperar:</strong></p>
+        <ul>
+            <li><strong>Tiempo de ejecución:</strong> El proceso puede tomar varios minutos (típicamente 5-15 minutos dependiendo del hardware)</li>
+            <li><strong>No cerrar el wizard:</strong> Es importante no cerrar el wizard ni el contenedor durante este proceso</li>
+            <li><strong>Progreso visible:</strong> Verás cómo cada tarea se completa secuencialmente con su checkmark verde</li>
+            <li><strong>100% completado:</strong> Cuando la barra de progreso llegue al 100% y todas las tareas tengan checkmarks verdes, el dominio ha sido creado exitosamente</li>
+        </ul>
+        
+        <div class="callout warn">
+            <p><strong>Nota</strong>:
+            </p><ul>
+                <li>Si alguna tarea falla, verás un mensaje de error en lugar del checkmark verde</li>
+                <li>En caso de error, revisa los logs en <code>/u01/oracle/cfgtoollogs/</code> dentro del contenedor</li>
+                <li>El proceso de OPSS Processing es crítico ya que configura la conexión a los schemas RCU que creaste anteriormente</li>
+            </ul>
+            <p></p>
+        </div>
+        
+        <p>Una vez que todas las tareas estén completadas (100%), el wizard mostrará un mensaje de éxito y podrás hacer clic en <strong>"Next"</strong> o <strong>"Finish"</strong> para cerrar el wizard.</p>
+        
+        <h4 class="sub">Pantalla 28: End Of Configuration (Fin de la Configuración)</h4>
+        <p>Esta es la pantalla final del Configuration Wizard. Confirma que el dominio ha sido creado exitosamente y proporciona información importante sobre el dominio creado.</p>
+        
+        <p><strong>Elementos de la pantalla:</strong></p>
+        
+        <p><strong>1. Mensaje de éxito:</strong></p>
+        <ul>
+            <li>Muestra un checkmark verde seguido del texto: <strong>"Oracle WebLogic Server Configuration Succeeded"</strong></li>
+            <li>Confirma: <strong>"New Domain <code>forms_domain</code> Creation Succeeded"</strong></li>
+            <li>Indica que el proceso se completó sin errores</li>
+        </ul>
+        
+        <p><strong>2. Domain Location (Ubicación del Dominio):</strong></p>
+        <ul>
+            <li>Muestra la ruta absoluta dentro del contenedor: <code>/u01/oracle/user_projects/domains/forms_domain</code></li>
+            <li><strong>Importante</strong>: Esta ruta está mapeada a <code>dist/domains/forms_domain</code> en el host gracias al bind mount configurado en <code>docker-compose.yml</code></li>
+            <li>El dominio es accesible directamente desde el host en: <code>./dist/domains/forms_domain/</code></li>
+        </ul>
+        
+        <p><strong>3. Admin Server URL:</strong></p>
+        <ul>
+            <li>Muestra la URL para acceder a la consola de administración: <code>http://weblogic-admin:7001/console</code></li>
+            <li><strong>Componentes de la URL:</strong>
+                <ul>
+                    <li><code>weblogic-admin</code>: Hostname del contenedor Admin (confirmando la configuración correcta)</li>
+                    <li><code>7001</code>: Puerto de escucha del AdminServer (configurado en la pantalla 10, Administration Server)</li>
+                    <li><code>/console</code>: Context root estándar de la consola de administración de WebLogic</li>
+                </ul>
+            </li>
+            <li><strong>Nota</strong>: Esta URL funciona desde dentro de la red Docker. Para acceder desde el host, usa <code>http://localhost:7001/console</code> (si el puerto está mapeado)</li>
+        </ul>
+        
+        <p><strong>4. Nota importante sobre OHS:</strong></p>
+        <ul>
+            <li>Al final de la pantalla aparece un mensaje informativo:
+                <blockquote>
+                    "After successful domain creation, you must run the WLST command <code>ohs_updateInstances()</code> to complete all the required steps. Please refer to OHS product documentation for more details."
+                </blockquote>
+            </li>
+            <li>⚠️ <strong>IMPORTANTE</strong>: Si configuraste OHS como System Component (pantalla 20), debes ejecutar este comando WLST después de crear el dominio para completar la configuración de OHS</li>
+            <li>Este paso es obligatorio para que OHS funcione correctamente</li>
+        </ul>
+        
+        <img src="images/image-048f4f7e-8bd6-4d2d-a0bc-6d8c2162bd69.png" alt="Pantalla End Of Configuration">
+        <p class="image-caption">Pantalla 28: End Of Configuration - Dominio creado exitosamente</p>
+        
+        <p><strong>Acción final:</strong></p>
+        <ul>
+            <li>Haz clic en <strong>"Finish"</strong> o <strong>"Done"</strong> para cerrar el Configuration Wizard</li>
+            <li>El contenedor temporal se cerrará automáticamente</li>
+            <li>El dominio quedará guardado en <code>dist/domains/forms_domain/</code> (en el host)</li>
+        </ul>
+        
+        <div class="callout ok">
+            <p><strong>Nota</strong>:
+            </p><ul>
+                <li>El dominio está completamente creado y listo para usar</li>
+                <li>Puedes verificar su existencia en el host: <code>ls -la dist/domains/forms_domain/</code></li>
+                <li>Si configuraste OHS, recuerda ejecutar <code>ohs_updateInstances()</code> desde WLST antes de iniciar OHS</li>
+                <li>La URL del Admin Server mostrada usa el hostname del contenedor (<code>weblogic-admin</code>), que es correcto para comunicación dentro de la red Docker</li>
+            </ul>
+            <p></p>
+        </div>
+        
+
+        <h4 class="sub">4. Esperar a que se complete</h4>
+
+        <p>El wizard creará el dominio. Esto puede tomar varios minutos. Verás el progreso en la ventana del wizard.</p>
+        
+
+        <h4 class="sub">5. Verificar que el dominio fue creado</h4>
+
+        <p>Una vez completado, verifica que el dominio existe:</p>
+        
+        <pre class="code"><code># Verificar carpeta del host
+ls -la dist/domains/forms_domain/
+
+# O desde dentro del contenedor (si aún está corriendo)
+docker compose exec admin ls -la /u01/oracle/user_projects/domains/</code></pre>
+        
+        <p>Deberías ver el directorio <code>forms_domain</code>.</p>
+        
+
+        <h4 class="sub">6. Cerrar el Wizard y reiniciar el contenedor <code>admin</code></h4>
+
+        <p>Al pulsar <strong>Finish</strong> el Wizard se cierra y el comando <code>run-config-wizard.sh</code> termina. El contenedor <code>admin</code> sigue corriendo, pero su script de entrada (<code>entrypoint_persistente.sh</code>) continúa en “modo configuración”: solo comprueba si existe el dominio al arrancar.</p>
+        
+        <p>Reinicia el contenedor para que detecte el dominio recién creado e inicie Node Manager y el AdminServer:</p>
+        
+        <pre class="code"><code>docker compose restart admin
+docker compose logs -f admin</code></pre>
+        </section>
+
+        <section class="slide-block" id="problemas">
+          <h3><span class="num">?</span> Solución de Problemas</h3>
+
+
+        <h4 class="sub">No puedo conectar con VNC</h4>
+
+        <ol>
+            <li>Verifica que el puerto 5902 está expuesto:
+                <pre class="code"><code>docker compose ps</code></pre>
+            </li>
+            <li>Verifica que x11vnc está corriendo dentro del contenedor:
+                <pre class="code"><code>docker compose exec admin pgrep x11vnc</code></pre>
+            </li>
+            <li>Intenta con la IP del contenedor en lugar de localhost</li>
+        </ol>
+        
+
+        <h4 class="sub">El Configuration Wizard no aparece</h4>
+
+        <ol>
+            <li>Verifica que Xvfb está corriendo:
+                <pre class="code"><code>docker-compose exec admin pgrep Xvfb</code></pre>
+            </li>
+            <li>Revisa los logs:
+                <pre class="code"><code>docker-compose exec admin cat /tmp/xvfb.log
+docker-compose exec admin cat /tmp/x11vnc.log</code></pre>
+            </li>
+        </ol>
+        
+
+        <h4 class="sub">Error al crear el dominio</h4>
+
+        <ol>
+            <li>Verifica que las credenciales de la base de datos son correctas</li>
+            <li>Verifica que los schemas RCU existen con el prefix configurado (por defecto <code>DIST</code>):
+                <pre class="code"><code>docker compose exec admin /u01/oracle/scripts/check-rcu-schemas.sh</code></pre>
+            </li>
+            <li>Revisa los logs del wizard en: <code>/u01/oracle/cfgtoollogs/</code></li>
+            <li>Verifica que los nombres de schemas en la configuración JDBC coinciden con los creados por RCU</li>
+        </ol>
+        </section>
+
+        <section class="slide-block" id="siguiente">
+          <h3><span class="num">→</span> Siguiente Paso</h3>
+
+        <p>Una vez creado el dominio, puedes iniciar el AdminServer:</p>
+        
+        <pre class="code"><code>cd dist
+docker compose up admin</code></pre>
+        </section>
+
+      </div>
+    </div>
+
+    <div class="card part-b" id="pasos-despues-dominio">
+      <div class="card-header part">
+        <span class="tag">Parte 2</span>
+        <span>Pasos después de crear el dominio<span class="sub-intro">Esta guía describe los pasos a seguir después de haber creado exitosamente el dominio WebLogic usando el Configuration Wizard.</span></span>
+      </div>
+      <div class="card-body">
+
+        <section class="slide-block" id="d-verificacion">
+          <h3><span class="num">✓</span> Verificación Inicial</h3>
+
+
+        <h4 class="sub">1. Verificar que el dominio fue creado</h4>
+
+        <p>Verifica que el dominio existe en la carpeta del host:</p>
+        
+        <pre class="code"><code>cd dist
+ls -la domains/forms_domain/</code></pre>
+        
+        <p>Deberías ver la estructura del dominio con carpetas como:</p>
+        <ul>
+            <li><code>bin/</code> - Scripts de inicio</li>
+            <li><code>config/</code> - Configuración del dominio</li>
+            <li><code>nodemanager/</code> - Configuración de Node Manager</li>
+            <li><code>servers/</code> - Configuración de servidores</li>
+            <li><code>security/</code> - Archivos de seguridad</li>
+        </ul>
+        
+
+        <h4 class="sub">2. Verificar permisos</h4>
+
+        <p>Asegúrate de que los permisos sean correctos:</p>
+        
+        <pre class="code"><code># Verificar permisos
+ls -la domains/forms_domain/
+
+# Si es necesario, ajustar permisos (desde el host)
+sudo chown -R $(id -u):$(id -g) domains/forms_domain/</code></pre>
+        </section>
+
+        <section class="slide-block" id="d-paso-1">
+          <h3><span class="num">1</span> Iniciar el AdminServer</h3>
+
+        <p>El AdminServer es el servidor central que gestiona el dominio. Debe iniciarse primero antes de cualquier otro servidor.</p>
+        
+
+        <h4 class="sub">1.1. Iniciar el contenedor AdminServer</h4>
+
+        <pre class="code"><code>cd dist
+docker compose up -d admin</code></pre>
+        
+        <p>O si prefieres ver los logs en tiempo real:</p>
+        
+        <pre class="code"><code>docker compose up admin</code></pre>
+        
+
+        <h4 class="sub">1.2. Verificar que AdminServer está corriendo</h4>
+
+        <p>Espera a que el servidor inicie completamente. Busca en los logs el mensaje:</p>
+        
+        <pre class="code"><code>&lt;Server state changed to RUNNING&gt;</code></pre>
+        
+        <p><strong>Ver logs:</strong></p>
+        <pre class="code"><code>docker compose logs -f admin</code></pre>
+        
+        <p><strong>Verificar estado del contenedor:</strong></p>
+        <pre class="code"><code>docker compose ps</code></pre>
+        
+        <p><strong>Health check:</strong></p>
+        <pre class="code"><code>docker compose exec admin /u01/oracle/scripts/healthcheck.sh</code></pre>
+        
+
+        <h4 class="sub">1.3. Acceder a la Consola de Administración</h4>
+
+        <p>Una vez que el AdminServer esté corriendo, puedes acceder a la consola:</p>
+        
+        <ul>
+            <li><strong>URL</strong>: <code>http://localhost:7001/console</code></li>
+            <li><strong>Usuario</strong>: <code>weblogic</code></li>
+            <li><strong>Contraseña</strong>: la contraseña del administrador definida en la <a href="#pantalla-4">Pantalla 4</a> del Configuration Wizard</li>
+        </ul>
+        
+        <div class="callout">
+            <p><strong>Nota</strong>: Si no puedes acceder desde el navegador, verifica que el puerto 7001 esté mapeado en <code>docker-compose.yml</code> y que el contenedor esté corriendo.</p>
+        </div>
+        </section>
+
+        <section class="slide-block" id="d-paso-2">
+          <h3><span class="num">2</span> Ejecutar ohs_updateInstances() (Si configuraste OHS)</h3>
+
+        <p>Si configuraste Oracle HTTP Server (OHS) como System Component durante el Configuration Wizard, debes ejecutar este comando WLST para completar la configuración.</p>
+        
+
+        <h4 class="sub">2.1. Conectar al AdminServer con WLST</h4>
+
+        <pre class="code"><code>cd dist
+docker compose exec admin /u01/oracle/oracle_common/common/bin/wlst.sh</code></pre>
+        
+
+        <h4 class="sub">2.2. Ejecutar ohs_updateInstances()</h4>
+
+        <p>Dentro de WLST, ejecuta:</p>
+        
+        <pre class="code"><code>connect('weblogic', '&lt;ADMIN_PASSWORD&gt;', 't3://weblogic-admin:7001')
+ohs_updateInstances()
+disconnect()
+exit()</code></pre>
+        
+        <p>Reemplaza <code>&lt;ADMIN_PASSWORD&gt;</code> por la contraseña del administrador definida en la Pantalla 4.</p>
+
+        <p><strong>Script completo:</strong></p>
+        
+        <pre class="code"><code>docker compose exec admin /u01/oracle/oracle_common/common/bin/wlst.sh &lt;&lt;EOF
+connect('weblogic', '&lt;ADMIN_PASSWORD&gt;', 't3://weblogic-admin:7001')
+ohs_updateInstances()
+disconnect()
+exit()
+EOF</code></pre>
+        
+        <div class="callout warn">
+            <p><strong>Nota</strong>: Este comando actualiza las instancias de OHS en el dominio. Es obligatorio si configuraste OHS durante el wizard.</p>
+        </div>
+        </section>
+
+        <section class="slide-block" id="d-paso-3">
+          <h3><span class="num">3</span> Verificar Configuración del Dominio</h3>
+
+
+        <h4 class="sub">3.1. Verificar Data Sources JDBC</h4>
+
+        <p>Desde la consola de administración (<code>http://localhost:7001/console</code>):</p>
+        
+        <ol>
+            <li>Navega a: <strong>Services &gt; Data Sources</strong></li>
+            <li>Verifica que los siguientes data sources estén configurados y funcionando:
+                <ul>
+                    <li><code>opss-audit-DBDS</code></li>
+                    <li><code>opss-data-source</code></li>
+                    <li><code>opss-audit-viewDS</code></li>
+                </ul>
+            </li>
+            <li>Para cada data source:
+                <ul>
+                    <li>Haz clic en el nombre</li>
+                    <li>Ve a la pestaña <strong>"Testing"</strong></li>
+                    <li>Haz clic en <strong>"Test Configuration"</strong></li>
+                    <li>Deberías ver un mensaje de éxito</li>
+                </ul>
+            </li>
+        </ol>
+        
+
+        <h4 class="sub">3.2. Verificar Managed Servers</h4>
+
+        <p>Desde la consola:</p>
+        
+        <ol>
+            <li>Navega a: <strong>Environment &gt; Servers</strong></li>
+            <li>Verifica que los siguientes servidores estén listados:
+                <ul>
+                    <li><code>AdminServer</code> (estado: RUNNING)</li>
+                    <li><code>WLS_FORMS</code> (estado: SHUTDOWN - esto es normal, aún no se ha iniciado)</li>
+                    <li><code>WLS_REPORTS</code> (estado: SHUTDOWN - esto es normal, aún no se ha iniciado)</li>
+                </ul>
+            </li>
+        </ol>
+        
+
+        <h4 class="sub">3.3. Verificar System Components</h4>
+
+        <ol>
+            <li>Navega a: <strong>Domain &gt; System Components</strong></li>
+            <li>Verifica que estén listados:
+                <ul>
+                    <li><code>forms1</code> (tipo: FORMS)</li>
+                    <li><code>ohs1</code> (tipo: OHS) - si lo configuraste</li>
+                </ul>
+            </li>
+        </ol>
+        </section>
+
+        <section class="slide-block" id="d-paso-4">
+          <h3><span class="num">4</span> Configurar Node Manager (Para Gestión Remota)</h3>
+
+        <p>
+            Para iniciar los Managed Servers (Forms y Reports) desde contenedores separados,
+            cada máquina lógica del dominio tiene su propio Node Manager. El AdminServer se
+            conecta a ellos por hostname en la red <code>weblogic-network</code>.
+        </p>
+
+        <h4 class="sub">4.1. Node Manager por máquina</h4>
+
+        <div class="tabla"><table>
+            <thead>
+                <tr>
+                    <th>Máquina (dominio)</th>
+                    <th>Contenedor / hostname</th>
+                    <th>Directorio Node Manager</th>
+                    <th>Puerto interno</th>
+                    <th>Puerto en el host</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>AdminServerMachine</code></td>
+                    <td><code>weblogic-admin</code></td>
+                    <td><code>nodemanager/</code></td>
+                    <td class="num">5556</td>
+                    <td class="num">5556</td>
+                </tr>
+                <tr>
+                    <td><code>FormsMachine</code></td>
+                    <td><code>weblogic-forms</code></td>
+                    <td><code>nodemanager_forms/</code></td>
+                    <td class="num">5556</td>
+                    <td class="num">5557</td>
+                </tr>
+                <tr>
+                    <td><code>ReportsMachine</code></td>
+                    <td><code>weblogic-reports</code></td>
+                    <td><code>nodemanager_reports/</code></td>
+                    <td class="num">5556</td>
+                    <td class="num">5558</td>
+                </tr>
+            </tbody>
+        </table></div>
+
+        <ul>
+            <li>Dentro de cada contenedor el Node Manager escucha siempre en <strong>5556</strong>.
+                En el host, <code>docker-compose.yml</code> publica Forms y Reports como
+                <code>5557:5556</code> y <code>5558:5556</code> para no chocar con el del admin.</li>
+            <li>Entre contenedores se usa el puerto <strong>interno</strong> 5556 y el
+                <strong>hostname</strong> del servicio (p. ej. <code>weblogic-forms:5556</code>),
+                no <code>localhost</code>.</li>
+            <li>Cada Node Manager tiene su <code>nodemanager.properties</code> con
+                <code>ListenAddress</code> apuntando al hostname del contenedor, de modo que el
+                AdminServer pueda gestionar remotamente los Managed Servers.</li>
+        </ul>
+
+        <h4 class="sub">4.2. Verificar configuración de Node Manager</h4>
+
+        <p>El Node Manager del AdminServer ya está configurado en el dominio. Verifica:</p>
+
+        <pre class="code"><code># Ver configuración de Node Manager (AdminServerMachine)
+cat domains/forms_domain/nodemanager/nodemanager.properties
+
+# Cuando existan forms/reports, también:
+# cat domains/forms_domain/nodemanager_forms/nodemanager.properties
+# cat domains/forms_domain/nodemanager_reports/nodemanager.properties</code></pre>
+
+        <h4 class="sub">4.3. Verificar que Node Manager está corriendo</h4>
+
+        <p>El Node Manager debería estar corriendo en el contenedor <code>weblogic-admin</code>:</p>
+
+        <pre class="code"><code>docker compose exec admin ps aux | grep nodemanager</code></pre>
+
+        <p>O verifica el puerto:</p>
+
+        <pre class="code"><code>docker compose exec admin netstat -tlnp | grep 5556</code></pre>
+        </section>
+
+        <section class="slide-block" id="d-paso-5">
+          <h3><span class="num">5</span> Agregar servicios <code>forms</code> y <code>reports</code> en Docker Compose</h3>
+
+        <p>
+            Con el dominio creado, amplía <code>dist/docker-compose.yml</code> con los Managed
+            Servers. Siguen el mismo patrón que <code>admin</code> (misma imagen, red
+            <code>weblogic-network</code> y bind mounts de <code>domains</code>/<code>app</code>)
+            y añaden variables del Managed Server, <code>depends_on: admin</code>,
+            <code>healthcheck</code> y el mapeo de Node Manager en el host.
+        </p>
+
+        <h4 class="sub">5.1. Resumen de servicios</h4>
+
+        <div class="tabla"><table>
+            <thead>
+                <tr>
+                    <th>Servicio</th>
+                    <th>Contenedor / hostname</th>
+                    <th>Managed Server</th>
+                    <th>Puertos clave (host)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>forms</code></td>
+                    <td><code>weblogic-forms</code></td>
+                    <td><code>WLS_FORMS</code></td>
+                    <td>9001, 9501, 9991, NM 5557</td>
+                </tr>
+                <tr>
+                    <td><code>reports</code></td>
+                    <td><code>weblogic-reports</code></td>
+                    <td><code>WLS_REPORTS</code></td>
+                    <td>9012, 9512, 9992, NM 5558</td>
+                </tr>
+            </tbody>
+        </table></div>
+
+        <h4 class="sub">5.2. Servicio <code>forms</code></h4>
+
+        <p>Añadir al mismo <code>docker-compose.yml</code> (junto al servicio <code>admin</code>):</p>
+
+        <pre class="code"><code>  forms:
+    image: image_forms_14.1.2:r1
+    container_name: weblogic-forms
+    hostname: weblogic-forms
+    user: oracle
+    networks:
+      - weblogic-network
+    volumes:
+      - ./domains:/u01/oracle/user_projects/domains
+      - ./app:/u01/oracle/user_projects/apps
+      - ./scripts/forms:/u01/oracle/scripts
+    environment:
+      - ORACLE_HOME=/u01/oracle
+      - DOMAIN_NAME=forms_domain
+      - DOMAIN_HOME=/u01/oracle/user_projects/domains/forms_domain
+      - ADMIN_SERVER_NAME=AdminServer
+      - ADMIN_SERVER_HOST=weblogic-admin
+      - ADMIN_SERVER_PORT=7001
+      - ADMIN_USER=weblogic
+      - ADMIN_PASSWORD=********
+      - MANAGED_SERVER_NAME=WLS_FORMS
+      - MANAGED_SERVER_PORT=9001
+      - JAVA_OPTIONS=-Dforms.instance=forms1
+      - FORMS_INSTANCE=/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig/components/FORMS/instances/forms1
+      - TNS_ADMIN=/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig
+      - FRMCMP=/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig/components/FORMS/instances/forms1/bin/frmcmp_batch.sh
+      - FORMS_PATH=/u01/oracle/user_projects/apps/forms_app/bin:/u01/oracle/user_projects/apps/forms_app/src:/u01/oracle/forms
+      - FORMS_MODULE_PATH=/u01/oracle/user_projects/apps/forms_app/bin:/u01/oracle/forms
+      - LD_LIBRARY_PATH=/u01/oracle/lib:/u01/oracle/oracle_common/lib
+      - PATH=/u01/oracle/bin:/u01/oracle/oracle_common/bin:${PATH}
+      - PROC=/u01/oracle/bin/proc
+      - PCSCFG=/u01/oracle/precomp/admin/pcscfg.cfg
+      - PROC_INCLUDE=/u01/oracle/precomp/public
+      - CC=/usr/bin/gcc
+    ports:
+      - "9001:9001"   # WLS_FORMS HTTP
+      - "9501:9501"   # WLS_FORMS HTTPS
+      - "9991:9991"   # Administration Port
+      - "5557:5556"   # Node Manager FormsMachine
+    command: ["/u01/oracle/scripts/entrypoint.sh"]
+    depends_on:
+      - admin
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9001"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 180s</code></pre>
+
+        <h4 class="sub">5.3. Servicio <code>reports</code></h4>
+
+        <pre class="code"><code>  reports:
+    image: image_forms_14.1.2:r1
+    container_name: weblogic-reports
+    hostname: weblogic-reports
+    user: oracle
+    networks:
+      - weblogic-network
+    volumes:
+      - ./domains:/u01/oracle/user_projects/domains
+      - ./app:/u01/oracle/user_projects/apps
+      - ./scripts/reports:/u01/oracle/scripts
+    environment:
+      - ORACLE_HOME=/u01/oracle
+      - DOMAIN_NAME=forms_domain
+      - DOMAIN_HOME=/u01/oracle/user_projects/domains/forms_domain
+      - ADMIN_SERVER_NAME=AdminServer
+      - ADMIN_SERVER_HOST=weblogic-admin
+      - ADMIN_SERVER_PORT=7001
+      - ADMIN_USER=weblogic
+      - ADMIN_PASSWORD=********
+      - MANAGED_SERVER_NAME=WLS_REPORTS
+      - MANAGED_SERVER_PORT=9012
+      - LD_LIBRARY_PATH=/u01/oracle/lib:/u01/oracle/oracle_common/lib
+      - PATH=/u01/oracle/bin:/u01/oracle/oracle_common/bin:${PATH}
+    ports:
+      - "9012:9012"   # WLS_REPORTS HTTP
+      - "9512:9512"   # WLS_REPORTS HTTPS
+      - "9992:9992"   # Administration Port
+      - "5558:5556"   # Node Manager ReportsMachine
+    command: ["/u01/oracle/scripts/entrypoint.sh"]
+    depends_on:
+      - admin
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9012"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 180s</code></pre>
+
+        <h4 class="sub">5.4. Validar y levantar</h4>
+
+        <pre class="code"><code>cd dist
+docker compose config
+docker compose up -d forms reports
+docker compose ps
+docker compose logs -f forms
+# docker compose logs -f reports</code></pre>
+
+        <div class="callout">
+            <p><strong>OHS:</strong> el System Component <code>ohs1</code> puede seguir en el
+            contenedor <code>admin</code> (puertos 7777/4443). Un servicio Compose aparte
+            <code>weblogic-ohs</code> no forma parte del stack actual de tres contenedores.</p>
+            <p>La referencia completa y operativa es <code>dist/docker-compose.yml</code>.</p>
+        </div>
+        </section>
+
+        <section class="slide-block" id="d-paso-6">
+          <h3><span class="num">6</span> Reasignar Deployments (Opcional)</h3>
+
+        <p>Actualmente, las aplicaciones están asignadas al <code>AdminServer</code>. Para una arquitectura distribuida, deberías reasignarlas:</p>
+        
+
+        <h4 class="sub">6.1. Reasignar Forms Application</h4>
+
+        <p>Desde la consola (<code>http://localhost:7001/console</code>):</p>
+        
+        <ol>
+            <li>Navega a: <strong>Deployments</strong></li>
+            <li>Selecciona: <code>formsapp#14.1.2</code></li>
+            <li>Haz clic en <strong>"Update"</strong></li>
+            <li>En <strong>"Targets"</strong>, desmarca <code>AdminServer</code> y marca <code>WLS_FORMS</code></li>
+            <li>Haz clic en <strong>"Finish"</strong></li>
+        </ol>
+        
+
+        <h4 class="sub">6.2. Reasignar Reports Application</h4>
+
+        <ol>
+            <li>Navega a: <strong>Deployments</strong></li>
+            <li>Selecciona: <code>reports#14.1.2</code></li>
+            <li>Haz clic en <strong>"Update"</strong></li>
+            <li>En <strong>"Targets"</strong>, desmarca <code>AdminServer</code> y marca <code>WLS_REPORTS</code></li>
+            <li>Haz clic en <strong>"Finish"</strong></li>
+        </ol>
+        
+        <div class="callout">
+            <p><strong>Nota</strong>: Esto solo es necesario si planeas iniciar los Managed Servers. Si solo usas AdminServer por ahora, puedes dejarlo así.</p>
+        </div>
+        </section>
+
+        <section class="slide-block" id="paso-7-reports">
+          <h3><span class="num">7</span> Completar Reports (elementos que el Wizard no crea)</h3>
+
+        <p>El Configuration Wizard aplica los templates de Reports (Reports Application, Reports Server y Reports Tools) y crea <code>WLS_REPORTS</code>. Pero <strong>no</strong> deja el dominio listo para ejecutar reportes. Faltan estos elementos, y cada uno produce un error distinto al invocar el primer reporte:</p>
+
+        <div class="tabla"><table>
+            <thead>
+                <tr>
+                    <th>Elemento faltante</th>
+                    <th>Error que produce</th>
+                    <th>Se resuelve en</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Instancia de Reports Tools (<code>config/fmwconfig/components/ReportsToolsComponent/reptools1</code>)</td>
+                    <td>Los lanzadores no tienen <code>REPORTS_INSTANCE</code> válido</td>
+                    <td>7.2</td>
+                </tr>
+                <tr>
+                    <td><code>$DOMAIN_HOME/reports/cache</code> y <code>temp</code></td>
+                    <td><code>REP-54005: The cache directory .../reports/cache cannot be created</code></td>
+                    <td>7.3</td>
+                </tr>
+                <tr>
+                    <td><code>$DOMAIN_HOME/reports/bin/rwengine.sh</code> (y <code>reports.sh</code>, <code>rwrun.sh</code>…)</td>
+                    <td><code>REP-56022: Engine rwEng-0 cannot be launched ... rwengine.sh: error=2, No such file or directory</code></td>
+                    <td>7.3</td>
+                </tr>
+                <tr>
+                    <td><code>$DOMAIN_HOME/reports/server</code></td>
+                    <td><code>REP-50141: File .../reports/server/rep_wls_reports_weblogic-reports.dat cannot be opened</code></td>
+                    <td>7.3</td>
+                </tr>
+                <tr>
+                    <td><code>$DOMAIN_HOME/reports/fonts</code></td>
+                    <td>Lo referencia <code>reports.sh</code> (<code>REPORTS_FONT_DIRECTORY</code>); sin fuentes, el PDF puede salir sin texto</td>
+                    <td>7.3</td>
+                </tr>
+                <tr>
+                    <td><code>sourceDir</code> del motor (ruta de los <code>.rdf</code>)</td>
+                    <td><code>REP-1070</code> / reporte no encontrado</td>
+                    <td>7.4</td>
+                </tr>
+                <tr>
+                    <td>Seguridad de Reports activa por defecto (<code>securityId="rwJaznSec"</code>)</td>
+                    <td>Pantalla "System User Authentication", <code>REP-51019</code> / <code>REP-56071</code></td>
+                    <td>7.4</td>
+                </tr>
+            </tbody>
+        </table></div>
+
+        <div class="callout warn">
+            <p><strong>Síntoma general:</strong> mientras falte cualquiera de los elementos, el navegador muestra <code>REP-52266: The in-process Reports Server rep_wls_reports_weblogic-reports failed to start</code> (a veces con <code>org.omg.CORBA.OBJECT_NOT_EXIST ... Null servant</code>) o <code>REP-51002: Bind to Reports Server ... failed</code>. La causa real está en <code>$DOMAIN_HOME/servers/WLS_REPORTS/logs/reports/rwserver_diagnostic.log</code>:</p>
+            <pre class="code"><code>grep -E 'REP-|rwEng' $DOMAIN_HOME/servers/WLS_REPORTS/logs/reports/rwserver_diagnostic.log | tail -15</code></pre>
+        </div>
+
+        <div class="callout">
+            <p><strong>Requisito de imagen:</strong> el motor de Reports necesita las librerías Motif/X11 (<code>libXm.so.4</code>, etc.). Con la imagen <code>r1</code>, el reporte queda colgado con <code>DFW-99998 UnsatisfiedLinkError: librwu.so: libXm.so.4</code>. Usar una imagen construida con el <code>Dockerfile.wls</code> actual o la <code>r2</code> (ver <a href="../crear_imagen/index.html#reports-libs">Crear imagen, punto 4.e</a>).</p>
+        </div>
+
+
+        <h4 class="sub">7.1. Levantar el Node Manager de ReportsMachine</h4>
+
+        <p><code>createReportsToolsInstance</code> delega la creación de archivos en el Node Manager de la Machine indicada. Si no está corriendo, el comando responde <em>"Reports Tools instance ... was successfully created"</em>, pero también avisa <em>"Node Manager is not available on machine ReportsMachine"</em>, y la instancia queda registrada <strong>sin archivos</strong>.</p>
+
+        <pre class="code"><code>docker compose exec -d reports /u01/oracle/scripts/startNodeManager.sh
+docker compose exec reports bash -c 'sleep 15; tail -5 $DOMAIN_HOME/nodemanager_reports/nodemanager.log'
+# Esperado: "Secure socket listener started on port 5556"</code></pre>
+
+
+        <h4 class="sub">7.2. Crear la instancia de Reports Tools (<code>reptools1</code>)</h4>
+
+        <pre class="code"><code>docker compose exec admin /u01/oracle/oracle_common/common/bin/wlst.sh \
+  /u01/oracle/scripts/create-reports-tools.py</code></pre>
+
+        <p>Equivalente manual en WLST:</p>
+        <pre class="code"><code>connect('weblogic','&lt;ADMIN_PASSWORD&gt;','t3://weblogic-admin:7001')
+createReportsToolsInstance(instanceName='reptools1', machine='ReportsMachine')
+exit()</code></pre>
+
+        <p>Verificar que se generaron los archivos (<code>rwbuilder.conf</code>, <code>guicommon/</code>…):</p>
+        <pre class="code"><code>ls $DOMAIN_HOME/config/fmwconfig/components/ReportsToolsComponent/reptools1/</code></pre>
+
+        <div class="callout">
+            <p>Si la instancia se creó sin el Node Manager (carpeta vacía o inexistente), crea otra con un nombre distinto (por ejemplo <code>REPORTS_TOOLS_INSTANCE=reptools2</code>). El script del paso 7.3 detecta sola la primera instancia que tenga <code>rwbuilder.conf</code>.</p>
+        </div>
+
+
+        <h4 class="sub">7.3. Preparar <code>$DOMAIN_HOME/reports</code> (directorios y lanzadores)</h4>
+
+        <p>Las plantillas de los lanzadores están en <code>$ORACLE_HOME/bin</code> (<code>rwengine.sh</code>, <code>reports.sh</code>, <code>rwrun.sh</code>, <code>rwserver.sh</code>…). Contienen marcadores que normalmente sustituye el instalador: <code>$$domain_home$$</code>, <code>$$mw_home$$</code>, <code>$$component_name$$</code> y <code>%HOME%</code>. Sin sustituir no funcionan, porque <code>$$</code> se expande al PID del shell.</p>
+
+        <p>El script <code>prepare-reports-domain.sh</code> hace todo el paso de forma idempotente:</p>
+        <ul>
+            <li>crea <code>reports/{bin,server,cache,temp,fonts}</code>;</li>
+            <li>copia los lanzadores desde <code>$ORACLE_HOME/bin</code>;</li>
+            <li>sustituye los marcadores con el <code>DOMAIN_HOME</code>, el <code>ORACLE_HOME</code> y la instancia de Reports Tools;</li>
+            <li>verifica que no quede ningún marcador.</li>
+        </ul>
+
+        <pre class="code"><code># Diagnóstico (no modifica nada)
+docker compose exec -u oracle reports /u01/oracle/scripts/prepare-reports-domain.sh --check
+
+# Aplicar (incluye 7.4 para DEV)
+docker compose exec -u oracle reports /u01/oracle/scripts/prepare-reports-domain.sh \
+  --source-dir /u01/oracle/user_projects/apps/reports_app/src \
+  --disable-security</code></pre>
+
+        <p>Equivalente manual:</p>
+        <pre class="code"><code>export DOMAIN_HOME=/u01/oracle/user_projects/domains/forms_domain
+mkdir -p $DOMAIN_HOME/reports/{bin,server,cache,temp,fonts}
+cp -p /u01/oracle/bin/reports.sh /u01/oracle/bin/rw*.sh $DOMAIN_HOME/reports/bin/
+chmod 750 $DOMAIN_HOME/reports/bin/*.sh
+cd $DOMAIN_HOME/reports/bin
+sed -i \
+  -e 's#\$\$domain_home\$\$#/u01/oracle/user_projects/domains/forms_domain#g' \
+  -e 's#\$\$mw_home\$\$#/u01/oracle#g' \
+  -e 's#\$\$component_name\$\$#reptools1#g' \
+  -e 's#%HOME%#/home/oracle#g' \
+  *.sh
+grep -n '\$\$\|%[A-Z_]*%' *.sh      # debe quedar vacío</code></pre>
+
+
+        <h4 class="sub">7.4. Ajustar <code>rwserver.conf</code>: <code>sourceDir</code> y seguridad (DEV)</h4>
+
+        <p>Archivo: <code>$DOMAIN_HOME/config/fmwconfig/servers/WLS_REPORTS/applications/reports_14.1.2/configuration/rwserver.conf</code></p>
+
+        <ul>
+            <li><strong><code>sourceDir</code></strong>: descomentar la propiedad del motor <code>rwEng</code> y apuntarla a la carpeta de los <code>.rdf</code>:
+                <pre class="code"><code>&lt;engine id="rwEng" class="oracle.reports.engine.EngineImpl" maxEngine="1" minEngine="1" engLife="50" &gt;
+   &lt;property name="sourceDir" value="/u01/oracle/user_projects/apps/reports_app/src"/&gt;</code></pre>
+            </li>
+            <li><strong>Seguridad</strong>: por defecto el job de reportes lleva <code>securityId="rwJaznSec"</code>, y cada petición pide un usuario de WebLogic con rol de Reports. Para DEV, o para llamadas desde Forms sin <code>authid</code>, se elimina ese atributo:
+                <pre class="code"><code>&lt;job jobType="report" engineId="rwEng"/&gt;</code></pre>
+                Si se mantiene la seguridad, hay que otorgar roles con WLST:
+                <pre class="code"><code>grantAppRole(appStripe="reports", appRoleName="RW_ADMINISTRATOR",
+             principalClass="weblogic.security.principal.WLSUserImpl", principalName="weblogic")</code></pre>
+            </li>
+        </ul>
+
+        <div class="callout">
+            <p>El aviso <code>SecurityHelper:start Writeable folders not configured</code> solo afecta a <code>destype=file</code> (requiere <code>folderAccess</code> en <code>rwserver.conf</code>). No impide <code>destype=cache</code>.</p>
+        </div>
+
+
+        <h4 class="sub">7.5. Reiniciar WLS_REPORTS y probar</h4>
+
+        <pre class="code"><code>docker compose exec reports bash -c "pkill -f 'weblogic.Name=WLS_REPORTS'; sleep 10"
+docker compose exec reports /u01/oracle/scripts/startWLSReports.sh
+
+# Prueba (BD encendida)
+curl -s -o /tmp/prueba.pdf -w "HTTP %{http_code}\n" \
+ "http://localhost:9012/reports/rwservlet?report=&lt;REPORTE&gt;.rdf&amp;userid=&lt;usr&gt;/&lt;pwd&gt;@&lt;TNS&gt;&amp;destype=cache&amp;desformat=PDF"
+file /tmp/prueba.pdf</code></pre>
+
+        <div class="tabla"><table>
+            <thead>
+                <tr>
+                    <th>Respuesta</th>
+                    <th>Significado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>REP-51019</code> en <code>getserverinfo</code></td><td>Normal: es un comando administrativo y requiere <code>authid</code>. El servidor está arriba.</td></tr>
+                <tr><td><code>REP-56071</code> con <code>authid=weblogic/...</code></td><td>El usuario no tiene el rol <code>RW_ADMINISTRATOR</code> (ver 7.4).</td></tr>
+                <tr><td><code>REP-1920: Character mode runtime is incompatible with DESFORMAT of PDF...</code></td><td>El RDF está definido en modo carácter. Agregar <code>&amp;mode=bitmap</code> o cambiar la propiedad <em>Mode</em> del reporte a <em>Bitmap</em> en Reports Builder.</td></tr>
+                <tr><td>PDF en blanco</td><td>Sin datos (faltan parámetros: probar <code>desformat=XML</code>) o sin fuentes en <code>$DOMAIN_HOME/reports/fonts</code>.</td></tr>
+            </tbody>
+        </table></div>
+        </section>
+
+        <section class="slide-block" id="d-resumen">
+          <h3><span class="num">Σ</span> Resumen de Estado Actual</h3>
+
+        <div class="callout ok">
+            <p><strong>✅ Completado:</strong></p>
+            <ul>
+                <li>Dominio creado en <code>dist/domains/forms_domain/</code></li>
+                <li>AdminServer configurado y listo para iniciar</li>
+                <li>Node Manager configurado</li>
+                <li>Data Sources JDBC configurados (si se completó el wizard correctamente)</li>
+            </ul>
+        </div>
+        
+        <div class="callout warn">
+            <p><strong>⏳ Pendiente:</strong></p>
+            <ul>
+                <li>Iniciar AdminServer (Paso 1)</li>
+                <li>Ejecutar <code>ohs_updateInstances()</code> si configuraste OHS (Paso 2)</li>
+                <li>Agregar <code>forms</code> y <code>reports</code> al <code>docker-compose.yml</code> (<a href="#d-paso-5">Paso 5</a>)</li>
+                <li>Configurar Node Manager por máquina (<a href="#d-paso-4">Paso 4</a>)</li>
+                <li>Iniciar Managed Servers desde sus contenedores respectivos</li>
+                <li>Completar Reports: instancia Reports Tools, <code>$DOMAIN_HOME/reports</code>, <code>sourceDir</code> y seguridad (<a href="#paso-7-reports">Paso 7</a>)</li>
+            </ul>
+        </div>
+        </section>
+
+        <section class="slide-block" id="d-comandos">
+          <h3><span class="num">$</span> Comandos Rápidos de Referencia</h3>
+
+        <pre class="code"><code># Iniciar AdminServer
+cd dist
+docker compose up -d admin
+
+# Ver logs
+docker compose logs -f admin
+
+# Detener AdminServer
+docker compose stop admin
+
+# Acceder a WLST
+docker compose exec admin /u01/oracle/oracle_common/common/bin/wlst.sh
+
+# Verificar estado
+docker compose ps
+
+# Health check
+docker compose exec admin /u01/oracle/scripts/healthcheck.sh</code></pre>
+        </section>
+
+        <section class="slide-block" id="d-siguiente">
+          <h3><span class="num">→</span> Siguiente Paso Recomendado</h3>
+
+        <div class="callout ok">
+            <p><strong>Inicia el AdminServer</strong> (Paso 1) para verificar que todo funciona correctamente:</p>
+            
+            <pre class="code"><code>cd dist
+docker compose up admin</code></pre>
+            
+            <p>Espera a ver el mensaje <code>Server state changed to RUNNING</code> y luego accede a la consola en <code>http://localhost:7001/console</code>.</p>
+        </div>
+        </section>
+
+      </div>
+    </div>
+
+    <p class="doc-footer">
+      <strong>Oracle Forms &amp; Reports 14.1.2 · Guía de creación del dominio</strong><br>
+      Ver también <a href="../crear_imagen/index.html">Crear imagen</a>
+    </p>
+
+    <p style="margin: 1rem 0 2rem; text-align: center;">
+      <a class="back-link" href="../../index.html">← Regresar a la documentación del proyecto</a>
+    </p>
+  </div>
+</body>
+</html>

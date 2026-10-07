@@ -1,0 +1,1918 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía · Crear la imagen image_forms_14.1.2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/estilos-demo.css">
+  <style>
+    :root {
+      --font-display: "Outfit", "Segoe UI", sans-serif;
+      --font-body: "Source Sans 3", "Segoe UI", sans-serif;
+      --font-mono: "JetBrains Mono", "Courier New", monospace;
+      --text-desc: #2f3540;
+      --size-desc: 1.05rem;
+      --leading-desc: 1.7;
+      --c-admin: #2e7d32;
+      --c-forms: #ef6c00;
+      --c-reports: #00838f;
+      --c-ohs: #0d47a1;
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--text-desc);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .app-wrap {
+      max-width: 960px;
+      overflow: visible;
+    }
+    .card,
+    .card-body {
+      overflow: visible;
+    }
+
+    /* Cabecera */
+    .comercial-header {
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: nowrap;
+      background-image: url('../../assets/ImagenEmpresa.png');
+      background-repeat: no-repeat;
+      background-position: left center;
+      background-size: cover;
+      background-color: #eef3f8;
+      min-height: 148px;
+      padding: 0.85rem 0.9rem;
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+    .comercial-header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.12) 0%,
+        rgba(255, 255, 255, 0.5) 40%,
+        rgba(255, 255, 255, 0.9) 62%,
+        #ffffff 78%
+      );
+      pointer-events: none;
+    }
+    .comercial-header .title-wrap {
+      position: relative;
+      z-index: 1;
+      margin-left: auto;
+      max-width: 58%;
+      min-width: 280px;
+      text-align: left;
+      padding: 0.95rem 1.15rem 1rem;
+      color: #0a1f4d;
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid rgba(13, 71, 161, 0.12);
+      border-left: 5px solid #0d47a1;
+      box-shadow: 0 6px 20px rgba(0, 33, 113, 0.12);
+    }
+    .comercial-header .title-wrap h1 {
+      font-family: var(--font-display);
+      color: #0a1f4d;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.28;
+      margin: 0;
+    }
+    .comercial-header .title-wrap h1 .header-line-1 {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      color: #0d47a1;
+    }
+    .comercial-header .title-wrap h1 .header-line-2 {
+      display: block;
+      font-size: 1.42rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+      color: #061433;
+    }
+    .comercial-header .title-wrap h1 .header-line-3 {
+      display: block;
+      font-size: 1.02rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: #1565c0;
+    }
+    .comercial-header .title-wrap .header-tagline {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      line-height: 1.45;
+      margin-top: 0.55rem;
+      margin-bottom: 0;
+      font-weight: 500;
+      color: #475569;
+      letter-spacing: 0.01em;
+      padding-top: 0.5rem;
+      border-top: 1px solid rgba(13, 71, 161, 0.15);
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 1rem;
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #0d47a1;
+      text-decoration: none;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    /* Introducción */
+    .intro-propuesta {
+      max-width: calc(100% - 1cm - 1.5rem - 1cm);
+      margin: 0 0 1.5rem 1cm;
+    }
+    .intro-propuesta h2 {
+      font-family: var(--font-display);
+      font-size: 1.28rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      color: var(--primary-dark);
+      margin: 0 0 0.75rem 0;
+    }
+    .intro-propuesta p {
+      text-align: justify;
+      color: var(--text-desc);
+      font-size: var(--size-desc);
+      line-height: var(--leading-desc);
+      font-weight: 400;
+      margin: 0 0 0.85rem;
+    }
+    .intro-propuesta p:last-child { margin-bottom: 0; }
+    .intro-propuesta .slogan {
+      margin-top: 1rem;
+      margin-bottom: 0;
+      text-align: left;
+      font-family: var(--font-display);
+      font-size: 1.12rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #0d47a1;
+      line-height: 1.4;
+    }
+
+    /* Índice */
+    .toc {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0 0 1.5rem 1cm;
+    }
+    .toc a {
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--primary);
+      background: #fff;
+      border: 1px solid #bbdefb;
+      border-radius: 999px;
+      padding: 0.3rem 0.8rem;
+      box-shadow: var(--shadow-sm);
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .toc a:hover { background: #e3f2fd; border-color: #90caf9; }
+
+    /* Bloques numerados */
+    .slide-block {
+      margin-bottom: 1.75rem;
+      padding: 1.25rem 1.4rem;
+      background: #fafafa;
+      border-radius: var(--radius);
+      border-left: 4px solid var(--primary);
+      scroll-margin-top: 1rem;
+    }
+    .slide-block h3 {
+      font-family: var(--font-display);
+      margin: 0 0 0.75rem 0;
+      color: var(--primary-dark);
+      font-size: 1.22rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    .slide-block h3 .num {
+      flex-shrink: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+    .slide-block p {
+      margin: 0 0 0.9rem 0;
+      color: var(--text-desc);
+      font-size: var(--size-desc);
+      line-height: var(--leading-desc);
+      font-weight: 400;
+      text-align: justify;
+    }
+    .slide-block p:last-child { margin-bottom: 0; }
+    .slide-block h4.sub {
+      font-family: var(--font-display);
+      margin: 1.35rem 0 0.65rem;
+      color: var(--primary-dark);
+      font-size: 1.08rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.86em;
+      background: #eef3f8;
+      color: #0a1f4d;
+      padding: 0.08rem 0.35rem;
+      border-radius: 4px;
+    }
+
+    /* Diagrama de arquitectura */
+    .arq {
+      margin: 1rem 0 0.5rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      padding: 1.1rem 1.1rem 1.2rem;
+    }
+    .arq-users {
+      display: flex;
+      justify-content: center;
+    }
+    .arq-users .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--primary-dark);
+      background: #e3f2fd;
+      border: 1px solid #90caf9;
+      border-radius: 999px;
+      padding: 0.45rem 1rem;
+    }
+    .arq-users .pill svg { width: 20px; height: 20px; fill: var(--primary); }
+    .arq-flow {
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      line-height: 1.2;
+      margin: 0.3rem 0;
+    }
+    .arq-flow .arrow {
+      display: block;
+      font-size: 1.3rem;
+      color: var(--primary);
+      line-height: 1;
+    }
+    .arq-host {
+      border: 2px dashed #90a4ae;
+      border-radius: 12px;
+      padding: 0.9rem 0.9rem 1rem;
+      background: #f7f9fc;
+      position: relative;
+    }
+    .arq-host-label {
+      font-family: var(--font-display);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #546e7a;
+      margin-bottom: 0.65rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .arq-host-label .net {
+      color: var(--primary);
+      background: #e3f2fd;
+      border-radius: 999px;
+      padding: 0.05rem 0.6rem;
+      letter-spacing: 0.04em;
+    }
+    .arq-containers {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+      align-items: stretch;
+    }
+    .ctr {
+      min-width: 0;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--c-admin);
+      border-radius: 10px;
+      box-shadow: var(--shadow-sm);
+      padding: 0.75rem 0.8rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .ctr.forms { border-top-color: var(--c-forms); }
+    .ctr.reports { border-top-color: var(--c-reports); }
+    .ctr-head {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+    .ctr-head .ico {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e8f5e9;
+      color: var(--c-admin);
+    }
+    .ctr.forms .ctr-head .ico { background: #fff3e0; color: var(--c-forms); }
+    .ctr.reports .ctr-head .ico { background: #e0f2f1; color: var(--c-reports); }
+    .ctr-head .ico svg { width: 20px; height: 20px; fill: currentColor; }
+    .ctr-head .t {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: var(--primary-dark);
+      line-height: 1.15;
+    }
+    .ctr-head .h {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    .comp {
+      border: 1px solid #e3e8ef;
+      border-radius: 8px;
+      padding: 0.45rem 0.6rem;
+      background: #fafbfd;
+    }
+    .comp .n {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      line-height: 1.25;
+    }
+    .comp .n em {
+      display: block;
+      font-style: normal;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      overflow-wrap: anywhere;
+    }
+    .comp .ports {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-top: 0.3rem;
+    }
+    .port {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 0.05rem 0.45rem;
+      border-radius: 999px;
+      background: #eef3f8;
+      color: #0a1f4d;
+      border: 1px solid #dbe4ee;
+      white-space: nowrap;
+    }
+    .comp.ohs { border-color: #bbdefb; background: #f3f8fe; }
+    .comp.nm { border-style: dashed; }
+    .ctr-machine {
+      margin-top: auto;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+    }
+    .arq-mounts {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    .mount {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 44px;
+    }
+    .mount::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 4px;
+      left: 50%;
+      border-left: 3px solid #8e24aa;
+      transform: translateX(-50%);
+    }
+    .mount::after {
+      content: "";
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 8px solid #8e24aa;
+    }
+    .mount span {
+      position: relative;
+      font-family: var(--font-display);
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #6a1b9a;
+      background: #fff;
+      border: 1px solid #e1bee7;
+      border-radius: 999px;
+      padding: 0.05rem 0.55rem;
+    }
+    .arq-domain {
+      position: relative;
+      background: linear-gradient(135deg, #f3e5f5 0%, #ede7f6 55%, #e8eaf6 100%);
+      border: 2px solid #8e24aa;
+      border-radius: 12px;
+      padding: 0.85rem 1rem 0.95rem;
+      box-shadow: 0 6px 18px rgba(106, 27, 154, 0.15);
+    }
+    .dom-head {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .dom-ico {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: #6a1b9a;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .dom-ico svg { width: 24px; height: 24px; fill: currentColor; }
+    .dom-kicker {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #6a1b9a;
+    }
+    .dom-name {
+      font-family: var(--font-mono);
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: #2a0a3d;
+      line-height: 1.2;
+    }
+    .dom-badge {
+      margin-left: auto;
+      font-family: var(--font-display);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #fff;
+      background: #6a1b9a;
+      border-radius: 999px;
+      padding: 0.3rem 0.8rem;
+    }
+    .dom-path {
+      margin-top: 0.65rem;
+      font-size: 0.85rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .dom-path code { background: #fff; }
+    .dom-path .to { color: #6a1b9a; font-weight: 700; }
+    .dom-parts {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.5rem;
+      margin-top: 0.65rem;
+    }
+    .dom-parts .part {
+      background: #fff;
+      border: 1px solid #e1bee7;
+      border-left: 4px solid var(--c-admin);
+      border-radius: 8px;
+      padding: 0.35rem 0.55rem;
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      overflow-wrap: anywhere;
+    }
+    .dom-parts .part.forms { border-left-color: var(--c-forms); }
+    .dom-parts .part.reports { border-left-color: var(--c-reports); }
+    .dom-parts .part code { font-size: 0.78em; font-weight: 500; }
+    .slide-block .arq-domain .dom-note,
+    .dom-note {
+      margin: 0.65rem 0 0;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: #3c2a4d;
+      text-align: left;
+    }
+    .arq-volumes {
+      margin-top: 0.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 0.75rem;
+      background: #eceff1;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      color: #37474f;
+    }
+    .arq-volumes .lbl {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.74rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #455a64;
+      margin-right: 0.25rem;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      justify-content: center;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+    .legend i {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+    .figure .caption,
+    .caption {
+      font-family: var(--font-body);
+      margin-top: 0.6rem;
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.45;
+      letter-spacing: 0.01em;
+    }
+
+    /* Componentes clave */
+    .capacidades-label {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin: 1.1rem 0 0.65rem;
+    }
+    .capacidades-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.65rem;
+    }
+    .capacidad {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.7rem 0.85rem;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.15s ease;
+    }
+    .capacidad:hover { border-color: #90caf9; }
+    .capacidad .nro {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #0d47a1, #1565c0);
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.05rem;
+    }
+    .capacidad .txt {
+      font-size: 0.95rem;
+      line-height: 1.4;
+      color: var(--text-desc);
+      padding-top: 0.2rem;
+      font-weight: 400;
+    }
+    .capacidad .txt strong {
+      font-family: var(--font-display);
+      color: var(--primary-dark);
+      font-weight: 700;
+    }
+
+    /* Especificaciones por contenedor */
+    .specs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin: 1rem 0 0.25rem;
+    }
+    .spec {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--c-admin);
+      overflow: hidden;
+    }
+    .spec.forms { border-top-color: var(--c-forms); }
+    .spec.reports { border-top-color: var(--c-reports); }
+    .spec h4 {
+      font-family: var(--font-display);
+      font-size: 1.02rem;
+      font-weight: 700;
+      margin: 0;
+      padding: 0.75rem 0.9rem 0.6rem;
+      color: var(--primary-dark);
+      letter-spacing: -0.01em;
+      border-bottom: 1px solid #eef2f6;
+    }
+    .spec dl {
+      margin: 0;
+      padding: 0.35rem 0.9rem 0.7rem;
+    }
+    .spec .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.36rem 0;
+      border-bottom: 1px dashed #eef2f6;
+      font-size: 0.9rem;
+    }
+    .spec .row:last-child { border-bottom: none; }
+    .spec dt { color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+    .spec dd {
+      margin: 0;
+      text-align: right;
+      color: var(--primary-dark);
+      font-weight: 600;
+    }
+    .spec .sep {
+      font-family: var(--font-display);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--c-ohs);
+      background: #f3f8fe;
+      padding: 0.4rem 0.9rem;
+      border-top: 1px solid #e3f2fd;
+      border-bottom: 1px solid #e3f2fd;
+    }
+
+    .badge {
+      font-family: var(--font-display);
+      display: inline-block;
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .badge-ok {
+      background: #e8f5e9;
+      color: #1b5e20;
+      border: 1px solid #a5d6a7;
+    }
+    .badge-manual {
+      background: #fff3e0;
+      color: #e65100;
+      border: 1px solid #ffcc80;
+    }
+
+    /* Tablas */
+    .tabla {
+      margin-top: 0.85rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .tabla table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    .tabla th {
+      font-family: var(--font-display);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-align: left;
+      color: var(--text-muted);
+      background: #f7f9fc;
+      padding: 0.65rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .tabla td {
+      padding: 0.55rem 0.9rem;
+      border-top: 1px solid #eef2f6;
+      color: var(--text-desc);
+      vertical-align: middle;
+    }
+    .tabla tr:first-child td { border-top: none; }
+    .tabla tbody tr:hover td { background: #fafcff; }
+    .tabla td.svc {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--primary-dark);
+      white-space: nowrap;
+    }
+    .tabla td.svc::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+      background: var(--c-admin);
+    }
+    .tabla td.svc.ohs::before { background: var(--c-ohs); }
+    .tabla td.svc.forms::before { background: var(--c-forms); }
+    .tabla td.svc.reports::before { background: var(--c-reports); }
+    .tabla td.num {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+    .tabla td.num.diff { color: #b26a00; font-weight: 600; }
+
+    /* Fichas de detalle técnico */
+    .detalles {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 1rem 0 0.25rem;
+    }
+    .detalle {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 1rem 1.15rem 1.1rem;
+      border-left: 4px solid var(--primary);
+    }
+    .detalle.d-2 { border-left-color: #00838f; }
+    .detalle.d-3 { border-left-color: #2e7d32; }
+    .detalle.d-4 { border-left-color: #558b2f; }
+    .detalle.d-5 { border-left-color: #6a1b9a; }
+    .detalle.d-6 { border-left-color: #546e7a; }
+    .detalle h4 {
+      font-family: var(--font-display);
+      margin: 0 0 0.55rem 0;
+      color: var(--primary-dark);
+      font-size: 1.08rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+    .detalle h4 .d-num {
+      flex-shrink: 0;
+      min-width: 1.7rem;
+      height: 1.7rem;
+      padding: 0 0.45rem;
+      border-radius: 999px;
+      background: var(--primary);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .detalle.d-2 h4 .d-num { background: #00838f; }
+    .detalle.d-3 h4 .d-num { background: #2e7d32; }
+    .detalle.d-4 h4 .d-num { background: #558b2f; }
+    .detalle.d-5 h4 .d-num { background: #6a1b9a; }
+    .detalle.d-6 h4 .d-num { background: #546e7a; }
+    .detalle h4 .d-tag {
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0;
+    }
+    .detalle p {
+      margin: 0 0 0.65rem 0;
+      font-size: 0.98rem;
+      line-height: 1.6;
+      text-align: justify;
+      color: var(--text-desc);
+    }
+    .detalle p:last-child { margin-bottom: 0; }
+
+    .cta-list {
+      margin: 0.35rem 0 0.65rem;
+      padding-left: 1.2rem;
+      color: var(--text-desc);
+      line-height: 1.65;
+      font-size: 0.98rem;
+      font-weight: 400;
+    }
+    .cta-list:last-child { margin-bottom: 0; }
+    .cta-list li { margin-bottom: 0.3rem; }
+    .cta-list strong {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    /* Bloques de código */
+    pre.code {
+      margin: 0.5rem 0 0.75rem;
+      background: #0f1b2d;
+      color: #e6edf3;
+      padding: 0.9rem 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.6;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+    }
+    pre.code:last-child { margin-bottom: 0; }
+    pre.code .c { color: #7d8ea3; }
+    pre.code .k { color: #79c0ff; }
+    pre.code .s { color: #a5d6ff; }
+
+    /* Comandos (plegables) */
+    .cmds {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      margin-top: 0.9rem;
+    }
+    .cmd {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .cmd summary {
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.75rem 0.95rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: var(--primary-dark);
+    }
+    .cmd summary::-webkit-details-marker { display: none; }
+    .cmd summary::after {
+      content: "+";
+      margin-left: auto;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+    .cmd[open] summary::after { content: "–"; }
+    .cmd summary .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+      flex-shrink: 0;
+    }
+    .cmd.admin summary .dot { background: var(--c-admin); }
+    .cmd.forms summary .dot { background: var(--c-forms); }
+    .cmd.reports summary .dot { background: var(--c-reports); }
+    .cmd summary .sub {
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .cmd .body {
+      padding: 0 0.95rem 0.95rem;
+      border-top: 1px solid #eef2f6;
+    }
+    .cmd .body p {
+      font-size: 0.92rem;
+      margin: 0.7rem 0 0.2rem;
+      text-align: left;
+    }
+
+    /* Beneficios */
+    .benefits {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.85rem;
+    }
+    .benefit {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 0.95rem 1.05rem;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    .benefit h4 {
+      font-family: var(--font-display);
+      margin: 0 0 0.4rem 0;
+      color: var(--primary-dark);
+      font-size: 1.02rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .benefit p {
+      margin: 0;
+      font-size: 0.98rem;
+      text-align: left;
+      color: var(--text-desc);
+      line-height: 1.55;
+      font-weight: 400;
+    }
+
+    .message-box {
+      margin-top: 1rem;
+      padding: 1.05rem 1.25rem;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%);
+      border: 1px solid rgba(13, 71, 161, 0.25);
+      font-size: var(--size-desc);
+      line-height: var(--leading-desc);
+      font-weight: 400;
+      color: var(--text-desc);
+    }
+    .message-box strong {
+      font-family: var(--font-display);
+      font-weight: 700;
+    }
+
+    .doc-footer {
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin: 0.5rem 0 1rem;
+    }
+    .doc-footer strong {
+      font-family: var(--font-display);
+      color: var(--primary-dark);
+    }
+
+    @media (max-width: 820px) {
+      .arq-containers { grid-template-columns: 1fr; }
+      .arq-mounts { display: none; }
+      .dom-parts { grid-template-columns: 1fr; }
+      .specs { grid-template-columns: 1fr; }
+      .capacidades-grid { grid-template-columns: 1fr; }
+      .tabla { overflow-x: auto; }
+    }
+
+    @media (max-width: 700px) {
+      .comercial-header {
+        flex-wrap: wrap;
+        background-position: top left;
+        min-height: auto;
+      }
+      .comercial-header::before {
+        background: rgba(255, 255, 255, 0.88);
+      }
+      .comercial-header .title-wrap {
+        max-width: 100%;
+        min-width: 0;
+        width: 100%;
+        text-align: left;
+      }
+      .comercial-header .title-wrap h1 .header-line-2 { font-size: 1.22rem; }
+      .intro-propuesta, .toc { margin-left: 0; max-width: 100%; }
+    }
+
+    @media print {
+      body { font-size: 12pt; }
+      .comercial-header .title-wrap h1 .header-line-2 { font-size: 16pt; }
+      .toc { display: none; }
+      .cmd .body { display: block !important; }
+      .slide-block { break-inside: avoid-page; }
+    }
+  </style>
+  <style>
+    a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    a code { color: var(--primary); }
+
+    /* Notas destacadas */
+    .callout {
+      margin: 0.9rem 0;
+      padding: 0.85rem 1.05rem;
+      border-radius: var(--radius);
+      border: 1px solid #bbdefb;
+      border-left: 4px solid var(--primary);
+      background: #f3f8fe;
+      font-size: 0.97rem;
+      line-height: 1.6;
+      color: var(--text-desc);
+    }
+    .callout:last-child { margin-bottom: 0; }
+    .callout .lbl {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 0.25rem;
+    }
+    .callout.warn { background: #fff8e1; border-color: #ffe082; border-left-color: #f9a825; }
+    .callout.warn .lbl { color: #b26a00; }
+    .callout.ok { background: #f1f8f2; border-color: #c8e6c9; border-left-color: var(--success); }
+    .callout.ok .lbl { color: #1b5e20; }
+    .callout ul { margin: 0.3rem 0 0; padding-left: 1.2rem; }
+    .callout li { margin-bottom: 0.2rem; }
+    .intro-propuesta .callout { text-align: left; }
+
+    /* Flujo del build multi-stage */
+    .pipeline {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+      margin: 0.9rem 0 1rem;
+      padding: 0.85rem 0.95rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+    .pipeline .stage-lbl {
+      flex-basis: 100%;
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+    .pipeline .stage-lbl:first-child { margin-top: 0; }
+    .step-chip {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary-dark);
+      background: #f3f8fe;
+      border: 1px solid #bbdefb;
+      border-radius: 999px;
+      padding: 0.2rem 0.7rem;
+      white-space: nowrap;
+    }
+    .step-chip.base { background: #eceff1; border-color: #cfd8dc; color: #37474f; }
+    .step-chip.final { background: #e8f5e9; border-color: #a5d6a7; color: #1b5e20; }
+    .step-chip.check { background: #fff3e0; border-color: #ffcc80; color: #e65100; }
+    .pipeline .sep { color: var(--primary); font-weight: 700; }
+
+    /* Tablas genéricas */
+    .tabla td code { font-size: 0.8rem; }
+    .tabla td.lib { font-family: var(--font-mono); font-size: 0.82rem; white-space: nowrap; }
+    .lib-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.45rem;
+      margin: 0.6rem 0 0.8rem;
+    }
+    .lib-grid span {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      text-align: center;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.3rem 0.35rem;
+      color: var(--primary-dark);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .detalle ol.cta-list,
+    .slide-block ol.cta-list { padding-left: 1.4rem; }
+    .cta-list ul { margin: 0.25rem 0 0.2rem; padding-left: 1.1rem; }
+
+    .env-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.45rem;
+      margin-top: 0.4rem;
+    }
+    .env-grid div {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      background: #fff;
+      border: 1px solid #dbe4ee;
+      border-radius: 6px;
+      padding: 0.3rem 0.55rem;
+      color: #0a1f4d;
+      overflow-wrap: anywhere;
+    }
+
+    pre.code.full { max-height: 640px; }
+
+    @media (max-width: 820px) {
+      .lib-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .env-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-wrap">
+    <a class="back-link" href="../../index.html">← Regresar a la documentación del proyecto</a>
+
+    <header class="comercial-header">
+      <div class="title-wrap">
+        <h1>
+          <span class="header-line-1">Oracle Forms &amp; Reports 14.1.2</span>
+          <span class="header-line-2">Crear la imagen image_forms_14.1.2</span>
+          <span class="header-line-3">JDK 17 · FMW Infrastructure · Oracle Linux 9</span>
+        </h1>
+        <p class="header-tagline">Imagen Docker lista para WLS_FORMS, WLS_REPORTS y el Configuration Wizard</p>
+      </div>
+    </header>
+
+    <div class="intro intro-propuesta">
+      <h2>Visión general</h2>
+      <p>
+        Esta guía describe los pasos para construir la imagen Docker
+        <code>image_forms_14.1.2</code>, que incluye <strong>JDK 17</strong>,
+        <strong>Fusion Middleware Infrastructure 14.1.2</strong> y
+        <strong>Forms &amp; Reports 14.1.2</strong> sobre Oracle Linux 9. También incorpora,
+        desde el build, las dependencias de sistema y las librerías compartidas necesarias
+        para ejecutar <strong>WLS_FORMS</strong> y el motor de <strong>WLS_REPORTS</strong>.
+      </p>
+      <div class="callout warn">
+        <span class="lbl">Revisión r2 · motor de Reports</span>
+        La imagen <code>r1</code> no incluía las librerías Motif/X11 que necesita el motor de
+        Reports (<code>librw.so</code>, <code>librwu.so</code> → <code>libXm.so.4</code>). Con
+        <code>r1</code>, WLS_REPORTS arranca, pero al ejecutar un reporte falla con
+        <code>DFW-99998 UnsatisfiedLinkError: librwu.so: libXm.so.4</code> y la petición queda
+        colgada. El <a href="Dockerfile.wls"><code>Dockerfile.wls</code></a> actual ya instala esos
+        paquetes (punto <a href="#reports-libs">4.e</a>) y verifica <code>librw*.so</code> durante el
+        build. Para imágenes ya construidas existe <a href="#r2">Dockerfile.r2</a> (punto 7.a).
+      </div>
+      <div class="callout">
+        <span class="lbl">Archivo de referencia</span>
+        La construcción se realiza con el Dockerfile
+        <a href="Dockerfile.wls"><code>Dockerfile.wls</code></a> (copia local en esta carpeta).
+        El original se encuentra en <code>weblogic/wl_image/Dockerfile.wls</code>.
+      </div>
+      <p class="slogan">Dependencias resueltas en la imagen, no en cada contenedor.</p>
+    </div>
+
+    <nav class="toc" aria-label="Contenido">
+      <a href="#requisitos">1 · Requisitos</a>
+      <a href="#contexto">2 · Contexto de build</a>
+      <a href="#etapas">3 · Etapas</a>
+      <a href="#librerias">4 · Librerías</a>
+      <a href="#gui">5 · Configuration Wizard</a>
+      <a href="#construir">6 · Construir</a>
+      <a href="#etiquetar">7 · Etiquetar</a>
+      <a href="#verificar">8 · Verificar</a>
+      <a href="#usar">9 · Usar la imagen</a>
+      <a href="#dockerfile">10 · Dockerfile.wls</a>
+    </nav>
+
+    <div class="card">
+      <div class="card-body">
+
+        <!-- 1 Requisitos previos -->
+        <section class="slide-block" id="requisitos">
+          <h3><span class="num">1</span> Requisitos previos</h3>
+          <ul class="cta-list">
+            <li>Docker instalado (con soporte de <code>docker buildx</code>).</li>
+            <li>Espacio en disco suficiente (varios GB para instaladores y capas de imagen).</li>
+            <li>Acceso a los repositorios yum de Oracle Linux 9 durante el build (para <code>libaio</code>, <code>gcc</code>, etc.), incluido el repositorio <strong>EPEL</strong> de Oracle (<code>ol9_developer_EPEL</code>), del que proviene <code>x11vnc</code>.</li>
+            <li>Los siguientes instaladores en el directorio de build (<code>wl_image/</code>):</li>
+          </ul>
+          <div class="tabla">
+            <table>
+              <thead><tr><th>Archivo</th><th>Descripción</th></tr></thead>
+              <tbody>
+                <tr><td class="lib">jdk-17_linux-x64_bin.tar.gz</td><td>JDK 17 para Linux x64</td></tr>
+                <tr><td class="lib">fmw_14.1.2.0.0_infrastructure.jar</td><td>Fusion Middleware Infrastructure 14.1.2 (WebLogic + EM)</td></tr>
+                <tr><td class="lib">fmw_14.1.2.0.0_fr_linux64.bin</td><td>Oracle Forms and Reports 14.1.2</td></tr>
+                <tr><td class="lib"><a href="Dockerfile.wls">Dockerfile.wls</a></td><td>Definición multi-stage de la imagen</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 2 Contexto de build -->
+        <section class="slide-block" id="contexto">
+          <h3><span class="num">2</span> Preparar el contexto de build</h3>
+          <p>
+            El build debe ejecutarse desde el directorio donde están los instaladores y el
+            Dockerfile (típicamente <code>weblogic/wl_image/</code>):
+          </p>
+<pre class="code">cd /home/ibsoft/trabajo/tools/Descargas/weblogic/wl_image
+
+ls -lh jdk-17_linux-x64_bin.tar.gz \
+       fmw_14.1.2.0.0_infrastructure.jar \
+       fmw_14.1.2.0.0_fr_linux64.bin \
+       Dockerfile.wls</pre>
+          <div class="callout warn">
+            <span class="lbl">Importante</span>
+            Los nombres de los instaladores deben coincidir exactamente con las variables
+            <code>JAVA_INSTALLER</code>, <code>INFRA_INSTALLER</code> y <code>FR_INSTALLER</code>
+            definidas en <a href="Dockerfile.wls"><code>Dockerfile.wls</code></a>.
+          </div>
+        </section>
+
+        <!-- 3 Etapas del Dockerfile -->
+        <section class="slide-block" id="etapas">
+          <h3><span class="num">3</span> Etapas del Dockerfile</h3>
+          <p>
+            <a href="Dockerfile.wls"><code>Dockerfile.wls</code></a> usa un build
+            <strong>multi-stage</strong>: una etapa instala y compila todo el software, y la
+            imagen final parte de un Oracle Linux limpio y copia solo lo necesario.
+          </p>
+
+          <div class="pipeline" role="img" aria-label="Flujo del build multi-stage">
+            <span class="stage-lbl">Stage 1 · builder</span>
+            <span class="step-chip base">oraclelinux:9</span><span class="sep">→</span>
+            <span class="step-chip">Paquetes base</span><span class="sep">→</span>
+            <span class="step-chip">JDK 17</span><span class="sep">→</span>
+            <span class="step-chip">FMW Infrastructure</span><span class="sep">→</span>
+            <span class="step-chip">Forms &amp; Reports</span><span class="sep">→</span>
+            <span class="step-chip check">genshlib (.so)</span>
+            <span class="stage-lbl">Stage 2 · imagen final</span>
+            <span class="step-chip base">oraclelinux:9</span><span class="sep">→</span>
+            <span class="step-chip">Runtime + Motif/X11</span><span class="sep">→</span>
+            <span class="step-chip">GUI Wizard</span><span class="sep">→</span>
+            <span class="step-chip">COPY desde builder</span><span class="sep">→</span>
+            <span class="step-chip check">ldd librw*.so</span><span class="sep">→</span>
+            <span class="step-chip final">image_forms_14.1.2</span>
+          </div>
+
+          <div class="detalles">
+            <div class="detalle d-1">
+              <h4><span class="d-num">a</span> Stage 1 · Builder <span class="d-tag"><code>oraclelinux:9 as builder</code></span></h4>
+              <ol class="cta-list">
+                <li>Instala paquetes del sistema: <code>unzip</code>, <code>tar</code>, <code>wget</code>, <code>openssl</code>, <code>glibc</code>, <code>libaio</code>, <code>libnsl</code>, <code>gcc</code>, <code>make</code>, <code>binutils</code>, <code>nano</code> y <code>net-tools</code>.</li>
+                <li>Crea el usuario/grupo <code>oracle</code> (uid/gid 1000) y los directorios <code>/u01/jdk</code>, <code>/u01/oracle</code> y <code>/u01/app/oraInventory</code>.</li>
+                <li>Copia los tres instaladores a <code>/tmp/</code>.</li>
+                <li>Genera archivos de respuesta silenciosos: <code>infra.rsp</code> (Infrastructure), <code>fr.rsp</code> (Forms and Reports) y <code>oraInst.loc</code> (inventario Oracle).</li>
+                <li>Como usuario <code>oracle</code>:
+                  <ul>
+                    <li>Instala el JDK 17 en <code>/u01/jdk</code>.</li>
+                    <li>Instala Fusion Middleware Infrastructure (modo silent).</li>
+                    <li>Instala Forms and Reports Deployment (modo silent).</li>
+                    <li>Genera las librerías compartidas de Forms (<code>.so</code>) con <code>genshlib</code> (ver punto 4).</li>
+                  </ul>
+                </li>
+              </ol>
+            </div>
+
+            <div class="detalle d-3">
+              <h4><span class="d-num">b</span> Stage 2 · Imagen final <span class="d-tag"><code>oraclelinux:9</code></span></h4>
+              <ol class="cta-list">
+                <li>Instala paquetes de runtime: <code>libaio</code>, <code>libnsl</code> (Forms), <code>gcc</code>, <code>make</code>, <code>binutils</code> (toolchain para regenerar librerías compartidas), <code>nano</code> y <code>net-tools</code> (utilitarios de administración), <code>motif</code>, <code>libX11</code>, <code>libXext</code>, <code>libXt</code> y <code>libXp</code> (motor de Reports, ver punto 4.e).</li>
+                <li>Instala las librerías gráficas del Configuration Wizard: <code>Xvfb</code>, <code>x11vnc</code> (desde EPEL), <code>xauth</code>, <code>xhost</code>, <code>dbus-x11</code>, librerías X11/fuentes para Java y, si están disponibles, <code>twm</code> y utilidades X11 (ver punto 5).</li>
+                <li>Define <code>PATH</code> y <code>LD_LIBRARY_PATH</code> apuntando a <code>$ORACLE_HOME</code>.</li>
+                <li>Copia desde el builder: <code>JAVA_HOME</code>, <code>ORACLE_HOME</code> (incluye los <code>.so</code> generados) y el inventario Oracle.</li>
+                <li>Verifica con <code>ldd</code> que <code>$ORACLE_HOME/lib/librw*.so</code> no tenga dependencias <em>not found</em>; si falta alguna, el build falla.</li>
+                <li>Recrea el usuario <code>oracle</code> y ajusta permisos sobre <code>/u01</code>.</li>
+                <li>Define <code>WORKDIR</code> en <code>/u01/oracle</code> y deja la imagen lista para crear el dominio y arrancar servidores (fuera del build).</li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="callout">
+            <span class="lbl">Variables de entorno en la imagen final</span>
+            <div class="env-grid">
+              <div>JAVA_HOME=/u01/jdk</div>
+              <div>ORACLE_HOME=/u01/oracle</div>
+              <div>DOMAIN_HOME=/u01/oracle/user_projects/domains/base_domain</div>
+              <div>LD_LIBRARY_PATH=/u01/oracle/lib</div>
+              <div>PATH incluye /u01/oracle/bin y /u01/jdk/bin</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4 Librerías -->
+        <section class="slide-block" id="librerias">
+          <h3><span class="num">4</span> Librerías requeridas por WLS_FORMS y Reports</h3>
+          <p>
+            Tras una instalación silenciosa de Forms, <code>$ORACLE_HOME/lib</code> suele contener
+            solo archivos estáticos (<code>.a</code>). El proceso de Forms (<code>frmweb</code>),
+            usado por <strong>WLS_FORMS</strong>, necesita las equivalentes dinámicas
+            (<code>.so</code> / <code>.so.0</code>). Si faltan, el managed server no puede crear el
+            proceso runtime de Forms.
+          </p>
+          <div class="callout warn">
+            <span class="lbl">Estas dependencias deben quedar resueltas en la imagen</span>
+            No en cada contenedor después del despliegue. El
+            <a href="Dockerfile.wls"><code>Dockerfile.wls</code></a> las incorpora en el Stage 1
+            (toolchain + <code>genshlib</code>) y en el Stage 2 (<code>libaio</code>,
+            <code>libnsl</code>, <code>gcc</code>, <code>make</code>, <code>nano</code>,
+            <code>net-tools</code>).
+          </div>
+
+          <div class="detalles">
+            <div class="detalle d-1">
+              <h4><span class="d-num">a</span> Paquete de sistema <span class="d-tag"><code>libaio</code></span></h4>
+              <p>
+                <code>libaio</code> es una dependencia nativa de las librerías Oracle. Sin ella,
+                herramientas como <code>sqlplus</code> y componentes de Forms fallan al cargar.
+                Se instala:
+              </p>
+              <ul class="cta-list">
+                <li>En el <strong>builder</strong>, junto con el resto de paquetes base.</li>
+                <li>En la <strong>imagen final</strong>, porque el Stage 2 parte de <code>oraclelinux:9</code> limpio (no hereda los paquetes del builder).</li>
+              </ul>
+            </div>
+
+            <div class="detalle d-2">
+              <h4><span class="d-num">b</span> Toolchain de compilación <span class="d-tag"><code>gcc</code> · <code>make</code> · <code>binutils</code></span></h4>
+              <p>
+                <code>genshlib</code> (incluido en <code>$ORACLE_HOME/bin</code>) enlaza cada
+                <code>.a</code> para producir el <code>.so.0</code> correspondiente. Para ello
+                requiere compilador y linker.
+              </p>
+              <ul class="cta-list">
+                <li>Se instalan en el <strong>Stage 1 (builder)</strong> para generar las librerías <code>.so</code> durante el build.</li>
+                <li>También se dejan en la <strong>imagen final</strong>, de modo que se puedan regenerar o ampliar librerías compartidas de Forms sin reconstruir toda la imagen.</li>
+              </ul>
+            </div>
+
+            <div class="detalle d-3">
+              <h4><span class="d-num">c</span> Librerías compartidas con <code>genshlib</code> <span class="d-tag">16 librerías en <code>$ORACLE_HOME/lib</code></span></h4>
+              <p>
+                Cada librería se genera como <code>.so.0</code>; <code>libiplsn</code> además
+                recibe un symlink <code>.so</code>.
+              </p>
+              <div class="lib-grid">
+                <span>libiplsn</span><span>libibfrmw</span><span>libiffw</span><span>libifcw</span>
+                <span>libijcw</span><span>libipfw</span><span>libimffrmw</span><span>libiwfw</span>
+                <span>libiwcw</span><span>libitw</span><span>libicw</span><span>libsosdw</span>
+                <span>libixw</span><span>libiicw</span><span>libiiiw</span><span>libiqw</span>
+              </div>
+              <p>Procedimiento equivalente (ya automatizado en el Dockerfile):</p>
+<pre class="code">export ORACLE_HOME=/u01/oracle
+export PATH=$ORACLE_HOME/bin:$PATH
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib:$LD_LIBRARY_PATH
+cd $ORACLE_HOME/lib
+
+for lib in \
+  libiplsn libibfrmw libiffw libifcw libijcw libipfw libimffrmw \
+  libiwfw libiwcw libitw libicw libsosdw libixw libiicw libiiiw libiqw
+do
+  echo "=== Generando ${lib}.so.0 ==="
+  if [ ! -f "${lib}.a" ]; then
+    echo "ERROR: falta ${lib}.a"
+    exit 1
+  fi
+  rm -f "${lib}.so" "${lib}.so.0"
+  $ORACLE_HOME/bin/genshlib "${ORACLE_HOME}/lib/${lib}.so.0"
+done
+
+<span class="c"># Verificación</span>
+ldd $ORACLE_HOME/bin/frmweb | grep "not found" || echo "OK: sin dependencias faltantes"</pre>
+              <div class="callout ok">
+                <span class="lbl">Resultado esperado</span>
+                Cada librería aparece como <code>.so.0</code> con un symlink <code>.so</code>, y
+                <code>ldd $ORACLE_HOME/bin/frmweb</code> no reporta dependencias <em>not found</em>.
+              </div>
+              <div class="callout">
+                <span class="lbl">Nota</span>
+                Durante el enlace de <code>libsosdw</code> puede aparecer un warning de
+                <code>ld</code> sobre el uso de <code>tempnam</code>. Es esperado y no impide la
+                generación de la librería.
+              </div>
+            </div>
+
+            <div class="detalle d-4">
+              <h4><span class="d-num">d</span> Utilitarios de administración <span class="d-tag"><code>nano</code> · <code>net-tools</code></span></h4>
+              <p>Además de las dependencias de Forms, la imagen incluye utilitarios prácticos para administrar el contenedor:</p>
+              <div class="tabla">
+                <table>
+                  <thead><tr><th>Paquete</th><th>Uso</th></tr></thead>
+                  <tbody>
+                    <tr><td class="lib">nano</td><td>Editor de texto ligero para ajustar archivos de configuración dentro del contenedor (<code>default.env</code>, scripts, etc.).</td></tr>
+                    <tr><td class="lib">net-tools</td><td>Herramientas de red clásicas (<code>ifconfig</code>, <code>netstat</code>, <code>route</code>) útiles para diagnosticar conectividad entre contenedores y puertos de WebLogic / Forms.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p style="margin-top: 0.75rem;">
+                Se instalan tanto en el builder como en la imagen final, para no tener que ejecutar
+                <code>yum install</code> después de crear el contenedor.
+              </p>
+            </div>
+
+            <div class="detalle d-5" id="reports-libs">
+              <h4><span class="d-num">e</span> Librerías Motif/X11 del motor de Reports <span class="d-tag"><code>librw.so</code> · <code>librwu.so</code></span></h4>
+              <p>
+                El motor de Reports (<code>rwEng</code>), que WLS_REPORTS lanza con
+                <code>$DOMAIN_HOME/reports/bin/rwengine.sh</code>, carga las librerías nativas
+                <code>$ORACLE_HOME/lib/librw.so</code> y <code>librwu.so</code>. Estas dependen de
+                Motif y X11, aunque el motor no muestre ninguna interfaz gráfica. Oracle Linux 9
+                mínimo no las trae.
+              </p>
+              <div class="tabla">
+                <table>
+                  <thead><tr><th>Paquete</th><th>Librería que aporta</th></tr></thead>
+                  <tbody>
+                    <tr><td class="lib">motif</td><td class="lib">libXm.so.4</td></tr>
+                    <tr><td class="lib">libX11</td><td class="lib">libX11.so.6</td></tr>
+                    <tr><td class="lib">libXext</td><td class="lib">libXext.so.6</td></tr>
+                    <tr><td class="lib">libXt</td><td class="lib">libXt.so.6</td></tr>
+                    <tr><td class="lib">libXp</td><td class="lib">libXp.so.6</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p style="margin-top: 0.75rem;">Síntoma cuando faltan (log de WLS_REPORTS / incidente ADR):</p>
+<pre class="code">DFW-99998 ... java.lang.UnsatisfiedLinkError: /u01/oracle/lib/librwu.so: libXm.so.4: cannot open shared object file</pre>
+              <p>
+                Instrucción en el Stage 2 de <a href="Dockerfile.wls"><code>Dockerfile.wls</code></a>
+                (junto con los paquetes de runtime) y verificación posterior al <code>COPY</code>:
+              </p>
+<pre class="code">RUN dnf install -y libaio libnsl gcc make binutils nano net-tools \
+                   motif libX11 libXext libXt libXp &amp;&amp; \
+    dnf clean all
+...
+RUN missing=$(for f in ${ORACLE_HOME}/lib/librw*.so; do ldd "$f" | grep 'not found'; done | sort -u) &amp;&amp; \
+    if [ -n "$missing" ]; then echo "Missing libraries for Reports:"; echo "$missing"; exit 1; fi &amp;&amp; \
+    echo "OK: librw*.so has no missing shared library dependencies"</pre>
+              <div class="callout">
+                <span class="lbl">Nota</span>
+                Las fuentes que el motor usa para PDF se buscan en
+                <code>$DOMAIN_HOME/reports/fonts</code> (<code>REPORTS_FONT_DIRECTORY</code>), que
+                forma parte del dominio y no de la imagen. Ver la guía de creación del dominio,
+                paso "Completar Reports".
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5 Configuration Wizard -->
+        <section class="slide-block" id="gui">
+          <h3><span class="num">5</span> Librerías gráficas para el Configuration Wizard</h3>
+          <p>
+            El dominio se crea con el <strong>Configuration Wizard</strong>, que solo se ejecuta en
+            modo gráfico. Dentro de un contenedor no hay pantalla, así que se usa un display
+            virtual (<code>Xvfb</code>) y se expone por VNC (<code>x11vnc</code>) para verlo desde el
+            host. Antes, estos paquetes se instalaban en cada contenedor con
+            <code>install-gui-packages.sh</code> (Paso 0.6 de
+            <a href="../crear-dominio/index.html">crear-dominio</a>) y se perdían al
+            recrearlo. Ahora quedan incluidos en la imagen.
+          </p>
+          <div class="tabla">
+            <table>
+              <thead><tr><th>Paquete</th><th>Función</th><th>Obligatorio</th></tr></thead>
+              <tbody>
+                <tr><td><code>xorg-x11-server-Xvfb</code></td><td>Servidor X virtual en memoria (display <code>:99</code>) donde se dibuja el Wizard.</td><td><span class="badge badge-ok">Sí</span></td></tr>
+                <tr><td><code>x11vnc</code></td><td>Servidor VNC que publica el display virtual en el puerto <code>5900</code> (mapeado a <code>5902</code> en el host). Proviene de EPEL.</td><td><span class="badge badge-ok">Sí</span></td></tr>
+                <tr><td><code>xorg-x11-xauth</code>, <code>xhost</code></td><td>Autenticación y control de acceso X11, necesarios para que Java AWT se conecte al display.</td><td><span class="badge badge-ok">Sí</span></td></tr>
+                <tr><td><code>dbus-x11</code></td><td>Bus de sesión que requieren algunas aplicaciones gráficas Java.</td><td><span class="badge badge-ok">Sí</span></td></tr>
+                <tr><td><code>libXext</code>, <code>libXrender</code>, <code>libXtst</code>, <code>libXi</code>, <code>fontconfig</code>, <code>dejavu-sans-fonts</code></td><td>Librerías X11 y fuentes que usa la interfaz Swing del Wizard; sin ellas la ventana puede no abrir o mostrarse sin texto.</td><td><span class="badge badge-ok">Sí</span></td></tr>
+                <tr><td><code>xorg-x11-twm</code>, <code>xorg-x11-xinit</code></td><td>Gestor de ventanas básico y utilidades de arranque de X. Mejoran el manejo de diálogos del Wizard.</td><td><span class="badge badge-manual">Opcional</span></td></tr>
+                <tr><td><code>xorg-x11-utils</code>, <code>xorg-x11-server-utils</code></td><td>Utilidades X11 de diagnóstico.</td><td><span class="badge badge-manual">Opcional</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="margin-top: 0.9rem;">
+            Los opcionales se instalan solo si están disponibles. Instrucción equivalente en el
+            Stage 2 de <a href="Dockerfile.wls"><code>Dockerfile.wls</code></a>:
+          </p>
+<pre class="code">RUN dnf install -y oracle-epel-release-el9 &amp;&amp; \
+    dnf config-manager --enable ol9_developer_EPEL &amp;&amp; \
+    dnf install -y xorg-x11-server-Xvfb x11vnc xorg-x11-xauth xhost dbus-x11 \
+                   libXext libXrender libXtst libXi fontconfig dejavu-sans-fonts &amp;&amp; \
+    dnf install -y --setopt=strict=0 xorg-x11-twm xorg-x11-xinit xorg-x11-utils xorg-x11-server-utils &amp;&amp; \
+    command -v Xvfb &amp;&amp; command -v x11vnc &amp;&amp; \
+    dnf clean all</pre>
+          <div class="callout">
+            <span class="lbl">Comportamiento del build</span>
+            Los paquetes obligatorios se instalan en modo estricto (si alguno falta, el build
+            falla). Los opcionales usan <code>--setopt=strict=0</code>, que omite los que no
+            existan en los repositorios de Oracle Linux 9 sin detener el build. Al final se
+            verifica que <code>Xvfb</code> y <code>x11vnc</code> estén disponibles.
+          </div>
+          <div class="callout warn">
+            <span class="lbl">Qué no incluye la imagen</span>
+            Solo se instalan los paquetes. El entorno gráfico (Xvfb, twm, x11vnc) se
+            <em>inicia</em> cuando se necesita, con <code>setup-gui.sh</code> (Paso 0.7 de la guía de
+            creación del dominio). Con la imagen nueva, el Paso 0.6
+            (<code>install-gui-packages.sh</code>) queda como verificación: el script detecta que
+            los paquetes ya existen y no reinstala nada.
+          </div>
+        </section>
+
+        <!-- 6 Construir -->
+        <section class="slide-block" id="construir">
+          <h3><span class="num">6</span> Construir la imagen</h3>
+          <p>Desde el directorio <code>wl_image/</code>, ejecutar:</p>
+<pre class="code">sudo docker buildx build -f Dockerfile.wls -t forms_ol9:14.1.2 .</pre>
+          <p>Equivalente con el tag final directamente:</p>
+<pre class="code">sudo docker buildx build -f Dockerfile.wls -t image_forms_14.1.2 .</pre>
+          <div class="callout">
+            <span class="lbl">Tag intermedio</span>
+            El comando documentado en <code>ComandosDockers.txt</code> usa el tag intermedio
+            <code>forms_ol9:14.1.2</code>. En el siguiente paso se etiqueta (o se retaguea) como
+            <code>image_forms_14.1.2</code>, que es el nombre usado por los contenedores y
+            <code>docker-compose</code>.
+          </div>
+        </section>
+
+        <!-- 7 Etiquetar -->
+        <section class="slide-block" id="etiquetar">
+          <h3><span class="num">7</span> Etiquetar como <code>image_forms_14.1.2</code></h3>
+          <p>Si el build se hizo con el tag <code>forms_ol9:14.1.2</code>:</p>
+<pre class="code">sudo docker tag forms_ol9:14.1.2 image_forms_14.1.2
+<span class="c"># Opcional, con tag de versión/revisión:</span>
+sudo docker tag forms_ol9:14.1.2 image_forms_14.1.2:r2</pre>
+          <div class="callout">
+            <span class="lbl">Revisión</span>
+            Una imagen construida con el <code>Dockerfile.wls</code> actual ya equivale a
+            <code>r2</code> (incluye las librerías del motor de Reports). Para AWS se sube a ECR con
+            ese tag; ver la guía de ECR/ECS.
+          </div>
+
+          <div class="detalles">
+            <div class="detalle d-2" id="r2">
+              <h4><span class="d-num">a</span> Actualizar una imagen existente <span class="d-tag"><a href="Dockerfile.r2"><code>Dockerfile.r2</code></a></span></h4>
+              <p>
+                Si ya existe <code>image_forms_14.1.2:r1</code> (construida antes de este cambio), no
+                hace falta reconstruir todo: <a href="Dockerfile.r2"><code>Dockerfile.r2</code></a>
+                parte de ella y agrega solo los paquetes del punto 4.e, con la misma verificación
+                de <code>librw*.so</code>.
+              </p>
+<pre class="code">docker build -f Dockerfile.r2 \
+  --build-arg BASE_IMAGE=image_forms_14.1.2:r1 \
+  --build-arg RUN_USER=$(docker inspect -f '{{.Config.User}}' image_forms_14.1.2:r1) \
+  -t image_forms_14.1.2:r2 .</pre>
+              <div class="callout warn">
+                <span class="lbl">Atención</span>
+                El punto final (<code>.</code>) es el contexto de build y es obligatorio; sin él,
+                Docker responde <code>"docker build" requires exactly 1 argument</code>.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8 Verificar -->
+        <section class="slide-block" id="verificar">
+          <h3><span class="num">8</span> Verificar la imagen</h3>
+          <p>
+            Comprobación de variables de entorno, paquetes del sistema, librerías gráficas,
+            librerías de Forms y dependencias nativas de Reports en un contenedor efímero:
+          </p>
+<pre class="code">sudo docker images | grep -E 'image_forms_14.1.2|forms_ol9'
+
+sudo docker run --rm --user=oracle --entrypoint /bin/bash image_forms_14.1.2 -c '
+  echo "JAVA_HOME=$JAVA_HOME"
+  echo "ORACLE_HOME=$ORACLE_HOME"
+  echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+  $JAVA_HOME/bin/java -version
+  <span class="c"># Paquetes de sistema</span>
+  ldconfig -p 2&gt;/dev/null | grep libaio || ls /usr/lib64/libaio.so* 2&gt;/dev/null
+  gcc --version | head -1
+  make --version | head -1
+  nano --version | head -1
+  ifconfig --version 2&gt;&amp;1 | head -1 || which ifconfig netstat
+  <span class="c"># Librerías gráficas del Configuration Wizard</span>
+  for cmd in Xvfb x11vnc xauth xhost; do
+    command -v $cmd || echo "FALTA: $cmd"
+  done
+  command -v twm || echo "twm no instalado (opcional)"
+  <span class="c"># Librerías Forms generadas</span>
+  for lib in libiplsn libibfrmw libiffw libifcw libijcw libipfw libimffrmw \
+             libiwfw libiwcw libitw libicw libsosdw libixw libiicw libiiiw libiqw; do
+    ls $ORACLE_HOME/lib/${lib}.so* 2&gt;/dev/null || echo "FALTA: $lib"
+  done
+  ldd $ORACLE_HOME/bin/frmweb | grep "not found" || echo "OK: frmweb sin dependencias faltantes"
+  <span class="c"># Librerías nativas del motor de Reports (Motif/X11)</span>
+  for f in $ORACLE_HOME/lib/librw*.so; do ldd "$f" | grep "not found"; done | sort -u | grep . \
+    || echo "OK: librw*.so sin dependencias faltantes"
+'</pre>
+          <div class="callout ok">
+            <span class="lbl">Imagen lista</span>
+            Si aparecen las 16 librerías <code>.so</code>; están disponibles <code>libaio</code>,
+            <code>gcc</code>, <code>make</code>, <code>nano</code> y <code>net-tools</code>; están
+            <code>Xvfb</code>, <code>x11vnc</code>, <code>xauth</code> y <code>xhost</code>; y ni
+            <code>frmweb</code> ni <code>librw*.so</code> reportan dependencias faltantes, la imagen
+            queda lista para crear el dominio y ejecutar WLS_FORMS y WLS_REPORTS.
+          </div>
+        </section>
+
+        <!-- 9 Usar la imagen -->
+        <section class="slide-block" id="usar">
+          <h3><span class="num">9</span> Usar la imagen (contenedor monolítico de referencia)</h3>
+          <p>Comando de referencia para crear el contenedor monolítico a partir de la imagen:</p>
+<pre class="code">sudo docker run -it -d \
+  --name forms-server-14.1.2 \
+  --user=oracle \
+  --entrypoint /bin/bash \
+  -p 5901:5900 -p 7701:7001 -p 7702:7002 -p 9902:9002 \
+  -v /home/ibsoft/trabajo/tools/Descargas/weblogic/wl_image/mk_domain:/u01/oracle/properties/ \
+  image_forms_14.1.2</pre>
+          <p>
+            La creación del dominio, RCU y arranque de servidores se documentan en
+            <a href="../crear-dominio/index.html">crear-dominio/index.html</a>.
+          </p>
+        </section>
+
+        <!-- 10 Dockerfile completo -->
+        <section class="slide-block" id="dockerfile">
+          <h3><span class="num">10</span> Contenido completo de <a href="Dockerfile.wls">Dockerfile.wls</a></h3>
+          <div class="callout">
+            <span class="lbl">Archivo</span>
+            <a href="Dockerfile.wls"><code>./Dockerfile.wls</code></a> (copia en esta carpeta).
+            Fuente original: <code>weblogic/wl_image/Dockerfile.wls</code>.
+          </div>
+          <div class="cmds">
+            <details class="cmd">
+              <summary><span class="dot"></span> Dockerfile.wls <span class="sub">Stage 1 builder + Stage 2 imagen final</span></summary>
+              <div class="body">
+<pre class="code full"># ====================================================================
+# STAGE 1: BUILDER - Handles installation of WLS, Forms, and JDK
+# ====================================================================
+FROM oraclelinux:9 as builder
+
+# --- Environment Variables ---
+ENV JAVA_HOME=/u01/jdk \
+    ORACLE_HOME=/u01/oracle \
+    DOMAIN_HOME=/u01/oracle/user_projects/domains/base_domain \
+    INFRA_INSTALLER=fmw_14.1.2.0.0_infrastructure.jar \
+    FR_INSTALLER=fmw_14.1.2.0.0_fr_linux64.bin \
+    JAVA_INSTALLER=jdk-17_linux-x64_bin.tar.gz
+
+# --- Setup Prerequisites (Root Operations) ---
+USER root
+
+# Install required system packages and dependencies
+# - libaio / libnsl: runtime deps for Forms / Oracle client tools
+# - gcc / make / binutils: required to generate Forms shared libraries (.so) with genshlib
+# - nano / net-tools: operational utilities used during image and container administration
+RUN dnf install -y unzip tar wget openssl glibc libaio libnsl gcc make binutils nano net-tools &amp;&amp; \
+    dnf clean all
+
+# Create the user/group, installation directories, and Inventory directory
+RUN groupadd -g 1000 oracle &amp;&amp; useradd -u 1000 -g oracle -d /u01/oracle -s /bin/bash oracle &amp;&amp; \
+    mkdir -p ${JAVA_HOME} &amp;&amp; \
+    mkdir -p ${ORACLE_HOME} &amp;&amp; \
+    mkdir -p /u01/app/oraInventory &amp;&amp; \
+    chown -R oracle:oracle /u01 &amp;&amp; \
+    chown -R oracle:oracle /u01/app/oraInventory
+
+# --- Copy Installers and Create Response Files ---
+COPY ./${JAVA_INSTALLER} /tmp/
+COPY ./${INFRA_INSTALLER} /tmp/
+COPY ./${FR_INSTALLER} /tmp/
+
+# Create silent response file for Infrastructure (infra.rsp)
+RUN echo &quot;[ENGINE]&quot; &gt; /tmp/infra.rsp &amp;&amp; \
+    echo &quot;Response File Version=1.0.0.0.0&quot; &gt;&gt; /tmp/infra.rsp &amp;&amp; \
+    echo &quot;[GENERIC]&quot; &gt;&gt; /tmp/infra.rsp &amp;&amp; \
+    echo &quot;ORACLE_HOME=${ORACLE_HOME}&quot; &gt;&gt; /tmp/infra.rsp &amp;&amp; \
+    echo &quot;INSTALL_TYPE=Fusion Middleware Infrastructure&quot; &gt;&gt; /tmp/infra.rsp &amp;&amp; \
+    echo &quot;DECLINE_SECURITY_UPDATES=true&quot; &gt;&gt; /tmp/infra.rsp &amp;&amp; \
+    echo &quot;SECURITY_UPDATES_VIA_MYORACLESUPPORT=false&quot; &gt;&gt; /tmp/infra.rsp &amp;&amp; \
+    echo &quot;UNIX_GROUP_NAME=oracle&quot; &gt;&gt; /tmp/infra.rsp
+
+# Create silent response file for Forms and Reports (fr.rsp)
+# Using the confirmed install type and required Oracle Inventory location file (/tmp/oraInst.loc)
+RUN echo &quot;[ENGINE]&quot; &gt; /tmp/fr.rsp &amp;&amp; \
+    echo &quot;Response File Version=1.0.0.0.0&quot; &gt;&gt; /tmp/fr.rsp &amp;&amp; \
+    echo &quot;[GENERIC]&quot; &gt;&gt; /tmp/fr.rsp &amp;&amp; \
+    echo &quot;ORACLE_HOME=${ORACLE_HOME}&quot; &gt;&gt; /tmp/fr.rsp &amp;&amp; \
+    echo &quot;INSTALL_TYPE=Forms and Reports Deployment&quot; &gt;&gt; /tmp/fr.rsp &amp;&amp; \
+    echo &quot;DECLINE_SECURITY_UPDATES=true&quot; &gt;&gt; /tmp/fr.rsp &amp;&amp; \
+    echo &quot;SECURITY_UPDATES_VIA_MYORACLESUPPORT=false&quot; &gt;&gt; /tmp/fr.rsp &amp;&amp; \
+    echo &quot;UNIX_GROUP_NAME=oracle&quot; &gt;&gt; /tmp/fr.rsp &amp;&amp; \
+    echo &quot;inventory_loc=/u01/app/oraInventory&quot; &gt; /tmp/oraInst.loc &amp;&amp; \
+    echo &quot;inst_group=oracle&quot; &gt;&gt; /tmp/oraInst.loc
+
+# Ensure installer files are owned by oracle:
+RUN chown -R oracle:oracle /tmp/*.tar.gz &amp;&amp; \
+    chown -R oracle:oracle /tmp/*.jar &amp;&amp; \
+    chown -R oracle:oracle /tmp/*.bin &amp;&amp; \
+    chown -R oracle:oracle /tmp/*.rsp &amp;&amp; \
+    chown -R oracle:oracle /tmp/oraInst.loc
+    
+
+# --- Installation Steps (Run as &#x27;oracle&#x27; user) ---
+USER oracle
+
+# 1. Install JDK
+RUN tar -xzf /tmp/${JAVA_INSTALLER} -C ${JAVA_HOME} --strip-components=1
+
+# Ensure ORACLE_HOME is clean before the installer runs
+RUN mkdir -p ${ORACLE_HOME} &amp;&amp; \
+    rm -rf ${ORACLE_HOME}/* &amp;&amp; \
+    rm -rf ${ORACLE_HOME}/.[!.]*
+
+
+
+# 2. Install Fusion Middleware Infrastructure (WLS + EM)
+RUN export PATH=$JAVA_HOME/bin:$PATH &amp;&amp; \
+    java -jar /tmp/${INFRA_INSTALLER} -silent -responseFile /tmp/infra.rsp -ignoreSysPrereqs -invPtrLoc /tmp/oraInst.loc
+
+# 3. Install Forms and Reports (Dependencies are now met)
+# Note: Infrastructure is installed, satisfying the WLS/EM prerequisite.
+RUN chmod +x /tmp/${FR_INSTALLER} &amp;&amp; \
+    /tmp/${FR_INSTALLER} -silent -responseFile /tmp/fr.rsp -ignoreSysPrereqs -invPtrLoc /tmp/oraInst.loc
+
+# 4. Generate Forms shared libraries (.so) required by WLS_FORMS / frmweb
+# The silent install leaves only static archives (.a) under $ORACLE_HOME/lib.
+# genshlib builds the corresponding shared objects used at runtime.
+ENV PATH=${ORACLE_HOME}/bin:${PATH} \
+    LD_LIBRARY_PATH=${ORACLE_HOME}/lib
+
+RUN cd ${ORACLE_HOME}/lib &amp;&amp; \
+    for lib in \
+      libiplsn libibfrmw libiffw libifcw libijcw libipfw libimffrmw \
+      libiwfw libiwcw libitw libicw libsosdw libixw libiicw libiiiw libiqw \
+    ; do \
+      echo &quot;=== Generating ${lib}.so.0 ===&quot;; \
+      if [ ! -f &quot;${lib}.a&quot; ]; then \
+        echo &quot;ERROR: missing ${lib}.a&quot;; \
+        exit 1; \
+      fi; \
+      rm -f &quot;${lib}.so&quot; &quot;${lib}.so.0&quot;; \
+      ${ORACLE_HOME}/bin/genshlib &quot;${ORACLE_HOME}/lib/${lib}.so.0&quot;; \
+    done &amp;&amp; \
+    for lib in \
+      libiplsn libibfrmw libiffw libifcw libijcw libipfw libimffrmw \
+      libiwfw libiwcw libitw libicw libsosdw libixw libiicw libiiiw libiqw \
+    ; do \
+      test -e &quot;${ORACLE_HOME}/lib/${lib}.so.0&quot; || (echo &quot;MISSING after genshlib: $lib&quot; &amp;&amp; exit 1); \
+    done &amp;&amp; \
+    ldd ${ORACLE_HOME}/bin/frmweb | grep &quot;not found&quot; &amp;&amp; exit 1 || echo &quot;OK: frmweb has no missing shared library dependencies&quot;
+
+
+# ====================================================================
+# STAGE 2: FINAL - Creates a clean, runtime-ready image
+# ====================================================================
+FROM oraclelinux:9
+
+# Set runtime environment variables
+ENV JAVA_HOME=/u01/jdk \
+    ORACLE_HOME=/u01/oracle \
+    DOMAIN_HOME=/u01/oracle/user_projects/domains/base_domain \
+    PATH=/u01/oracle/bin:/u01/jdk/bin:${PATH} \
+    LD_LIBRARY_PATH=/u01/oracle/lib
+
+# Runtime OS packages:
+# - libaio / libnsl: required by Oracle Forms native libraries
+# - gcc / make / binutils: keep toolchain available for genshlib / Forms shared libs
+# - nano / net-tools: operational utilities (editor, ifconfig/netstat)
+# - motif / libX11 / libXext / libXt / libXp: required by Reports engine (librw.so, librwu.so -&gt; libXm.so.4)
+USER root
+RUN dnf install -y libaio libnsl gcc make binutils nano net-tools \
+                   motif libX11 libXext libXt libXp &amp;&amp; \
+    dnf clean all
+
+# GUI packages for the Configuration Wizard (Xvfb display + VNC access)
+# - Xvfb: virtual X display (:99); x11vnc (EPEL): exposes the display on port 5900
+# - xauth / xhost / dbus-x11: X11 authentication and session bus for Java AWT/Swing
+# - libX* / fontconfig / dejavu fonts: required by the Java GUI of the wizard
+# - twm / xinit / X11 utils: optional window manager and utilities (installed if available)
+RUN dnf install -y oracle-epel-release-el9 &amp;&amp; \
+    dnf config-manager --enable ol9_developer_EPEL &amp;&amp; \
+    dnf install -y xorg-x11-server-Xvfb x11vnc xorg-x11-xauth xhost dbus-x11 \
+                   libXext libXrender libXtst libXi fontconfig dejavu-sans-fonts &amp;&amp; \
+    dnf install -y --setopt=strict=0 xorg-x11-twm xorg-x11-xinit xorg-x11-utils xorg-x11-server-utils &amp;&amp; \
+    command -v Xvfb &amp;&amp; command -v x11vnc &amp;&amp; \
+    dnf clean all
+
+
+# Copy the installed software from the builder stage
+COPY --from=builder ${JAVA_HOME} ${JAVA_HOME}
+COPY --from=builder ${ORACLE_HOME} ${ORACLE_HOME}
+COPY --from=builder /u01/app/oraInventory /u01/app/oraInventory
+
+# Reports engine native libraries must resolve (fails the build if motif/X11 packages are missing)
+RUN missing=$(for f in ${ORACLE_HOME}/lib/librw*.so; do ldd &quot;$f&quot; | grep &#x27;not found&#x27;; done | sort -u) &amp;&amp; \
+    if [ -n &quot;$missing&quot; ]; then echo &quot;Missing libraries for Reports:&quot;; echo &quot;$missing&quot;; exit 1; fi &amp;&amp; \
+    echo &quot;OK: librw*.so has no missing shared library dependencies&quot;
+
+# Final setup of the &#x27;oracle&#x27; user for runtime
+RUN groupadd -g 1000 oracle &amp;&amp; useradd -u 1000 -g oracle -d /u01/oracle -s /bin/bash oracle &amp;&amp; \
+    chown -R oracle:oracle /u01
+
+# Copy domain creation and startup scripts
+#COPY ./create_domain.py /u01/oracle/create_domain.py
+#COPY ./start_server.sh /u01/oracle/start_server.sh
+
+# Give execution permissions to the startup script
+#RUN chmod +x /u01/oracle/start_server.sh &amp;&amp; \
+#    chmod +x /u01/oracle/create_domain.py
+
+# Ensure all application files are owned by the oracle user
+RUN chown -R oracle:oracle /u01
+
+# Final configuration and entrypoint (Needs domain creation script)
+# You must now add your custom script to create the domain and start the server.
+USER oracle
+WORKDIR ${ORACLE_HOME}
+# CMD [&quot;/u01/oracle/startDomain.sh&quot;]</pre>
+              </div>
+            </details>
+          </div>
+
+          <div class="message-box">
+            <strong>En resumen:</strong> un build multi-stage produce
+            <code>image_forms_14.1.2</code> con JDK, Infrastructure, Forms &amp; Reports, las 16
+            librerías compartidas de Forms, las dependencias Motif/X11 de Reports y el entorno
+            gráfico del Configuration Wizard, verificados durante el propio build.
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <p class="doc-footer">
+      Documentación basada en <a href="Dockerfile.wls"><code>Dockerfile.wls</code></a>,
+      <code>ComandosDockers.txt</code> y la experiencia de instalación/compilación de librerías
+      Forms registrada en <code>log/console.log</code> (puntos 1–3).
+    </p>
+
+    <p style="margin: 1rem 0 2rem; text-align: center;">
+      <a class="back-link" href="../../index.html">← Regresar a la documentación del proyecto</a>
+    </p>
+  </div>
+</body>
+</html>
