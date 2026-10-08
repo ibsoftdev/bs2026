@@ -1519,12 +1519,13 @@
           <h3><span class="num">3</span> Fases de Construcción y Despliegue</h3>
           <p>
             Guías en el orden recomendado: primero la imagen y el dominio en Docker; luego
-            el despliegue de Forms y Reports en ECS Fargate.
+            el despliegue en ECS Fargate (AdminServer, Forms y Reports).
           </p>
 
           <div class="path-flow" aria-hidden="true">
             <span class="chip">Imagen Docker</span><span class="sep">→</span>
             <span class="chip">Crear dominio</span><span class="sep">→</span>
+            <span class="chip aws">ECS Admin</span><span class="sep">→</span>
             <span class="chip aws">ECS Forms</span><span class="sep">→</span>
             <span class="chip aws">ECS Reports</span>
           </div>
@@ -1550,8 +1551,18 @@
               <span class="go">Abrir →</span>
             </a>
 
-            <a class="doc-card aws" href="aws-ecs/forms/index.html">
+            <a class="doc-card aws" href="aws-ecs/admin/index.html">
               <span class="phase">3</span>
+              <div class="meta">
+                <div class="kicker">AWS ECS · Fargate</div>
+                <h4>Contenedor AdminServer</h4>
+                <p>Prepara ECR, EFS, seguridad y Cloud Map; crea la task definition y el servicio <code>forms-admin</code> con Discovery <code>weblogic-admin</code>.</p>
+              </div>
+              <span class="go">Abrir →</span>
+            </a>
+
+            <a class="doc-card aws" href="aws-ecs/forms/index.html">
+              <span class="phase">4</span>
               <div class="meta">
                 <div class="kicker">AWS ECS · Fargate</div>
                 <h4>Contenedor Forms</h4>
@@ -1561,7 +1572,7 @@
             </a>
 
             <a class="doc-card aws" href="aws-ecs/report/index.html">
-              <span class="phase">4</span>
+              <span class="phase">5</span>
               <div class="meta">
                 <div class="kicker">AWS ECS · Fargate</div>
                 <h4>Contenedor Reports</h4>
