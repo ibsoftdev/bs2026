@@ -1432,6 +1432,44 @@
         Los <code>.fmb</code> deben compilarse en el mismo entorno donde se ejecutan (Forms 14.1.2, Linux x64): los
         <code>.fmx</code> no son portables entre versiones ni plataformas.
       </div>
+
+      <h4 class="sub" id="paso-1-2">1.2 · Resultado de la compilación (referencia)</h4>
+      <p>
+        Estado final de cada módulo según su compilación más reciente en <code>forms-server</code>: compilación completa del
+        10/09/2026 (<code>compile_all_forms.sh</code>), recompilación de los fallidos (<code>formas.lis</code>) el 02/10/2026 y
+        recompilación de los grupos 1 a 3 el 05/10/2026. Logs en <code>forms_app/log/log_aws_*</code>; no se toma en cuenta
+        <code>bin/fmx</code> de la versión 12c, que solo sirvió de referencia.
+      </p>
+      <div class="tabla"><table>
+        <tr><th>Estado final</th><th>Módulos</th></tr>
+        <tr><td>Compilados (2.003 sin avisos y 121 con avisos)</td><td>2.124</td></tr>
+        <tr><td>Descartados: fuentes guardados con Forms 5.0 (<code>FRM-18130</code>)</td><td>154</td></tr>
+        <tr><td>Pendientes</td><td>36</td></tr>
+        <tr><td><strong>Total</strong> (2.289 formas de <code>src/rector</code> y 25 menús)</td><td><strong>2.314</strong></td></tr>
+      </table></div>
+      <p>Los 36 pendientes, agrupados por causa:</p>
+      <div class="tabla"><table>
+        <tr><th>Grupo</th><th>Causa</th><th>Módulos</th><th>¿Genera <code>.fmx</code>?</th><th>Qué hay que hacer</th><th>Dónde se corrige</th><th>Lista</th></tr>
+        <tr><td>1</td><td>El fuente no coincide con el esquema de <code>BANESCO_DEV</code> (columnas, firmas, <code>INSERT</code>/<code>FETCH</code>, objetos o permisos)</td><td>18</td><td>No</td><td>Corregir los objetos en la base o compilar con el usuario dueño. Solo <code>CADO_CARP_CD_RAMO</code> afecta a 6</td><td>Base de datos</td><td><code>esquema_bd.lis</code></td></tr>
+        <tr><td>2</td><td>Falta <code>EJECUTAREP.fmb</code> (objetos <code>EJEREP</code> y <code>REPORTE</code>)</td><td>7</td><td>Sí, incompleto</td><td>Conseguir <code>EJECUTAREP.fmb</code> y copiarlo a <code>src/rector</code></td><td>Fuentes</td><td><code>frm18108_incompletos.lis</code></td></tr>
+        <tr><td>3</td><td>Referencias a módulos de prueba, a una ruta de Windows o a una clase de propiedades dañada</td><td>5</td><td>Sí, incompleto</td><td>Apuntar la referencia al módulo real</td><td>Forms Builder</td><td><code>frm18108_incompletos.lis</code></td></tr>
+        <tr><td>4</td><td>Uso de <code>RUN_PRODUCT</code></td><td>5</td><td>No</td><td>Reemplazarlo por <code>RUN_REPORT_OBJECT</code> o <code>WEB.SHOW_DOCUMENT</code>. 2 de ellos dependen además de <code>EJECUTAREP.fmb</code></td><td>Forms Builder</td><td><code>run_product.lis</code></td></tr>
+        <tr><td>5</td><td><code>CREF00040X (1).fmb</code>, saltado por el espacio en el nombre</td><td>1</td><td>No compilado</td><td>Decidir si es el vigente: renombrarlo y compilarlo, o descartarlo</td><td>Fuentes</td><td>—</td></tr>
+      </table></div>
+      <p>Módulos de cada grupo:</p>
+      <div class="tabla"><table>
+        <tr><th>Grupo</th><th>Módulos</th></tr>
+        <tr><td>1</td><td><code>AUTF40465</code>, <code>CAJF11075_vld</code>, <code>CARF30024</code>, <code>CARF40003</code>, <code>CARF40057</code>, <code>CARF44010</code>, <code>CARF63339</code>, <code>CARF63343</code>, <code>CARF63346</code>, <code>CONF40030</code>, <code>CREF40497</code>, <code>FINX10010</code>, <code>FINX10020</code>, <code>SINF10115</code>, <code>SINF20650N</code>, <code>SINF20681</code>, <code>SINF63623</code>, <code>SOLF10309</code></td></tr>
+        <tr><td>2</td><td><code>CAJF30073</code>, <code>CONF60132</code>, <code>SINF40690</code>, <code>VIDF00009</code>, <code>VIDF00055</code>, <code>VIDF40521</code>, <code>VIDF90030</code></td></tr>
+        <tr><td>3</td><td><code>CARF40045</code>, <code>CARF64321</code>, <code>CARF64322</code>, <code>CARF64342</code>, <code>FINF10004</code></td></tr>
+        <tr><td>4</td><td><code>CARF42000</code>, <code>CARF50060</code>, <code>CARF64000</code>, <code>VIDF30045</code>, <code>VIDF30046</code></td></tr>
+        <tr><td>5</td><td><code>CREF00040X (1)</code></td></tr>
+      </table></div>
+      <div class="callout warn">
+        Los 154 módulos con <code>FRM-18130</code> (<code>frm18130_forms50.lis</code>) quedan descartados: son fuentes rezagados
+        de Forms 5.0 que no se usan y no requieren compilación. Las listas de cada grupo están en <code>forms_app/listas/</code> y se
+        recompilan con <code>./compile_forms_list.sh listas/&lt;grupo&gt;.lis</code>.
+      </div>
         </section>
 
         <section class="slide-block" id="paso-2">
@@ -1467,6 +1505,42 @@
       <div class="callout">
         Los ejecutables se enlazan con las librerías cliente de Oracle del contenedor (<code>$ORACLE_HOME/lib</code>): deben
         compilarse y ejecutarse en la misma imagen.
+      </div>
+
+      <h4 class="sub" id="paso-2-2">2.2 · Resultado de la compilación (referencia)</h4>
+      <p>
+        Resultado de la compilación completa del 03/10/2026 en <code>forms-server</code> (<code>compile_proc_all.sh</code>,
+        log <code>proc_app/log/compile_proc_all_20261003_224239.log</code>), con <code>gcc</code> 11 y <code>CFLAGS=-std=gnu89</code>.
+      </p>
+      <div class="tabla"><table>
+        <tr><th>Estado final</th><th>Programas</th></tr>
+        <tr><td>Compilados (455 sin avisos y 259 con avisos de <code>gcc</code>)</td><td>714</td></tr>
+        <tr><td>Saltados: fuentes de inclusión sin <code>main()</code> (<code>GENL00000</code>, <code>new30055</code>)</td><td>2</td></tr>
+        <tr><td>Pendientes (30 fallan en <code>proc</code> y 16 en <code>gcc</code>)</td><td>46</td></tr>
+        <tr><td><strong>Total</strong> (<code>src/*.pc</code>)</td><td><strong>762</strong></td></tr>
+      </table></div>
+      <p>Los 46 pendientes, agrupados por causa:</p>
+      <div class="tabla"><table>
+        <tr><th>Grupo</th><th>Causa</th><th>Programas</th><th>Falla en</th><th>Qué hay que hacer</th><th>Dónde se corrige</th></tr>
+        <tr><td>1</td><td><code>PCC-S-02345</code>: el fuente tiene bloques PL/SQL embebidos, que <code>proc</code> solo acepta con <code>SQLCHECK=SEMANTICS</code></td><td>30</td><td><code>proc</code></td><td>Recompilar con <code>PROC_OPTS="sqlcheck=semantics userid=uspan/&lt;clave&gt;@BANESCO_DEV"</code>. Requiere conexión a la base y que existan los objetos que usan los bloques</td><td>Opciones de compilación</td></tr>
+        <tr><td>2</td><td>Hint de Oracle escrito como comentario de línea (<code>SELECT --+ RULE</code>) dentro del SQL: el <code>.c</code> generado queda con cadenas sin cerrar</td><td>5</td><td><code>gcc</code></td><td>Reescribir el hint como <code>/*+ RULE */</code> o quitarlo</td><td>Fuente <code>.pc</code></td></tr>
+        <tr><td>3</td><td>Cadenas SQL cortadas en el <code>.c</code> generado (<code>missing terminating "</code>) a partir del cursor <code>c_siniestros</code>; causa probable, sin confirmar: su hint <code>/*+ INDEX(...) */</code> de varias líneas</td><td>8</td><td><code>gcc</code></td><td>Revisar el SQL del cursor en <code>obj/INCC3008x.c</code> y dejar el hint en una sola línea</td><td>Fuente <code>.pc</code></td></tr>
+        <tr><td>4</td><td><code>main(secuencia1,secuencia2)</code> usa <code>argv</code>, que no está declarado</td><td>2</td><td><code>gcc</code></td><td>Declarar <code>main(int argc, char *argv[])</code></td><td>Fuente <code>.pc</code></td></tr>
+        <tr><td>5</td><td>Variable mal escrita: <code>WCARD_CA1SU_CD_SUCURSAL</code> (debería ser <code>WCARD_CASU_CD_SUCURSAL</code>)</td><td>1</td><td><code>gcc</code></td><td>Corregir el nombre en la línea 736</td><td>Fuente <code>.pc</code></td></tr>
+      </table></div>
+      <p>Programas de cada grupo:</p>
+      <div class="tabla"><table>
+        <tr><th>Grupo</th><th>Programas</th></tr>
+        <tr><td>1</td><td><code>CAJC30001</code>, <code>CAJC30033</code>, <code>CAJC30100</code>, <code>CAJC30120</code>, <code>CAJC30123</code>, <code>CAJC30724</code>, <code>CARC30150</code>, <code>CARC30160</code>, <code>CARC30208</code>, <code>CARC40051</code>, <code>ESTC30031</code>, <code>ESTC30033</code>, <code>ESTC30034</code>, <code>ESTC30035</code>, <code>ESTC30042</code>, <code>ESTC30047</code>, <code>ESTC30053</code>, <code>PROC30010</code>, <code>PROC30020</code>, <code>PROC30038</code>, <code>PROC30044</code>, <code>PROC30047</code>, <code>PROC35020</code>, <code>PROC70031</code>, <code>SINC30090</code>, <code>SINC30125</code>, <code>SINC30131</code>, <code>SINC30132</code>, <code>SINC30139</code>, <code>SINC31001</code></td></tr>
+        <tr><td>2</td><td><code>CARC30211</code>, <code>CARC30250</code>, <code>CARC30251</code>, <code>CARC30253</code>, <code>CARC40016</code></td></tr>
+        <tr><td>3</td><td><code>INCC30080</code>, <code>INCC30081</code>, <code>INCC30082</code>, <code>INCC30083</code>, <code>INCC30084</code>, <code>INCC30085</code>, <code>INCC30086</code>, <code>INCC30087</code></td></tr>
+        <tr><td>4</td><td><code>COBC33005</code>, <code>PROC30031</code></td></tr>
+        <tr><td>5</td><td><code>CAJC30140</code></td></tr>
+      </table></div>
+      <div class="callout warn">
+        <code>CARC30253</code> tiene además <code>#include &lt;doubleingpoint.h&gt;</code> en la línea 8 (debería ser
+        <code>floatingpoint.h</code>): al corregir el grupo 2 fallará por ese include. Los grupos 2 a 5 requieren cambiar el fuente;
+        el grupo 1 solo cambia las opciones de compilación y es el que más programas destraba.
       </div>
         </section>
 
