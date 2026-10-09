@@ -1,0 +1,270 @@
+{
+    "taskDefinitionArn": "arn:aws:ecs:us-east-1:730335573515:task-definition/forms-server:10",
+    "containerDefinitions": [
+      {
+        "name": "forms-server",
+        "image": "730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker@sha256:82a4532d4c80c5c643d60c9dba8e2f99f459c3255f023fdcaea2e68779d320cf",
+        "cpu": 0,
+        "portMappings": [
+          {
+            "containerPort": 9001,
+            "hostPort": 9001,
+            "protocol": "tcp",
+            "name": "wls-forms-http",
+            "appProtocol": "http"
+          },
+          {
+            "containerPort": 9501,
+            "hostPort": 9501,
+            "protocol": "tcp",
+            "name": "wls-forms-https",
+            "appProtocol": "http"
+          },
+          {
+            "containerPort": 9991,
+            "hostPort": 9991,
+            "protocol": "tcp",
+            "name": "wls-forms-admin"
+          },
+          {
+            "containerPort": 5556,
+            "hostPort": 5556,
+            "protocol": "tcp",
+            "name": "nodemanager"
+          }
+        ],
+        "essential": true,
+        "command": [
+          "/u01/oracle/scripts/startWLSForms.sh",
+          "-keep"
+        ],
+        "environment": [
+          {
+            "name": "CC",
+            "value": "/usr/bin/gcc"
+          },
+          {
+            "name": "FORMS_PATH",
+            "value": "/u01/oracle/user_projects/apps/forms_app/bin:/u01/oracle/user_projects/apps/forms_app/src:/u01/oracle/forms"
+          },
+          {
+            "name": "PATH",
+            "value": "/u01/oracle/bin:/u01/oracle/oracle_common/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+          },
+          {
+            "name": "PROC_INCLUDE",
+            "value": "/u01/oracle/precomp/public"
+          },
+          {
+            "name": "ADMIN_SERVER_HOST",
+            "value": "weblogic-admin.forms.local"
+          },
+          {
+            "name": "ADMIN_SERVER_NAME",
+            "value": "AdminServer"
+          },
+          {
+            "name": "ADMIN_USER",
+            "value": "weblogic"
+          },
+          {
+            "name": "MANAGED_SERVER_NAME",
+            "value": "WLS_FORMS"
+          },
+          {
+            "name": "TNS_ADMIN",
+            "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig"
+          },
+          {
+            "name": "DOMAIN_NAME",
+            "value": "forms_domain"
+          },
+          {
+            "name": "FORMS_MODULE_PATH",
+            "value": "/u01/oracle/user_projects/apps/forms_app/bin:/u01/oracle/forms"
+          },
+          {
+            "name": "DOMAIN_HOME",
+            "value": "/u01/oracle/user_projects/domains/forms_domain"
+          },
+          {
+            "name": "ADMIN_PASSWORD",
+            "value": "t.123456"
+          },
+          {
+            "name": "FORMS_INSTANCE",
+            "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig/components/FORMS/instances/forms1"
+          },
+          {
+            "name": "MANAGED_SERVER_PORT",
+            "value": "9001"
+          },
+          {
+            "name": "NODE_MANAGER_PORT",
+            "value": "5556"
+          },
+          {
+            "name": "PROC",
+            "value": "/u01/oracle/bin/proc"
+          },
+          {
+            "name": "LD_LIBRARY_PATH",
+            "value": "/u01/oracle/lib:/u01/oracle/oracle_common/lib"
+          },
+          {
+            "name": "JAVA_OPTIONS",
+            "value": "-Dforms.instance=forms1"
+          },
+          {
+            "name": "ORACLE_HOME",
+            "value": "/u01/oracle"
+          },
+          {
+            "name": "ADMIN_SERVER_PORT",
+            "value": "7001"
+          },
+          {
+            "name": "PCSCFG",
+            "value": "/u01/oracle/precomp/admin/pcscfg.cfg"
+          },
+          {
+            "name": "FRMCMP",
+            "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig/components/FORMS/instances/forms1/bin/frmcmp_batch.sh"
+          }
+        ],
+        "environmentFiles": [],
+        "mountPoints": [
+          {
+            "sourceVolume": "efs-domains",
+            "containerPath": "/u01/oracle/user_projects/domains",
+            "readOnly": false
+          },
+          {
+            "sourceVolume": "efs-app",
+            "containerPath": "/u01/oracle/user_projects/apps",
+            "readOnly": false
+          },
+          {
+            "sourceVolume": "efs-scripts",
+            "containerPath": "/u01/oracle/scripts",
+            "readOnly": false
+          }
+        ],
+        "volumesFrom": [],
+        "workingDirectory": "/u01/oracle",
+        "readonlyRootFilesystem": false,
+        "ulimits": [],
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "/ecs/forms-server",
+            "awslogs-create-group": "true",
+            "awslogs-region": "us-east-1",
+            "awslogs-stream-prefix": "ecs"
+          },
+          "secretOptions": []
+        },
+        "systemControls": []
+      }
+    ],
+    "family": "forms-server",
+    "taskRoleArn": "arn:aws:iam::730335573515:role/ecs-forms-admin-task-role",
+    "executionRoleArn": "arn:aws:iam::730335573515:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "revision": 10,
+    "volumes": [
+      {
+        "name": "efs-domains",
+        "efsVolumeConfiguration": {
+          "fileSystemId": "fs-08471cc88d2a8edc3",
+          "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/domains",
+          "transitEncryption": "ENABLED"
+        }
+      },
+      {
+        "name": "efs-app",
+        "efsVolumeConfiguration": {
+          "fileSystemId": "fs-08471cc88d2a8edc3",
+          "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/app",
+          "transitEncryption": "ENABLED"
+        }
+      },
+      {
+        "name": "efs-scripts",
+        "efsVolumeConfiguration": {
+          "fileSystemId": "fs-08471cc88d2a8edc3",
+          "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/scripts/forms",
+          "transitEncryption": "ENABLED"
+        }
+      }
+    ],
+    "status": "ACTIVE",
+    "requiresAttributes": [
+      {
+        "name": "ecs.capability.execution-role-awslogs"
+      },
+      {
+        "name": "com.amazonaws.ecs.capability.ecr-auth"
+      },
+      {
+        "name": "com.amazonaws.ecs.capability.docker-remote-api.1.17"
+      },
+      {
+        "name": "com.amazonaws.ecs.capability.docker-remote-api.1.21"
+      },
+      {
+        "name": "com.amazonaws.ecs.capability.task-iam-role"
+      },
+      {
+        "name": "ecs.capability.execution-role-ecr-pull"
+      },
+      {
+        "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+      },
+      {
+        "name": "ecs.capability.task-eni"
+      },
+      {
+        "name": "com.amazonaws.ecs.capability.docker-remote-api.1.29"
+      },
+      {
+        "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+      },
+      {
+        "name": "ecs.capability.efsAuth"
+      },
+      {
+        "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+      },
+      {
+        "name": "ecs.capability.efs"
+      },
+      {
+        "name": "com.amazonaws.ecs.capability.docker-remote-api.1.25"
+      },
+      {
+        "name": "ecs.capability.extensible-ephemeral-storage"
+      }
+    ],
+    "placementConstraints": [],
+    "compatibilities": [
+      "EC2",
+      "FARGATE"
+    ],
+    "runtimePlatform": {
+      "cpuArchitecture": "X86_64",
+      "operatingSystemFamily": "LINUX"
+    },
+    "requiresCompatibilities": [
+      "FARGATE"
+    ],
+    "cpu": "2048",
+    "memory": "4096",
+    "registeredAt": "2026-10-09T01:06:09.947Z",
+    "registeredBy": "arn:aws:iam::730335573515:user/cuchivano@gmail.com",
+    "ephemeralStorage": {
+      "sizeInGiB": 100
+    },
+    "enableFaultInjection": false,
+    "tags": []
+  }

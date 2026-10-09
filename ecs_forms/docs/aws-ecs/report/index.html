@@ -1378,195 +1378,144 @@
     <div class="intro intro-propuesta">
       <h2>Visión general</h2>
       <p>
-        Guía paso a paso para crear la <strong>task definition</strong> <code>reports-server</code>
-      y el <strong>servicio</strong> correspondiente en el cluster <code>forms_report</code>
-      (Managed Server <code>WLS_REPORTS</code>), reutilizando la imagen ECR, el EFS
-      <code>rector-dev</code>, la red y el namespace Cloud Map <code>forms.local</code>
-      ya validados con los servicios <code>forms-admin</code> y <code>forms-server</code>
-      (ver <a href="../forms/index.html">guía ECS Forms</a>).
+        Guía paso a paso para crear la <strong>task definition</strong> <code>reports-server</code> y su <strong>servicio</strong> en el
+        cluster <code>forms_report</code>, registrado en Cloud Map como <code>weblogic-reports.forms.local</code>, arrancar el managed server
+        <code>WLS_REPORTS</code>, completar Reports en el dominio y validarlo con un reporte real. Parte de lo creado en la guía del
+        <a href="../admin/index.html">Contenedor AdminServer</a> (infraestructura, cluster, red y hostnames) y sigue el esquema del
+        <a href="../forms/index.html">Contenedor Forms</a>; lo compartido se referencia en lugar de repetirse.
       </p>
       <p class="slogan">Service Discovery, dominio en EFS y validación funcional de Reports.</p>
     </div>
 
-    <nav class="toc" aria-label="Contenido"><a href="#paso-0">0 · Preparación y valores fijos</a><a href="#paso-1">1 · Crear task definition — inicio</a><a href="#paso-2">2 · Infraestructura y roles</a><a href="#paso-3">3 · Contenedor: imagen, puertos, entorno…</a><a href="#paso-4">4 · Almacenamiento efímero + volúmenes E…</a><a href="#paso-5">5 · Puntos de montaje, logs y crear</a><a href="#paso-6">6 · Crear servicio en el cluster</a><a href="#paso-7">7 · Opciones de implementación</a><a href="#paso-8">8 · Service Discovery weblogic-reports</a><a href="#paso-9">9 · Redes + puerto 9012 en el Security G…</a><a href="#paso-10">10 · Verificar Running y ECS Exec</a><a href="#paso-11">11 · Ajustes del dominio para weblogic-re…</a><a href="#paso-12">12 · Arranque de Node Manager y WLS_REPOR…</a><a href="#paso-13">13 · Validación funcional de Reports</a><a href="#anexo-json">Anexo · Task definition JSON (reports-server)</a><a href="#anexo-r2">Anexo · Imagen r2: construir, subir a ECR y actual…</a><a href="#anexo-cli">Anexo · Comandos AWS CLI</a><a href="#lecciones-criticas">★ · Lecciones críticas</a></nav>
+    <nav class="toc" aria-label="Contenido"><a href="#paso-0">0 · Requisitos y valores fijos</a><a href="#paso-1">1 · Crear task definition Reports</a><a href="#paso-2">2 · Crear servicio + Service Discovery</a><a href="#paso-3">3 · Verificar Running, Cloud Map y ECS Exec</a><a href="#paso-4">4 · Verificar hostnames del dominio</a><a href="#paso-5">5 · Arrancar Node Manager y WLS_REPORTS</a><a href="#paso-6">6 · Completar Reports en el dominio</a><a href="#paso-7">7 · Validación funcional de Reports</a><a href="#anexo-json">Anexo · Task definition JSON</a><a href="#anexo-r2">Anexo · Imagen r2</a><a href="#anexo-cli">Anexo · Comandos AWS CLI</a><a href="#lecciones-criticas">★ · Lecciones críticas</a></nav>
 
     <div class="card">
       <div class="card-body">
 
         <section class="slide-block" id="paso-0">
-          <h3><span class="num">0</span> Preparación y valores fijos<span class="status pending">Pendiente</span></h3>
-
+          <h3><span class="num">0</span> Requisitos y valores fijos<span class="status done">Hecho</span></h3>
       <p>
-        La infraestructura compartida (cluster, EFS, VPC, SG, roles, namespace Cloud Map,
-        ruta a la BD en <code>Pub-RT</code>) ya existe desde el levantamiento de Forms.
-        Para Reports solo cambian nombres, puertos, el script de entrada y el registro DNS.
+        El contenedor Reports se apoya en lo creado en la guía del <a href="../admin/index.html">Contenedor AdminServer</a>
+        (infraestructura común, cluster, red y hostnames) y sigue el mismo esquema que el
+        <a href="../forms/index.html">Contenedor Forms</a>. Esta guía solo cubre lo propio de Reports; lo compartido se
+        referencia a la guía admin.
       </p>
+
+      <h4 class="sub" id="paso-0-1">0.1 · Requisitos ya creados</h4>
       <div class="tabla"><table>
-        <tr><th>Concepto</th><th>Valor</th></tr>
-        <tr><td>Cluster</td><td><code>forms_report</code></td></tr>
-        <tr><td>Imagen ECR</td><td><code>730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:r2</code> (o su digest <code>@sha256:…</code>). <strong>No usar <code>r1</code></strong>: le faltan las librerías Motif/X11 del motor de Reports. Usar la misma imagen en <code>forms-admin</code>, <code>forms-server</code> y <code>reports-server</code>.</td></tr>
-        <tr><td>EFS</td><td><code>fs-08471cc88d2a8edc3</code> (rector-dev)</td></tr>
-        <tr><td>VPC</td><td><code>vpc-055a4007418b34e64</code></td></tr>
-        <tr><td>Subnet</td><td>
-          <strong>Solo pública:</strong> <code>subnet-01212efd4a9ce759b</code> (<code>pub-A-SN</code>)<br />
-          Acceso a Oracle <code>192.168.229.137</code> vía ruta ya existente en <code>Pub-RT</code>.
-        </td></tr>
-        <tr><td>SG tarea</td><td><code>sg-0e1787d32bac71fcd</code> (<code>forms-sg-ecs</code>) — ya tiene NFS 2049 hacia EFS</td></tr>
-        <tr><td>Rol ejecución</td><td><code>ecsTaskExecutionRole</code></td></tr>
-        <tr><td>Rol tarea (Exec)</td><td><code>ecs-forms-admin-task-role</code> (reutilizable)</td></tr>
-        <tr><td>Namespace Cloud Map</td><td><code>forms.local</code> (<code>ns-r3zqawwpjtp5pzue</code>)</td></tr>
-        <tr><td>Nombre familia TD</td><td><code>reports-server</code></td></tr>
-        <tr><td>Nombre servicio</td><td><code>reports-server</code></td></tr>
-        <tr><td>Nombre contenedor</td><td><code>reports-server</code></td></tr>
-        <tr><td>Managed Server</td><td><code>WLS_REPORTS</code> (Machine <code>ReportsMachine</code>)</td></tr>
-        <tr><td>DNS Discovery</td><td><code>weblogic-reports.forms.local</code></td></tr>
+        <tr><th>Elemento</th><th>Dónde se crea</th></tr>
+        <tr><td>Imagen ECR <code>forms-docker</code> (tag <code>r2</code>, ver <a href="#anexo-r2">anexo</a>)</td><td><a href="../admin/index.html#paso-1-1">Admin 1.1</a></td></tr>
+        <tr><td>Security group <code>forms-sg-ecs</code> + regla interna <strong>Todo el tráfico</strong></td><td><a href="../admin/index.html#paso-1-2">Admin 1.2</a></td></tr>
+        <tr><td>EFS <code>rector-dev</code> y regla NFS 2049</td><td><a href="../admin/index.html#paso-1-3">Admin 1.3</a></td></tr>
+        <tr><td>Rol de tarea <code>ecs-forms-admin-task-role</code> (ECS Exec, reutilizable)</td><td><a href="../admin/index.html#paso-1-4">Admin 1.4</a></td></tr>
+        <tr><td>Namespace Cloud Map <code>forms.local</code></td><td><a href="../admin/index.html#paso-1-5">Admin 1.5</a></td></tr>
+        <tr><td>Cluster <code>forms_report</code></td><td><a href="../admin/index.html#paso-2">Admin 2</a></td></tr>
+        <tr><td>Redes del servicio (solo <code>pub-A</code>) y ruta a la BD en <code>Pub-RT</code></td><td><a href="../admin/index.html#paso-4-9">Admin 4.9</a> · <a href="../admin/index.html#paso-4-10">4.10</a></td></tr>
+        <tr><td>Hostnames del dominio alineados a <code>*.forms.local</code> (incluye <code>ReportsMachine</code>)</td><td><a href="../admin/index.html#paso-6">Admin 6</a></td></tr>
+        <tr><td>AdminServer en <strong>RUNNING</strong> en <code>weblogic-admin.forms.local:7001</code></td><td><a href="../admin/index.html#paso-7">Admin 7</a></td></tr>
       </table></div>
 
-      <h4 class="sub">Nombres Cloud Map en el dominio (antes del primer arranque)</h4>
-      <p>
-        Los tres hosts del dominio se usan con FQDN desde el principio, igual que en la guía de Forms
-        (Paso 0 — nombres Cloud Map):
-      </p>
-      <div class="tabla"><table>
-        <tr><th>Machine</th><th><code>listen-address</code> / <code>ListenAddress</code></th><th>Node Manager</th></tr>
-        <tr><td><code>AdminServerMachine</code></td><td><code>weblogic-admin.forms.local</code></td><td><code>nodemanager/</code></td></tr>
-        <tr><td><code>FormsMachine</code></td><td><code>weblogic-forms.forms.local</code></td><td><code>nodemanager_forms/</code></td></tr>
-        <tr><td><code>ReportsMachine</code></td><td><code>weblogic-reports.forms.local</code></td><td><code>nodemanager_reports/</code></td></tr>
-      </table></div>
-      <p>Con AdminServer y managed servers detenidos, desde el contenedor <code>admin</code> como <code>oracle</code>:</p>
-      <pre class="code">/u01/oracle/scripts/set-cloudmap-hostnames.sh --check
-/u01/oracle/scripts/set-cloudmap-hostnames.sh</pre>
-      <div class="callout">
-        Si ya se ejecutó al levantar Forms, <code>--check</code> debe mostrar las tres líneas con
-        <code>.forms.local</code> y no hay que hacer nada más (el Paso 11 queda como verificación).
-        Requiere también la regla interna <strong>Todo el tráfico</strong> en <code>forms-sg-ecs</code> (Paso 9).
-      </div>
-
-      <h4 class="sub">Diferencias respecto a <code>forms-server</code></h4>
+      <h4 class="sub" id="paso-0-2">0.2 · Valores propios de Reports</h4>
       <div class="tabla"><table>
         <tr><th>Concepto</th><th>Forms</th><th>Reports</th></tr>
-        <tr><td>Servicio compose</td><td><code>forms</code> / <code>weblogic-forms</code></td><td><code>reports</code> / <code>weblogic-reports</code></td></tr>
-        <tr><td>Managed Server</td><td><code>WLS_FORMS</code></td><td><code>WLS_REPORTS</code></td></tr>
+        <tr><td>Familia TD / contenedor</td><td><code>forms-server</code></td><td><code>reports-server</code></td></tr>
+        <tr><td>Servicio ECS</td><td><code>forms</code></td><td><code>reports-server</code></td></tr>
+        <tr><td>Service Discovery</td><td><code>weblogic-forms</code></td><td><code>weblogic-reports</code></td></tr>
+        <tr><td>Managed server / Machine</td><td><code>WLS_FORMS</code> / <code>FormsMachine</code></td><td><code>WLS_REPORTS</code> / <code>ReportsMachine</code></td></tr>
         <tr><td>Puerto HTTP / HTTPS</td><td><code>9001</code> / <code>9501</code></td><td><code>9012</code> / <code>9512</code></td></tr>
         <tr><td>Administration Port</td><td><code>9991</code></td><td><code>9992</code></td></tr>
         <tr><td>Node Manager</td><td><code>5556</code> (<code>nodemanager_forms</code>)</td><td><code>5556</code> (<code>nodemanager_reports</code>)</td></tr>
-        <tr><td>Scripts EFS</td><td><code>.../scripts/forms</code></td><td><code>.../scripts/reports</code></td></tr>
+        <tr><td>Scripts EFS</td><td><code>…/scripts/forms</code></td><td><code>…/scripts/reports</code></td></tr>
         <tr><td><code>JAVA_OPTIONS</code></td><td><code>-Dforms.instance=forms1</code></td><td>No aplica</td></tr>
-        <tr><td>Variables de compilación (rev. 9)</td><td><code>FORMS_PATH</code>, <code>FORMS_MODULE_PATH</code>, <code>FORMS_INSTANCE</code>, <code>FRMCMP</code>, <code>PROC</code>, <code>PCSCFG</code>, <code>PROC_INCLUDE</code>, <code>CC</code></td><td>No aplica (se compila en <code>forms-server</code>)</td></tr>
+        <tr><td>Variables de compilación (<code>FORMS_PATH</code>, <code>FRMCMP</code>, <code>PROC</code>…)</td><td>Sí</td><td>No aplica (se compila en Forms)</td></tr>
         <tr><td><code>TNS_ADMIN</code></td><td><code>$DOMAIN_HOME/config/fmwconfig</code></td><td>Igual</td></tr>
-        <tr><td>Log group</td><td><code>/ecs/forms-server</code></td><td><code>/ecs/reports-server</code></td></tr>
+        <tr><td>Log group</td><td><code>/ecs/forms-server</code></td><td><code>/ecs/reports-server</code> (crearlo a mano, <a href="#paso-1-7">1.7</a>)</td></tr>
         <tr><td>URL de prueba</td><td><code>/forms/frmservlet</code></td><td><code>/reports/rwservlet</code></td></tr>
       </table></div>
-
       <div class="callout warn">
-        <strong>Paths EFS (sin <code>/domain</code>):</strong><br />
-        domains → <code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/domains</code><br />
-        app → <code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/app</code><br />
-        scripts → <code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/scripts/reports</code>
+        <strong>Imagen <code>r2</code>, no <code>r1</code>:</strong> a <code>r1</code> le faltan las librerías Motif/X11 del motor de
+        Reports. Usar la misma imagen en los tres servicios (<a href="#anexo-r2">Anexo — imagen r2</a>).
       </div>
       <div class="callout">
-        <strong>Verificar antes de crear la TD</strong> que la carpeta <code>scripts/reports</code> exista en
-        el EFS con <code>entrypoint.sh</code>, <code>startNodeManager.sh</code>,
-        <code>create-reports-machine.py</code>, <code>startWLSReports.sh</code>,
-        <code>create-reports-tools.py</code> y <code>prepare-reports-domain.sh</code>
-        (origen: <code>dist/scripts/reports/</code> del proyecto compose).
-        Si el <code>rootDirectory</code> no existe, la tarea falla al montar el volumen
+        <strong>Verificar antes de crear la TD</strong> que exista en el EFS la carpeta <code>scripts/reports</code> con
+        <code>entrypoint.sh</code>, <code>startNodeManager.sh</code>, <code>create-reports-machine.py</code>,
+        <code>startWLSReports.sh</code>, <code>create-reports-tools.py</code> y <code>prepare-reports-domain.sh</code>
+        (origen: <code>dist/scripts/reports/</code>). Si no existe, la tarea falla al montar el volumen
         (<code>ResourceInitializationError … mount.nfs4: … No such file or directory</code>).
-        Se puede comprobar desde el contenedor <code>forms-admin</code> (ECS Exec), que monta
-        <code>domains</code> con el mismo EFS, o montando temporalmente la raíz del EFS.
       </div>
       <figure class="shot" data-shot="paso-0a">
         <img src="assets/paso-00a-cluster-servicios.png" alt="Cluster forms_report, pestaña Servicios: admin, forms y reports-server activos" />
         <figcaption>
-          Paso 0a — Cluster <code>forms_report</code> (Activo), pestaña <strong>Servicios</strong>: <code>admin</code>
-          (<code>forms-admin:6</code>), <code>forms</code> (<code>forms-server:9</code>) y <code>reports-server</code>
-          (<code>reports-server:2</code>), cada uno con 1/1 tareas en ejecución
+          Paso 0a — Resultado final: cluster <code>forms_report</code> con <code>admin</code> (<code>forms-admin:6</code>),
+          <code>forms</code> (<code>forms-server:9</code>) y <code>reports-server</code> (<code>reports-server:2</code>), cada uno 1/1
         </figcaption>
       </figure>
       <figure class="shot" data-shot="paso-0b">
         <img src="assets/paso-00b-cluster-tareas.png" alt="Cluster forms_report, pestaña Tareas: tres tareas en ejecución" />
-        <figcaption>
-          Paso 0b — Pestaña <strong>Tareas</strong>: las tres tareas en <em>Ejecutando</em>, con su definición de tarea y su grupo
-          (<code>service:admin</code>, <code>service:forms</code>, <code>service:reports-server</code>)
-        </figcaption>
+        <figcaption>Paso 0b — Pestaña <strong>Tareas</strong>: las tres tareas en <em>Ejecutando</em> (<code>service:admin</code>, <code>service:forms</code>, <code>service:reports-server</code>)</figcaption>
       </figure>
         </section>
+
+        <!-- ═════════════ TASK DEFINITION ═════════════ -->
 
         <section class="slide-block" id="paso-1">
-          <h3><span class="num">1</span> Crear task definition — inicio<span class="status pending">Pendiente</span></h3>
+          <h3><span class="num">1</span> Crear task definition Reports<span class="status done">Hecho</span></h3>
+      <p>
+        La task definition <code>reports-server</code> describe el contenedor del managed server <code>WLS_REPORTS</code>.
+        Sigue el mismo asistente que la del AdminServer (<a href="../admin/index.html#paso-3">Admin 3</a>, donde se explica
+        cada sección). Cambian el nombre, los puertos, las variables, la carpeta de scripts y el log group.
+      </p>
+      <p>
+        ECS → <strong>Definiciones de tareas</strong> → <strong>Crear nueva definición de tarea</strong>. No partir de
+        <strong>Crear nueva revisión</strong> sobre <code>forms-server</code>: cambiaría la familia de Forms. Para partir de su
+        configuración usar el <a href="#anexo-json">JSON del anexo</a> con <strong>Crear nueva definición de tarea con JSON</strong>.
+      </p>
 
-      <ol>
-        <li>ECS → <strong>Definiciones de tareas</strong> → <strong>Crear nueva definición de tarea</strong></li>
-        <li>Familia: <code>reports-server</code></li>
-      </ol>
-      <div class="callout">
-        Alternativa: abrir <code>forms-server</code> (última revisión) → <strong>Crear nueva revisión</strong>
-        no sirve, porque cambiaría la familia de Forms. Para partir de la configuración de Forms usar
-        el <a href="#anexo-json">JSON del anexo</a> con <strong>Crear nueva definición de tarea con JSON</strong>.
-      </div>
-      <figure class="shot" data-shot="paso-1">
-        <img src="assets/paso-01-02-familia-infra.png" alt="Familia de definición de tareas reports-server, revisión de fuente 2" />
-        <figcaption>Paso 1 — Familia <code>reports-server</code> (pantalla de nueva revisión a partir de la revisión 2)</figcaption>
-      </figure>
-        </section>
-
-        <section class="slide-block" id="paso-2">
-          <h3><span class="num">2</span> Infraestructura y roles<span class="status pending">Pendiente</span></h3>
-
+      <h4 class="sub" id="paso-1-1">1.1 · Familia, Fargate, tamaño y roles</h4>
       <div class="tabla"><table>
         <tr><th>Campo</th><th>Valor</th></tr>
-        <tr><td>Tipo de inicio</td><td>AWS Fargate</td></tr>
-        <tr><td>SO / Arquitectura</td><td>Linux / X86_64</td></tr>
-        <tr><td>CPU</td><td>2 vCPU</td></tr>
-        <tr><td>Memoria</td><td>4 GB (subir a 8 GB si hay reportes pesados o varios engines <code>rwEng</code>)</td></tr>
-        <tr><td>Rol de tarea</td><td><code>ecs-forms-admin-task-role</code></td></tr>
-        <tr><td>Rol de ejecución</td><td><code>ecsTaskExecutionRole</code></td></tr>
+        <tr><td>Familia</td><td><code>reports-server</code></td></tr>
+        <tr><td>Tipo de inicio / SO</td><td>AWS Fargate · Linux/X86_64</td></tr>
+        <tr><td>CPU / memoria</td><td>2 vCPU / 4 GB (8 GB si hay reportes pesados)</td></tr>
+        <tr><td>Rol de tarea / ejecución</td><td><code>ecs-forms-admin-task-role</code> / <code>ecsTaskExecutionRole</code> (<a href="../admin/index.html#paso-3-2">Admin 3.2</a>)</td></tr>
       </table></div>
       <div class="callout">
-        Reports lanza procesos engine (<code>rwEngine</code>) adicionales a la JVM de
-        <code>WLS_REPORTS</code>; con 4 GB alcanza para pruebas con reportes modelo. Si aparece
-        <code>OutOfMemoryError</code> o la tarea se detiene con <code>OutOfMemory</code> /
-        exit code <code>137</code>, crear una nueva revisión con 8 GB.
+        Reports lanza procesos engine (<code>rwEngine</code>) aparte de la JVM de <code>WLS_REPORTS</code>. Con 4 GB alcanza para
+        reportes modelo; si aparece <code>OutOfMemoryError</code> o la tarea se detiene con exit code <code>137</code>,
+        crear una nueva revisión con 8 GB.
       </div>
-      <figure class="shot" data-shot="paso-2">
-        <img src="assets/paso-01-02-familia-infra.png" alt="Requisitos de infraestructura: AWS Fargate, Linux/X86_64, awsvpc, 2 vCPU, 4 GB" />
-        <figcaption>Paso 2 — Fargate, Linux/X86_64, 2 vCPU, 4 GB</figcaption>
+      <figure class="shot" data-shot="paso-1-1a">
+        <img src="assets/paso-01-02-familia-infra.png" alt="Familia reports-server; Fargate, Linux/X86_64, awsvpc, 2 vCPU, 4 GB" />
+        <figcaption>Paso 1.1a — Familia <code>reports-server</code>, Fargate, 2 vCPU, 4 GB</figcaption>
       </figure>
-      <figure class="shot" data-shot="paso-2b">
-        <img src="assets/paso-02b-03a-roles-imagen.png" alt="Rol de tarea ecs-forms-admin-task-role y rol de ejecución ecsTaskExecutionRole" />
-        <figcaption>Paso 2b — Rol de tarea <code>ecs-forms-admin-task-role</code> + ejecución <code>ecsTaskExecutionRole</code></figcaption>
+      <figure class="shot" data-shot="paso-1-1b">
+        <img src="assets/paso-02b-03a-roles-imagen.png" alt="Rol de tarea ecs-forms-admin-task-role, rol de ejecución y contenedor reports-server con imagen por digest" />
+        <figcaption>Paso 1.1b — Roles y contenedor <code>reports-server</code> con imagen <code>forms-docker@sha256:fbdf8505…</code> (<code>r2</code>)</figcaption>
       </figure>
-        </section>
 
-        <section class="slide-block" id="paso-3">
-          <h3><span class="num">3</span> Contenedor: imagen, puertos, entorno, comando<span class="status pending">Pendiente</span></h3>
-
+      <h4 class="sub" id="paso-1-2">1.2 · Contenedor: imagen y puertos</h4>
+      <p>
+        Contenedor <code>reports-server</code> (esencial), imagen <code>forms-docker:r2</code> fijada por digest. Puertos del managed
+        server y de su Node Manager:
+      </p>
       <div class="tabla"><table>
-        <tr><th>Campo</th><th>Valor</th></tr>
-        <tr><td>Nombre</td><td><code>reports-server</code></td></tr>
-        <tr><td>Esencial</td><td>Sí</td></tr>
-        <tr><td>URI imagen</td><td><code>730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:r2</code> (ver <a href="#anexo-r2">Anexo — imagen r2</a>)</td></tr>
-        <tr><td>Puertos</td><td>9012 / 9512 / 9992 / 5556</td></tr>
-        <tr><td>Comando (pruebas)</td><td>Entrypoint <code>sh,-c</code> + comando <code>sleep infinity</code></td></tr>
-        <tr><td>Comando (producción)</td><td><code>/u01/oracle/scripts/entrypoint.sh</code></td></tr>
-        <tr><td>Directorio de trabajo</td><td><code>/u01/oracle</code></td></tr>
-      </table></div>
-
-      <h4 class="sub">Mapeos de puertos</h4>
-      <div class="tabla"><table>
-        <tr><th>Puerto</th><th>Protocolo</th><th>Nombre</th><th>App protocol</th><th>Uso</th></tr>
-        <tr><td><code>9012</code></td><td>TCP</td><td><code>wls-reports-http</code></td><td>HTTP</td><td><code>WLS_REPORTS</code> HTTP (<code>/reports/rwservlet</code>)</td></tr>
-        <tr><td><code>9512</code></td><td>TCP</td><td><code>wls-reports-https</code></td><td>HTTP</td><td><code>WLS_REPORTS</code> HTTPS</td></tr>
-        <tr><td><code>9992</code></td><td>TCP</td><td><code>wls-reports-admin</code></td><td>—</td><td>Administration Port del managed</td></tr>
-        <tr><td><code>5556</code></td><td>TCP</td><td><code>nodemanager</code></td><td>—</td><td>Node Manager <code>ReportsMachine</code></td></tr>
+        <tr><th>Puerto</th><th>Nombre</th><th>Uso</th></tr>
+        <tr><td><code>9012</code></td><td><code>wls-reports-http</code></td><td><code>WLS_REPORTS</code> HTTP (<code>/reports/rwservlet</code>)</td></tr>
+        <tr><td><code>9512</code></td><td><code>wls-reports-https</code></td><td><code>WLS_REPORTS</code> HTTPS</td></tr>
+        <tr><td><code>9992</code></td><td><code>wls-reports-admin</code></td><td>Administration Port del managed</td></tr>
+        <tr><td><code>5556</code></td><td><code>nodemanager</code></td><td>Node Manager de <code>ReportsMachine</code></td></tr>
       </table></div>
       <div class="callout">
-        En compose el Node Manager de Reports se publicaba como <code>5558:5556</code> para no chocar
-        con admin y forms en el mismo host. En Fargate cada tarea tiene su propia ENI/IP, así que se
-        usa <code>5556</code> directo.
+        En compose el Node Manager de Reports se publicaba como <code>5558:5556</code> para no chocar con admin y forms en el mismo
+        host. En Fargate cada tarea tiene su propia IP, así que se usa <code>5556</code> directo.
       </div>
+      <figure class="shot" data-shot="paso-1-2">
+        <img src="assets/paso-03b-puertos.png" alt="Mapeos de puertos 9012, 9512, 9992 y 5556 TCP" />
+        <figcaption>Paso 1.2 — Puertos 9012, 9512, 9992, 5556</figcaption>
+      </figure>
 
-      <p>Variables de entorno (equivalentes al servicio <code>reports</code> del compose):</p>
+      <h4 class="sub" id="paso-1-3">1.3 · Variables de entorno</h4>
+      <p>Equivalentes al servicio <code>reports</code> del compose. Indican dónde está el AdminServer y qué managed server arrancar:</p>
       <pre class="code">ORACLE_HOME=/u01/oracle
 DOMAIN_NAME=forms_domain
 DOMAIN_HOME=/u01/oracle/user_projects/domains/forms_domain
@@ -1581,472 +1530,278 @@ MANAGED_SERVER_PORT=9012
 NODE_MANAGER_PORT=5556
 LD_LIBRARY_PATH=/u01/oracle/lib:/u01/oracle/oracle_common/lib</pre>
       <div class="callout warn">
-        <strong>No</strong> copiar la línea del compose <code>PATH=/u01/oracle/bin:…:${PATH}</code>:
-        ECS <strong>no</strong> expande <code>${PATH}</code> y el contenedor falla con
-        <code>exec: "sleep": executable file not found in $PATH</code>. Omitir <code>PATH</code>
-        o definirlo completo:
-        <code>/u01/oracle/bin:/u01/oracle/oracle_common/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin</code>.
+        <strong>No</strong> copiar del compose <code>PATH=…:${PATH}</code>: ECS no expande <code>${PATH}</code> y el contenedor falla con
+        <code>exec: "sleep": executable file not found in $PATH</code> (<a href="../admin/index.html#paso-3-4">Admin 3.4</a>). Omitirlo o
+        definirlo completo: <code>/u01/oracle/bin:/u01/oracle/oracle_common/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin</code>.
       </div>
-      <div class="callout">
-        <code>ADMIN_SERVER_HOST=weblogic-admin.forms.local</code> ya resuelve vía Cloud Map
-        (registro creado en el servicio <code>forms-admin</code>). No usar el short name
-        <code>weblogic-admin</code> del compose.
-      </div>
-      <figure class="shot" data-shot="paso-3a">
-        <img src="assets/paso-02b-03a-roles-imagen.png" alt="Contenedor reports-server esencial, URI de imagen forms-docker@sha256:fbdf8505..." />
-        <figcaption>Paso 3a — Contenedor <code>reports-server</code> (esencial) con imagen ECR fijada por digest
-          <code>forms-docker@sha256:fbdf850571115d74a8abb6324c1471db7be03428c2fd9d2413fb02899365896f</code> (imagen <code>r2</code>)</figcaption>
-      </figure>
-      <figure class="shot" data-shot="paso-3b">
-        <img src="assets/paso-03b-puertos.png" alt="Mapeos de puertos 9012, 9512, 9992 y 5556 TCP" />
-        <figcaption>Paso 3b — Puertos 9012, 9512, 9992, 5556</figcaption>
-      </figure>
-      <figure class="shot" data-shot="paso-3c">
+      <figure class="shot" data-shot="paso-1-3">
         <img src="assets/paso-03c-env.png" alt="Variables de entorno de reports-server" />
-        <figcaption>Paso 3c — Environment (password en claro solo para pruebas; migrar a Secrets Manager)</figcaption>
+        <figcaption>Paso 1.3 — Variables de entorno (clave en claro solo para pruebas; migrar a Secrets Manager)</figcaption>
       </figure>
-      <figure class="shot" data-shot="paso-3d">
+
+      <h4 class="sub" id="paso-1-4">1.4 · Comando y directorio de trabajo</h4>
+      <p>
+        Punto de entrada <code>sh,-c</code>, comando <code>sleep infinity</code>, directorio <code>/u01/oracle</code>: la tarea queda viva
+        para entrar por ECS Exec y arrancar <code>WLS_REPORTS</code> a mano (por qué, en <a href="../admin/index.html#paso-3-5">Admin 3.5</a>).
+        Cuando el arranque sea estable se puede cambiar por un script de arranque en una nueva revisión, como en
+        <a href="../admin/index.html#paso-7d">Admin 7d</a>.
+      </p>
+      <figure class="shot" data-shot="paso-1-4">
         <img src="assets/paso-03d-comando.png" alt="Configuración de Docker: punto de entrada sh,-c, comando sleep infinity, directorio /u01/oracle" />
-        <figcaption>
-          Paso 3d — Docker config: punto de entrada <code>sh,-c</code>, comando
-          <code>sleep infinity</code>, directorio de trabajo <code>/u01/oracle</code>
-        </figcaption>
+        <figcaption>Paso 1.4 — Punto de entrada <code>sh,-c</code>, comando <code>sleep infinity</code>, directorio <code>/u01/oracle</code></figcaption>
       </figure>
-      <div class="callout warn">
-        Con <code>sleep infinity</code> la tarea queda <strong>RUNNING</strong> sin arrancar WebLogic,
-        para entrar con ECS Exec, ajustar el dominio (Paso 11) y arrancar Node Manager /
-        <code>WLS_REPORTS</code> a mano (Paso 12). Cuando el arranque sea estable, crear una nueva
-        revisión con <code>/u01/oracle/scripts/entrypoint.sh</code> como comando.
-      </div>
-        </section>
 
-        <section class="slide-block" id="paso-4">
-          <h3><span class="num">4</span> Almacenamiento efímero + volúmenes EFS<span class="status pending">Pendiente</span></h3>
+      <h4 class="sub" id="paso-1-5">1.5 · Almacenamiento efímero + volúmenes EFS</h4>
+      <p>
+        Mismo EFS y mismas carpetas que admin y Forms (<a href="../admin/index.html#paso-3-6">Admin 3.6</a>); el único cambio es la
+        carpeta de scripts, <code>scripts/reports</code>. Almacenamiento efímero <strong>100 GiB</strong>; cifrado en tránsito habilitado.
+      </p>
+      <div class="tabla"><table>
+        <tr><th>Volumen</th><th>Directorio raíz (filesystem <code>fs-08471cc88d2a8edc3</code>)</th></tr>
+        <tr><td><code>efs-domains</code></td><td><code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/domains</code></td></tr>
+        <tr><td><code>efs-app</code></td><td><code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/app</code></td></tr>
+        <tr><td><code>efs-scripts</code></td><td><code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/scripts/<strong>reports</strong></code></td></tr>
+      </table></div>
+      <figure class="shot" data-shot="paso-1-5a">
+        <img src="assets/paso-04a-ephemeral-efs-domains.png" alt="Almacenamiento efímero 100 GiB y volumen efs-domains" />
+        <figcaption>Paso 1.5a — Almacenamiento efímero 100 GiB y volumen <code>efs-domains</code></figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-1-5b">
+        <img src="assets/paso-04b-efs-app.png" alt="Volumen efs-app en EFS rector-dev" />
+        <figcaption>Paso 1.5b — Volumen <code>efs-app</code></figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-1-5c">
+        <img src="assets/paso-04b-efs-scripts.png" alt="Volumen efs-scripts con directorio raíz domain_forms/scripts/reports" />
+        <figcaption>Paso 1.5c — Volumen <code>efs-scripts</code> apuntando a <code>scripts/reports</code></figcaption>
+      </figure>
 
+      <h4 class="sub" id="paso-1-6">1.6 · Puntos de montaje y logs</h4>
+      <p>Mismas rutas en el contenedor que admin (<a href="../admin/index.html#paso-3-7">Admin 3.7</a>); logs en <code>/ecs/reports-server</code>.</p>
       <div class="tabla"><table>
         <tr><th>Campo</th><th>Valor</th></tr>
-        <tr><td>Almacenamiento efímero</td><td><strong>100</strong> GiB (la imagen es grande; con el default de 20 GiB falla con <code>no space left on device</code>)</td></tr>
-      </table></div>
-      <div class="tabla"><table>
-        <tr><th>Volumen</th><th>File system</th><th>Root directory</th><th>Cifrado en tránsito</th></tr>
-        <tr>
-          <td><code>efs-domains</code></td>
-          <td><code>fs-08471cc88d2a8edc3</code></td>
-          <td><code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/domains</code></td>
-          <td>Habilitado</td>
-        </tr>
-        <tr>
-          <td><code>efs-app</code></td>
-          <td><code>fs-08471cc88d2a8edc3</code></td>
-          <td><code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/app</code></td>
-          <td>Habilitado</td>
-        </tr>
-        <tr>
-          <td><code>efs-scripts</code></td>
-          <td><code>fs-08471cc88d2a8edc3</code></td>
-          <td><code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/scripts/reports</code></td>
-          <td>Habilitado</td>
-        </tr>
-      </table></div>
-      <div class="callout warn">
-        No anteponer <code>/domain</code> al root directory. El único cambio respecto a Forms es
-        <code>scripts/forms</code> → <code>scripts/reports</code>.
-      </div>
-      <figure class="shot" data-shot="paso-4a">
-        <img src="assets/paso-04a-ephemeral-efs-domains.png" alt="Almacenamiento efímero 100 GiB y volumen 1 efs-domains" />
-        <figcaption>Paso 4a — Almacenamiento efímero configurado en 100 GiB</figcaption>
-      </figure>
-      <figure class="shot" data-shot="paso-4b">
-        <img src="assets/paso-04a-ephemeral-efs-domains.png" alt="Volumen efs-domains en EFS rector-dev, directorio raíz domain_forms/domains" />
-        <figcaption>Paso 4b.1 — Volumen <code>efs-domains</code> en EFS</figcaption>
-      </figure>
-      <figure class="shot" data-shot="paso-4b-app">
-        <img src="assets/paso-04b-efs-app.png" alt="Volumen efs-app en EFS rector-dev, directorio raíz domain_forms/app" />
-        <figcaption>Paso 4b.2 — Volumen <code>efs-app</code> en EFS</figcaption>
-      </figure>
-      <figure class="shot" data-shot="paso-4b-scripts">
-        <img src="assets/paso-04b-efs-scripts.png" alt="Volumen efs-scripts en EFS rector-dev, directorio raíz domain_forms/scripts/reports" />
-        <figcaption>Paso 4b.3 — Volumen <code>efs-scripts</code> apuntando a <code>scripts/reports</code></figcaption>
-      </figure>
-        </section>
-
-        <section class="slide-block" id="paso-5">
-          <h3><span class="num">5</span> Puntos de montaje, logs y crear<span class="status pending">Pendiente</span></h3>
-
-      <div class="tabla"><table>
-        <tr><th>Volumen</th><th>Ruta contenedor</th><th>Solo lectura</th></tr>
-        <tr><td>efs-domains</td><td><code>/u01/oracle/user_projects/domains</code></td><td>No</td></tr>
-        <tr><td>efs-app</td><td><code>/u01/oracle/user_projects/apps</code></td><td>No</td></tr>
-        <tr><td>efs-scripts</td><td><code>/u01/oracle/scripts</code></td><td>No</td></tr>
-      </table></div>
-      <div class="tabla"><table>
-        <tr><th>Recopilación de logs</th><th>Valor</th></tr>
-        <tr><td>Driver</td><td><code>awslogs</code> (CloudWatch)</td></tr>
+        <tr><td><code>efs-domains</code> / <code>efs-app</code> / <code>efs-scripts</code></td><td><code>/u01/oracle/user_projects/domains</code> · <code>/u01/oracle/user_projects/apps</code> · <code>/u01/oracle/scripts</code></td></tr>
         <tr><td><code>awslogs-group</code></td><td><code>/ecs/reports-server</code></td></tr>
-        <tr><td><code>awslogs-create-group</code></td><td><code>true</code></td></tr>
-        <tr><td><code>awslogs-region</code></td><td><code>us-east-1</code></td></tr>
-        <tr><td><code>awslogs-stream-prefix</code></td><td><code>ecs</code></td></tr>
+        <tr><td><code>awslogs-region</code> / <code>awslogs-stream-prefix</code></td><td><code>us-east-1</code> / <code>ecs</code></td></tr>
       </table></div>
-      <p>Crear la definición → queda <code>reports-server:1</code>.</p>
-      <figure class="shot" data-shot="paso-5a">
+      <figure class="shot" data-shot="paso-1-6a">
         <img src="assets/paso-05a-mounts.png" alt="Puntos de montaje efs-domains, efs-app y efs-scripts en reports-server" />
-        <figcaption>Paso 5a — Puntos de montaje: <code>efs-domains</code> → <code>/u01/oracle/user_projects/domains</code>,
-          <code>efs-app</code> → <code>/u01/oracle/user_projects/apps</code>, <code>efs-scripts</code> → <code>/u01/oracle/scripts</code> (lectura/escritura)</figcaption>
+        <figcaption>Paso 1.6a — Puntos de montaje (lectura/escritura)</figcaption>
       </figure>
-      <figure class="shot" data-shot="paso-5f">
+      <figure class="shot" data-shot="paso-1-6b">
         <img src="assets/paso-05f-td-registro.png" alt="Recopilación de registros en CloudWatch: awslogs-group /ecs/reports-server" />
-        <figcaption>Paso 5 — Registro en CloudWatch: <code>awslogs-group=/ecs/reports-server</code>, <code>awslogs-region=us-east-1</code>,
-          <code>awslogs-stream-prefix=ecs</code>. <code>awslogs-create-group=true</code> no basta: el grupo se crea a mano (ver abajo)</figcaption>
-      </figure>
-      <figure class="shot" data-shot="paso-5b">
-        <img src="assets/paso-05b-td-creada.png" alt="Familia reports-server con revisiones 1 y 2 en estado Activo" />
-        <figcaption>Paso 5b — Definiciones de tareas → <code>reports-server</code>: revisiones <code>reports-server:1</code>
-          (creación inicial, imagen <code>r1</code>) y <code>reports-server:2</code> (imagen <code>r2</code>), ambas activas</figcaption>
-      </figure>
-      <figure class="shot" data-shot="paso-5b2">
-        <img src="assets/paso-05b2-td-revision2.png" alt="Detalle de reports-server:2: ACTIVE, Fargate, Linux/X86_64, awsvpc, 2 vCPU, 4 GiB" />
-        <figcaption>Paso 5b — Detalle de <code>reports-server:2</code>, la revisión vigente del servicio: ACTIVE, creada el 4 de octubre de 2026,
-          Fargate, Linux/X86_64, <code>awsvpc</code>, roles <code>ecs-forms-admin-task-role</code> / <code>ecsTaskExecutionRole</code>,
-          2 vCPU / 4 GiB y 3 volúmenes</figcaption>
+        <figcaption>Paso 1.6b — Registro en CloudWatch: <code>awslogs-group=/ecs/reports-server</code></figcaption>
       </figure>
 
-      <h4 class="sub">Crear el log group <code>/ecs/reports-server</code> en CloudWatch (obligatorio)</h4>
-      <div class="callout warn">
-        Aunque la TD lleva <code>awslogs-create-group=true</code>, <code>ecsTaskExecutionRole</code> no tiene
-        <code>logs:CreateLogGroup</code>. Si el grupo no existe, la tarea queda <strong>Detenido</strong> con
-        <code>ResourceInitializationError: failed to validate logger args ... AccessDeniedException ...
-        logs:CreateLogGroup</code>. <code>/ecs/forms-admin</code> y <code>/ecs/forms-server</code> ya existían, por
-        eso no ocurrió con Forms.
-      </div>
+      <h4 class="sub" id="paso-1-7">1.7 · Crear el log group <code>/ecs/reports-server</code> (obligatorio)</h4>
+      <p>
+        Aunque la TD lleva <code>awslogs-create-group=true</code>, <code>ecsTaskExecutionRole</code> no tiene permiso
+        <code>logs:CreateLogGroup</code>. Si el grupo no existe, la tarea queda <strong>Detenida</strong> con
+        <code>ResourceInitializationError: failed to validate logger args ... AccessDeniedException ... logs:CreateLogGroup</code>.
+        <code>/ecs/forms-admin</code> y <code>/ecs/forms-server</code> ya existían, por eso no ocurrió con admin ni Forms.
+      </p>
       <ol>
-        <li>CloudWatch → <strong>Registros</strong> → <strong>Administración de registros</strong> →
-          <strong>Crear un grupo de registros</strong></li>
-        <li>Nombre: <code>/ecs/reports-server</code> (con la barra inicial)</li>
-        <li>Retención: <em>No vence nunca</em> (igual que los grupos de Forms); clase <em>Estándar</em>; sin KMS</li>
-        <li><strong>Crear</strong></li>
+        <li>CloudWatch → <strong>Registros</strong> → <strong>Administración de registros</strong> → <strong>Crear un grupo de registros</strong>.</li>
+        <li>Nombre <code>/ecs/reports-server</code> (con la barra inicial); retención <em>No vence nunca</em>; clase <em>Estándar</em>; sin KMS.</li>
+        <li><strong>Crear</strong>.</li>
       </ol>
       <pre class="code">aws logs create-log-group --log-group-name /ecs/reports-server --region us-east-1</pre>
-      <figure class="shot" data-shot="paso-5c">
-        <img src="assets/paso-05c-cloudwatch-grupos.png" alt="CloudWatch Administración de registros: lista de grupos y botón Crear un grupo de registros" />
-        <figcaption>Paso 5c — CloudWatch → Administración de registros → <strong>Crear un grupo de registros</strong></figcaption>
+      <figure class="shot" data-shot="paso-1-7a">
+        <img src="assets/paso-05c-cloudwatch-grupos.png" alt="CloudWatch Administración de registros: botón Crear un grupo de registros" />
+        <figcaption>Paso 1.7a — CloudWatch → <strong>Crear un grupo de registros</strong></figcaption>
       </figure>
-      <figure class="shot" data-shot="paso-5d">
-        <img src="assets/paso-05d-crear-log-group.png" alt="Formulario Crear un grupo de registros con nombre /ecs/reports-server, retención No vence nunca, clase Estándar" />
-        <figcaption>Paso 5d — Nombre <code>/ecs/reports-server</code>, retención <em>No vence nunca</em>, clase <em>Estándar</em></figcaption>
+      <figure class="shot" data-shot="paso-1-7b">
+        <img src="assets/paso-05d-crear-log-group.png" alt="Formulario con nombre /ecs/reports-server, retención No vence nunca, clase Estándar" />
+        <figcaption>Paso 1.7b — Nombre <code>/ecs/reports-server</code>, retención <em>No vence nunca</em></figcaption>
       </figure>
-      <figure class="shot" data-shot="paso-5e">
+      <figure class="shot" data-shot="paso-1-7c">
         <img src="assets/paso-05e-log-group-creado.png" alt="Grupo /ecs/reports-server creado junto a /ecs/forms-admin y /ecs/forms-server" />
-        <figcaption>Paso 5e — Grupo creado: <code>/ecs/reports-server</code> junto a <code>/ecs/forms-admin</code> y <code>/ecs/forms-server</code></figcaption>
+        <figcaption>Paso 1.7c — Grupo creado junto a <code>/ecs/forms-admin</code> y <code>/ecs/forms-server</code></figcaption>
       </figure>
-      <p>
-        Si el servicio ya se había creado y sus tareas fallaron por este motivo: <code>reports-server</code> →
-        <strong>Actualizar servicio</strong> → <strong>Forzar nueva implementación</strong>.
-      </p>
+      <p>Si el servicio ya existía y sus tareas fallaron por esto: <strong>Actualizar servicio</strong> → <strong>Forzar nueva implementación</strong>.</p>
+
+      <h4 class="sub" id="paso-1-8">1.8 · Crear</h4>
+      <p>La primera revisión fue <code>reports-server:1</code> (imagen <code>r1</code>); la vigente es <code>reports-server:2</code> (imagen <code>r2</code>).</p>
+      <figure class="shot" data-shot="paso-1-8a">
+        <img src="assets/paso-05b-td-creada.png" alt="Familia reports-server con revisiones 1 y 2 en estado Activo" />
+        <figcaption>Paso 1.8a — Revisiones <code>reports-server:1</code> y <code>reports-server:2</code>, ambas activas</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-1-8b">
+        <img src="assets/paso-05b2-td-revision2.png" alt="Detalle de reports-server:2: ACTIVE, Fargate, 2 vCPU, 4 GiB" />
+        <figcaption>Paso 1.8b — Detalle de <code>reports-server:2</code>: Fargate, <code>awsvpc</code>, 2 vCPU / 4 GiB, 3 volúmenes</figcaption>
+      </figure>
         </section>
 
-        <section class="slide-block" id="paso-6">
-          <h3><span class="num">6</span> Crear servicio en el cluster<span class="status pending">Pendiente</span></h3>
+        <!-- ═════════════ SERVICIO ═════════════ -->
 
+        <section class="slide-block" id="paso-2">
+          <h3><span class="num">2</span> Crear servicio + Service Discovery<span class="status done">Hecho</span></h3>
+      <p>
+        El servicio <code>reports-server</code> mantiene una tarea Reports en ejecución. El asistente es el mismo que el del servicio
+        admin (<a href="../admin/index.html#paso-4">Admin 4</a>, con cada sección explicada); cambian el nombre de Service Discovery
+        y la apertura del puerto 9012.
+      </p>
+
+      <h4 class="sub" id="paso-2-1">2.1 · Crear el servicio</h4>
       <ol>
-        <li>Cluster <code>forms_report</code> → Servicios → <strong>Crear</strong></li>
-        <li>Task definition: familia <code>reports-server</code>, revisión más reciente</li>
-        <li>Nombre servicio: <code>reports-server</code></li>
-        <li>Tareas deseadas: <code>1</code></li>
-        <li>Cómputo: Fargate (capacity provider), plataforma <code>LATEST</code></li>
-        <li>Encender <strong>ECS Exec</strong></li>
+        <li>Cluster <code>forms_report</code> → pestaña <strong>Servicios</strong> → <strong>Crear</strong>.</li>
+        <li>Familia <code>reports-server</code> (revisión más reciente); nombre <code>reports-server</code>; tareas deseadas <code>1</code>.</li>
+        <li>Cómputo Fargate, plataforma <code>LATEST</code>, <strong>ECS Exec</strong> encendido.</li>
       </ol>
-      <div class="callout warn">
-        <strong>Antes de pulsar Crear</strong>, completar la sección de
-        <strong>Detección de servicios</strong> (Paso 8). En ECS el Service Discovery solo se
-        asocia al <strong>crear</strong> el servicio; si se omite, hay que eliminar y recrear el servicio.
-      </div>
-      <figure class="shot" data-shot="paso-6a">
-        <img src="assets/paso-06a-servicios-cluster.png" alt="Cluster forms_report con los servicios admin y forms activos, botón Crear" />
-        <figcaption>
-          Paso 6a — Cluster <code>forms_report</code> → Servicios: <code>admin</code> (<code>forms-admin:6</code>)
-          y <code>forms</code> (<code>forms-server:9</code>) en ejecución → <strong>Crear</strong>
-        </figcaption>
+      <figure class="shot" data-shot="paso-2-1a">
+        <img src="assets/paso-06a-servicios-cluster.png" alt="Cluster forms_report con admin y forms activos, botón Crear" />
+        <figcaption>Paso 2.1a — Servicios <code>admin</code> y <code>forms</code> en ejecución → <strong>Crear</strong></figcaption>
       </figure>
-      <figure class="shot" data-shot="paso-6b">
-        <img src="assets/paso-06b-detalles-servicio.png" alt="Detalles del servicio reports-server, revisión 1, proveedor de capacidad FARGATE" />
-        <figcaption>
-          Paso 6b — Familia <code>reports-server</code> revisión <code>1</code>, nombre <code>reports-server</code>;
-          estrategia de proveedor de capacidad personalizada: <code>FARGATE</code>, base 0, peso 1
-        </figcaption>
+      <figure class="shot" data-shot="paso-2-1b">
+        <img src="assets/paso-06b-detalles-servicio.png" alt="Detalles del servicio reports-server, proveedor de capacidad FARGATE" />
+        <figcaption>Paso 2.1b — Familia y nombre <code>reports-server</code>; capacidad <code>FARGATE</code></figcaption>
       </figure>
-      <figure class="shot" data-shot="paso-6c">
-        <img src="assets/paso-06c-compute.png" alt="Plataforma LATEST, ECS Exec encendido, réplica con 1 tarea deseada" />
-        <figcaption>
-          Paso 6c — Plataforma <code>LATEST</code>, <strong>ECS Exec</strong> encendido; implementación
-          Réplica con <code>1</code> tarea deseada y reequilibrio de zonas de disponibilidad habilitado
-        </figcaption>
+      <figure class="shot" data-shot="paso-2-1c">
+        <img src="assets/paso-06c-compute.png" alt="Plataforma LATEST, ECS Exec encendido, réplica con 1 tarea" />
+        <figcaption>Paso 2.1c — Plataforma <code>LATEST</code>, ECS Exec encendido, réplica con 1 tarea</figcaption>
       </figure>
-        </section>
 
-        <section class="slide-block" id="paso-7">
-          <h3><span class="num">7</span> Opciones de implementación<span class="status pending">Pendiente</span></h3>
-
-      <div class="tabla"><table>
-        <tr><th>Campo</th><th>Valor</th></tr>
-        <tr><td>Tipo de servicio</td><td>Réplica, desired = 1</td></tr>
-        <tr><td>Estrategia</td><td>Actualización acumulativa</td></tr>
-        <tr><td>Mín. healthy %</td><td>0</td></tr>
-        <tr><td>Máx. %</td><td>200 (si AZ rebalancing está ON)</td></tr>
-        <tr><td>Balanceador de carga / Auto scaling</td><td>No (por ahora)</td></tr>
-      </table></div>
-      <div class="callout">
-        Mín. 0 % evita que durante un redeploy convivan dos tareas <code>WLS_REPORTS</code>
-        escribiendo sobre el mismo dominio en EFS (no es un cluster activo-activo).
-      </div>
-      <figure class="shot" data-shot="paso-7">
-        <img src="assets/paso-07-deploy.png" alt="Réplica con 1 tarea, controlador ECS, actualización acumulativa, mínimo 0 % y máximo 200 %" />
-        <figcaption>
-          Paso 7 — Réplica con <code>1</code> tarea deseada, reequilibrio de zonas habilitado;
-          controlador <code>ECS</code>, <strong>Actualización acumulativa</strong>, mín <code>0</code> % / máx <code>200</code> %
-        </figcaption>
-      </figure>
-        </section>
-
-        <section class="slide-block" id="paso-8">
-          <h3><span class="num">8</span> Service Discovery <code>weblogic-reports</code><span class="status pending">Pendiente</span></h3>
-
+      <h4 class="sub" id="paso-2-2">2.2 · Opciones de implementación</h4>
       <p>
-        Mismo esquema que <code>weblogic-admin</code> en el servicio <code>forms-admin</code>.
-        Registra la IP privada de la tarea como <code>weblogic-reports.forms.local</code>, que es el
-        host que usan <code>ReportsMachine</code>, el Node Manager de Reports y Coherence WKA.
+        Actualización acumulativa, mín. <code>0</code> % / máx. <code>200</code> % (<a href="../admin/index.html#paso-4-3">Admin 4.3</a>).
+        El mínimo 0 % evita que durante un redespliegue convivan dos <code>WLS_REPORTS</code> escribiendo sobre el mismo dominio en EFS.
+      </p>
+      <figure class="shot" data-shot="paso-2-2">
+        <img src="assets/paso-07-deploy.png" alt="Réplica con 1 tarea, actualización acumulativa, mínimo 0 % y máximo 200 %" />
+        <figcaption>Paso 2.2 — Actualización acumulativa, mín 0 % / máx 200 %</figcaption>
+      </figure>
+
+      <h4 class="sub" id="paso-2-3">2.3 · Service Discovery <code>weblogic-reports</code></h4>
+      <p>
+        Registra la tarea como <code>weblogic-reports.forms.local</code>, el host que usan <code>ReportsMachine</code>, el Node Manager
+        de Reports y Coherence. Mismo procedimiento que <code>weblogic-admin</code> (<a href="../admin/index.html#paso-4-6">Admin 4.6</a>).
       </p>
       <div class="tabla"><table>
         <tr><th>Campo</th><th>Valor</th></tr>
-        <tr><td>Utilizar la detección de servicios</td><td>Marcado</td></tr>
         <tr><td>Espacio de nombres</td><td>Existente: <code>forms.local</code> (<code>ns-r3zqawwpjtp5pzue</code>)</td></tr>
-        <tr><td>Servicio de detección</td><td><strong>Crear un nuevo servicio de detección</strong></td></tr>
-        <tr><td>Nombre de detección</td><td><code>weblogic-reports</code></td></tr>
-        <tr><td>DNS resultante</td><td><code>weblogic-reports.forms.local</code></td></tr>
-        <tr><td>Propagación estado ECS</td><td>Habilitada</td></tr>
-        <tr><td>Tipo de registro DNS</td><td><code>A</code></td></tr>
-        <tr><td>TTL</td><td><code>15</code></td></tr>
+        <tr><td>Servicio de detección</td><td>Nuevo: <code>weblogic-reports</code></td></tr>
+        <tr><td>Registro DNS / TTL</td><td><code>A</code> / <code>15</code> · propagación de estado ECS habilitada</td></tr>
       </table></div>
-      <figure class="shot" data-shot="paso-8">
-        <img src="assets/paso-08-service-discovery-weblogic-reports.png" alt="Detección de servicios: namespace existente ns-r3zqawwpjtp5pzue, nuevo servicio weblogic-reports, registro A TTL 15" />
-        <figcaption>
-          Paso 8 — Detección de servicios: namespace existente <code>forms.local</code>
-          (<code>ns-r3zqawwpjtp5pzue</code>), nuevo servicio <code>weblogic-reports</code>,
-          propagación de estado ECS habilitada, registro <code>A</code>, TTL 15
-        </figcaption>
-      </figure>
-        </section>
-
-        <section class="slide-block" id="paso-9">
-          <h3><span class="num">9</span> Redes + puerto 9012 en el Security Group<span class="status pending">Pendiente</span></h3>
-
-      <div class="tabla"><table>
-        <tr><th>Campo</th><th>Valor</th></tr>
-        <tr><td>VPC</td><td><code>vpc-055a4007418b34e64</code></td></tr>
-        <tr><td>Subnet del servicio</td><td><strong>Solo</strong> <code>subnet-01212efd4a9ce759b</code> / <code>vpc-Banesco-Seguros-VE-dev-pub-A-SN</code></td></tr>
-        <tr><td>Security group</td><td><code>sg-0e1787d32bac71fcd</code> (<code>forms-sg-ecs</code>)</td></tr>
-        <tr><td>IP pública</td><td>ENABLED</td></tr>
-        <tr><td>BD Oracle</td><td><code>192.168.229.137</code> vía peering <code>pcx-0ad20c217472c7080</code> (ruta ya existente en <code>Pub-RT</code>)</td></tr>
-      </table></div>
-      <div class="callout warn">
-        <strong>No asociar <code>database-A</code>.</strong> Si el servicio incluye ambas subnets, ECS puede
-        colocar la tarea en la privada: la IP pública queda asignada pero no responde desde Internet
-        (salida por NAT, no por IGW). La ruta <code>192.168.229.137/32 → pcx</code> en <code>Pub-RT</code>
-        ya da acceso a Oracle desde <code>pub-A</code>.
-      </div>
-      <figure class="shot" data-shot="paso-9a">
-        <img src="assets/paso-09a-redes-servicio.png" alt="Redes: VPC vpc-055a4007418b34e64, solo subnet pub-A, SG forms-sg-ecs, IP pública activada" />
-        <figcaption>
-          Paso 9a — Red del servicio: VPC <code>vpc-055a4007418b34e64</code>, solo
-          <code>subnet-01212efd4a9ce759b</code> (<code>pub-A-SN</code>, us-east-1a, <code>10.171.240.0/25</code>),
-          SG <code>forms-sg-ecs</code>, IP pública activada
-        </figcaption>
+      <div class="callout warn">Completar esta sección <strong>antes</strong> de pulsar Crear: solo se puede asociar al crear el servicio.</div>
+      <figure class="shot" data-shot="paso-2-3">
+        <img src="assets/paso-08-service-discovery-weblogic-reports.png" alt="Detección de servicios: namespace forms.local, nuevo servicio weblogic-reports, registro A TTL 15" />
+        <figcaption>Paso 2.3 — Service Discovery <code>weblogic-reports</code>, registro <code>A</code>, TTL 15</figcaption>
       </figure>
 
-      <h4 class="sub">Reglas de entrada en <code>forms-sg-ecs</code> (consola EC2, sesión aparte)</h4>
+      <h4 class="sub" id="paso-2-4">2.4 · Redes del servicio</h4>
       <p>
-        Las reglas no se editan en el asistente del servicio: EC2 → <strong>Grupos de seguridad</strong>
-        → <code>forms-sg-ecs</code> → <strong>Editar reglas de entrada</strong>.
+        Misma red que admin: <strong>solo</strong> <code>pub-A</code>, SG <code>forms-sg-ecs</code> e IP pública activada
+        (<a href="../admin/index.html#paso-4-9">Admin 4.9</a>). La ruta a la BD ya existe en <code>Pub-RT</code>
+        (<a href="../admin/index.html#paso-4-10">Admin 4.10</a>); no asociar <code>database-A</code>.
+      </p>
+      <figure class="shot" data-shot="paso-2-4">
+        <img src="assets/paso-09a-redes-servicio.png" alt="Redes: solo subnet pub-A, SG forms-sg-ecs, IP pública activada" />
+        <figcaption>Paso 2.4 — Solo <code>pub-A</code>, SG <code>forms-sg-ecs</code>, IP pública activada</figcaption>
+      </figure>
+
+      <h4 class="sub" id="paso-2-5">2.5 · Regla de entrada 9012 en <code>forms-sg-ecs</code></h4>
+      <p>
+        Para acceder a <code>rwservlet</code> desde fuera se abre el 9012 en el security group compartido
+        (<a href="../admin/index.html#paso-1-2">Admin 1.2</a>), desde <strong>EC2 → Grupos de seguridad</strong>, no desde el asistente.
+        La regla interna <strong>Todo el tráfico</strong> cubre Node Manager, Administration Port y Coherence entre los tres contenedores.
       </p>
       <div class="tabla"><table>
         <tr><th>Puerto</th><th>Uso</th><th>Origen recomendado</th></tr>
-        <tr><td><code>9012</code></td><td>Reports HTTP (<code>rwservlet</code>)</td><td><strong>My IP /32</strong> o red corporativa</td></tr>
-        <tr><td><code>9512</code></td><td>Reports HTTPS</td><td>No se abre (HTTPS no se usa en DEV)</td></tr>
-        <tr><td><code>9992</code></td><td>Administration Port <code>WLS_REPORTS</code></td><td>Solo SG interno (<code>forms-sg-ecs</code> → <code>forms-sg-ecs</code>)</td></tr>
-        <tr><td><code>5556</code></td><td>Node Manager <code>ReportsMachine</code></td><td>Solo SG interno (el AdminServer lo usa para arrancar <code>WLS_REPORTS</code>)</td></tr>
-        <tr><td><code>7574</code> UDP</td><td>Coherence (descubrimiento WKA entre <code>WLS_FORMS</code> y <code>WLS_REPORTS</code>)</td><td>Solo SG interno</td></tr>
+        <tr><td><code>9012</code></td><td>Reports HTTP (<code>rwservlet</code>)</td><td>IP de administración <code>/32</code> o red corporativa</td></tr>
+        <tr><td><code>9512</code></td><td>Reports HTTPS</td><td>No se abre en DEV</td></tr>
+        <tr><td><code>9992</code> · <code>5556</code> · UDP <code>7574</code></td><td>Administration Port · Node Manager · Coherence</td><td>Solo regla interna del SG</td></tr>
       </table></div>
-      <div class="callout">
-        Como admin, forms y reports comparten <code>forms-sg-ecs</code>, una sola regla
-        <strong>Todo el tráfico</strong> con origen <code>sg-0e1787d32bac71fcd</code> (el propio SG) cubre
-        AdminServer ↔ Node Manager ↔ managed (TCP) y Coherence (UDP <code>7574</code>; el cluster
-        <code>defaultCoherenceCluster</code> lo comparten <code>cluster_forms</code> y <code>cluster_reports</code>)
-        sin abrir esos puertos a Internet. Si ya existe <strong>Todos los TCP</strong> desde el SG, agregar
-        <strong>Todos los UDP</strong> con el mismo origen.
-      </div>
-      <figure class="shot" data-shot="paso-9b">
-        <img src="assets/paso-09b-regla-9012.png" alt="Editar reglas de entrada de forms-sg-ecs: 9001, 7001, 9012 desde 0.0.0.0/0 y Todos los TCP desde sg-0e1787d32bac71fcd" />
-        <figcaption>
-          Paso 9b — Reglas de entrada de <code>forms-sg-ecs</code>: se agregan <code>9012</code>
-          (<em>Anywhere-IPv4</em>, <code>Reports HTTP access</code>) y <strong>Todos los TCP</strong> con origen
-          <code>sg-0e1787d32bac71fcd</code> (<code>Interno admin-forms-reports</code>), elegido en el buscador
-          bajo <em>Grupos de seguridad</em>
-        </figcaption>
-      </figure>
       <div class="callout warn">
-        En DEV se puede usar temporalmente <code>0.0.0.0/0</code> en 9012; reemplazar por la tabla
-        anterior antes de pasar a QA/PROD.
+        Coherence (<code>defaultCoherenceCluster</code>, compartido por <code>cluster_forms</code> y <code>cluster_reports</code>) descubre
+        miembros por <strong>UDP 7574</strong>. Si la regla interna es solo <strong>Todos los TCP</strong>, agregar <strong>Todos los UDP</strong>
+        con el mismo origen. <code>0.0.0.0/0</code> en 9012 solo en DEV.
       </div>
-      <p>
-        Revisar el resumen y pulsar <strong>Crear</strong>. La consola vuelve al clúster con el aviso
-        <em>“La implementación de reports-server está en curso”</em> (se despliega vía CloudFormation).
-      </p>
-      <figure class="shot" data-shot="paso-9c">
-        <img src="assets/paso-09c-servicio-creado.png" alt="Clúster forms_report: admin y forms 1/1, reports-server 0/1 con implementación En curso" />
-        <figcaption>
-          Paso 9c — Tras <strong>Crear</strong>: clúster <code>forms_report</code> con 3 servicios;
-          <code>admin</code> y <code>forms</code> en 1/1, <code>reports-server</code> en 0/1 con la implementación
-          <strong>En curso</strong> (pasa a 1/1 en unos minutos)
-        </figcaption>
+      <figure class="shot" data-shot="paso-2-5">
+        <img src="assets/paso-09b-regla-9012.png" alt="Reglas de entrada de forms-sg-ecs: 9001, 7001, 9012 y Todos los TCP desde el propio SG" />
+        <figcaption>Paso 2.5 — Reglas de entrada: <code>9012</code> (<em>Reports HTTP access</em>) y regla interna desde <code>sg-0e1787d32bac71fcd</code></figcaption>
+      </figure>
+
+      <h4 class="sub" id="paso-2-6">2.6 · Crear</h4>
+      <p>La consola vuelve al cluster con el aviso <em>“La implementación de reports-server está en curso”</em>.</p>
+      <figure class="shot" data-shot="paso-2-6">
+        <img src="assets/paso-09c-servicio-creado.png" alt="Clúster forms_report: admin y forms 1/1, reports-server 0/1 En curso" />
+        <figcaption>Paso 2.6 — <code>reports-server</code> en 0/1 con la implementación <strong>En curso</strong> (pasa a 1/1 en unos minutos)</figcaption>
       </figure>
         </section>
 
-        <section class="slide-block" id="paso-10">
-          <h3><span class="num">10</span> Verificar Running y ECS Exec<span class="status pending">Pendiente</span></h3>
+        <!-- ═════════════ VERIFICACIÓN ═════════════ -->
 
-      <ol>
-        <li>Esperar estado <strong>Running</strong> (el pull de la imagen puede tardar ~5 min).</li>
-        <li>Cloud Map → <code>forms.local</code> → <code>weblogic-reports</code>: debe aparecer una instancia con la IP privada de la tarea.</li>
-        <li>Conectar como <code>oracle</code> (para que apliquen las variables de la TD):</li>
-      </ol>
+        <section class="slide-block" id="paso-3">
+          <h3><span class="num">3</span> Verificar Running, Cloud Map y ECS Exec<span class="status done">Hecho</span></h3>
+      <p>
+        Como en admin (<a href="../admin/index.html#paso-5">Admin 5</a>): esperar la tarea en <strong>Ejecutando</strong> (la descarga de la
+        imagen tarda ~5 min), comprobar el registro <code>weblogic-reports</code> en Cloud Map y entrar con ECS Exec:
+      </p>
       <pre class="code">aws ecs execute-command \
   --cluster forms_report \
   --task &lt;TASK_ID&gt; \
   --container reports-server \
   --interactive \
-  --command "su - oracle"</pre>
-      <pre class="code"># Montajes
-df -h | grep -E 'domains|apps|scripts'
-ls /u01/oracle/user_projects/domains/forms_domain
-ls /u01/oracle/scripts          # entrypoint.sh, startNodeManager.sh, create-reports-machine.py
-
-# Variables
-env | grep -E 'ADMIN_|MANAGED_|DOMAIN_'
+  --command "su -s /bin/bash oracle"</pre>
+      <pre class="code">df -h | grep -E 'domains|apps|scripts'
+ls /u01/oracle/scripts          # scripts de reports
 
 # DNS Cloud Map: debe coincidir con la IP VPC de la tarea (eth1), no con 169.254.x.x
-getent hosts weblogic-reports.forms.local
-getent hosts weblogic-admin.forms.local
+getent hosts weblogic-reports.forms.local weblogic-admin.forms.local weblogic-forms.forms.local
 ip -4 -o addr show | awk '{print $2,$4}'
 
-# AdminServer alcanzable
-timeout 5 bash -c 'echo &gt;/dev/tcp/weblogic-admin.forms.local/7001' &amp;&amp; echo OK || echo FAIL
-
-# BD Oracle alcanzable
-timeout 5 bash -c 'echo &gt;/dev/tcp/192.168.229.137/1521' &amp;&amp; echo OK || echo FAIL</pre>
-      <figure class="shot" data-shot="paso-10a">
-        <img src="assets/paso-10a-running.png" alt="Tarea 5fcf8f1eafd546bba1f853972468cccd de reports-server:1 en estado Ejecutando; ciclo de vida completo" />
-        <figcaption>
-          Paso 10a — Tarea de <code>reports-server:1</code> en <strong>Ejecutando</strong> (2 vCPU / 4 GiB, Fargate).
-          La extracción de la imagen tardó ~5 min, por lo que el primer arranque toma 6–7 min.
-        </figcaption>
+timeout 5 bash -c 'echo &gt;/dev/tcp/weblogic-admin.forms.local/7001' &amp;&amp; echo OK || echo FAIL   # AdminServer
+timeout 5 bash -c 'echo &gt;/dev/tcp/192.168.229.137/1521' &amp;&amp; echo OK || echo FAIL              # BD Oracle</pre>
+      <figure class="shot" data-shot="paso-3a">
+        <img src="assets/paso-10a-running.png" alt="Tarea de reports-server:1 en estado Ejecutando" />
+        <figcaption>Paso 3a — Tarea en <strong>Ejecutando</strong>; la extracción de la imagen llevó ~5 min (primer arranque 6–7 min)</figcaption>
       </figure>
-      <figure class="shot" data-shot="paso-10b">
-        <img src="assets/paso-10b1-cloudmap-namespace.png" alt="Cloud Map: espacio de nombres forms.local (ns-r3zqawwpjtp5pzue)" />
-        <figcaption>Paso 10b.1 — Cloud Map → Espacios de nombres: <code>forms.local</code> (<code>ns-r3zqawwpjtp5pzue</code>),
-          "DNS interno Forms/Reports"</figcaption>
-      </figure>
-      <figure class="shot" data-shot="paso-10b2">
+      <figure class="shot" data-shot="paso-3b">
         <img src="assets/paso-10b2-cloudmap-servicios.png" alt="Servicios de forms.local: weblogic-admin, weblogic-reports, weblogic-forms" />
-        <figcaption>Paso 10b.2 — Servicios de <code>forms.local</code>: <code>weblogic-admin</code>, <code>weblogic-forms</code> y
-          <code>weblogic-reports</code> (<code>srv-rxsfsgokofubju6e</code>, creado el 4 de octubre de 2026 al crear el servicio ECS)</figcaption>
+        <figcaption>Paso 3b — Servicios de <code>forms.local</code>: <code>weblogic-admin</code>, <code>weblogic-forms</code> y <code>weblogic-reports</code></figcaption>
       </figure>
-      <figure class="shot" data-shot="paso-10b3">
+      <figure class="shot" data-shot="paso-3c">
         <img src="assets/paso-10b-cloudmap-weblogic-reports.png" alt="weblogic-reports: una instancia de servicio en buen estado" />
-        <figcaption>Paso 10b.3 — <code>weblogic-reports</code>: una instancia registrada, cuyo ID es el de la tarea ECS
-          (<code>5b2e0e86a89e45adb1e1f0a4da67e967</code>), en buen estado. Las etiquetas muestran que la creó la consola ECS
-          (stack <code>ECS-Console-V2-Service-reports-server-…</code>)</figcaption>
+        <figcaption>Paso 3c — <code>weblogic-reports</code>: una instancia registrada (ID = tarea ECS), en buen estado</figcaption>
       </figure>
-      <figure class="shot" data-shot="paso-10b4">
+      <figure class="shot" data-shot="paso-3d">
         <img src="assets/paso-10b4-getent-weblogic-reports.png" alt="getent hosts weblogic-reports.forms.local devuelve 10.171.240.80" />
-        <figcaption>Paso 10b.4 — Resolución DNS desde un contenedor: <code>weblogic-reports.forms.local</code> → <code>10.171.240.80</code>
-          (IP privada de la tarea; cambia en cada redeploy)</figcaption>
+        <figcaption>Paso 3d — <code>weblogic-reports.forms.local</code> → <code>10.171.240.80</code> (cambia en cada redespliegue)</figcaption>
       </figure>
-      <figure class="shot" data-shot="paso-10c">
+      <figure class="shot" data-shot="paso-3e">
         <img src="assets/paso-10c-exec.png" alt="ECS Exec en reports-server: montajes EFS, DNS Cloud Map, 7001 OK y 1521 OK" />
-        <figcaption>Paso 10c — ECS Exec a <code>reports-server</code>: los tres montajes EFS (<code>domains</code>, <code>app</code>,
-          <code>scripts/reports</code>); Cloud Map resuelve <code>weblogic-admin</code> (10.171.240.90), <code>weblogic-forms</code>
-          (10.171.240.110) y <code>weblogic-reports</code> (10.171.240.80); AdminServer <code>7001 OK</code> y BD
-          <code>192.168.229.137:1521 OK</code></figcaption>
+        <figcaption>Paso 3e — ECS Exec: montajes EFS, los tres nombres resuelven, AdminServer <code>7001 OK</code> y BD <code>1521 OK</code></figcaption>
       </figure>
         </section>
 
-        <section class="slide-block" id="paso-11">
-          <h3><span class="num">11</span> Ajustes del dominio para <code>weblogic-reports.forms.local</code><span class="status pending">Pendiente</span></h3>
-
+        <section class="slide-block" id="paso-4">
+          <h3><span class="num">4</span> Verificar hostnames del dominio<span class="status done">Hecho</span></h3>
       <p>
-        El dominio se creó con hostnames de compose (<code>weblogic-reports</code>). En ECS ese short
-        name no resuelve; hay que llevarlo al FQDN de Cloud Map, igual que se hizo con
-        <code>weblogic-admin</code> en la guía de Forms (Paso 12).
+        <code>ReportsMachine</code> y <code>nodemanager_reports/nodemanager.properties</code> deben usar
+        <code>weblogic-reports.forms.local</code>. El ajuste lo hace <code>set-cloudmap-hostnames.sh</code> una sola vez para las tres
+        Machines (<a href="../admin/index.html#paso-6">Admin 6</a>); aquí solo se verifica:
       </p>
-      <div class="callout">
-        <strong>Si se ejecutó <code>set-cloudmap-hostnames.sh</code></strong> (Paso 0), este paso es solo de
-        verificación: <code>/u01/oracle/scripts/set-cloudmap-hostnames.sh --check</code> en el contenedor
-        <code>admin</code>. La edición manual de abajo queda como referencia (es lo que hace el script).
-      </div>
+      <pre class="code">grep -n 'weblogic-reports' $DOMAIN_HOME/config/config.xml $DOMAIN_HOME/nodemanager_reports/nodemanager.properties
+# Esperado: solo weblogic-reports.forms.local, nunca el nombre corto</pre>
       <div class="callout warn">
-        El dominio está en EFS y lo comparten los tres contenedores. Hacer respaldo antes de editar y
-        aplicar los cambios con el AdminServer detenido o desde la consola WebLogic
-        (<strong>Lock &amp; Edit → Activate</strong>) para que <code>config.xml</code> no se sobrescriba.
+        Con el nombre corto, el Node Manager falla con <code>UnknownHostException</code> y <code>WLS_REPORTS</code> queda fuera del WKA de
+        Coherence (<code>Hostname weblogic-reports ... failed to resolve</code>): a los 300 s pasa a <code>FAILED</code>. Si falta, aplicar
+        <a href="../admin/index.html#paso-6">Admin 6</a> con todos los servidores detenidos.
       </div>
-      <div class="tabla"><table>
-        <tr><th>Archivo / objeto</th><th>Cambio</th></tr>
-        <tr>
-          <td><code>$DOMAIN_HOME/nodemanager_reports/nodemanager.properties</code></td>
-          <td><code>ListenAddress=weblogic-reports.forms.local</code></td>
-        </tr>
-        <tr>
-          <td><code>$DOMAIN_HOME/config/config.xml</code> → Machine <code>ReportsMachine</code></td>
-          <td>Node Manager <code>&lt;listen-address&gt;weblogic-reports.forms.local&lt;/listen-address&gt;</code>, puerto <code>5556</code></td>
-        </tr>
-        <tr>
-          <td><code>$DOMAIN_HOME/config/config.xml</code> → Server <code>WLS_REPORTS</code></td>
-          <td><code>listen-address</code> vacío o <code>weblogic-reports.forms.local</code> (nunca el short name)</td>
-        </tr>
-      </table></div>
-      <p>Auditoría rápida:</p>
-      <pre class="code">cd "$DOMAIN_HOME"
-cp -a config/config.xml config/config.xml.bak-$(date +%Y%m%d%H%M%S)
-cp -a nodemanager_reports/nodemanager.properties nodemanager_reports/nodemanager.properties.bak-$(date +%Y%m%d%H%M%S)
-
-grep -RIn --exclude-dir=tmp --exclude-dir=cache --exclude='*.log' \
-  -E 'weblogic-reports([^.]|$)' \
-  "$DOMAIN_HOME/nodemanager_reports" "$DOMAIN_HOME/config" /u01/oracle/scripts 2&gt;/dev/null | head -80
-
-grep -n 'ListenAddress' "$DOMAIN_HOME/nodemanager_reports/nodemanager.properties"</pre>
-      <p>Ejemplo de ajuste del Node Manager:</p>
-      <pre class="code">sed -i 's/^ListenAddress=.*/ListenAddress=weblogic-reports.forms.local/' \
-  "$DOMAIN_HOME/nodemanager_reports/nodemanager.properties"</pre>
-      <div class="callout">
-        <code>scripts/reports/create-reports-machine.py</code> ya usa por defecto
-        <code>weblogic-reports.forms.local</code> y <code>t3://weblogic-admin.forms.local:7001</code>
-        (toma <code>ADMIN_SERVER_HOST</code> del entorno; en compose exportar <code>CLOUDMAP_NAMESPACE=''</code>
-        para volver a los short names).
-      </div>
-      <figure class="shot" data-shot="paso-11">
-        <img src="assets/paso-11-reportsmachine.png" alt="sed sobre config.xml línea 893 y nodemanager_reports/nodemanager.properties con weblogic-reports.forms.local" />
-        <figcaption>
-          Paso 11 — Con el AdminServer detenido (y respaldo de <code>config.xml</code>): línea 893 de
-          <code>config/config.xml</code> (<code>ReportsMachine</code>) y <code>nodemanager_reports/nodemanager.properties</code>
-          pasan a <code>weblogic-reports.forms.local</code>; las tres máquinas quedan con FQDN
-        </figcaption>
+      <figure class="shot" data-shot="paso-4">
+        <img src="assets/paso-11-reportsmachine.png" alt="config.xml ReportsMachine y nodemanager_reports/nodemanager.properties con weblogic-reports.forms.local" />
+        <figcaption>Paso 4 — <code>ReportsMachine</code> en <code>config.xml</code> y <code>nodemanager_reports/nodemanager.properties</code> con <code>weblogic-reports.forms.local</code></figcaption>
       </figure>
         </section>
 
-        <section class="slide-block" id="paso-12">
-          <h3><span class="num">12</span> Arranque de Node Manager y <code>WLS_REPORTS</code><span class="status pending">Pendiente</span></h3>
+        <section class="slide-block" id="paso-5">
+          <h3><span class="num">5</span> Arrancar Node Manager y WLS_REPORTS<span class="status done">Hecho</span></h3>
+      <p>
+        Con el AdminServer en RUNNING (<a href="../admin/index.html#paso-7">Admin 7</a>), se arranca el Node Manager de
+        <code>ReportsMachine</code> (lo necesitan el AdminServer y la creación de Reports Tools del <a href="#paso-6">Paso 6</a>) y luego
+        <code>WLS_REPORTS</code>, desde la sesión ECS Exec del <a href="#paso-3">Paso 3</a>.
+      </p>
 
-      <p>Requisito: <code>forms-admin</code> Running con AdminServer arriba en <code>weblogic-admin.forms.local:7001</code>.</p>
-
-      <h4 class="sub">12a. Credenciales de arranque (<code>boot.properties</code>)</h4>
+      <h4 class="sub" id="paso-5-1">5.1 · Credenciales de arranque (<code>boot.properties</code>)</h4>
       <pre class="code">mkdir -p "$DOMAIN_HOME/servers/WLS_REPORTS/security"
 cat &gt; "$DOMAIN_HOME/servers/WLS_REPORTS/security/boot.properties" &lt;&lt;EOF
 username=weblogic
@@ -2054,84 +1809,126 @@ password=&lt;clave&gt;
 EOF
 chmod 600 "$DOMAIN_HOME/servers/WLS_REPORTS/security/boot.properties"</pre>
       <div class="callout">
-        WebLogic cifra el archivo en el primer arranque. <code>export WLS_USER</code> /
-        <code>WLS_PW</code> no sirve: <code>startManagedWebLogic.sh</code> las reinicia vacías.
-        No confundir con el <code>boot.properties</code> de Node Manager bajo <code>.../data/nodemanager/</code>.
+        WebLogic cifra el archivo en el primer arranque. <code>export WLS_USER</code> / <code>WLS_PW</code> no sirve:
+        <code>startManagedWebLogic.sh</code> las reinicia vacías. No confundir con el <code>boot.properties</code> de Node Manager
+        (<code>.../data/nodemanager/</code>).
       </div>
 
-      <h4 class="sub">12b. Node Manager de <code>ReportsMachine</code></h4>
-      <pre class="code"># En segundo plano, con log en el dominio
-nohup /u01/oracle/scripts/startNodeManager.sh \
+      <h4 class="sub" id="paso-5-2">5.2 · Node Manager de <code>ReportsMachine</code></h4>
+      <pre class="code">nohup /u01/oracle/scripts/startNodeManager.sh \
   &gt; "$DOMAIN_HOME/nodemanager_reports/nm_console.out" 2&gt;&amp;1 &amp;
 
 tail -f "$DOMAIN_HOME/nodemanager_reports/nodemanager.log"
 # Esperado: "Secure socket listener started on port 5556, host weblogic-reports.forms.local"</pre>
+      <figure class="shot" data-shot="paso-5-2">
+        <img src="assets/paso-12a-nodemanager.png" alt="Node Manager de ReportsMachine escuchando en 5556, host weblogic-reports.forms.local" />
+        <figcaption>Paso 5.2 — Node Manager escuchando en 5556 como <code>weblogic-reports.forms.local/10.171.240.80</code> (las líneas de enero son del entorno compose)</figcaption>
+      </figure>
 
-      <div class="callout">
-        El Node Manager de <code>ReportsMachine</code> también es obligatorio para crear la instancia de
-        Reports Tools (Paso 12e). La regla <em>Todo el tráfico</em> del SG (Paso 9) cubre el puerto 5556
-        entre <code>forms-admin</code> y <code>reports-server</code>.
-      </div>
-
-      <h4 class="sub">12c. Arrancar <code>WLS_REPORTS</code></h4>
-      <p><strong>Opción recomendada — script <code>startWLSReports.sh</code></strong> (como <code>root</code> o
-        <code>oracle</code>): valida <code>boot.properties</code> y el AdminServer, limpia <code>.lok</code>,
-        arranca en segundo plano y espera RUNNING + HTTP 200 de <code>/reports/rwservlet</code>:</p>
+      <h4 class="sub" id="paso-5-3">5.3 · Arrancar <code>WLS_REPORTS</code></h4>
+      <p>
+        <strong>Opción recomendada — <code>startWLSReports.sh</code></strong> (como <code>root</code> u <code>oracle</code>): valida
+        <code>boot.properties</code> y el AdminServer, limpia <code>.lok</code>, arranca en segundo plano y espera RUNNING + HTTP 200 de
+        <code>/reports/rwservlet</code>:
+      </p>
       <pre class="code">/u01/oracle/scripts/startWLSReports.sh
 # Reinicio:
 pkill -f 'weblogic.Name=WLS_REPORTS'; sleep 10; /u01/oracle/scripts/startWLSReports.sh</pre>
-      <p><strong>Opción A — vía Node Manager</strong>: WebLogic 14.1.2 no trae la consola clásica; usar WebLogic Remote Console
-        (Servidores → <code>WLS_REPORTS</code> → Iniciar) o WLST:
-        <code>connect(...); start('WLS_REPORTS','Server')</code>.</p>
-      <p><strong>Opción B — script directo en el contenedor:</strong></p>
-      <pre class="code">cd "$DOMAIN_HOME"
-nohup ./bin/startManagedWebLogic.sh WLS_REPORTS t3://weblogic-admin.forms.local:7001 \
-  &gt; "$DOMAIN_HOME/servers/WLS_REPORTS/logs/WLS_REPORTS.out" 2&gt;&amp;1 &amp;
-
-tail -f "$DOMAIN_HOME/servers/WLS_REPORTS/logs/WLS_REPORTS.out"
+      <p>Para monitorear el inicio:</p>
+      <pre class="code">tail -100f /u01/oracle/user_projects/domains/forms_domain/servers/WLS_REPORTS/logs/WLS_REPORTS.log
 # Esperado: &lt;Server state changed to RUNNING.&gt;</pre>
-      <div class="callout warn">
-        <strong>ECS RUNNING ≠ WebLogic RUNNING.</strong> Con <code>sleep infinity</code> la tarea sigue
-        activa aunque la JVM muera. Validar con <code>ps -ef | grep -E 'WLS_REPORTS|NodeManager'</code>
-        y <code>grep 'Server state changed to RUNNING' $DOMAIN_HOME/servers/WLS_REPORTS/logs/WLS_REPORTS.out</code> (ver Paso 12b).
-      </div>
-
-      <h4 class="sub">12d. Targets de la aplicación <code>reports</code></h4>
       <p>
-        Remote Console (o WLST) → Deployments → <code>reports#14.1.2</code> → Targets: desmarcar <code>AdminServer</code>
-        y marcar <code>WLS_REPORTS</code> (o <code>cluster_reports</code>), si no se hizo al crear el dominio.
+        Alternativas: WebLogic Remote Console (Servidores → <code>WLS_REPORTS</code> → Iniciar), WLST
+        (<code>connect(...); start('WLS_REPORTS','Server')</code>) o
+        <code>./bin/startManagedWebLogic.sh WLS_REPORTS t3://weblogic-admin.forms.local:7001</code> en segundo plano.
+      </p>
+      <figure class="shot" data-shot="paso-5-3">
+        <img src="assets/paso-12b-wls-reports-running.png" alt="WLS_REPORTS: un proceso, Server state changed to RUNNING, rwservlet HTTP 200" />
+        <figcaption>Paso 5.3 — <code>WLS_REPORTS</code> en <strong>RUNNING</strong> (BEA-000365) y <code>/reports/rwservlet</code> → HTTP 200</figcaption>
+      </figure>
+
+      <h4 class="sub" id="paso-5-4">5.4 · Targets de la aplicación <code>reports</code></h4>
+      <p>
+        Remote Console (o WLST) → Deployments → <code>reports#14.1.2</code> → Targets: desmarcar <code>AdminServer</code> y marcar
+        <code>WLS_REPORTS</code> (o <code>cluster_reports</code>), si no se hizo al crear el dominio. Si sigue en <code>AdminServer</code>,
+        <code>/reports/rwservlet</code> no responde en 9012.
       </p>
 
-      <h4 class="sub" id="paso-12e">12e. Completar Reports en el dominio (una sola vez, queda en EFS)</h4>
+      <h4 class="sub" id="paso-5-5">5.5 · Arranque automático de <code>WLS_REPORTS</code> al iniciar la tarea<span class="status done">Hecho</span></h4>
       <p>
-        El Configuration Wizard no crea la instancia de Reports Tools ni <code>$DOMAIN_HOME/reports</code>.
-        <code>WLS_REPORTS</code> llega a RUNNING y <code>/reports/rwservlet</code> responde 200, pero el primer
-        reporte falla con <code>REP-52266</code> / <code>REP-51002</code>. Detalle completo en la
-        guía de creación del dominio, <em>Paso 7: Completar Reports</em>.
+        Validado el arranque manual (<a href="#paso-5-3">5.3</a>), se cambia el comando del contenedor para que la tarea inicie
+        <code>WLS_REPORTS</code> sin intervención, igual que el AdminServer (<a href="../admin/index.html#paso-7d">Admin 7d</a>) y
+        <code>WLS_FORMS</code> (<a href="../forms/index.html#paso-5-auto">Forms 5d</a>): <strong>nueva revisión</strong> de la task
+        definition y <strong>actualización del servicio</strong>.
       </p>
       <ol>
-        <li><strong>Node Manager de <code>ReportsMachine</code> arriba</strong> (12b).</li>
-        <li><strong>Instancia de Reports Tools</strong>: en <code>reports-server</code> (ECS Exec, <code>su - oracle</code>);
-          WLST se conecta al AdminServer por <code>t3://weblogic-admin.forms.local:7001</code>:
-          <pre class="code">/u01/oracle/oracle_common/common/bin/wlst.sh /u01/oracle/scripts/create-reports-tools.py</pre>
-          Equivalente manual en WLST:
-          <pre class="code">connect('weblogic','&lt;clave&gt;','t3://weblogic-admin.forms.local:7001')
-createReportsToolsInstance(instanceName='reptools1', machine='ReportsMachine')</pre>
-          Si responde <em>"Node Manager is not available on machine ReportsMachine"</em>, la instancia queda
-          registrada <strong>sin archivos</strong>. Levantar el Node Manager y crear otra (<code>reptools2</code>).
+        <li>ECS → <strong>Definiciones de tareas</strong> → <code>reports-server</code> → última revisión → <strong>Crear nueva revisión</strong>.</li>
+        <li>Contenedor <code>reports-server</code> → <strong>Configuración de Docker</strong>:
+          <ul>
+            <li><strong>Punto de entrada</strong>: vacío.</li>
+            <li><strong>Comando</strong>: <code>/u01/oracle/scripts/startWLSReports.sh,-keep</code> (reemplaza a <code>sleep,infinity</code>).</li>
+            <li><strong>Directorio de trabajo</strong>: <code>/u01/oracle</code> (sin cambios).</li>
+          </ul>
         </li>
-        <li><strong>Directorios y lanzadores</strong>: en <code>reports-server</code> como <code>oracle</code>:
-          <pre class="code">/u01/oracle/scripts/prepare-reports-domain.sh --check
+        <li><strong>Crear</strong> → nueva revisión (<code>reports-server:N</code>).</li>
+        <li>Cluster <code>forms_report</code> → servicio <code>reports-server</code> → <strong>Actualizar</strong> → revisión <code>reports-server:N</code>
+          → <strong>Forzar nueva implementación</strong> → <strong>Actualizar</strong>.</li>
+        <li>Con la nueva tarea en <em>Ejecutando</em>, validar RUNNING con el <code>tail</code> de <code>WLS_REPORTS.log</code> (<a href="#paso-5-3">5.3</a>) y el reporte de prueba (<a href="#paso-7">Paso 7</a>).</li>
+      </ol>
+      <figure class="shot" data-shot="paso-5-5">
+        <img src="assets/paso-05-5-td-comando-arranque.png" alt="Configuración de Docker: punto de entrada vacío, comando /u01/oracle/scripts/startWLSReports.sh,-keep y directorio de trabajo /u01/oracle" />
+        <figcaption>Paso 5.5 — Comando del contenedor: <code>startWLSReports.sh,-keep</code></figcaption>
+      </figure>
+      <p>Equivalente en el JSON de la task definition:</p>
+      <pre class="code">"command": ["/u01/oracle/scripts/startWLSReports.sh", "-keep"]</pre>
+      <p>
+        Con <code>-keep</code>, si el AdminServer aún no responde (tareas lanzadas a la vez), el script lo espera hasta
+        <code>WAIT_TIMEOUT</code> (600 s) antes de arrancar <code>WLS_REPORTS</code>; la tarea sigue viva aunque el managed server
+        falle, para poder entrar por ECS Exec a revisar. Sin <code>-keep</code> la tarea termina al fallar o al alcanzar RUNNING,
+        por lo que no sirve como comando del contenedor.
+      </p>
+      <div class="callout warn">
+        El script se ejecuta desde el EFS (<code>/u01/oracle/scripts</code>): debe existir con permiso de ejecución
+        (<code>chmod +x startWLSReports.sh</code>) y requiere el <code>boot.properties</code> de <a href="#paso-5-1">5.1</a>.
+        El Node Manager de <code>ReportsMachine</code> no se arranca automáticamente: si hace falta (consola, Reports Tools del
+        <a href="#paso-6">Paso 6</a>), iniciarlo por ECS Exec como en <a href="#paso-5-2">5.2</a>.
+      </div>
+        </section>
+
+        <section class="slide-block" id="paso-6">
+          <h3><span class="num">6</span> Completar Reports en el dominio<span class="status done">Hecho</span></h3>
+      <p>
+        El Configuration Wizard no crea la instancia de Reports Tools ni <code>$DOMAIN_HOME/reports</code>. <code>WLS_REPORTS</code> llega a
+        RUNNING y <code>/reports/rwservlet</code> responde 200, pero el primer reporte falla con <code>REP-52266</code> /
+        <code>REP-51002</code>. Se hace <strong>una sola vez</strong>: queda en el EFS y sobrevive a los redespliegues. Detalle en la guía de
+        creación del dominio, <em>Paso 7: Completar Reports</em>.
+      </p>
+
+      <h4 class="sub" id="paso-6-1">6.1 · Instancia de Reports Tools</h4>
+      <p>Con el Node Manager de <code>ReportsMachine</code> arriba (<a href="#paso-5-2">5.2</a>), en <code>reports-server</code> como <code>oracle</code>:</p>
+      <pre class="code">/u01/oracle/oracle_common/common/bin/wlst.sh /u01/oracle/scripts/create-reports-tools.py
+
+# Equivalente manual en WLST:
+connect('weblogic','&lt;clave&gt;','t3://weblogic-admin.forms.local:7001')
+createReportsToolsInstance(instanceName='reptools1', machine='ReportsMachine')</pre>
+      <div class="callout warn">
+        Si responde <em>"Node Manager is not available on machine ReportsMachine"</em>, la instancia queda registrada
+        <strong>sin archivos</strong>. Levantar el Node Manager y crear otra (<code>reptools2</code>).
+      </div>
+
+      <h4 class="sub" id="paso-6-2">6.2 · Directorios y lanzadores</h4>
+      <pre class="code">/u01/oracle/scripts/prepare-reports-domain.sh --check
 /u01/oracle/scripts/prepare-reports-domain.sh \
   --source-dir /u01/oracle/user_projects/apps/reports_app/src \
   --disable-security</pre>
-          Crea <code>reports/{bin,server,cache,temp,fonts}</code> y copia <code>rwengine.sh</code>, <code>reports.sh</code>, etc.
-          desde <code>$ORACLE_HOME/bin</code>, sustituyendo <code>$$domain_home$$</code>, <code>$$mw_home$$</code>,
-          <code>$$component_name$$</code> y <code>%HOME%</code>. Además fija <code>sourceDir</code> en
-          <code>rwserver.conf</code> y quita <code>securityId="rwJaznSec"</code> (DEV).
-        </li>
-        <li><strong>Reiniciar <code>WLS_REPORTS</code></strong> con <code>startWLSReports.sh</code> (12c).</li>
-      </ol>
+      <p>
+        Crea <code>reports/{bin,server,cache,temp,fonts}</code> y copia <code>rwengine.sh</code>, <code>reports.sh</code>, etc. desde
+        <code>$ORACLE_HOME/bin</code>, sustituyendo <code>$$domain_home$$</code>, <code>$$mw_home$$</code>, <code>$$component_name$$</code> y
+        <code>%HOME%</code>. Además fija <code>sourceDir</code> en <code>rwserver.conf</code> y quita <code>securityId="rwJaznSec"</code> (DEV).
+        Luego reiniciar <code>WLS_REPORTS</code> (<a href="#paso-5-3">5.3</a>).
+      </p>
+
+      <h4 class="sub" id="paso-6-3">6.3 · Diagnóstico</h4>
       <div class="tabla"><table>
         <tr><th>Error (navegador / <code>rwserver_diagnostic.log</code>)</th><th>Elemento faltante</th></tr>
         <tr><td><code>REP-54005</code> cache directory cannot be created</td><td><code>reports/cache</code></td></tr>
@@ -2140,176 +1937,138 @@ createReportsToolsInstance(instanceName='reptools1', machine='ReportsMachine')</
         <tr><td>Pantalla "System User Authentication" / <code>REP-51019</code></td><td>Seguridad activa (<code>securityId</code>)</td></tr>
       </table></div>
       <pre class="code">grep -E 'REP-|rwEng' $DOMAIN_HOME/servers/WLS_REPORTS/logs/reports/rwserver_diagnostic.log | tail -15</pre>
-      <figure class="shot" data-shot="paso-12a">
-        <img src="assets/paso-12a-nodemanager.png" alt="Node Manager de ReportsMachine: Secure socket listener started on port 5556, host weblogic-reports.forms.local" />
-        <figcaption>Paso 12a — Node Manager de <code>ReportsMachine</code> corriendo y escuchando en 5556. La última línea del log
-          (5 de octubre de 2026) ya muestra <code>host weblogic-reports.forms.local/10.171.240.80</code>; las de enero son del entorno
-          compose (<code>weblogic-reports/172.21.0.4</code>). La conexión a <code>weblogic-reports.forms.local:5556</code> responde OK</figcaption>
-      </figure>
-      <figure class="shot" data-shot="paso-12b">
-        <img src="assets/paso-12b-wls-reports-running.png" alt="WLS_REPORTS: un proceso, Server state changed to RUNNING, rwservlet HTTP 200" />
-        <figcaption>Paso 12b — <code>WLS_REPORTS</code> en estado <strong>RUNNING</strong>: un proceso <code>weblogic.Name=WLS_REPORTS</code>,
-          <code>&lt;Server state changed to RUNNING.&gt;</code> (BEA-000365, 5 de octubre de 2026) en <code>WLS_REPORTS.out</code> y
-          <code>/reports/rwservlet</code> responde <code>HTTP 200</code>. WebLogic 14.1.2 no trae la consola clásica, así que la
-          verificación se hace por terminal (o con WebLogic Remote Console)</figcaption>
-      </figure>
         </section>
 
-        <section class="slide-block" id="paso-13">
-          <h3><span class="num">13</span> Validación funcional de Reports<span class="status pending">Pendiente</span></h3>
-
+        <section class="slide-block" id="paso-7">
+          <h3><span class="num">7</span> Validación funcional de Reports<span class="status done">Hecho</span></h3>
       <p>
-        Validación con <strong>reportes modelo</strong> de referencia (definiciones sencillas, sin lógica
-        de negocio), para comprobar que Reports Server responde en la arquitectura containerizada y que
-        la conexión a la BD funciona.
+        Validación con <strong>reportes modelo</strong> (definiciones sencillas, sin lógica de negocio) para comprobar que Reports Server
+        responde en la arquitectura containerizada y que la conexión a la BD funciona.
       </p>
       <div class="tabla"><table class="fixed">
         <colgroup><col style="width:22%" /><col style="width:46%" /><col style="width:32%" /></colgroup>
         <tr><th>Prueba</th><th>URL / comando</th><th>Resultado esperado</th></tr>
-        <tr>
-          <td>Servlet activo</td>
-          <td><code>http://&lt;IP_PUBLICA&gt;:9012/reports/rwservlet</code></td>
-          <td>Página de bienvenida de Oracle Reports Services</td>
-        </tr>
-        <tr>
-          <td>Info del server in-process</td>
-          <td><code>http://&lt;IP_PUBLICA&gt;:9012/reports/rwservlet/getserverinfo?authid=weblogic/&lt;clave&gt;</code></td>
-          <td>Nombre del Reports Server, engines y estado. Sin <code>authid</code> responde <code>REP-51019</code>, lo cual es normal
-            (es un comando administrativo). Con <code>REP-56071</code>, falta el rol <code>RW_ADMINISTRATOR</code> (opcional).</td>
-        </tr>
-        <tr>
-          <td>Cola de trabajos</td>
-          <td><code>http://&lt;IP_PUBLICA&gt;:9012/reports/rwservlet/showjobs</code></td>
-          <td>Lista de jobs (vacía al inicio)</td>
-        </tr>
-        <tr>
-          <td>Reporte modelo con BD</td>
-          <td><code>…/rwservlet?report=&lt;modelo&gt;.rdf&amp;userid=&lt;usr&gt;/&lt;pwd&gt;@&lt;TNS&gt;&amp;destype=cache&amp;desformat=PDF</code></td>
-          <td>PDF generado con datos de la BD</td>
-        </tr>
-        <tr>
-          <td><strong>Caso de prueba validado:</strong> <code>CARR30015.rdf</code></td>
-          <td><code>http://&lt;IP_PUBLICA&gt;:9012/reports/rwservlet?report=CARR30015.rdf&amp;userid=uspan/&lt;clave&gt;@BANESCO_DEV&amp;destype=cache&amp;desformat=pdf&amp;nu_sec=205873</code></td>
-          <td>PDF con datos (probado OK sobre <code>54.81.150.92</code>)</td>
-        </tr>
+        <tr><td>Servlet activo</td><td><code>http://&lt;IP-pública&gt;:9012/reports/rwservlet</code></td><td>Página de bienvenida de Oracle Reports Services</td></tr>
+        <tr><td>Info del server in-process</td><td><code>…/rwservlet/getserverinfo?authid=weblogic/&lt;clave&gt;</code></td>
+          <td>Reports Server, engines y estado. Sin <code>authid</code> responde <code>REP-51019</code> (normal); con <code>REP-56071</code> falta el rol <code>RW_ADMINISTRATOR</code> (opcional); con <code>REP-52262</code> la salida de diagnóstico está deshabilitada (ver 7c).</td></tr>
+        <tr><td>Cola de trabajos</td><td><code>…/rwservlet/showjobs</code></td><td>Lista de jobs (vacía al inicio)</td></tr>
+        <tr><td>Reporte modelo con BD</td><td><code>…/rwservlet?report=&lt;modelo&gt;.rdf&amp;userid=&lt;usr&gt;/&lt;pwd&gt;@&lt;TNS&gt;&amp;destype=cache&amp;desformat=PDF</code></td><td>PDF con datos de la BD</td></tr>
+        <tr><td><strong>Caso validado:</strong> <code>CARR30015.rdf</code></td><td><code>…/rwservlet?report=CARR30015.rdf&amp;userid=uspan/&lt;clave&gt;@BANESCO_DEV&amp;destype=cache&amp;desformat=pdf&amp;nu_sec=205873</code></td><td>PDF con datos</td></tr>
       </table></div>
       <div class="callout warn">
-        <strong>Requisitos del caso <code>CARR30015.rdf</code>:</strong>
+        <strong>Requisitos de <code>CARR30015.rdf</code>:</strong>
         <ul>
-          <li>El parámetro <code>nu_sec=205873</code> es una secuencia que <strong>debe existir y ser válida en la BD
-            <code>BANESCO_DEV</code></strong>. Si no existe, o la BD se refresca y cambia, el reporte sale vacío o con error:
-            usar una secuencia vigente.</li>
-          <li><code>userid</code> es obligatorio. Sin él, el motor no puede compilar el PL/SQL del RDF contra la BD y responde
-            <code>REP-1247: Uncompiled program units exist</code>.</li>
-          <li>No requiere <code>mode=bitmap</code>, a diferencia de <code>SINR30032.rdf</code>, que está definido en modo carácter
-            (<code>REP-1920</code>).</li>
-          <li>El alias <code>BANESCO_DEV</code> debe existir en <code>$TNS_ADMIN/tnsnames.ora</code>, y la BD debe estar encendida.</li>
+          <li><code>nu_sec=205873</code> debe existir en la BD <code>BANESCO_DEV</code>; si la BD se refresca, usar una secuencia vigente.</li>
+          <li><code>userid</code> es obligatorio: sin él el motor no compila el PL/SQL del RDF (<code>REP-1247</code>).</li>
+          <li>No requiere <code>mode=bitmap</code> (a diferencia de <code>SINR30032.rdf</code>, en modo carácter: <code>REP-1920</code>).</li>
+          <li>El alias <code>BANESCO_DEV</code> debe estar en <code>$TNS_ADMIN/tnsnames.ora</code> y la BD encendida.</li>
         </ul>
       </div>
       <p>Desde dentro del contenedor (sin depender del SG):</p>
       <pre class="code">curl -s -o /dev/null -w '%{http_code}\n' http://localhost:9012/reports/rwservlet
 curl -s http://localhost:9012/reports/rwservlet/getserverinfo | head -50</pre>
-      <div class="callout">
-        El alias TNS debe existir en el <code>tnsnames.ora</code> que lee Reports
-        (<code>$DOMAIN_HOME/config/fmwconfig/tnsnames.ora</code> o el definido en <code>TNS_ADMIN</code>),
-        apuntando a <code>192.168.229.137:1521</code>. Los <code>.rdf</code> se leen del <code>sourceDir</code>
-        configurado en el Paso 12e (<code>/u01/oracle/user_projects/apps/reports_app/src</code>, EFS).
-      </div>
       <div class="tabla"><table class="fixed">
         <colgroup><col style="width:38%" /><col style="width:62%" /></colgroup>
         <tr><th>Respuesta al invocar el reporte</th><th>Causa / acción</th></tr>
-        <tr><td><code>REP-52266</code> / <code>REP-51002</code></td><td>Falta algún elemento del Paso 12e; ver <code>rwserver_diagnostic.log</code>.</td></tr>
-        <tr><td>Petición colgada + incidente <code>DFW-99998 UnsatisfiedLinkError: librwu.so: libXm.so.4</code></td><td>Imagen <code>r1</code>: pasar la TD a <code>r2</code> (<a href="#anexo-r2">anexo</a>).</td></tr>
+        <tr><td><code>REP-52266</code> / <code>REP-51002</code></td><td>Falta algún elemento del <a href="#paso-6">Paso 6</a>; ver <code>rwserver_diagnostic.log</code>.</td></tr>
+        <tr><td>Petición colgada + <code>DFW-99998 UnsatisfiedLinkError: librwu.so: libXm.so.4</code></td><td>Imagen <code>r1</code>: pasar la TD a <code>r2</code> (<a href="#anexo-r2">anexo</a>).</td></tr>
         <tr><td>Pantalla "System User Authentication"</td><td>Seguridad de Reports activa: <code>prepare-reports-domain.sh --disable-security</code> o agregar <code>&amp;authid=</code>.</td></tr>
-        <tr><td><code>REP-1247: Uncompiled program units exist</code></td><td>Falta <code>userid</code> en la URL (el motor no puede compilar el PL/SQL), faltan <code>.pll</code> adjuntas en <code>sourceDir</code> o hay objetos inválidos en la BD. Diagnóstico: <code>rwconverter.sh ... compile_all=yes logfile=...</code>.</td></tr>
-        <tr><td><code>REP-1920: Character mode runtime is incompatible with DESFORMAT of PDF...</code></td><td>RDF en modo carácter: agregar <code>&amp;mode=bitmap</code> o cambiar <em>Mode = Bitmap</em> en Reports Builder.</td></tr>
-        <tr><td>PDF en blanco</td><td>Sin datos (parámetros faltantes; probar <code>desformat=XML</code>) o sin fuentes en <code>$DOMAIN_HOME/reports/fonts</code>.</td></tr>
+        <tr><td><code>REP-1247: Uncompiled program units exist</code></td><td>Falta <code>userid</code>, faltan <code>.pll</code> en <code>sourceDir</code> u objetos inválidos en la BD (<code>rwconverter.sh ... compile_all=yes</code>).</td></tr>
+        <tr><td><code>REP-1920</code> Character mode … PDF</td><td>RDF en modo carácter: <code>&amp;mode=bitmap</code> o <em>Mode = Bitmap</em> en Reports Builder.</td></tr>
+        <tr><td>PDF en blanco</td><td>Sin datos (probar <code>desformat=XML</code>) o sin fuentes en <code>$DOMAIN_HOME/reports/fonts</code>.</td></tr>
+        <tr><td><code>REP-0501</code> / <code>ORA-12170</code></td><td>Conectividad a <code>192.168.229.137:1521</code> (<a href="#paso-3">Paso 3</a>) y alias TNS; ver el <a href="../forms/index.html#anexo-cli-red-bd">anexo de red hacia BD</a>.</td></tr>
       </table></div>
-      <div class="callout warn">
-        Si el reporte falla con <code>REP-0501</code> / <code>ORA-12170</code>, revisar primero la conectividad
-        TCP a <code>192.168.229.137:1521</code> (Paso 10) y el alias TNS; ver el
-        <a href="../forms/index.html#anexo-cli-red-bd">anexo de red hacia BD</a> de la guía Forms.
+      <figure class="shot" data-shot="paso-7a">
+        <img src="assets/paso-13a-rwservlet.png" alt="curl a rwservlet en 9012 devuelve HTTP 200 y Oracle Reports Services - Servlet" />
+        <figcaption>Paso 7a — <code>rwservlet</code> en 9012 desde fuera de AWS: <code>HTTP 200</code>, "Oracle Reports Services - Servlet"</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-7b">
+        <img src="assets/paso-13b-carr30015-pdf.png" alt="PDF generado por CARR30015.rdf con datos de BANESCO_DEV" />
+        <figcaption>Paso 7b — <code>CARR30015.rdf</code> con <code>nu_sec=205873</code>: PDF "Cuadro Póliza - Recibo Prima" con datos de <code>BANESCO_DEV</code></figcaption>
+      </figure>
+      <p>
+        Al consultar <code>getserverinfo</code> con credenciales válidas, la respuesta por defecto es <code>REP-52262: Diagnostic output is
+        disabled</code>. <strong>No es una falla</strong>: <code>WLS_REPORTS</code> y <code>rwservlet</code> responden y la autenticación
+        pasó; solo indica que los comandos de diagnóstico del servlet están deshabilitados (valor por defecto de Oracle, recomendado
+        en producción porque exponen la configuración del server).
+      </p>
+      <figure class="shot" data-shot="paso-7c">
+        <img src="assets/paso-07c-getserverinfo-rep52262.png" alt="rwservlet/getserverinfo en 9012 responde REP-52262: Diagnostic output is disabled" />
+        <figcaption>Paso 7c — <code>getserverinfo</code>: <code>REP-52262</code>, servlet activo con diagnóstico deshabilitado</figcaption>
+      </figure>
+      <div class="callout">
+        Para habilitarlo temporalmente (solo en desarrollo), en el <code>rwservlet.properties</code> de <code>WLS_REPORTS</code> cambiar
+        <code>&lt;diagnostic&gt;no&lt;/diagnostic&gt;</code> por <code>&lt;diagnostic&gt;yes&lt;/diagnostic&gt;</code> y reiniciar
+        <code>WLS_REPORTS</code> (<a href="#paso-5-3">5.3</a>):
+        <pre class="code">find $DOMAIN_HOME/config/fmwconfig/servers/WLS_REPORTS -name rwservlet.properties
+grep -n diagnostic &lt;ruta&gt;/rwservlet.properties</pre>
+        Volver a <code>no</code> al terminar las pruebas.
       </div>
-      <figure class="shot" data-shot="paso-13a">
-        <img src="assets/paso-13a-rwservlet.png" alt="curl a http://54.81.150.92:9012/reports/rwservlet devuelve HTTP 200 y Oracle Reports Services - Servlet" />
-        <figcaption>
-          Paso 13a — <code>rwservlet</code> respondiendo en el puerto 9012 desde fuera de AWS:
-          <code>curl</code> a <code>http://54.81.150.92:9012/reports/rwservlet</code> devuelve <code>HTTP 200</code> y la página
-          "Oracle Reports Services - Servlet"
-        </figcaption>
-      </figure>
-      <figure class="shot" data-shot="paso-13b">
-        <img src="assets/paso-13b-carr30015-pdf.png" alt="PDF generado por CARR30015.rdf: Cuadro Póliza - Recibo Prima, Vida Integral Plus, con datos de BANESCO_DEV" />
-        <figcaption>
-          Paso 13b — Caso de prueba <code>CARR30015.rdf</code> con <code>nu_sec=205873</code>: PDF "Cuadro Póliza - Recibo Prima"
-          (Vida Integral Plus) generado por <code>WLS_REPORTS</code> con datos de <code>BANESCO_DEV</code>
-          (<code>…/rwservlet?report=CARR30015.rdf&amp;userid=uspan/&lt;clave&gt;@BANESCO_DEV&amp;destype=cache&amp;desformat=pdf&amp;nu_sec=205873</code>)
-        </figcaption>
-      </figure>
         </section>
 
-        <section class="slide-block anexo" id="anexo-json">
-          <h3><span class="num anexo">Anexo</span> Task definition JSON (<code>reports-server</code>)</h3>
+        <!-- ═════════════ ANEXOS ═════════════ -->
 
+        <section class="slide-block anexo" id="anexo-json">
+          <h3><span class="num anexo">Anexo</span> Task definition JSON (<code>reports-server:4</code>)<span class="status done">Hecho</span></h3>
       <p>
-        Equivalente a los Pasos 1–5, derivado de <code>forms-server:9</code>. Puede pegarse en
-        ECS → <strong>Crear nueva definición de tarea con JSON</strong> o registrarse por CLI.
-        Usa la imagen <code>forms-docker:r2</code> (librerías del motor de Reports); se puede fijar al digest
-        de <code>r2</code> que muestra ECR. Sustituir la contraseña.
+        Última revisión registrada (<code>reports-server:4</code>), exportada en <code>aws-ecs/report/report.json</code>. Se muestra en formato registrable:
+        sin los campos de solo lectura que agrega ECS al exportar (<code>taskDefinitionArn</code>, <code>revision</code>, <code>status</code>,
+        <code>requiresAttributes</code>, <code>registeredAt</code>/<code>By</code>…), por lo que puede pegarse en ECS →
+        <strong>Crear nueva definición de tarea con JSON</strong> o registrarse por CLI. Sustituir <code>&lt;clave&gt;</code> por la contraseña real. La imagen queda fijada por <em>digest</em> (<code>@sha256:…</code>), tal como la resolvió ECS.
+        Corresponde al <a href="#paso-1">Paso 1</a> con el comando de arranque automático de <a href="#paso-5-5">5.5</a>.
+        No incluye las variables de compilación de Forms (<code>FORMS_PATH</code>, <code>FRMCMP</code>, <code>PROC</code>…): esa
+        compilación se hace en <code>forms-server</code>.
       </p>
-      <div class="callout">
-        <strong>Ajustes de <code>forms-server:9</code></strong> (respecto de la revisión 8): se agregaron
-        variables de entorno de compilación y conexión. En Reports solo aplica <code>TNS_ADMIN</code>
-        (mismo dominio, conexión a la BD). No se copian las de compilación Forms
-        (<code>FORMS_PATH</code>, <code>FORMS_MODULE_PATH</code>, <code>FORMS_INSTANCE</code>,
-        <code>FRMCMP</code>) ni las de ProC (<code>PROC</code>, <code>PCSCFG</code>,
-        <code>PROC_INCLUDE</code>, <code>CC</code>): esa compilación se hace en <code>forms-server</code>.
-      </div>
       <pre class="code">{
-  "family": "reports-server",
-  "taskRoleArn": "arn:aws:iam::730335573515:role/ecs-forms-admin-task-role",
-  "executionRoleArn": "arn:aws:iam::730335573515:role/ecsTaskExecutionRole",
-  "networkMode": "awsvpc",
-  "requiresCompatibilities": ["FARGATE"],
-  "runtimePlatform": { "cpuArchitecture": "X86_64", "operatingSystemFamily": "LINUX" },
-  "cpu": "2048",
-  "memory": "4096",
-  "ephemeralStorage": { "sizeInGiB": 100 },
   "containerDefinitions": [
     {
       "name": "reports-server",
-      "image": "730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:r2",
-      "essential": true,
-      "entryPoint": ["sh", "-c"],
-      "command": ["sleep infinity"],
-      "workingDirectory": "/u01/oracle",
+      "image": "730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker@sha256:fbdf850571115d74a8abb6324c1471db7be03428c2fd9d2413fb02899365896f",
       "portMappings": [
-        { "containerPort": 9012, "hostPort": 9012, "protocol": "tcp", "name": "wls-reports-http",  "appProtocol": "http" },
-        { "containerPort": 9512, "hostPort": 9512, "protocol": "tcp", "name": "wls-reports-https", "appProtocol": "http" },
-        { "containerPort": 9992, "hostPort": 9992, "protocol": "tcp", "name": "wls-reports-admin" },
-        { "containerPort": 5556, "hostPort": 5556, "protocol": "tcp", "name": "nodemanager" }
+        {
+          "containerPort": 9012,
+          "hostPort": 9012,
+          "protocol": "tcp",
+          "name": "wls-reports-http",
+          "appProtocol": "http"
+        },
+        {
+          "containerPort": 9512,
+          "hostPort": 9512,
+          "protocol": "tcp",
+          "name": "wls-reports-https",
+          "appProtocol": "http"
+        },
+        {"containerPort": 9992, "hostPort": 9992, "protocol": "tcp", "name": "wls-reports-admin"},
+        {"containerPort": 5556, "hostPort": 5556, "protocol": "tcp", "name": "nodemanager"}
       ],
+      "essential": true,
+      "command": ["/u01/oracle/scripts/startWLSReports.sh", "-keep"],
       "environment": [
-        { "name": "ORACLE_HOME",         "value": "/u01/oracle" },
-        { "name": "DOMAIN_NAME",         "value": "forms_domain" },
-        { "name": "DOMAIN_HOME",         "value": "/u01/oracle/user_projects/domains/forms_domain" },
-        { "name": "TNS_ADMIN",           "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig" },
-        { "name": "ADMIN_SERVER_NAME",   "value": "AdminServer" },
-        { "name": "ADMIN_SERVER_HOST",   "value": "weblogic-admin.forms.local" },
-        { "name": "ADMIN_SERVER_PORT",   "value": "7001" },
-        { "name": "ADMIN_USER",          "value": "weblogic" },
-        { "name": "ADMIN_PASSWORD",      "value": "&lt;CLAVE&gt;" },
-        { "name": "MANAGED_SERVER_NAME", "value": "WLS_REPORTS" },
-        { "name": "MANAGED_SERVER_PORT", "value": "9012" },
-        { "name": "NODE_MANAGER_PORT",   "value": "5556" },
-        { "name": "LD_LIBRARY_PATH",     "value": "/u01/oracle/lib:/u01/oracle/oracle_common/lib" },
-        { "name": "PATH",                "value": "/u01/oracle/bin:/u01/oracle/oracle_common/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" }
+        {
+          "name": "PATH",
+          "value": "/u01/oracle/bin:/u01/oracle/oracle_common/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        },
+        {"name": "ADMIN_SERVER_HOST", "value": "weblogic-admin.forms.local"},
+        {"name": "ADMIN_SERVER_NAME", "value": "AdminServer"},
+        {"name": "ADMIN_USER", "value": "weblogic"},
+        {"name": "MANAGED_SERVER_NAME", "value": "WLS_REPORTS"},
+        {"name": "TNS_ADMIN", "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig"},
+        {"name": "DOMAIN_NAME", "value": "forms_domain"},
+        {"name": "DOMAIN_HOME", "value": "/u01/oracle/user_projects/domains/forms_domain"},
+        {"name": "ADMIN_PASSWORD", "value": "&lt;clave&gt;"},
+        {"name": "MANAGED_SERVER_PORT", "value": "9012"},
+        {"name": "NODE_MANAGER_PORT", "value": "5556"},
+        {"name": "LD_LIBRARY_PATH", "value": "/u01/oracle/lib:/u01/oracle/oracle_common/lib"},
+        {"name": "ORACLE_HOME", "value": "/u01/oracle"},
+        {"name": "ADMIN_SERVER_PORT", "value": "7001"}
       ],
       "mountPoints": [
-        { "sourceVolume": "efs-domains", "containerPath": "/u01/oracle/user_projects/domains", "readOnly": false },
-        { "sourceVolume": "efs-app",     "containerPath": "/u01/oracle/user_projects/apps",    "readOnly": false },
-        { "sourceVolume": "efs-scripts", "containerPath": "/u01/oracle/scripts",               "readOnly": false }
+        {"sourceVolume": "efs-domains", "containerPath": "/u01/oracle/user_projects/domains", "readOnly": false},
+        {"sourceVolume": "efs-app", "containerPath": "/u01/oracle/user_projects/apps", "readOnly": false},
+        {"sourceVolume": "efs-scripts", "containerPath": "/u01/oracle/scripts", "readOnly": false}
       ],
+      "workingDirectory": "/u01/oracle",
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
@@ -2321,6 +2080,10 @@ curl -s http://localhost:9012/reports/rwservlet/getserverinfo | head -50</pre>
       }
     }
   ],
+  "family": "reports-server",
+  "taskRoleArn": "arn:aws:iam::730335573515:role/ecs-forms-admin-task-role",
+  "executionRoleArn": "arn:aws:iam::730335573515:role/ecsTaskExecutionRole",
+  "networkMode": "awsvpc",
   "volumes": [
     {
       "name": "efs-domains",
@@ -2346,76 +2109,70 @@ curl -s http://localhost:9012/reports/rwservlet/getserverinfo | head -50</pre>
         "transitEncryption": "ENABLED"
       }
     }
-  ]
+  ],
+  "runtimePlatform": {"cpuArchitecture": "X86_64", "operatingSystemFamily": "LINUX"},
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "2048",
+  "memory": "4096",
+  "ephemeralStorage": {"sizeInGiB": 100}
 }</pre>
-      <div class="callout">
-        Guardado como <code>conf_json/reports-server.json</code> junto a
-        <code>forms-admin.json</code> y <code>forms-server.json</code>. Ese archivo ya trae la
-        contraseña de pruebas (igual que <code>forms-server.json</code>) para registrarlo directo por CLI.
-      </div>
         </section>
 
         <section class="slide-block anexo" id="anexo-r2">
-          <h3><span class="num anexo">Anexo</span> Imagen <code>r2</code>: construir, subir a ECR y actualizar servicios</h3>
-
+          <h3><span class="num anexo">Anexo</span> Imagen <code>r2</code>: construir, subir a ECR y actualizar servicios<span class="status done">Hecho</span></h3>
       <p>
         <code>r2</code> = <code>r1</code> + <code>motif libX11 libXext libXt libXp</code>, necesarias para <code>librw.so</code> /
-        <code>librwu.so</code> del motor de Reports. Las imágenes nuevas construidas con el <code>Dockerfile.wls</code> actual
-        ya las incluyen (<a href="../../docker/crear_imagen/index.html">Crear imagen</a>, puntos 4.e y 7.a).
+        <code>librwu.so</code> del motor de Reports. Las imágenes construidas con el <code>Dockerfile.wls</code> actual ya las incluyen
+        (<a href="../../docker/crear_imagen/index.html">Crear imagen</a>, puntos 4.e y 7.a). El repositorio ECR y el envío se explican en
+        <a href="../admin/index.html#paso-1-1">Admin 1.1</a>.
       </p>
-      <h4 class="sub">1. Construir <code>r2</code> a partir de <code>r1</code> (local)</h4>
+      <h4 class="sub" id="anexo-r2-1">1 · Construir <code>r2</code> a partir de <code>r1</code> (local)</h4>
       <pre class="code">cd dist/html/docker/crear_imagen
 docker build -f Dockerfile.r2 \
   --build-arg BASE_IMAGE=image_forms_14.1.2:r1 \
   --build-arg RUN_USER=$(docker inspect -f '{{.Config.User}}' image_forms_14.1.2:r1) \
   -t image_forms_14.1.2:r2 .</pre>
-      <h4 class="sub">2. Subir a ECR</h4>
+      <h4 class="sub" id="anexo-r2-2">2 · Subir a ECR</h4>
       <pre class="code">aws ecr get-login-password --region us-east-1 | \
   docker login --username AWS --password-stdin 730335573515.dkr.ecr.us-east-1.amazonaws.com
 docker tag image_forms_14.1.2:r2 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:r2
 docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:r2</pre>
-      <h4 class="sub">3. Nueva revisión de TD + forzar despliegue (los tres servicios)</h4>
-      <p>Consola: TD → última revisión → <strong>Crear nueva revisión</strong> → contenedor → URI de imagen
-        <code>…/forms-docker:r2</code> → Crear. Luego, en el servicio: <strong>Actualizar</strong> → nueva revisión →
-        <strong>Forzar nueva implementación</strong>. Repetir para <code>forms-admin</code>, <code>forms-server</code> y
-        <code>reports-server</code>.</p>
-      <pre class="code">aws ecs update-service --cluster forms_report --service reports-server \
-  --task-definition reports-server --force-new-deployment --region us-east-1</pre>
+      <h4 class="sub" id="anexo-r2-3">3 · Nueva revisión de TD + forzar despliegue (los tres servicios)</h4>
+      <p>
+        TD → última revisión → <strong>Crear nueva revisión</strong> → URI de imagen <code>…/forms-docker:r2</code> → Crear. Luego en el servicio:
+        <strong>Actualizar</strong> → nueva revisión → <strong>Forzar nueva implementación</strong> (mismo procedimiento que
+        <a href="../admin/index.html#paso-7d">Admin 7d</a>). Repetir en <code>admin</code>, <code>forms</code> y <code>reports-server</code>.
+      </p>
       <div class="callout warn">
-        Con <code>sleep infinity</code>, cada redeploy reinicia el contenedor sin WebLogic: hay que volver a arrancar
-        AdminServer, Node Manager y los managed (Pasos 12b–12c). El dominio, <code>reports/</code> y los scripts
-        persisten en EFS, así que el Paso 12e no se repite.
+        Con <code>sleep infinity</code>, cada redespliegue reinicia el contenedor sin WebLogic: hay que volver a arrancar AdminServer, Node
+        Manager y los managed (<a href="#paso-5">Paso 5</a>). El dominio, <code>reports/</code> y los scripts persisten en EFS, así que el
+        <a href="#paso-6">Paso 6</a> no se repite.
       </div>
-      <h4 class="sub">4. Verificar en el contenedor</h4>
+      <h4 class="sub" id="anexo-r2-4">4 · Verificar en el contenedor</h4>
       <pre class="code">for f in /u01/oracle/lib/librw*.so; do ldd "$f" | grep 'not found'; done | sort -u
 # Sin salida = OK</pre>
         </section>
 
         <section class="slide-block anexo" id="anexo-cli">
-          <h3><span class="num anexo">Anexo</span> Comandos AWS CLI</h3>
+          <h3><span class="num anexo">Anexo</span> Comandos AWS CLI<span class="status done">Hecho</span></h3>
+      <p>
+        Los comandos de infraestructura compartida (subnets, rutas, security groups, EFS, Session Manager Plugin, redespliegue) están en el
+        <a href="../admin/index.html#anexo-cli">anexo CLI de admin</a>. Aquí los específicos de <code>reports-server</code>, incluida su
+        creación completa por CLI.
+      </p>
+      <h4 class="sub" id="anexo-cli-1">1 · Registrar la task definition</h4>
+      <pre class="code">aws ecs register-task-definition --cli-input-json file://conf_json/reports-server.json --region us-east-1</pre>
 
-      <div class="callout">
-        Región <code>us-east-1</code>, cluster <code>forms_report</code>. Los comandos de diagnóstico de
-        subnets, rutas, SG y EFS son los mismos de la
-        <a href="../forms/index.html#anexo-cli">guía Forms</a>.
-      </div>
-
-      <h4 class="sub">1. Registrar la task definition</h4>
-      <pre class="code">aws ecs register-task-definition \
-  --cli-input-json file://conf_json/reports-server.json \
-  --region us-east-1</pre>
-
-      <h4 class="sub">2. Obtener el ARN del servicio Cloud Map <code>weblogic-reports</code></h4>
-      <p>Solo si se crea el servicio ECS por CLI (desde la consola se crea en el Paso 8).</p>
+      <h4 class="sub" id="anexo-cli-2">2 · Servicio Cloud Map <code>weblogic-reports</code></h4>
+      <p>Solo si el servicio ECS se crea por CLI (desde la consola se crea en el <a href="#paso-2-3">Paso 2.3</a>).</p>
       <pre class="code">aws servicediscovery create-service \
   --name weblogic-reports \
   --namespace-id ns-r3zqawwpjtp5pzue \
   --dns-config 'NamespaceId=ns-r3zqawwpjtp5pzue,RoutingPolicy=MULTIVALUE,DnsRecords=[{Type=A,TTL=15}]' \
   --health-check-custom-config FailureThreshold=1 \
-  --region us-east-1 \
-  --query 'Service.Arn' --output text</pre>
+  --region us-east-1 --query 'Service.Arn' --output text</pre>
 
-      <h4 class="sub">3. Crear el servicio ECS</h4>
+      <h4 class="sub" id="anexo-cli-3">3 · Crear el servicio ECS</h4>
       <pre class="code">aws ecs create-service \
   --cluster forms_report \
   --service-name reports-server \
@@ -2429,14 +2186,11 @@ docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:r2</pre>
   --service-registries 'registryArn=&lt;ARN_SERVICIO_CLOUDMAP_WEBLOGIC_REPORTS&gt;' \
   --region us-east-1</pre>
 
-      <h4 class="sub">4. Abrir 9012 en el SG (desde una IP concreta)</h4>
-      <pre class="code">aws ec2 authorize-security-group-ingress \
-  --group-id sg-0e1787d32bac71fcd \
-  --protocol tcp --port 9012 \
-  --cidr &lt;MI_IP&gt;/32 \
-  --region us-east-1</pre>
+      <h4 class="sub" id="anexo-cli-4">4 · Abrir 9012 en el SG (desde una IP concreta)</h4>
+      <pre class="code">aws ec2 authorize-security-group-ingress --group-id sg-0e1787d32bac71fcd \
+  --protocol tcp --port 9012 --cidr &lt;MI_IP&gt;/32 --region us-east-1</pre>
 
-      <h4 class="sub">5. Tarea, IP pública y logs</h4>
+      <h4 class="sub" id="anexo-cli-5">5 · Tarea, IP pública y logs</h4>
       <pre class="code">TASK_ARN=$(aws ecs list-tasks --cluster forms_report --service-name reports-server \
   --region us-east-1 --query 'taskArns[0]' --output text)
 
@@ -2452,17 +2206,17 @@ aws ecs describe-tasks --cluster forms_report --tasks "$TASK_ARN" --region us-ea
 
 aws logs tail /ecs/reports-server --follow --region us-east-1</pre>
 
-      <h4 class="sub">6. Respaldar la configuración</h4>
+      <h4 class="sub" id="anexo-cli-6">6 · Respaldar la configuración</h4>
       <pre class="code">aws ecs describe-services --cluster forms_report --services reports-server \
   --region us-east-1 --output json &gt; conf_json/reports-server-service.json
-
 aws ecs describe-task-definition --task-definition reports-server \
   --region us-east-1 --query taskDefinition --output json &gt; conf_json/reports-server.json</pre>
 
-      <h4 class="sub">Equivalencia rápida admin / forms / reports</h4>
+      <h4 class="sub" id="anexo-cli-7">Equivalencia rápida admin / forms / reports</h4>
       <div class="tabla"><table>
         <tr><th>Concepto</th><th>Admin</th><th>Forms</th><th>Reports</th></tr>
-        <tr><td>Servicio</td><td><code>forms-admin</code></td><td><code>forms-server</code></td><td><code>reports-server</code></td></tr>
+        <tr><td>Servicio</td><td><code>admin</code></td><td><code>forms</code></td><td><code>reports-server</code></td></tr>
+        <tr><td>Task definition</td><td><code>forms-admin</code></td><td><code>forms-server</code></td><td><code>reports-server</code></td></tr>
         <tr><td>Contenedor</td><td><code>admin</code></td><td><code>forms-server</code></td><td><code>reports-server</code></td></tr>
         <tr><td>Discovery</td><td><code>weblogic-admin</code></td><td><code>weblogic-forms</code></td><td><code>weblogic-reports</code></td></tr>
         <tr><td>Scripts EFS</td><td><code>scripts/admin</code></td><td><code>scripts/forms</code></td><td><code>scripts/reports</code></td></tr>
@@ -2472,38 +2226,29 @@ aws ecs describe-task-definition --task-definition reports-server \
 
         <section class="slide-block lecciones" id="lecciones-criticas">
           <h3><span class="num lecciones">★</span> Lecciones críticas</h3>
-
-      <p><strong>Heredadas del levantamiento de Forms (aplican igual a Reports):</strong></p>
+      <p>
+        Las lecciones de infraestructura comunes (rol de tarea, timeout de ECR, espacio efímero, NFS 2049, rutas EFS, <code>sleep infinity</code>
+        y <code>PATH</code>, Service Discovery al crear, solo <code>pub-A</code> + ruta BD, hostnames) están en las
+        <a href="../admin/index.html#lecciones-criticas">lecciones de admin</a>, y las de WebLogic en contenedor (usuario <code>oracle</code>,
+        <code>boot.properties</code>, zombies, ECS Running ≠ WebLogic RUNNING, libaio en la imagen, URL de BD fija en el dominio) en las
+        <a href="../forms/index.html#lecciones-criticas">lecciones de Forms</a>. Propias de Reports:
+      </p>
       <ol>
-        <li><strong>Espacio efímero 100 GiB</strong> (Paso 4) — con el default, <code>no space left on device</code> al descomprimir la imagen.</li>
-        <li><strong><code>sleep infinity</code> y <code>PATH</code></strong> (Paso 3) — no redefinir <code>PATH</code> con <code>${PATH}</code>: ECS no lo expande y <code>sleep</code> deja de encontrarse.</li>
-        <li><strong>Log group <code>/ecs/reports-server</code> creado a mano</strong> (Paso 5) — <code>ecsTaskExecutionRole</code> no tiene <code>logs:CreateLogGroup</code>; aunque la TD lleva <code>awslogs-create-group=true</code>, la tarea falla con <code>ResourceInitializationError ... AccessDeniedException ... logs:CreateLogGroup</code>. Crear el grupo en CloudWatch y forzar nueva implementación.</li>
-        <li><strong>Solo <code>pub-A</code> en el servicio</strong> (Paso 9) — si la tarea cae en <code>database-A</code>, la IP pública no responde.</li>
-        <li><strong>Ruta BD en <code>Pub-RT</code></strong> — <code>192.168.229.137/32 → pcx-0ad20c217472c7080</code> ya configurada; no hay que repetirla.</li>
-        <li><strong>EFS NFS 2049</strong> — el SG del EFS ya permite 2049 desde <code>forms-sg-ecs</code>; si Reports usara otro SG, habría que añadirlo.</li>
-        <li><strong>Service Discovery solo al crear el servicio</strong> (Paso 8) — no se agrega con un update.</li>
-        <li><strong>Coherence WKA usa UDP 7574</strong> (Paso 9) — la regla SG → mismo SG debe incluir UDP (o <em>Todo el tráfico</em>), no solo TCP. Si no, <code>WLS_REPORTS</code> queda en <code>Delaying formation of a new cluster</code> y a los 300 s pasa a <code>FAILED</code> (<code>RequestTimeoutException ... Name=Cluster</code>).</li>
-        <li><strong>FQDN en el dominio desde el principio</strong> (Paso 0 / Paso 11) — <code>weblogic-reports</code> sin sufijo provoca <code>UnknownHostException</code> en Node Manager y deja a <code>WLS_REPORTS</code> fuera del WKA de Coherence (<code>Hostname weblogic-reports ... failed to resolve</code>): si <code>WLS_FORMS</code> no responde, Reports pasa a <code>FAILED</code> a los 300 s. Ejecutar <code>set-cloudmap-hostnames.sh</code> antes del primer arranque.</li>
-        <li><strong>Usuario <code>oracle</code></strong> (Paso 10) — trabajar con <code>su - oracle</code>, no como <code>root</code>.</li>
-        <li><strong><code>boot.properties</code> del managed</strong> (Paso 12a) — necesario para arranque sin prompt de credenciales.</li>
-        <li><strong>Librerías X11/Motif en la imagen</strong> (Paso 13) — el motor de Reports (<code>librw.so</code>, <code>librwu.so</code>) necesita <code>libXm.so.4</code>, <code>libX11</code>, <code>libXext</code>, <code>libXt</code>, <code>libXp</code>. Sin ellas, la primera petición a <code>rwservlet</code> queda colgada y aparece el incidente <code>DFW-99998 [java.lang.UnsatisfiedLinkError][oracle.reports.util.EnvironmentGlobal.&lt;init&gt;]</code>. Instalar <code>motif libX11 libXext libXt libXp</code> en el Dockerfile (runtime stage); en ECR es el tag <code>r2</code> (<a href="#anexo-r2">anexo</a>).</li>
-        <li><strong>libaio / net-tools / nano en la imagen</strong> — instalarlos con ECS Exec se pierde al recrear la tarea.</li>
-        <li><strong>Redeploy = nueva IP</strong> — Cloud Map actualiza el registro A; respetar TTL 15 antes de arrancar.</li>
-      </ol>
-      <p><strong>Específicas de Reports:</strong></p>
-      <ol>
-        <li><strong>Puertos propios</strong> — 9012/9512/9992; el mapeo <code>5558:5556</code> de compose no aplica en Fargate (usar 5556).</li>
-        <li><strong>Carpeta <code>scripts/reports</code> en EFS</strong> (Paso 0) — debe existir antes de lanzar la tarea, o falla el montaje del volumen.</li>
-        <li><strong>Node Manager separado</strong> — Reports usa <code>nodemanager_reports</code> (no el <code>nodemanager</code> del admin); su <code>ListenAddress</code> debe ser <code>weblogic-reports.forms.local</code>.</li>
-        <li><strong>Memoria</strong> (Paso 2) — los engines <code>rwEng</code> consumen memoria aparte de la JVM; subir a 8 GB si hay <code>OutOfMemory</code> / exit 137.</li>
-        <li><strong>Target de <code>reports#14.1.2</code></strong> (Paso 12d) — si sigue en <code>AdminServer</code>, <code>/reports/rwservlet</code> no responde en 9012.</li>
-        <li><strong>TNS y <code>sourceDir</code></strong> (Paso 12e / 13) — el alias de BD y la ruta de los <code>.rdf</code> deben estar en EFS para que sobrevivan a un redeploy.</li>
-        <li><strong>El Wizard no completa Reports</strong> (Paso 12e) — faltan la instancia de Reports Tools y <code>$DOMAIN_HOME/reports/{bin,server,cache,temp,fonts}</code>. <code>rwservlet</code> responde 200, pero el reporte da <code>REP-52266</code>/<code>REP-51002</code>; la causa real (<code>REP-54005</code>, <code>REP-56022</code>, <code>REP-50141</code>) solo aparece en <code>rwserver_diagnostic.log</code>.</li>
-        <li><strong><code>createReportsToolsInstance</code> necesita el Node Manager de <code>ReportsMachine</code></strong> — sin él, la instancia queda registrada pero sin archivos.</li>
-        <li><strong>Lanzadores con marcadores</strong> — <code>$ORACLE_HOME/bin/rwengine.sh</code> y <code>reports.sh</code> traen <code>$$domain_home$$</code>, <code>$$mw_home$$</code>, <code>$$component_name$$</code> y <code>%HOME%</code>; copiarlos sin sustituir no funciona (<code>prepare-reports-domain.sh</code> lo hace).</li>
-        <li><strong>Seguridad de Reports activa por defecto</strong> — <code>securityId="rwJaznSec"</code> pide usuario en cada reporte; en DEV se elimina del job.</li>
-        <li><strong>RDF en modo carácter</strong> — <code>REP-1920</code> con <code>desformat=PDF</code>; usar <code>mode=bitmap</code>.</li>
-        <li><strong>URL de BD quemada en el dominio</strong> — <em>pendiente por resolver</em> (mismo punto que en Forms: <code>jps-config-jse.xml</code>, <code>opss-datasource-jdbc.xml</code>, etc.).</li>
+        <li><strong>Log group creado a mano</strong> (Paso 1.7) — <code>ecsTaskExecutionRole</code> no tiene <code>logs:CreateLogGroup</code>; <code>awslogs-create-group=true</code> no basta.</li>
+        <li><strong>Librerías X11/Motif en la imagen</strong> (<a href="#anexo-r2">anexo r2</a>) — sin <code>libXm.so.4</code>, <code>libX11</code>, <code>libXext</code>, <code>libXt</code>, <code>libXp</code>, la primera petición a <code>rwservlet</code> queda colgada con <code>DFW-99998 UnsatisfiedLinkError</code>.</li>
+        <li><strong>Coherence por UDP 7574</strong> (Paso 2.5) — la regla interna del SG debe incluir UDP; si no, <code>WLS_REPORTS</code> queda en <code>Delaying formation of a new cluster</code> y a los 300 s pasa a <code>FAILED</code>.</li>
+        <li><strong>FQDN de <code>ReportsMachine</code></strong> (Paso 4) — el nombre corto deja a <code>WLS_REPORTS</code> fuera del WKA de Coherence.</li>
+        <li><strong>Puertos propios</strong> (Paso 1.2) — 9012/9512/9992; el mapeo <code>5558:5556</code> de compose no aplica en Fargate.</li>
+        <li><strong>Carpeta <code>scripts/reports</code> en EFS</strong> (Paso 0) — debe existir antes de lanzar la tarea, o falla el montaje.</li>
+        <li><strong>Node Manager separado</strong> (Paso 5.2) — <code>nodemanager_reports</code>, con <code>ListenAddress=weblogic-reports.forms.local</code>.</li>
+        <li><strong>Memoria</strong> (Paso 1.1) — los engines <code>rwEng</code> consumen memoria aparte de la JVM; 8 GB si hay <code>OutOfMemory</code> / exit 137.</li>
+        <li><strong>Target de <code>reports#14.1.2</code></strong> (Paso 5.4) — si sigue en <code>AdminServer</code>, <code>rwservlet</code> no responde en 9012.</li>
+        <li><strong>El Wizard no completa Reports</strong> (Paso 6) — faltan Reports Tools y <code>$DOMAIN_HOME/reports/{bin,server,cache,temp,fonts}</code>; la causa real solo aparece en <code>rwserver_diagnostic.log</code>.</li>
+        <li><strong><code>createReportsToolsInstance</code> necesita el Node Manager de <code>ReportsMachine</code></strong> (Paso 6.1) — sin él, la instancia queda sin archivos.</li>
+        <li><strong>Lanzadores con marcadores</strong> (Paso 6.2) — <code>rwengine.sh</code> y <code>reports.sh</code> traen <code>$$domain_home$$</code>, <code>$$mw_home$$</code>, <code>$$component_name$$</code> y <code>%HOME%</code>; copiarlos sin sustituir no funciona.</li>
+        <li><strong>Seguridad de Reports activa por defecto</strong> — <code>securityId="rwJaznSec"</code> pide usuario en cada reporte; en DEV se elimina.</li>
+        <li><strong>TNS y <code>sourceDir</code> en EFS</strong> (Pasos 6–7) — para que sobrevivan a un redespliegue.</li>
+        <li><strong>RDF en modo carácter</strong> (Paso 7) — <code>REP-1920</code> con <code>desformat=PDF</code>; usar <code>mode=bitmap</code>.</li>
       </ol>
         </section>
 
@@ -2511,7 +2256,7 @@ aws ecs describe-task-definition --task-definition reports-server \
     </div>
 
     <p class="doc-footer">
-      Documentación ECS Reports — capturas en <code>assets/</code>. Basada en <a href="../forms/index.html">ECS Forms</a>.
+      Documentación ECS Reports — capturas en <code>assets/</code>. Ver también <a href="../admin/index.html">ECS AdminServer</a> y <a href="../forms/index.html">ECS Forms</a>.
     </p>
 
     <p style="margin: 1rem 0 2rem; text-align: center;">

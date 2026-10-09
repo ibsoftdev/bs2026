@@ -1394,7 +1394,7 @@
       </div>
     </div>
 
-    <nav class="toc" aria-label="Contenido"><a href="#paso-0">0 · Preparación y valores fijos</a><a href="#paso-1">1 · Configuraciones comunes del Dominio</a><a href="#paso-2">2 · Cluster forms_report</a><a href="#paso-3">3 · Crear task definition</a><a href="#paso-4">4 · Crear servicio + Service Discovery</a><a href="#paso-5">5 · Verificar Running y ECS Exec</a><a href="#paso-6">6 · Arrancar AdminServer y consola</a><a href="#paso-7">7 · Alinear hostnames Cloud Map</a><a href="#anexo-cli">Anexo · Comandos AWS CLI</a><a href="#anexo-td">Anexo · Resumen task definition</a><a href="#lecciones-criticas">★ · Lecciones críticas</a></nav>
+    <nav class="toc" aria-label="Contenido"><a href="#paso-0">0 · Preparación y valores fijos</a><a href="#paso-1">1 · Configuraciones comunes del Cluster</a><a href="#paso-2">2 · Cluster forms_report</a><a href="#paso-3">3 · Crear task definition AdminServer</a><a href="#paso-4">4 · Crear servicio + Service Discovery</a><a href="#paso-5">5 · Verificar Running y ECS Exec</a><a href="#paso-6">6 · Alinear hostnames Cloud Map</a><a href="#paso-7">7 · Arrancar AdminServer y consola</a><a href="#anexo-json">Anexo · Task definition JSON</a><a href="#anexo-cli">Anexo · Comandos AWS CLI</a><a href="#lecciones-criticas">★ · Lecciones críticas</a></nav>
 
     <div class="card">
       <div class="card-body">
@@ -1416,7 +1416,7 @@
         <tr><td>SG del EFS</td><td><code>sg-0e39a7aa49ff6a22b</code> (NFS 2049 desde <code>forms-sg-ecs</code>)</td></tr>
         <tr><td>Rol ejecución</td><td><code>ecsTaskExecutionRole</code></td></tr>
         <tr><td>Rol tarea (Exec)</td><td><code>ecs-forms-admin-task-role</code></td></tr>
-        <tr><td>Familia TD / servicio / contenedor</td><td><code>forms-admin</code> / <code>forms-admin</code> / <code>admin</code></td></tr>
+        <tr><td>Familia TD / servicio / contenedor</td><td><code>forms-admin</code> / <code>admin</code> / <code>admin</code></td></tr>
         <tr><td>Namespace Cloud Map</td><td><code>forms.local</code> (<code>ns-r3zqawwpjtp5pzue</code>)</td></tr>
         <tr><td>Service Discovery</td><td><code>weblogic-admin</code> → <code>weblogic-admin.forms.local</code></td></tr>
         <tr><td>Log group</td><td><code>/ecs/forms-admin</code></td></tr>
@@ -1436,31 +1436,69 @@
         <!-- ═════════════ CONFIGURACIONES COMUNES ═════════════ -->
 
         <section class="slide-block" id="paso-1">
-<h3><span class="num">1</span> Configuraciones comunes del Dominio<span class="status done">Hecho</span></h3>
+<h3><span class="num">1</span> Configuraciones comunes del Cluster<span class="status done">Hecho</span></h3>
       <p>
         Antes de crear el cluster y la task definition, dejar listas las piezas compartidas por los tres
         contenedores (admin, forms y reports): la <strong>imagen en ECR</strong>, el security group de las tareas, el EFS del dominio, el rol de tarea para ECS Exec y el <strong>namespace Cloud Map</strong> <code>forms.local</code>.
       </p>
 
-<h4 class="sub" id="paso-1-1">1.1 · Imagen en ECR<span class="status pending">Pendiente</span></h4>
+<h4 class="sub" id="paso-1-1">1.1 · Imagen en ECR<span class="status done">Hecho</span></h4>
       <p>
         Subir a ECR la imagen construida en la fase <a href="../../docker/crear_imagen/index.html">Crear la imagen</a>.
         Los tres servicios (admin, forms, reports) usan <strong>la misma imagen</strong>.
       </p>
+
+      <h4 class="sub" id="paso-1-1a">1.1a · Crear el repositorio privado</h4>
+      <p>
+        Amazon ECR (Elastic Container Registry) es el registro de imágenes Docker de AWS. ECS Fargate no puede usar
+        la imagen que está en la máquina local: la descarga de un repositorio ECR al lanzar cada tarea. Este repositorio
+        privado guarda la imagen Oracle Forms/Reports 14.1.2 y solo es accesible con credenciales de la cuenta.
+      </p>
+      <p>Amazon ECR → <strong>Registro privado</strong> → <strong>Repositorios</strong> → <strong>Crear repositorio</strong>.</p>
+      <div class="tabla"><table>
+        <tr><th>Campo</th><th>Valor</th></tr>
+        <tr><td>Nombre del repositorio</td><td><code>forms-docker</code></td></tr>
+        <tr><td>Mutabilidad de etiquetas</td><td><strong>Mutable</strong></td></tr>
+        <tr><td>Cifrado</td><td><strong>AES-256</strong> (no se puede cambiar después)</td></tr>
+      </table></div>
+      <figure class="shot" data-shot="paso-1-1a">
+        <img src="assets/paso-01-1a-ecr-crear-repo.png" alt="Crear repositorio privado forms-docker, mutable, AES-256" />
+        <figcaption>Paso 1.1a — Crear repositorio <code>forms-docker</code></figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-1-1b">
+        <img src="assets/paso-01-1b-ecr-resumen.png" alt="Resumen del repositorio forms-docker con URI y ARN" />
+        <figcaption>Paso 1.1b — Repositorio creado: URI <code>730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker</code></figcaption>
+      </figure>
+
+      <h4 class="sub" id="paso-1-1c">1.1c · Subir la imagen</h4>
+      <p>
+        Se publica en el repositorio la imagen construida localmente: primero se autentica Docker contra ECR,
+        luego se etiqueta la imagen con la URI del repositorio y por último se envía (<em>push</em>). Por el tamaño
+        de la imagen (~11 GB) el envío tarda varios minutos y conviene hacerlo desde una máquina con buena conexión.
+      </p>
+      <p>El botón <strong>Ver comandos de envío</strong> del repositorio muestra estos mismos comandos:</p>
       <pre class="code">aws ecr get-login-password --region us-east-1 \
   | docker login --username AWS --password-stdin 730335573515.dkr.ecr.us-east-1.amazonaws.com
 
 docker tag &lt;imagen-local&gt;:&lt;tag&gt; 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt;
 docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt;</pre>
-      <p>Anotar el <strong>digest</strong> (<code>sha256:…</code>) resultante; la task definition lo referencia por digest.</p>
-      <figure class="shot" data-shot="paso-1-1">
-        <div class="placeholder">[ Captura pendiente: repositorio forms-docker en ECR con la imagen y su digest ]</div>
-        <figcaption>Paso 1.1 — Imagen en ECR</figcaption>
+      <p>
+        En la pestaña <strong>Imágenes</strong> quedan las versiones subidas (<code>latest</code>, <code>r1</code>, <code>r2</code>,
+        ~11 GB cada una). Anotar el <strong>digest</strong> (<code>sha256:…</code>) de la versión a desplegar:
+        la task definition lo referencia por digest.
+      </p>
+      <figure class="shot" data-shot="paso-1-1c">
+        <img src="assets/paso-01-1c-ecr-imagenes.png" alt="Pestaña Imágenes de forms-docker con etiquetas r2, r1 y latest" />
+        <figcaption>Paso 1.1c — Imágenes en <code>forms-docker</code> y sus digests</figcaption>
       </figure>
 
-
-
 <h4 class="sub" id="paso-1-2">1.2 · Security group <code>forms-sg-ecs</code></h4>
+      <p>
+        Un security group es el firewall virtual que AWS aplica a cada tarea Fargate (a su interfaz de red). Define
+        qué tráfico puede entrar y salir del contenedor. <code>forms-sg-ecs</code> lo comparten admin, forms y reports:
+        abre la consola WebLogic hacia afuera, permite que los contenedores se hablen entre sí y deja salir el tráfico
+        hacia ECR, CloudWatch, EFS y la base de datos.
+      </p>
       <p>
         EC2 → <strong>Red y seguridad</strong> → <strong>Grupos de seguridad</strong> →
         <strong>Crear grupo de seguridad</strong>, en la VPC
@@ -1484,6 +1522,11 @@ docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt
       </figure>
 
       <h4 class="sub">1.2c · Reglas de entrada y salida</h4>
+      <p>
+        Las reglas de <strong>entrada</strong> indican quién puede conectarse a las tareas y por qué puerto; las de
+        <strong>salida</strong>, a dónde pueden conectarse las tareas. Los security groups son <em>stateful</em>: la
+        respuesta a una conexión permitida vuelve sin necesidad de otra regla.
+      </p>
       <div class="tabla"><table>
         <tr><th>Regla</th><th>Protocolo / puerto</th><th>Origen / destino</th><th>Uso</th></tr>
         <tr><td>Entrada</td><td>TCP personalizado · <strong>7001</strong></td><td><code>0.0.0.0/0</code> (descripción: <em>Admin HTTP access</em>)</td><td>Consola WebLogic / EM</td></tr>
@@ -1507,8 +1550,14 @@ docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt
 
 <h4 class="sub" id="paso-1-3">1.3 · EFS <code>rector-dev</code> y NFS 2049</h4>
       <p>
+        Amazon EFS (Elastic File System) es un sistema de archivos de red (NFS) administrado por AWS. Las tareas Fargate
+        son efímeras: todo lo que se escribe dentro del contenedor se pierde al detenerse. Por eso el dominio WebLogic
+        (<code>forms_domain</code>), las aplicaciones y los scripts viven en el EFS y se montan en cada contenedor.
+        Así admin, forms y reports comparten el mismo dominio y los cambios sobreviven a los redespliegues.
+      </p>
+      <p>
         Amazon EFS → <strong>Sistemas de archivos</strong> → <code>rector-dev</code>
-        (<code>(fs-08471cc88d2a8edc3)</code>. Debe estar <strong>Disponible</strong> y con mount target
+        (<code>fs-08471cc88d2a8edc3</code>). Debe estar <strong>Disponible</strong> y con mount target
         en la AZ de <code>pub-A</code> (<code>us-east-1a</code> / <code>subnet-01212efd4a9ce759b</code>).
       </p>
 
@@ -1519,6 +1568,11 @@ docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt
       </figure>
 
       <h4 class="sub">1.3b · Pestaña Red (mount targets)</h4>
+      <p>
+        Un <strong>mount target</strong> (destino de montaje) es el punto de acceso del EFS dentro de una zona de
+        disponibilidad: una IP en una subnet por la que las tareas montan el filesystem por NFS. La tarea usa el mount
+        target de su misma AZ, por lo que debe existir uno en la AZ de la subnet del servicio ECS.
+      </p>
       <p>
         Abrir el filesystem → pestaña <strong>Red</strong>. Los tres mount targets usan el SG
         <code>sg-0e39a7aa49ff6a22b</code> (<code>ESF-dev-sg</code>). El de <code>us-east-1a</code>
@@ -1537,6 +1591,11 @@ docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt
 
       <h4 class="sub">1.3c · Administrar destinos de montaje</h4>
       <p>
+        Esta pantalla permite crear, quitar o cambiar los mount targets y el security group de cada uno. Aquí solo se
+        verifica: que estén en la VPC de las tareas y que tengan el SG <code>ESF-dev-sg</code>, que es el que controla
+        quién puede montar el EFS.
+      </p>
+      <p>
         Desde <strong>Administrar</strong> se confirma la VPC
         <code>vpc-055a4007418b34e64</code> (<code>vpc-Banesco-Seguros-VE-dev</code>) y el SG
         <code>ESF-dev-sg</code> en cada AZ.
@@ -1547,6 +1606,12 @@ docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt
       </figure>
 
       <h4 class="sub">1.3d · Regla NFS 2049 en el SG del EFS</h4>
+      <p>
+        NFS usa el puerto TCP <strong>2049</strong>. Para que una tarea monte el EFS, el SG de los mount targets
+        (<code>ESF-dev-sg</code>) debe aceptar conexiones a ese puerto desde el SG de las tareas
+        (<code>forms-sg-ecs</code>). Usar el SG como origen (en lugar de IPs) permite que cualquier tarea nueva, con
+        cualquier IP, pueda montar el filesystem.
+      </p>
       <ol>
         <li>EC2 → <strong>Grupos de seguridad</strong> → <code>sg-0e39a7aa49ff6a22b</code> (<code>ESF-dev-sg</code>)</li>
         <li>Pestaña <strong>Reglas de entrada</strong>: debe existir <strong>NFS / TCP 2049</strong> con origen
@@ -1642,25 +1707,89 @@ docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt
         <figcaption>Paso 1.4d2 — Revisar permisos → Crear rol</figcaption>
       </figure>
 
-<h4 class="sub" id="paso-1-5">1.5 · Cloud Map — namespace <code>forms.local</code><span class="status pending">Pendiente</span></h4>
-      <ol>
-        <li>Cloud Map → <strong>Crear espacio de nombres</strong></li>
-        <li>Nombre: <code>forms.local</code></li>
-        <li>Tipo: <strong>Llamadas a la API y consultas DNS en VPC</strong> · VPC <code>vpc-055a4007418b34e64</code></li>
-      </ol>
-      <p>Resultado: namespace <code>ns-r3zqawwpjtp5pzue</code>. Se crea una sola vez y lo comparten admin, forms y reports. Puede hacerse <strong>antes</strong> del cluster y de la task definition; Service Discovery se asocia después, al crear cada servicio ECS.</p>
-      <figure class="shot" data-shot="paso-1-5">
-        <div class="placeholder">[ Captura pendiente: namespace forms.local en Cloud Map ]</div>
-        <figcaption>Paso 1.5 — Namespace DNS privado</figcaption>
+<h4 class="sub" id="paso-1-5">1.5 · Cloud Map — namespace <code>forms.local</code><span class="status done">Hecho</span></h4>
+      <p>
+        AWS Cloud Map es el servicio de descubrimiento de servicios de AWS: mantiene un registro de nombres DNS que
+        apuntan a las IPs de las tareas ECS. En Fargate cada tarea recibe una IP distinta en cada despliegue, por lo que
+        los contenedores no pueden referenciarse por IP. Con Cloud Map, forms y reports encuentran al AdminServer por un
+        nombre fijo (<code>weblogic-admin.forms.local</code>) y ECS actualiza la IP detrás de ese nombre automáticamente.
+      </p>
+      <p>
+        Namespace DNS privado que comparten admin, forms y reports. Se crea una sola vez y solo depende de la VPC, así que puede hacerse
+        <strong>antes</strong> del cluster y de la task definition. Service Discovery (<code>weblogic-admin</code>) se asocia después, al crear el servicio en el <a href="#paso-4">Paso 4</a>.
+      </p>
+
+      <h4 class="sub" id="paso-1-5a">1.5a · Crear espacio de nombres</h4>
+      <p>
+        Un <strong>espacio de nombres</strong> (namespace) es el dominio DNS bajo el que se registran los servicios; aquí
+        <code>forms.local</code>. Cada servicio ECS con Service Discovery agrega un nombre dentro de él
+        (<code>weblogic-admin.forms.local</code>, etc.).
+      </p>
+      <p>AWS Cloud Map → <strong>Espacios de nombres</strong> → <strong>Crear espacio de nombres</strong>.</p>
+      <figure class="shot" data-shot="paso-1-5a">
+        <img src="assets/paso-01-5a-cloudmap-lista.png" alt="Lista de espacios de nombres de AWS Cloud Map con forms.local" />
+        <figcaption>Paso 1.5a — Espacios de nombres en Cloud Map</figcaption>
       </figure>
 
-        </section>
+      <h4 class="sub" id="paso-1-5b">1.5b · Configuración del namespace</h4>
+      <p>
+        El tipo <strong>Llamadas a la API y consultas de DNS en VPC</strong> crea un DNS <em>privado</em>: los nombres
+        solo se resuelven desde dentro de la VPC indicada, no desde Internet. El <strong>TTL</strong> es el tiempo
+        (en segundos) que los clientes guardan en caché una respuesta DNS; un valor bajo (15 s) hace que un cambio de IP
+        de la tarea se note rápido.
+      </p>
+      <div class="tabla"><table>
+        <tr><th>Campo</th><th>Valor</th></tr>
+        <tr><td>Nombre</td><td><code>forms.local</code></td></tr>
+        <tr><td>Descripción</td><td>DNS interno Forms/Reports</td></tr>
+        <tr><td>Detección de instancias</td><td><strong>Llamadas a la API y consultas de DNS en VPC</strong></td></tr>
+        <tr><td>VPC</td><td><code>vpc-055a4007418b34e64</code> (vpc-Banesco-Seguros-VE-dev)</td></tr>
+        <tr><td>TTL del registro SOA</td><td><code>15</code></td></tr>
+      </table></div>
+      <div class="callout">La captura corresponde a la pantalla <strong>Editar espacio de nombres</strong> del namespace ya creado; los campos coinciden con los de creación. La VPC solo se elige al crear y no se puede cambiar después.</div>
+      <figure class="shot" data-shot="paso-1-5b">
+        <img src="assets/paso-01-5b-cloudmap-config.png" alt="Editar espacio de nombres forms.local: descripción, tipo API y DNS en VPC, TTL 15" />
+        <figcaption>Paso 1.5b — Namespace <code>forms.local</code> (<code>ns-r3zqawwpjtp5pzue</code>)</figcaption>
+      </figure>
+
+      <h4 class="sub" id="paso-1-5c">1.5c · Verificar la zona privada en Route 53</h4>
+      <p>
+        Route 53 es el servicio DNS de AWS. Cloud Map no resuelve nombres por sí mismo: al crear el namespace genera una
+        <strong>zona alojada privada</strong> en Route 53 y escribe en ella los registros de cada tarea. Esta verificación
+        confirma que la zona existe y está asociada a la VPC correcta; si no, los contenedores no podrán resolver
+        <code>*.forms.local</code>.
+      </p>
+      <p>
+        Cloud Map crea automáticamente una <strong>zona alojada privada</strong> <code>forms.local</code> asociada a la VPC.
+        Route 53 → <strong>Zonas alojadas</strong> → <code>forms.local</code>:
+      </p>
+      <div class="tabla"><table>
+        <tr><th>Campo</th><th>Valor</th></tr>
+        <tr><td>ID de zona</td><td><code>Z0103242BR4XEF1M63G7</code></td></tr>
+        <tr><td>Tipo</td><td>Zona alojada privada</td></tr>
+        <tr><td>Creada por</td><td>Cloud Map · <code>arn:aws:servicediscovery:us-east-1:730335573515:namespace/ns-r3zqawwpjtp5pzue</code></td></tr>
+        <tr><td>VPC asociada</td><td><code>vpc-055a4007418b34e64</code> · us-east-1</td></tr>
+        <tr><td>Registros</td><td>5 (SOA, NS y los registros A de los servicios registrados)</td></tr>
+      </table></div>
+      <div class="callout warn">No editar ni borrar los registros de esta zona a mano: los administra Cloud Map al arrancar y detener las tareas ECS.</div>
+      <figure class="shot" data-shot="paso-1-5c">
+        <img src="assets/paso-01-5c-cloudmap-route53.png" alt="Route 53: zona alojada privada forms.local creada por Cloud Map, asociada a vpc-055a4007418b34e64" />
+        <figcaption>Paso 1.5c — Zona privada <code>forms.local</code> en Route 53</figcaption>
+      </figure>
+
+    </section>
 
 
         <!-- ═════════════ CLUSTER ═════════════ -->
 
 <section class="slide-block" id="paso-2">
 <h3><span class="num">2</span> Cluster <code>forms_report</code><span class="status done">Hecho</span></h3>
+      <p>
+        Un <strong>cluster</strong> ECS es la agrupación lógica donde se ejecutan los servicios y tareas. No es una máquina:
+        con <strong>Fargate</strong> AWS provee y administra la infraestructura de cómputo de cada tarea, sin servidores
+        EC2 que mantener. El cluster <code>forms_report</code> agrupa los tres servicios (admin, forms y reports) del
+        dominio, lo que facilita verlos, monitorearlos y administrarlos juntos.
+      </p>
       <ol>
         <li>ECS → <strong>Clústeres</strong> → <strong>Crear clúster</strong></li>
         <li>Nombre del clúster: <code>forms_report</code></li>
@@ -1686,7 +1815,15 @@ docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt
         <!-- ═════════════ TASK DEFINITION ═════════════ -->
 
 <section class="slide-block" id="paso-3">
-          <h3><span class="num">3</span> Crear task definition<span class="status done">Hecho</span></h3>
+          <h3><span class="num">3</span> Crear task definition AdminServer<span class="status done">Hecho</span></h3>
+      <p>
+        La <strong>task definition</strong> (definición de tarea) es la plantilla que describe cómo ejecutar el
+        contenedor: imagen, CPU y memoria, puertos, variables de entorno, comando de arranque, volúmenes EFS, logs y
+        roles IAM. Es el equivalente en ECS de un <code>docker-compose.yml</code>. Es inmutable: cada cambio genera
+        una nueva <strong>revisión</strong> numerada (<code>forms-admin:1</code>, <code>:2</code>, …) y el servicio
+        indica qué revisión ejecutar.
+      </p>
+      <p>Definición completa de la última revisión en el <a href="#anexo-json">anexo JSON</a> (<code>forms-admin:7</code>).</p>
       <p>
         ECS → <strong>Definiciones de tareas</strong> → <strong>Crear nueva definición de tarea</strong>
         (o <strong>Crear nueva revisión</strong> si la familia ya existe). Familia:
@@ -1708,6 +1845,12 @@ docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt
       </figure>
 
       <h4 class="sub" id="paso-3-2">3.2 · Roles</h4>
+      <p>
+        Una tarea usa dos roles IAM con funciones distintas. El <strong>rol de ejecución</strong>
+        (<code>ecsTaskExecutionRole</code>) lo usa el agente de ECS <em>antes</em> de arrancar el contenedor: descarga la
+        imagen de ECR y crea los logs en CloudWatch. El <strong>rol de tarea</strong> (<code>ecs-forms-admin-task-role</code>)
+        lo usan los procesos <em>dentro</em> del contenedor; aquí sirve para abrir sesiones ECS Exec (Paso 1.4).
+      </p>
       <div class="tabla"><table>
         <tr><th>Campo</th><th>Valor</th></tr>
         <tr><td>Rol de tarea</td><td><code>ecs-forms-admin-task-role</code></td></tr>
@@ -1720,6 +1863,14 @@ docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt
       </figure>
 
       <h4 class="sub" id="paso-3-3">3.3 · Contenedor: imagen y puertos</h4>
+      <p>
+        Define el contenedor que corre en la tarea. La imagen se referencia por <strong>digest</strong>
+        (<code>@sha256:…</code>) en lugar de por etiqueta: así la revisión siempre usa exactamente la misma imagen aunque
+        la etiqueta <code>latest</code> se reasigne. Marcarlo como <strong>esencial</strong> significa que si el contenedor
+        termina, la tarea completa se detiene. Las <strong>asignaciones de puertos</strong> declaran qué puertos expone
+        el contenedor; en Fargate (red <code>awsvpc</code>) se abren directamente en la IP de la tarea, y el security
+        group decide quién puede llegar a ellos.
+      </p>
       <div class="tabla"><table>
         <tr><th>Campo</th><th>Valor</th></tr>
         <tr><td>Nombre</td><td><code>admin</code> (esencial: Sí)</td></tr>
@@ -1740,6 +1891,12 @@ docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt
       </figure>
 
       <h4 class="sub" id="paso-3-4">3.4 · Variables de entorno</h4>
+      <p>
+        Las variables de entorno se inyectan en el contenedor al arrancar y las leen los scripts de WebLogic
+        (<code>startAdminserver.sh</code>, <code>startWebLogic.sh</code>). Indican dónde está instalado Oracle, dónde está
+        el dominio en el EFS y los puertos del AdminServer y del Node Manager. Permiten reutilizar la misma imagen con
+        configuraciones distintas sin reconstruirla.
+      </p>
       <div class="tabla"><table>
         <tr><th>Variable</th><th>Valor</th></tr>
         <tr><td><code>ORACLE_HOME</code></td><td><code>/u01/oracle</code></td></tr>
@@ -1761,6 +1918,13 @@ docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt
       </figure>
 
       <h4 class="sub" id="paso-3-5">3.5 · Logs, comando y directorio de trabajo</h4>
+      <p>
+        Los <strong>logs</strong> envían la salida estándar del contenedor a CloudWatch Logs (driver
+        <code>awslogs</code>), consultable desde la consola aunque la tarea ya no exista. El <strong>comando</strong>
+        es el proceso principal del contenedor: la tarea vive mientras ese proceso esté en ejecución. El
+        <strong>directorio de trabajo</strong> es la carpeta desde la que se ejecuta el comando y donde inicia la sesión
+        de ECS Exec.
+      </p>
       <div class="tabla"><table>
         <tr><th>Campo</th><th>Valor</th></tr>
         <tr><td>Recopilación de registros</td><td>Amazon CloudWatch</td></tr>
@@ -1775,8 +1939,13 @@ docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt
       <p>
         Con <code>sleep infinity</code> el contenedor queda vivo para ECS Exec y arranque manual.
         Cuando el dominio y el DNS estén estables se puede cambiar por
-        <code>/u01/oracle/scripts/entrypoint_persistente.sh</code> (nueva revisión).
+        <code>/u01/oracle/scripts/startAdminserver.sh</code> (nueva revisión).
       </p>
+      <div class="callout warn">
+        Si no se coloca <code>sleep infinity</code> (ni otro comando que se mantenga en ejecución), el contenedor sube y se
+        detiene de inmediato: no tiene ningún proceso asociado para ejecutar. La tarea pasa a <em>Detenida</em> y el servicio
+        la relanza una y otra vez, sin permitir conectarse por ECS Exec.
+      </div>
       <figure class="shot" data-shot="paso-3-5-logs">
         <img src="assets/paso-08d-td-logs.png" alt="Configuración de logs CloudWatch /ecs/forms-admin" />
         <figcaption>Paso 3.5 — Registro CloudWatch</figcaption>
@@ -1787,6 +1956,13 @@ docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt
       </figure>
 
       <h4 class="sub" id="paso-3-6">3.6 · Almacenamiento efímero + volúmenes EFS</h4>
+      <p>
+        El <strong>almacenamiento efímero</strong> es el disco local de la tarea: aloja la imagen descomprimida y lo que
+        se escriba fuera de los volúmenes, y se borra al detenerse la tarea. Los <strong>volúmenes EFS</strong> declaran
+        qué carpetas del EFS (Paso 1.3) se ponen a disposición del contenedor; son persistentes y compartidas. Cada
+        volumen apunta a un <strong>directorio raíz</strong> dentro del filesystem, de modo que el contenedor solo ve esa
+        parte.
+      </p>
       <p><strong>Almacenamiento efímero:</strong> <code>100 GiB</code> (el valor por defecto de 20 GiB no alcanza para extraer la imagen).</p>
       <p>Tres volúmenes EFS, tipo <strong>EFS</strong>, filesystem <code>rector-dev (fs-08471cc88d2a8edc3)</code>,
         punto de acceso <strong>Ninguno</strong>. En <strong>Configuraciones avanzadas</strong> dejar
@@ -1811,6 +1987,12 @@ docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt
       </figure>
 
       <h4 class="sub" id="paso-3-7">3.7 · Puntos de montaje y crear</h4>
+      <p>
+        Los <strong>puntos de montaje</strong> conectan cada volumen declarado en 3.6 con una ruta dentro del contenedor.
+        Al arrancar, el contenido de esa carpeta del EFS aparece en esa ruta: así el dominio
+        <code>forms_domain</code>, las aplicaciones y los scripts se ven en las rutas que esperan WebLogic y las variables
+        de entorno de 3.4. Al final se crea la task definition (o la nueva revisión).
+      </p>
       <div class="tabla"><table>
         <tr><th>Volumen</th><th>Ruta en el contenedor</th></tr>
         <tr><td><code>efs-domains</code></td><td><code>/u01/oracle/user_projects/domains</code></td></tr>
@@ -1836,7 +2018,7 @@ docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt
       <div class="callout">
         Las capturas de este paso son de la pantalla <strong>Actualizar</strong> del servicio ya existente
         (mismos valores que al crear). Al <strong>crear</strong> por primera vez: nombre del servicio
-        <code>forms-admin</code>, tareas deseadas <strong>1</strong>, y Service Discovery con nombre
+        <code>admin</code>, tareas deseadas <strong>1</strong>, y Service Discovery con nombre
         <code>weblogic-admin</code> (solo se puede fijar en la creación).
       </div>
       <p>ECS → cluster <code>forms_report</code> → pestaña <strong>Servicios</strong> → <strong>Crear</strong>.</p>
@@ -1947,12 +2129,48 @@ docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt
       </figure>
       <h4 class="sub" id="paso-4-10">4.10 · Ruta hacia la BD</h4>
       <p>
-        Acceso a Oracle <code>192.168.229.137</code>: en la tabla de rutas <code>Pub-RT</code> (<code>rtb-0a99542c9d91cd2cc</code>)
-        debe existir <code>192.168.229.137/32 → pcx-0ad20c217472c7080</code>.
+        La base de datos Oracle (<code>192.168.229.137</code>) está en otra red, alcanzable por una
+        <strong>interconexión de VPC</strong> (peering <code>pcx-0ad20c217472c7080</code>). La subnet <code>pub-A</code>
+        envía por defecto todo el tráfico al Internet Gateway, así que sin una ruta específica las conexiones a la BD
+        terminan en <code>ORA-12170</code> (timeout). Se agrega una ruta <code>/32</code> hacia el peering en la tabla de
+        rutas de <code>pub-A</code> (<code>Pub-RT</code>). La tabla es compartida: se hace <strong>una sola vez</strong>
+        y sirve para admin, forms y reports.
       </p>
-      <figure class="shot" data-shot="paso-4-10">
-        <div class="placeholder">[ Captura pendiente: Pub-RT con la ruta hacia el peering ]</div>
-        <figcaption>Paso 4.10 — Ruta hacia la BD</figcaption>
+      <div class="callout warn">
+        No hace falta asociar la subnet privada <code>database-A</code> al servicio. Si se asocian <code>pub-A</code> y
+        <code>database-A</code>, ECS puede colocar la tarea en la privada: la IP pública queda asignada pero
+        <strong>no responde desde Internet</strong> (su ruta por defecto es NAT, no IGW).
+      </div>
+      <ol>
+        <li>VPC → <strong>Subredes</strong> → <code>pub-A</code> (<code>subnet-01212efd4a9ce759b</code>).</li>
+        <li>Pestaña <strong>Tabla de enrutamiento</strong> → abrir <code>rtb-0a99542c9d91cd2cc</code> (<code>…-Pub-RT</code>).</li>
+        <li><strong>Editar rutas</strong> → <strong>Agregar ruta</strong>: destino <code>192.168.229.137/32</code>,
+          destino de tráfico <strong>Interconexión</strong> → <code>pcx-0ad20c217472c7080</code>.</li>
+        <li><strong>Guardar cambios</strong> y verificar la ruta en estado <strong>Activo</strong>.</li>
+      </ol>
+      <figure class="shot" data-shot="paso-4-10a">
+        <img src="assets/paso-04-10a-vpc-panel.png" alt="Panel VPC para entrar a Subredes" />
+        <figcaption>Paso 4.10a — Panel VPC: entrar a <strong>Subredes</strong></figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-4-10b">
+        <img src="assets/paso-04-10b-pub-a-rtb.png" alt="Subnet pub-A con enlace a la tabla de rutas Pub-RT" />
+        <figcaption>Paso 4.10b — Subnet <code>pub-A</code>: abrir la tabla de rutas <code>Pub-RT</code></figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-4-10c">
+        <img src="assets/paso-04-10c-editar-ruta.png" alt="Editar rutas: destino 192.168.229.137/32 vía interconexión" />
+        <figcaption>Paso 4.10c — Editar rutas: <code>192.168.229.137/32</code> → <strong>Interconexión</strong></figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-4-10d">
+        <img src="assets/paso-04-10d-ruta-guardada.png" alt="Rutas actualizadas en Pub-RT" />
+        <figcaption>Paso 4.10d — Rutas actualizadas en <code>Pub-RT</code></figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-4-10e">
+        <img src="assets/paso-04-10e-pub-a-rutas.png" alt="pub-A con ruta 192.168.229.137 vía peering y 0.0.0.0/0 vía IGW" />
+        <figcaption>Paso 4.10e — Resultado en <code>pub-A</code>: <code>192.168.229.137/32 → pcx-0ad20c217472c7080</code> + <code>0.0.0.0/0 → igw</code></figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-4-10f">
+        <img src="assets/paso-04-10f-database-a-rutas.png" alt="Tabla de rutas de database-A con la ruta original al peering" />
+        <figcaption>Paso 4.10f — Referencia: <code>database-A</code> (<code>Priv-C-RT</code>) ya tenía la ruta al peering; se replica en <code>Pub-RT</code></figcaption>
       </figure>
 
         </section>
@@ -1968,18 +2186,37 @@ docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt
       </p>
       <pre class="code">aws ecs execute-command \
   --cluster forms_report \
-  --task &lt;TASK_ID&gt; \
+  --task a9ed65bdece84f2aacbc38af485d626d \
   --container admin \
   --interactive \
-  --command "/bin/bash"</pre>
+  --command "su -s /bin/bash oracle"</pre>
+      <p>La sesión entra directamente como usuario <code>oracle</code>. El ID de la tarea cambia en cada despliegue: tomarlo de la pestaña <strong>Tareas</strong> del servicio.</p>
+      <div class="callout"><code>--container</code> corresponde al contenedor del servicio que se quiere abrir: es el nombre definido en su task definition (<a href="#paso-3">Paso 3</a>). Para el servicio <code>admin</code> el contenedor también es <code>admin</code>.</div>
+      <div class="callout">Para conectar como <strong>root</strong> se usa <code>--command "/bin/bash"</code> en lugar de <code>--command "su -s /bin/bash oracle"</code>.</div>
       <p>Dentro del contenedor:</p>
       <pre class="code">df -h | grep -E 'domains|apps|scripts'
 ls /u01/oracle/scripts
 ls /u01/oracle/user_projects/domains
 getent hosts weblogic-admin.forms.local   # debe devolver la IP VPC de la tarea</pre>
+      <h4 class="sub" id="paso-5a">5a · Tarea en estado Ejecutando<span class="status done">Hecho</span></h4>
+      <p>ECS → cluster <code>forms_report</code> → servicio <code>admin</code> → pestaña <strong>Tareas</strong> → abrir la tarea.</p>
+      <div class="tabla"><table>
+        <tr><th>Campo</th><th>Valor</th></tr>
+        <tr><td>ID de tarea</td><td><code>a9ed65bdece84f2aacbc38af485d626d</code> (el que se usa en <code>--task</code>)</td></tr>
+        <tr><td>Último estado / deseado</td><td><strong>Ejecutando</strong> / Ejecutando</td></tr>
+        <tr><td>Task definition</td><td><code>forms-admin:6</code></td></tr>
+        <tr><td>Servicio</td><td><code>admin</code></td></tr>
+        <tr><td>CPU / memoria</td><td>2 vCPU / 4 GiB · Fargate</td></tr>
+        <tr><td>Contenedor</td><td><code>admin</code> (esencial) · comando <code>["sleep","infinity"]</code></td></tr>
+      </table></div>
+      <p>
+        El ciclo de vida muestra la extracción de la imagen (~5 min 14 s) antes de pasar a <strong>Ejecutando</strong>.
+        El contenedor arranca con <code>sleep infinity</code>: la tarea queda viva pero el AdminServer <strong>no</strong> está iniciado;
+        se arranca a mano en el <a href="#paso-7">Paso 7</a>, después de alinear los hostnames (<a href="#paso-6">Paso 6</a>).
+      </p>
       <figure class="shot" data-shot="paso-5a">
-        <div class="placeholder">[ Captura pendiente: tarea en estado Ejecutando ]</div>
-        <figcaption>Paso 5a — Tarea Running</figcaption>
+        <img src="assets/paso-05a-tarea-running.png" alt="Tarea a9ed65bdece84f2aacbc38af485d626d en estado Ejecutando, servicio admin, task definition forms-admin:6" />
+        <figcaption>Paso 5a — Tarea en ejecución y contenedor <code>admin</code></figcaption>
       </figure>
       <figure class="shot" data-shot="paso-5b">
         <div class="placeholder">[ Captura pendiente: sesión ECS Exec con montajes EFS ]</div>
@@ -1988,86 +2225,333 @@ getent hosts weblogic-admin.forms.local   # debe devolver la IP VPC de la tarea<
         </section>
 
 <section class="slide-block" id="paso-6">
-          <h3><span class="num">6</span> Arrancar AdminServer y consola<span class="status pending">Pendiente</span></h3>
-      <pre class="code">su - oracle
-/u01/oracle/scripts/entrypoint_persistente.sh</pre>
+          <h3><span class="num">6</span> Alinear hostnames Cloud Map<span class="status pending">Pendiente</span></h3>
       <p>
-        Validar en <code>/ecs/forms-admin</code> o en los logs del dominio que el AdminServer llega a <strong>RUNNING</strong>
-        y abrir <code>http://&lt;IP-pública&gt;:7001/console</code> y <code>/em</code>.
+        El dominio <code>forms_domain</code> se creó y probó en local con Docker Compose. Allí cada contenedor se localiza
+        por su <strong>nombre corto</strong> de servicio (<code>weblogic-admin</code>, <code>weblogic-forms</code>,
+        <code>weblogic-reports</code>), que el DNS interno de Docker resuelve automáticamente. Esos nombres quedaron
+        guardados en la configuración del dominio: como dirección de cada <em>Machine</em> de WebLogic y como dirección de
+        escucha de cada Node Manager.
       </p>
-      <div class="callout">Tarea ECS en <em>Running</em> no significa AdminServer en <em>RUNNING</em>: revisar siempre el log de WebLogic.</div>
-      <figure class="shot" data-shot="paso-6a">
-        <div class="placeholder">[ Captura pendiente: log con AdminServer en RUNNING ]</div>
-        <figcaption>Paso 6a — AdminServer RUNNING</figcaption>
-      </figure>
-      <figure class="shot" data-shot="paso-6b">
-        <div class="placeholder">[ Captura pendiente: consola WebLogic en :7001 ]</div>
-        <figcaption>Paso 6b — Consola WebLogic</figcaption>
-      </figure>
-        </section>
+      <p>
+        En ECS Fargate ese DNS de Docker no existe. Los únicos nombres que resuelven son los que registra Cloud Map
+        (<a href="#paso-1-5">Paso 1.5</a>), y siempre son nombres completos (FQDN) del namespace:
+        <code>weblogic-admin.forms.local</code>. Un nombre corto no resuelve dentro de la VPC. Sin este ajuste:
+      </p>
+      <ul>
+        <li>El AdminServer no puede contactar al Node Manager de los contenedores forms y reports, y por tanto no puede
+          arrancar ni controlar <code>WLS_FORMS</code> y <code>WLS_REPORTS</code>.</li>
+        <li>Cada Node Manager intenta escuchar en un hostname que no resuelve.</li>
+      </ul>
 
-<section class="slide-block" id="paso-7">
-          <h3><span class="num">7</span> Alinear hostnames Cloud Map<span class="status pending">Pendiente</span></h3>
+      <h4 class="sub" id="paso-6a">6a · Qué cambia el script</h4>
       <p>
-        El dominio viene de Docker Compose con short names (<code>weblogic-admin</code>, <code>weblogic-forms</code>,
-        <code>weblogic-reports</code>). En ECS deben ser FQDN de <code>forms.local</code>. Con AdminServer y managed servers
-        detenidos, como <code>oracle</code>:
+        <code>set-cloudmap-hostnames.sh</code> agrega el sufijo <code>.forms.local</code> a los nombres cortos en los
+        archivos del dominio (en el EFS):
       </p>
-      <pre class="code">/u01/oracle/scripts/set-cloudmap-hostnames.sh --check   # estado actual
+      <div class="tabla"><table>
+        <tr><th>Archivo</th><th>Antes</th><th>Después</th></tr>
+        <tr><td><code>config/config.xml</code> (Machine <code>AdminServerMachine</code>)</td><td><code>weblogic-admin</code></td><td><code>weblogic-admin.forms.local</code></td></tr>
+        <tr><td><code>config/config.xml</code> (Machine <code>FormsMachine</code>)</td><td><code>weblogic-forms</code></td><td><code>weblogic-forms.forms.local</code></td></tr>
+        <tr><td><code>config/config.xml</code> (Machine <code>ReportsMachine</code>)</td><td><code>weblogic-reports</code></td><td><code>weblogic-reports.forms.local</code></td></tr>
+        <tr><td><code>nodemanager/nodemanager.properties</code></td><td><code>ListenAddress=weblogic-admin</code></td><td><code>ListenAddress=weblogic-admin.forms.local</code></td></tr>
+        <tr><td><code>nodemanager_forms/nodemanager.properties</code></td><td><code>ListenAddress=weblogic-forms</code></td><td><code>ListenAddress=weblogic-forms.forms.local</code></td></tr>
+        <tr><td><code>nodemanager_reports/nodemanager.properties</code></td><td><code>ListenAddress=weblogic-reports</code></td><td><code>ListenAddress=weblogic-reports.forms.local</code></td></tr>
+      </table></div>
+      <p>Además:</p>
+      <ul>
+        <li>Respalda cada archivo que modifica (<code>config.xml.bak_&lt;fecha&gt;</code>, <code>nodemanager.properties.bak_&lt;fecha&gt;</code>).</li>
+        <li>Si hay cambios de consola sin activar en <code>pending/</code>, los aparta a <code>pending.bak_&lt;fecha&gt;</code> para que no reescriban <code>config.xml</code>.</li>
+        <li>Es <strong>idempotente</strong>: los valores que ya tienen el sufijo no se tocan, por lo que puede ejecutarse más de una vez.</li>
+        <li>Se niega a ejecutarse si detecta un servidor WebLogic corriendo en el contenedor.</li>
+        <li>Al final muestra el estado y falla si quedó algún nombre corto en <code>config.xml</code>.</li>
+      </ul>
+
+      <h4 class="sub" id="paso-6b">6b · Cuándo y cómo aplicarlo</h4>
+      <div class="callout warn">
+        El AdminServer, <code>WLS_FORMS</code> y <code>WLS_REPORTS</code> deben estar <strong>detenidos</strong> en todos los
+        contenedores: un AdminServer en ejecución reescribe <code>config.xml</code> con su copia en memoria y se pierde el
+        cambio. Por eso lo ideal es aplicarlo <strong>antes del <a href="#paso-7">Paso 7</a></strong>, con el contenedor en
+        <code>sleep infinity</code>. Si el AdminServer ya está arriba, detenerlo, aplicar el script y volver a arrancarlo.
+      </div>
+      <p>
+        Como el dominio está en el EFS (persistente y compartido), se hace <strong>una sola vez</strong>: admin, forms y
+        reports ven el dominio corregido. Desde la sesión ECS Exec (<a href="#paso-5">Paso 5</a>), como <code>oracle</code>:
+      </p>
+      <pre class="code">/u01/oracle/scripts/set-cloudmap-hostnames.sh --check   # solo muestra el estado actual, no cambia nada
 /u01/oracle/scripts/set-cloudmap-hostnames.sh           # respalda y cambia a *.forms.local</pre>
+      <p>
+        Con <code>--check</code> se ve si ya está aplicado: si aparecen <code>weblogic-admin</code>,
+        <code>weblogic-forms</code> o <code>weblogic-reports</code> sin <code>.forms.local</code>, falta aplicarlo.
+        El resultado esperado es <code>✓ Dominio alineado con Cloud Map (*.forms.local)</code>.
+      </p>
       <div class="tabla"><table>
         <tr><th>Machine</th><th>FQDN</th><th>Node Manager</th></tr>
         <tr><td><code>AdminServerMachine</code></td><td><code>weblogic-admin.forms.local</code></td><td><code>nodemanager/</code></td></tr>
         <tr><td><code>FormsMachine</code></td><td><code>weblogic-forms.forms.local</code></td><td><code>nodemanager_forms/</code></td></tr>
         <tr><td><code>ReportsMachine</code></td><td><code>weblogic-reports.forms.local</code></td><td><code>nodemanager_reports/</code></td></tr>
       </table></div>
-      <p>Siguiente fase: <a href="../forms/index.html">crear el contenedor Forms</a>.</p>
-      <figure class="shot" data-shot="paso-7">
+      <div class="callout">
+        Los FQDN solo resuelven si cada servicio ECS tiene Service Discovery con ese nombre: <code>weblogic-admin</code>
+        (<a href="#paso-4">Paso 4</a>), y <code>weblogic-forms</code> / <code>weblogic-reports</code> en sus fases.
+        Verificar con <code>getent hosts weblogic-admin.forms.local</code>.
+      </div>
+      <figure class="shot" data-shot="paso-6">
         <div class="placeholder">[ Captura pendiente: salida de set-cloudmap-hostnames.sh --check ]</div>
-        <figcaption>Paso 7 — Hostnames alineados</figcaption>
+        <figcaption>Paso 6 — Hostnames alineados</figcaption>
       </figure>
+        </section>
+
+<section class="slide-block" id="paso-7">
+          <h3><span class="num">7</span> Arrancar AdminServer y consola<span class="status pending">Pendiente</span></h3>
+      <p>
+        Desde la sesión ECS Exec del <a href="#paso-5">Paso 5</a> (usuario <code>oracle</code>), ejecutar el script de arranque.
+        Inicia el Node Manager y luego el AdminServer:
+      </p>
+      <pre class="code">cd /u01/oracle/scripts
+./startAdminserver.sh          # modo normal: el script espera a WebLogic
+./startAdminserver.sh -keep    # modo persistente: WebLogic desacoplado (nohup)</pre>
+
+      <h4 class="sub" id="paso-7a">7a · Arranque del AdminServer<span class="status done">Hecho</span></h4>
+      <p>
+        El script muestra el modo, las variables (<code>DOMAIN_HOME</code>, <code>ADMIN_PORT</code> 7001), arranca el Node Manager en el puerto
+        <code>5556</code>, limpia los <code>.lok</code> de ejecuciones anteriores y lanza <code>startWebLogic.sh</code>. La salida de WebLogic no se muestra en consola:
+        va a <code>servers/AdminServer/logs/AdminServer.out</code> y el script indica dónde consultar el log.
+      </p>
+      <figure class="shot" data-shot="paso-7a">
+        <img src="assets/paso-06a-start-adminserver.png?v=2" alt="Salida de ./startAdminserver.sh en modo normal: Node Manager iniciado, AdminServer en arranque y dónde consultar los logs" />
+        <figcaption>Paso 7a — <code>./startAdminserver.sh</code>: Node Manager, arranque del AdminServer y ubicación de los logs</figcaption>
+      </figure>
+      <div class="callout warn">
+        En modo normal WebLogic queda ligado a la sesión ECS Exec: al cerrarla se detiene el AdminServer.
+        Para que siga corriendo tras salir de la sesión, usar <code>./startAdminserver.sh -keep</code>.
+      </div>
+
+      <h4 class="sub" id="paso-7b">7b · Monitorear el log hasta RUNNING<span class="status done">Hecho</span></h4>
+      <p>Desde otra sesión ECS Exec (o tras arrancar con <code>-keep</code>), seguir el log del AdminServer:</p>
+      <pre class="code">cd /u01/oracle
+tail -200f user_projects/domains/forms_domain/servers/AdminServer/logs/AdminServer.log</pre>
+      <p>El arranque está completo cuando aparecen estos mensajes:</p>
+      <div class="tabla"><table>
+        <tr><th>Código</th><th>Mensaje</th></tr>
+        <tr><td><code>BEA-000331</code></td><td>Started the WebLogic Server Administration Server "AdminServer" for domain "forms_domain"</td></tr>
+        <tr><td><code>BEA-002613</code></td><td>Channel "Default" is now listening on <code>10.171.240.56:7001</code> (IP VPC de la tarea)</td></tr>
+        <tr><td><code>BEA-000360</code></td><td>The server started in RUNNING mode</td></tr>
+        <tr><td><code>BEA-000365</code></td><td>Server state changed to <strong>RUNNING</strong></td></tr>
+      </table></div>
+      <figure class="shot" data-shot="paso-7b">
+        <img src="assets/paso-06b-adminserver-running.png" alt="Log del AdminServer: canales escuchando en 7001 y estado RUNNING" />
+        <figcaption>Paso 7b — AdminServer en <strong>RUNNING</strong></figcaption>
+      </figure>
+      <div class="callout">Tarea ECS en <em>Running</em> no significa AdminServer en <em>RUNNING</em>: revisar siempre el log de WebLogic. La IP de la tarea cambia en cada despliegue.</div>
+
+      <h4 class="sub" id="paso-7c">7c · Consola WebLogic<span class="status pending">Pendiente</span></h4>
+      <p>Abrir <code>http://&lt;IP-pública&gt;:7001/console</code> y <code>/em</code>.</p>
+      <figure class="shot" data-shot="paso-7c">
+        <div class="placeholder">[ Captura pendiente: consola WebLogic en :7001 ]</div>
+        <figcaption>Paso 7c — Consola WebLogic</figcaption>
+      </figure>
+
+      <h4 class="sub" id="paso-7d">7d · Arranque automático del AdminServer al iniciar la tarea<span class="status done">Hecho</span></h4>
+      <p>
+        Una vez validado el arranque manual, se cambia el comando del contenedor para que la tarea inicie el AdminServer
+        sin intervención. El cambio se hace creando una <strong>nueva revisión</strong> de la task definition y
+        <strong>actualizando el servicio</strong> para que la use.
+      </p>
+      <ol>
+        <li>ECS → <strong>Definiciones de tareas</strong> → <code>forms-admin</code> → seleccionar la última revisión → <strong>Crear nueva revisión</strong>.</li>
+        <li>Contenedor <code>admin</code> → <strong>Configuración de Docker</strong>:
+          <ul>
+            <li><strong>Punto de entrada</strong>: vacío.</li>
+            <li><strong>Comando</strong>: <code>/u01/oracle/scripts/startAdminserver.sh,-keep</code> (reemplaza a <code>sleep,infinity</code>).</li>
+          </ul>
+        </li>
+        <li><strong>Crear</strong> → queda una nueva revisión (<code>forms-admin:N</code>).</li>
+        <li>ECS → cluster <code>forms_report</code> → servicio <code>admin</code> → <strong>Actualizar</strong> → revisión <code>forms-admin:N</code>
+          → marcar <strong>Forzar nueva implementación</strong> → <strong>Actualizar</strong>.</li>
+        <li>Esperar la nueva tarea en <em>Ejecutando</em> y validar RUNNING con el log (<a href="#paso-7b">7b</a>).</li>
+      </ol>
+      <figure class="shot" data-shot="paso-7d">
+        <img src="assets/paso-06d-td-comando-arranque.png" alt="Configuración de Docker: punto de entrada vacío y comando /u01/oracle/scripts/startAdminserver.sh,-keep" />
+        <figcaption>Paso 7d — Comando del contenedor: <code>startAdminserver.sh,-keep</code></figcaption>
+      </figure>
+      <p>Equivalente en el JSON de la task definition:</p>
+      <pre class="code">"command": ["/u01/oracle/scripts/startAdminserver.sh", "-keep"]</pre>
+      <div class="tabla"><table>
+        <tr><th>Comando</th><th>Comportamiento</th></tr>
+        <tr><td><code>/u01/oracle/scripts/startAdminserver.sh,-keep</code></td><td>La tarea sigue viva aunque el AdminServer falle: permite entrar por ECS Exec a revisar. ECS <strong>no</strong> detecta la caída de WebLogic.</td></tr>
+        <tr><td><code>/u01/oracle/scripts/startAdminserver.sh</code></td><td>Si el AdminServer termina, la tarea termina y el servicio lanza otra: recuperación automática.</td></tr>
+      </table></div>
+      <div class="callout warn">
+        El script se ejecuta desde el EFS (<code>/u01/oracle/scripts</code>): debe existir allí con permiso de ejecución
+        (<code>chmod +x startAdminserver.sh</code>); si no, la tarea se detiene al arrancar. La salida de WebLogic no va a
+        CloudWatch (<code>/ecs/forms-admin</code>), solo los mensajes del script: el log se consulta en
+        <code>AdminServer.log</code> como en <a href="#paso-7b">7b</a>.
+      </div>
+      <div class="callout">
+        Con el arranque automático ya no hace falta ejecutar <code>./startAdminserver.sh</code> desde ECS Exec; la sesión
+        (<a href="#paso-5">Paso 5</a>) se sigue usando para revisar logs y diagnosticar.
+      </div>
+      <p>Siguiente fase: <a href="../forms/index.html">crear el contenedor Forms</a>.</p>
         </section>
 
         <!-- ═════════════ ANEXOS ═════════════ -->
 
-        <section class="slide-block anexo" id="anexo-cli">
-          <h3><span class="num anexo">Anexo</span> Comandos AWS CLI<span class="status pending">Pendiente</span></h3>
-      <pre class="code">export AWS_REGION=us-east-1
-export CLUSTER=forms_report
-export SERVICE=forms-admin
-
-# Estado del servicio y red asignada
-aws ecs describe-services --cluster $CLUSTER --services $SERVICE \
-  --query 'services[0].{status:status,running:runningCount,td:taskDefinition,net:networkConfiguration}'
-
-# Task definition vigente
-aws ecs describe-task-definition --task-definition forms-admin:5 --query 'taskDefinition.containerDefinitions[0]'
-
-# Mount targets del EFS y su SG
-aws efs describe-mount-targets --file-system-id fs-08471cc88d2a8edc3
-
-# Permitir NFS 2049 desde el SG de ECS al SG del EFS
-aws ec2 authorize-security-group-ingress --group-id sg-0e39a7aa49ff6a22b \
-  --protocol tcp --port 2049 --source-group sg-0e1787d32bac71fcd
-
-# Forzar un nuevo despliegue tras cambiar la task definition
-aws ecs update-service --cluster $CLUSTER --service $SERVICE \
-  --task-definition forms-admin:5 --force-new-deployment</pre>
+        <section class="slide-block anexo" id="anexo-json">
+          <h3><span class="num anexo">Anexo</span> Task definition JSON (<code>forms-admin:7</code>)<span class="status done">Hecho</span></h3>
+      <p>
+        Última revisión registrada (<code>forms-admin:7</code>), exportada en <code>aws-ecs/admin/admin.json</code>. Se muestra en formato registrable:
+        sin los campos de solo lectura que agrega ECS al exportar (<code>taskDefinitionArn</code>, <code>revision</code>, <code>status</code>,
+        <code>requiresAttributes</code>, <code>registeredAt</code>/<code>By</code>…), por lo que puede pegarse en ECS →
+        <strong>Crear nueva definición de tarea con JSON</strong> o registrarse por CLI. La imagen queda fijada por <em>digest</em> (<code>@sha256:…</code>), tal como la resolvió ECS.
+        Corresponde al <a href="#paso-3">Paso 3</a> con el comando de arranque automático de <a href="#paso-7d">7d</a>.
+      </p>
+      <pre class="code">{
+  "containerDefinitions": [
+    {
+      "name": "admin",
+      "image": "730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker@sha256:82a4532d4c80c5c643d60c9dba8e2f99f459c3255f023fdcaea2e68779d320cf",
+      "portMappings": [
+        {"containerPort": 7001, "hostPort": 7001, "protocol": "tcp", "name": "adminserver"},
+        {"containerPort": 9002, "hostPort": 9002, "protocol": "tcp", "name": "adminport"},
+        {"containerPort": 5556, "hostPort": 5556, "protocol": "tcp", "name": "nodemanager"},
+        {"containerPort": 7777, "hostPort": 7777, "protocol": "tcp", "name": "ohshttp"},
+        {"containerPort": 4443, "hostPort": 4443, "protocol": "tcp", "name": "ohshttps"}
+      ],
+      "essential": true,
+      "command": ["/u01/oracle/scripts/startAdminserver.sh", "-keep"],
+      "environment": [
+        {
+          "name": "PATH",
+          "value": "/u01/oracle/bin:/u01/oracle/oracle_common/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        },
+        {"name": "DOMAIN_HOME", "value": "/u01/oracle/user_projects/domains/forms_domain"},
+        {"name": "NODE_MANAGER_PORT", "value": "5556"},
+        {"name": "LD_LIBRARY_PATH", "value": "/u01/oracle/lib:/u01/oracle/oracle_common/lib"},
+        {"name": "ORACLE_HOME", "value": "/u01/oracle"},
+        {"name": "DOMAIN_NAME", "value": "forms_domain"},
+        {"name": "ADMIN_PORT", "value": "7001"}
+      ],
+      "environmentFiles": [],
+      "mountPoints": [
+        {"sourceVolume": "efs-domains", "containerPath": "/u01/oracle/user_projects/domains", "readOnly": false},
+        {"sourceVolume": "efs-app", "containerPath": "/u01/oracle/user_projects/apps", "readOnly": false},
+        {"sourceVolume": "efs-scripts", "containerPath": "/u01/oracle/scripts", "readOnly": false}
+      ],
+      "workingDirectory": "/u01/oracle",
+      "ulimits": [],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/forms-admin",
+          "awslogs-create-group": "true",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ],
+  "family": "forms-admin",
+  "taskRoleArn": "arn:aws:iam::730335573515:role/ecs-forms-admin-task-role",
+  "executionRoleArn": "arn:aws:iam::730335573515:role/ecsTaskExecutionRole",
+  "networkMode": "awsvpc",
+  "volumes": [
+    {
+      "name": "efs-domains",
+      "efsVolumeConfiguration": {
+        "fileSystemId": "fs-08471cc88d2a8edc3",
+        "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/domains",
+        "transitEncryption": "ENABLED"
+      }
+    },
+    {
+      "name": "efs-app",
+      "efsVolumeConfiguration": {
+        "fileSystemId": "fs-08471cc88d2a8edc3",
+        "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/app",
+        "transitEncryption": "ENABLED"
+      }
+    },
+    {
+      "name": "efs-scripts",
+      "efsVolumeConfiguration": {
+        "fileSystemId": "fs-08471cc88d2a8edc3",
+        "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/scripts/admin",
+        "transitEncryption": "ENABLED"
+      }
+    }
+  ],
+  "runtimePlatform": {"cpuArchitecture": "X86_64", "operatingSystemFamily": "LINUX"},
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "2048",
+  "memory": "4096",
+  "ephemeralStorage": {"sizeInGiB": 100}
+}</pre>
         </section>
 
-        <section class="slide-block anexo" id="anexo-td">
-          <h3><span class="num anexo">Anexo</span> Resumen task definition <code>forms-admin</code><span class="status done">Hecho</span></h3>
-      <div class="tabla"><table>
-        <tr><th>Atributo</th><th>Valor</th></tr>
-        <tr><td>Contenedor</td><td><code>admin</code></td></tr>
-        <tr><td>CPU / memoria / efímero</td><td>2048 / 4096 / 100 GiB</td></tr>
-        <tr><td>Puertos</td><td>7001, 9002, 5556, 7777, 4443</td></tr>
-        <tr><td>Comando</td><td><code>["sleep","infinity"]</code></td></tr>
-        <tr><td>Volúmenes</td><td><code>efs-domains</code>, <code>efs-app</code>, <code>efs-scripts</code> (scripts/admin)</td></tr>
-        <tr><td>Logs</td><td><code>/ecs/forms-admin</code></td></tr>
-        <tr><td>Roles</td><td>tarea <code>ecs-forms-admin-task-role</code> · ejecución <code>ecsTaskExecutionRole</code></td></tr>
-      </table></div>
-      <p>Fuente: <code>weblogic_docker_aws/conf_json/forms-admin.json</code>.</p>
+        <section class="slide-block anexo" id="anexo-cli">
+          <h3><span class="num anexo">Anexo</span> Comandos AWS CLI<span class="status done">Hecho</span></h3>
+      <p>
+        La creación se hizo por consola; la CLI sirve para <strong>exportar configuración</strong>,
+        <strong>diagnosticar red / ECR / EFS</strong> y <strong>ECS Exec</strong>. Los comandos de infraestructura
+        (subnets, SG, EFS) son comunes a admin, forms y reports; para los servicios basta cambiar
+        <code>SERVICE</code> y la task definition.
+      </p>
+      <pre class="code">export AWS_REGION=us-east-1
+export CLUSTER=forms_report
+export SERVICE=admin            # forms-server / reports-server en las otras fases
+export TASKDEF=forms-admin:6</pre>
+
+      <h4 class="sub" id="anexo-cli-1">1 · Exportar servicio y task definition</h4>
+      <p>Respaldar y revisar red, SG, IP pública y definición de tarea.</p>
+      <pre class="code">aws ecs describe-services --cluster $CLUSTER --services $SERVICE \
+  --query 'services[0].{status:status,running:runningCount,td:taskDefinition,net:networkConfiguration,exec:enableExecuteCommand}'
+
+aws ecs describe-task-definition --task-definition $TASKDEF \
+  --query taskDefinition --output json &gt; conf_json/forms-admin.json</pre>
+
+      <h4 class="sub" id="anexo-cli-2">2 · Subnets y rutas (Internet / BD)</h4>
+      <p>Verificar <code>pub-A</code> (IGW + ruta a la BD, <a href="#paso-4-10">Paso 4.10</a>). Útil ante timeout de ECR u <code>ORA-12170</code>.</p>
+      <pre class="code">aws ec2 describe-subnets --subnet-ids subnet-01212efd4a9ce759b subnet-0f4dc6c60b100a66d \
+  --query 'Subnets[*].{Id:SubnetId,Name:Tags[?Key==`Name`].Value|[0],Public:MapPublicIpOnLaunch,Az:AvailabilityZone}' \
+  --output table
+
+# Rutas de pub-A: debe incluir 192.168.229.137/32 → pcx y 0.0.0.0/0 → igw
+aws ec2 describe-route-tables \
+  --filters Name=association.subnet-id,Values=subnet-01212efd4a9ce759b \
+  --query 'RouteTables[0].Routes[*].{Dest:DestinationCidrBlock,Gw:GatewayId,Pcx:VpcPeeringConnectionId,Nat:NatGatewayId,State:State}' \
+  --output table</pre>
+
+      <h4 class="sub" id="anexo-cli-3">3 · Security groups</h4>
+      <p>Reglas de entrada/salida del SG de las tareas (<a href="#paso-1-2">Paso 1.2</a>) y del EFS (<a href="#paso-1-3">Paso 1.3</a>).</p>
+      <pre class="code">aws ec2 describe-security-groups --group-ids sg-0e1787d32bac71fcd   # forms-sg-ecs
+aws ec2 describe-security-groups --group-ids sg-0e39a7aa49ff6a22b   # ESF-dev-sg</pre>
+      <div class="callout warn">
+        El SG <code>default | DO NOT USE</code> (<code>sg-04963b231db91fcf1</code>) no tiene reglas de entrada ni de salida:
+        no usarlo en servicios ECS.
+      </div>
+
+      <h4 class="sub" id="anexo-cli-4">4 · EFS: mount targets y NFS 2049</h4>
+      <pre class="code">aws efs describe-mount-targets --file-system-id fs-08471cc88d2a8edc3 --output table
+aws efs describe-mount-target-security-groups --mount-target-id &lt;fsmt-...&gt;
+
+# Permitir NFS 2049 desde forms-sg-ecs hacia el SG del EFS (corrige mount.nfs4: Connection timed out)
+aws ec2 authorize-security-group-ingress --group-id sg-0e39a7aa49ff6a22b \
+  --protocol tcp --port 2049 --source-group sg-0e1787d32bac71fcd</pre>
+
+      <h4 class="sub" id="anexo-cli-5">5 · ECS Exec</h4>
+      <p>Requiere ECS Exec activado en el servicio, el rol de tarea (<a href="#paso-1-4">Paso 1.4</a>) y el Session Manager Plugin local.</p>
+      <pre class="code"># Session Manager Plugin (Ubuntu)
+curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" \
+  -o session-manager-plugin.deb
+sudo dpkg -i session-manager-plugin.deb
+
+aws ecs execute-command --cluster $CLUSTER --task &lt;TASK_ID&gt; --container admin \
+  --interactive --command "su -s /bin/bash oracle"</pre>
+
+      <h4 class="sub" id="anexo-cli-6">6 · Redesplegar con una nueva revisión</h4>
+      <pre class="code">aws ecs update-service --cluster $CLUSTER --service $SERVICE \
+  --task-definition $TASKDEF --force-new-deployment</pre>
         </section>
 
         <section class="slide-block lecciones" id="lecciones-criticas">
@@ -2082,8 +2566,8 @@ aws ecs update-service --cluster $CLUSTER --service $SERVICE \
         <li><strong>Comando <code>sleep infinity</code></strong> (Paso 3.5) — permite ECS Exec y arranque manual; no redefinir <code>PATH</code>.</li>
         <li><strong>Service Discovery</strong> (Paso 4.6) — solo al crear el servicio; requiere el namespace del Paso 1.5; los demás contenedores dependen de <code>weblogic-admin.forms.local</code>.</li>
         <li><strong>Solo <code>pub-A</code> + ruta BD</strong> (Paso 4.9–4.10) — no asociar <code>database-A</code>; <code>192.168.229.137/32 → pcx</code> en <code>Pub-RT</code>.</li>
-        <li><strong>Hostnames</strong> (Paso 7) — sin FQDN en <code>config.xml</code> y <code>nodemanager.properties</code> aparece <code>UnknownHostException</code>.</li>
-        <li><strong>ECS Running ≠ WebLogic RUNNING</strong> (Paso 6) — validar siempre el log del AdminServer.</li>
+        <li><strong>Hostnames</strong> (Paso 6) — sin FQDN en <code>config.xml</code> y <code>nodemanager.properties</code> aparece <code>UnknownHostException</code>.</li>
+        <li><strong>ECS Running ≠ WebLogic RUNNING</strong> (Paso 7) — validar siempre el log del AdminServer.</li>
       </ol>
         </section>
 
