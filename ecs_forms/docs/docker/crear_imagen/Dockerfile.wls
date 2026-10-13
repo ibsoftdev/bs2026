@@ -132,10 +132,14 @@ ENV JAVA_HOME=/u01/jdk \
 # - gcc / make / binutils: keep toolchain available for genshlib / Forms shared libs
 # - nano / net-tools: operational utilities (editor, ifconfig/netstat)
 # - motif / libX11 / libXext / libXt / libXp: required by Reports engine (librw.so, librwu.so -> libXm.so.4)
+# - libnsl2: Reports client binaries (rwclient, rwrun) need libnsl.so.2; on OL9 libnsl2 only ships
+#   libnsl.so.3, so a libnsl.so.2 compatibility symlink is created
 USER root
-RUN dnf install -y libaio libnsl gcc make binutils nano net-tools \
+RUN dnf install -y libaio libnsl libnsl2 gcc make binutils nano net-tools \
                    motif libX11 libXext libXt libXp && \
-    dnf clean all
+    dnf clean all && \
+    ln -sf /usr/lib64/libnsl.so.3 /usr/lib64/libnsl.so.2 && \
+    ldconfig
 
 # GUI packages for the Configuration Wizard (Xvfb display + VNC access)
 # - Xvfb: virtual X display (:99); x11vnc (EPEL): exposes the display on port 5900
@@ -160,6 +164,15 @@ COPY --from=builder /u01/app/oraInventory /u01/app/oraInventory
 RUN missing=$(for f in ${ORACLE_HOME}/lib/librw*.so; do ldd "$f" | grep 'not found'; done | sort -u) && \
     if [ -n "$missing" ]; then echo "Missing libraries for Reports:"; echo "$missing"; exit 1; fi && \
     echo "OK: librw*.so has no missing shared library dependencies"
+
+# Reports client binaries must be executable and resolve all shared libraries (rwclient -> libnsl.so.2)
+RUN chmod a+x ${ORACLE_HOME}/bin/rw* && \
+    missing=$(for f in ${ORACLE_HOME}/bin/rwclient ${ORACLE_HOME}/bin/rwrun ${ORACLE_HOME}/bin/rwserver \
+                       ${ORACLE_HOME}/bin/rwbuilder ${ORACLE_HOME}/bin/rwconverter; do \
+                [ -f "$f" ] && ldd "$f" | grep 'not found'; \
+              done | sort -u) ; \
+    if [ -n "$missing" ]; then echo "Missing libraries for Reports binaries:"; echo "$missing"; exit 1; fi && \
+    echo "OK: rw* binaries have no missing shared library dependencies"
 
 # Final setup of the 'oracle' user for runtime
 RUN groupadd -g 1000 oracle && useradd -u 1000 -g oracle -d /u01/oracle -s /bin/bash oracle && \

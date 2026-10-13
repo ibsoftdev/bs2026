@@ -1,0 +1,155 @@
+{
+    "family": "colas-server",
+    "containerDefinitions": [
+        {
+            "name": "colas-server",
+            "image": "730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:r3",
+            "cpu": 0,
+            "portMappings": [],
+            "essential": true,
+            "command": [
+                "sleep",
+                "infinity"
+            ],
+            "environment": [
+                {
+                    "name": "PASS_FILE",
+                    "value": "/u01/oracle/user_projects/apps/proc_app/bin/USUARIOBATCH.lis"
+                },
+                {
+                    "name": "TWO_TASK",
+                    "value": "SEGU"
+                },
+                {
+                    "name": "PATH",
+                    "value": "/u01/oracle/user_projects/domains/forms_domain/reports/bin:/u01/oracle/bin:/u01/oracle/oracle_common/bin:/u01/jdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+                },
+                {
+                    "name": "ADMIN_SERVER_HOST",
+                    "value": "weblogic-admin.forms.local"
+                },
+                {
+                    "name": "ADMIN_SERVER_NAME",
+                    "value": "AdminServer"
+                },
+                {
+                    "name": "ADMIN_USER",
+                    "value": "weblogic"
+                },
+                {
+                    "name": "MANAGED_SERVER_NAME",
+                    "value": "WLS_REPORTS"
+                },
+                {
+                    "name": "TNS_ADMIN",
+                    "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig"
+                },
+                {
+                    "name": "DOMAIN_NAME",
+                    "value": "forms_domain"
+                },
+                {
+                    "name": "DOMAIN_HOME",
+                    "value": "/u01/oracle/user_projects/domains/forms_domain"
+                },
+                {
+                    "name": "ADMIN_PASSWORD",
+                    "value": "t.123456"
+                },
+                {
+                    "name": "MANAGED_SERVER_PORT",
+                    "value": "9012"
+                },
+                {
+                    "name": "NODE_MANAGER_PORT",
+                    "value": "5556"
+                },
+                {
+                    "name": "LD_LIBRARY_PATH",
+                    "value": "/u01/oracle/lib:/u01/oracle/oracle_common/lib"
+                },
+                {
+                    "name": "ORACLE_HOME",
+                    "value": "/u01/oracle"
+                },
+                {
+                    "name": "ADMIN_SERVER_PORT",
+                    "value": "7001"
+                }
+            ],
+            "mountPoints": [
+                {
+                    "sourceVolume": "efs-domains",
+                    "containerPath": "/u01/oracle/user_projects/domains",
+                    "readOnly": false
+                },
+                {
+                    "sourceVolume": "efs-app",
+                    "containerPath": "/u01/oracle/user_projects/apps",
+                    "readOnly": false
+                },
+                {
+                    "sourceVolume": "efs-scripts",
+                    "containerPath": "/u01/oracle/scripts",
+                    "readOnly": false
+                }
+            ],
+            "volumesFrom": [],
+            "workingDirectory": "/u01/oracle",
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/colas-server",
+                    "awslogs-create-group": "true",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            },
+            "systemControls": []
+        }
+    ],
+    "taskRoleArn": "arn:aws:iam::730335573515:role/ecs-forms-admin-task-role",
+    "executionRoleArn": "arn:aws:iam::730335573515:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "volumes": [
+        {
+            "name": "efs-domains",
+            "efsVolumeConfiguration": {
+                "fileSystemId": "fs-08471cc88d2a8edc3",
+                "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/domains",
+                "transitEncryption": "ENABLED"
+            }
+        },
+        {
+            "name": "efs-app",
+            "efsVolumeConfiguration": {
+                "fileSystemId": "fs-08471cc88d2a8edc3",
+                "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/app",
+                "transitEncryption": "ENABLED"
+            }
+        },
+        {
+            "name": "efs-scripts",
+            "efsVolumeConfiguration": {
+                "fileSystemId": "fs-08471cc88d2a8edc3",
+                "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/scripts/colas",
+                "transitEncryption": "ENABLED"
+            }
+        }
+    ],
+    "placementConstraints": [],
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "LINUX"
+    },
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "2048",
+    "memory": "4096",
+    "ephemeralStorage": {
+        "sizeInGiB": 100
+    },
+    "tags": []
+}

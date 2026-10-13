@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Guía · Compilación de Forms y Pro*C</title>
+  <title>Guía · Ejecución de Aplicativo RECTOR</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1225,6 +1225,14 @@
       scroll-margin-top: 1rem;
     }
     .slide-block > h4.sub:first-of-type { border-top: none; padding-top: 0; }
+    .slide-block h5.sub {
+      font-family: var(--font-display);
+      margin: 1.1rem 0 0.55rem;
+      color: var(--primary-dark);
+      font-size: 0.98rem;
+      font-weight: 700;
+      scroll-margin-top: 1rem;
+    }
 
     .slide-block ul,
     .slide-block ol {
@@ -1368,7 +1376,7 @@
       <div class="title-wrap">
         <h1>
           <span class="header-line-1">AWS ECS · Fargate</span>
-          <span class="header-line-2">Compilación de Forms y Pro*C</span>
+          <span class="header-line-2">Ejecución de Aplicativo RECTOR</span>
           <span class="header-line-3">frmcmp · proc · gcc</span>
         </h1>
         <p class="header-tagline">Compilación de las aplicaciones en el contenedor forms-server</p>
@@ -1388,20 +1396,22 @@
       <p class="slogan">Fuentes en EFS, compilación en el contenedor, ejecutables listos para WLS_FORMS.</p>
     </div>
 
-    <nav class="toc" aria-label="Contenido"><a href="#paso-1">1 · Compilación Forms</a><a href="#paso-2">2 · Compilación Pro*C</a></nav>
+    <nav class="toc" aria-label="Contenido"><a href="#paso-1">1 · Ejecución de Aplicación Forms</a><a href="#paso-2">2 · Ejecución de Colas de Procesos</a></nav>
 
     <div class="card">
       <div class="card-body">
 
         <section class="slide-block" id="paso-1">
-          <h3><span class="num">1</span> Compilación Forms<span class="status pending">Pendiente</span></h3>
+          <h3><span class="num">1</span> Ejecución de Aplicación Forms<span class="status pending">Pendiente</span></h3>
+
+      <h4 class="sub" id="paso-1-1">1.1 · Compilación Forms</h4>
       <p>
         Compilación de los módulos Forms (<code>.fmb</code>, <code>.pll</code>, <code>.mmb</code>) a sus ejecutables
         (<code>.fmx</code>, <code>.plx</code>, <code>.mmx</code>) con <code>frmcmp</code>, dentro del contenedor
         <code>forms-server</code>.
       </p>
 
-      <h4 class="sub" id="paso-1-1">1.1 · Estructura de directorios</h4>
+      <h5 class="sub" id="paso-1-1-1">1.1.1 · Estructura de directorios</h5>
       <p>
         Las fuentes y los ejecutables de la aplicación están en el directorio <code>forms_app</code>. Localmente vive en
         <code>forms_reports/dist/app/forms_app</code>; en ECS está en el EFS (<code>domain_forms/app</code>) y el volumen
@@ -1413,6 +1423,8 @@
         <code>WLS_FORMS</code> y persisten entre despliegues de la tarea. Dentro de <code>forms_app</code>:
       </p>
       <pre class="code">forms_app/
+├── compile_all_forms.sh    script: compila todas las formas y menús
+├── compile_forms_list.sh   script: compila solo los módulos de una lista (.lis)
 ├── src/    fuentes a compilar
 │   ├── rector/    formas (.fmb)
 │   └── menues/    menús (.mmb)
@@ -1423,6 +1435,8 @@
 └── log/    logs de ejecución del script de compilación</pre>
       <div class="tabla"><table>
         <tr><th>Directorio</th><th>Contenido</th></tr>
+        <tr><td><code>compile_all_forms.sh</code></td><td>Script que compila todos los módulos: <code>src/rector/*.fmb</code> → <code>bin/fmx</code> y <code>src/menues/*.mmb</code> → <code>bin/mnu</code>. Deja sus logs en <code>log/compile_all</code>.</td></tr>
+        <tr><td><code>compile_forms_list.sh</code></td><td>Script que compila solo los módulos indicados en un archivo <code>.lis</code> (por defecto <code>formas.lis</code>; las listas por grupo están en <code>listas/</code>). Deja sus logs en <code>log/compile_list</code>.</td></tr>
         <tr><td><code>src</code></td><td>Fuentes a compilar: formas <code>.fmb</code> en <code>src/rector</code> (≈2.290) y menús <code>.mmb</code> en <code>src/menues</code> (25).</td></tr>
         <tr><td><code>lib</code></td><td>Librerías que referencian los <code>.fmb</code> al compilar (<code>.pll</code>, <code>.olb</code>).</td></tr>
         <tr><td><code>bin</code></td><td>Directorio de salida: <code>.fmx</code> en <code>bin/fmx</code> y <code>.mmx</code> en <code>bin/mnu</code>.</td></tr>
@@ -1433,7 +1447,54 @@
         <code>.fmx</code> no son portables entre versiones ni plataformas.
       </div>
 
-      <h4 class="sub" id="paso-1-2">1.2 · Resultado de la compilación (referencia)</h4>
+      <h5 class="sub" id="paso-1-1-2">1.1.2 · Ejecutar la compilación</h5>
+      <p>
+        La compilación se ejecuta dentro del contenedor <code>forms-server</code>, que tiene <code>frmcmp</code>, la conexión a la
+        base de datos y el directorio <code>forms_app</code> montado desde el EFS. Primero hay que conectarse al contenedor con
+        ECS Exec (como en <a href="../aws-ecs/forms/index.html#paso-3">Forms 3</a>) y luego ejecutar, como usuario
+        <code>oracle</code>, los scripts de compilación del punto <a href="#paso-1-1-1">1.1.1</a>.
+      </p>
+      <p>1. Conectarse al contenedor <code>forms-server</code>:</p>
+      <pre class="code"><span class="c"># El ID de la tarea (--task) cambia con cada despliegue del servicio forms: tomar el de la</span>
+<span class="c"># tarea en ejecución actual (ECS → forms_report → servicio forms → pestaña Tareas)</span>
+aws ecs execute-command --cluster forms_report --task dba0a9d75d77475d8a3ca34c79e98e41 \
+  --container forms-server --interactive --command "su -s /bin/bash oracle"</pre>
+      <p>
+        2. Apartar los fuentes que no están en uso: se movieron a una carpeta <code>old_version</code> dentro de cada directorio
+        todos los <code>src/rector/*.fmb</code> y <code>src/menues/*.mmb</code> que no se encuentran entre los compilados
+        (<code>.fmx</code> / <code>.mmx</code>) de la versión 12c actualmente en ejecución. La referencia es
+        <code>lista_fmx.txt</code>, un listado <code>ls -l</code> de esos compilados, y el movimiento lo hace
+        <code>move_old_fmb.sh</code>:
+      </p>
+      <pre class="code">cd /u01/oracle/user_projects/apps/forms_app
+./move_old_fmb.sh</pre>
+      <div class="tabla"><table>
+        <tr><th>Directorio</th><th>Antes</th><th>Movidos a <code>old_version</code></th><th>Quedan</th></tr>
+        <tr><td><code>src/rector</code> (<code>*.fmb</code>)</td><td>2.289</td><td>207</td><td>2.082</td></tr>
+        <tr><td><code>src/menues</code> (<code>*.mmb</code>)</td><td>25</td><td>12</td><td>13</td></tr>
+      </table></div>
+      <p>3. Ejecutar el script de compilación que corresponda:</p>
+      <pre class="code">cd /u01/oracle/user_projects/apps/forms_app
+
+<span class="c"># Compilación completa (formas de src/rector y menús de src/menues)</span>
+./compile_all_forms.sh
+
+<span class="c"># Solo los módulos de una lista (por defecto formas.lis; listas por grupo en listas/)</span>
+./compile_forms_list.sh
+./compile_forms_list.sh listas/&lt;grupo&gt;.lis</pre>
+      <div class="tabla"><table>
+        <tr><th>Variable opcional</th><th>Uso</th></tr>
+        <tr><td><code>FORMS_USERID</code></td><td>Usuario de conexión para compilar (<code>usuario/clave@alias</code>). Si no está definida, los scripts usan <code>uspan/uspandesa@BANESCO_DEV</code>; el alias se resuelve con el <code>tnsnames.ora</code> de <code>TNS_ADMIN</code>.</td></tr>
+        <tr><td><code>EXCLUDE_REGEX</code></td><td>Solo <code>compile_all_forms.sh</code>: expresión regular de nombres a omitir, p. ej. <code>'_old|_OLD|\(1\)'</code>.</td></tr>
+      </table></div>
+      <div class="callout">
+        La compilación completa (≈2.300 módulos) es larga: conviene lanzarla con <code>nohup ./compile_all_forms.sh &amp;</code>
+        para que no se corte si se cierra la sesión de ECS Exec. Ninguno de los scripts se detiene por el fallo de un módulo; al
+        final muestran un resumen y los módulos fallidos, y el detalle de cada uno queda en su <code>.err</code> dentro de
+        <code>log/</code>.
+      </div>
+
+      <h5 class="sub" id="paso-1-1-3">1.1.3 · Resultado de la compilación (referencia)</h5>
       <p>
         Estado final de cada módulo según su compilación más reciente en <code>forms-server</code>: compilación completa del
         10/09/2026 (<code>compile_all_forms.sh</code>), recompilación de los fallidos (<code>formas.lis</code>) el 02/10/2026 y
@@ -1470,25 +1531,32 @@
         de Forms 5.0 que no se usan y no requieren compilación. Las listas de cada grupo están en <code>forms_app/listas/</code> y se
         recompilan con <code>./compile_forms_list.sh listas/&lt;grupo&gt;.lis</code>.
       </div>
+
+      <h4 class="sub" id="paso-1-2">1.2 · Ejecución Aplicación Forms</h4>
+      <p><em>Por desarrollar.</em></p>
         </section>
 
         <section class="slide-block" id="paso-2">
-          <h3><span class="num">2</span> Compilación Pro*C<span class="status pending">Pendiente</span></h3>
+          <h3><span class="num">2</span> Ejecución de Colas de Procesos<span class="status pending">Pendiente</span></h3>
+
+      <h4 class="sub" id="paso-2-1">2.1 · Compilación Pro*C</h4>
       <p>
         Precompilación de los programas Pro*C (<code>.pc</code>) con <code>proc</code> y compilación y enlace con <code>gcc</code>,
         dentro del contenedor <code>forms-server</code>.
       </p>
 
-      <h4 class="sub" id="paso-2-1">2.1 · Estructura de directorios</h4>
+      <h5 class="sub" id="paso-2-1-1">2.1.1 · Estructura de directorios</h5>
       <p>
         Los programas Pro*C están en el directorio <code>proc_app</code>. Localmente vive en <code>forms_reports/dist/app/proc_app</code>;
-        en ECS está en el mismo volumen <code>efs-app</code> que <code>forms_app</code> (<a href="#paso-1-1">1.1</a>) y se ve dentro del
+        en ECS está en el mismo volumen <code>efs-app</code> que <code>forms_app</code> (<a href="#paso-1-1-1">1.1.1</a>) y se ve dentro del
         contenedor como:
       </p>
       <pre class="code">/u01/oracle/user_projects/apps/proc_app</pre>
       <p>Cada programa pasa por dos etapas, y cada etapa deja su resultado en un directorio distinto:</p>
       <pre class="code">src/X.pc  --proc-->  obj/X.c  --gcc-->  bin/X</pre>
       <pre class="code">proc_app/
+├── compile_proc_all.sh    script: compila todos los programas Pro*C
+├── compile_proc_list.sh   script: compila solo los programas de una lista (.lis)
 ├── src/       fuentes Pro*C (.pc)
 ├── include/   cabeceras propias usadas al compilar (.h)
 ├── obj/       código C generado por proc (.c)
@@ -1496,6 +1564,8 @@
 └── log/       logs de ejecución del script de compilación</pre>
       <div class="tabla"><table>
         <tr><th>Directorio</th><th>Contenido</th></tr>
+        <tr><td><code>compile_proc_all.sh</code></td><td>Script que compila todos los <code>src/*.pc</code>: genera la lista de fuentes y delega en <code>compile_proc_list.sh</code>. Deja sus logs en <code>log/compile_proc_all</code>.</td></tr>
+        <tr><td><code>compile_proc_list.sh</code></td><td>Script que compila solo los programas indicados en un archivo <code>.lis</code> (por defecto <code>proc.lis</code>; entradas <code>X.pc</code>, <code>X</code> o ruta absoluta). Deja sus logs en <code>log/compile_proc_list</code>.</td></tr>
         <tr><td><code>src</code></td><td>Fuentes Pro*C a compilar (≈760 <code>.pc</code>). Los fuentes sin <code>main()</code> son de inclusión y no generan ejecutable.</td></tr>
         <tr><td><code>include</code></td><td>Cabeceras que necesitan los fuentes y que no trae Linux, como <code>floatingpoint.h</code>. Se pasan a <code>proc</code> y a <code>gcc</code> junto con <code>$ORACLE_HOME/precomp/public</code> (<code>PROC_INCLUDE</code>).</td></tr>
         <tr><td><code>obj</code></td><td>Salida intermedia: el <code>.c</code> que genera <code>proc</code> a partir de cada <code>.pc</code>.</td></tr>
@@ -1507,40 +1577,173 @@
         compilarse y ejecutarse en la misma imagen.
       </div>
 
-      <h4 class="sub" id="paso-2-2">2.2 · Resultado de la compilación (referencia)</h4>
+      <h5 class="sub" id="paso-2-1-2">2.1.2 · Fuentes excluidos de la compilación</h5>
       <p>
-        Resultado de la compilación completa del 03/10/2026 en <code>forms-server</code> (<code>compile_proc_all.sh</code>,
-        log <code>proc_app/log/compile_proc_all_20261003_224239.log</code>), con <code>gcc</code> 11 y <code>CFLAGS=-std=gnu89</code>.
+        Se movieron a <code>src/old_version</code> todos los <code>src/*.pc</code> que no se encuentran entre los ejecutables de
+        la versión 12c actualmente en ejecución. La referencia es <code>lista_proc.txt</code>, un listado <code>ls -l</code> de
+        esos ejecutables (sin extensión: <code>X.pc</code> se compara con <code>X</code>), y el movimiento lo hace
+        <code>move_old_proc.sh</code>:
+      </p>
+      <pre class="code">cd /u01/oracle/user_projects/apps/proc_app
+./move_old_proc.sh</pre>
+      <div class="tabla"><table>
+        <tr><th>Directorio</th><th>Antes</th><th>Movidos a <code>old_version</code></th><th>Quedan</th></tr>
+        <tr><td><code>src</code> (<code>*.pc</code>)</td><td>762</td><td>136</td><td>626</td></tr>
+      </table></div>
+      <div class="callout">
+        Como <code>compile_proc_all.sh</code> solo toma <code>src/*.pc</code> (sin subcarpetas), los fuentes de
+        <code>src/old_version</code> ya no se compilan. Los fuentes de inclusión <code>GENL00000.pc</code> y
+        <code>new30055.pc</code> no generan ejecutable, pero los incluyen otros programas: deben quedarse en <code>src</code>, y
+        <code>move_old_proc.sh</code> no mueve fuentes sin <code>main()</code>.
+      </div>
+
+      <h5 class="sub" id="paso-2-1-3">2.1.3 · Resultado de la compilación (referencia)</h5>
+      <p>
+        Resultado final en <code>forms-server</code> (<code>gcc</code> 11, <code>CFLAGS=-std=gnu89</code>,
+        <code>sqlcheck=semantics</code> contra <code>BANESCO_DEV</code>): compilación completa del 13/10/2026
+        (<code>compile_proc_all.sh</code>) y recompilación de los fallidos por <code>PCC-S-02345</code> con
+        <code>proc.lis</code>. Logs en <code>proc_app/log/compile_proc_all</code> y <code>proc_app/log/compile_proc_list</code>.
       </p>
       <div class="tabla"><table>
         <tr><th>Estado final</th><th>Programas</th></tr>
-        <tr><td>Compilados (455 sin avisos y 259 con avisos de <code>gcc</code>)</td><td>714</td></tr>
+        <tr><td>Compilados</td><td>619</td></tr>
         <tr><td>Saltados: fuentes de inclusión sin <code>main()</code> (<code>GENL00000</code>, <code>new30055</code>)</td><td>2</td></tr>
-        <tr><td>Pendientes (30 fallan en <code>proc</code> y 16 en <code>gcc</code>)</td><td>46</td></tr>
-        <tr><td><strong>Total</strong> (<code>src/*.pc</code>)</td><td><strong>762</strong></td></tr>
+        <tr><td>Pendientes</td><td>5</td></tr>
+        <tr><td><strong>Total</strong> (<code>src/*.pc</code>)</td><td><strong>626</strong></td></tr>
       </table></div>
-      <p>Los 46 pendientes, agrupados por causa:</p>
+      <p>Los 5 pendientes:</p>
       <div class="tabla"><table>
-        <tr><th>Grupo</th><th>Causa</th><th>Programas</th><th>Falla en</th><th>Qué hay que hacer</th><th>Dónde se corrige</th></tr>
-        <tr><td>1</td><td><code>PCC-S-02345</code>: el fuente tiene bloques PL/SQL embebidos, que <code>proc</code> solo acepta con <code>SQLCHECK=SEMANTICS</code></td><td>30</td><td><code>proc</code></td><td>Recompilar con <code>PROC_OPTS="sqlcheck=semantics userid=uspan/&lt;clave&gt;@BANESCO_DEV"</code>. Requiere conexión a la base y que existan los objetos que usan los bloques</td><td>Opciones de compilación</td></tr>
-        <tr><td>2</td><td>Hint de Oracle escrito como comentario de línea (<code>SELECT --+ RULE</code>) dentro del SQL: el <code>.c</code> generado queda con cadenas sin cerrar</td><td>5</td><td><code>gcc</code></td><td>Reescribir el hint como <code>/*+ RULE */</code> o quitarlo</td><td>Fuente <code>.pc</code></td></tr>
-        <tr><td>3</td><td>Cadenas SQL cortadas en el <code>.c</code> generado (<code>missing terminating "</code>) a partir del cursor <code>c_siniestros</code>; causa probable, sin confirmar: su hint <code>/*+ INDEX(...) */</code> de varias líneas</td><td>8</td><td><code>gcc</code></td><td>Revisar el SQL del cursor en <code>obj/INCC3008x.c</code> y dejar el hint en una sola línea</td><td>Fuente <code>.pc</code></td></tr>
-        <tr><td>4</td><td><code>main(secuencia1,secuencia2)</code> usa <code>argv</code>, que no está declarado</td><td>2</td><td><code>gcc</code></td><td>Declarar <code>main(int argc, char *argv[])</code></td><td>Fuente <code>.pc</code></td></tr>
-        <tr><td>5</td><td>Variable mal escrita: <code>WCARD_CA1SU_CD_SUCURSAL</code> (debería ser <code>WCARD_CASU_CD_SUCURSAL</code>)</td><td>1</td><td><code>gcc</code></td><td>Corregir el nombre en la línea 736</td><td>Fuente <code>.pc</code></td></tr>
+        <tr><th>Programa</th><th>Error</th><th>Causa</th><th>Qué hay que hacer</th></tr>
+        <tr><td><code>CAJC30001</code></td><td><code>PLS-S-00201</code> en <code>proc</code> (línea 1583)</td><td><code>CARTERA.P_PROCESAR_DEVOLUCION</code> no existe en <code>BANESCO_DEV</code> o el usuario no tiene permiso de ejecución</td><td>Crear el procedimiento u otorgar <code>EXECUTE</code> en la base</td></tr>
+        <tr><td><code>ESTC30042</code>, <code>SINC30125</code>, <code>SINC31001</code></td><td><code>PLS-S-00395</code> en <code>proc</code></td><td>El <code>INSERT INTO BATB_SINPAG_MENSUAL_01 VALUES</code> envía 20 valores y la tabla en <code>BANESCO_DEV</code> tiene otro número de columnas</td><td>Alinear la tabla con producción o listar las columnas en el <code>INSERT</code></td></tr>
+        <tr><td><code>CAJC30140</code></td><td><code>gcc</code></td><td>Variable mal escrita: <code>WCARD_CA1SU_CD_SUCURSAL</code> (debería ser <code>WCARD_CASU_CD_SUCURSAL</code>)</td><td>Corregir el nombre en el fuente (línea 736)</td></tr>
       </table></div>
-      <p>Programas de cada grupo:</p>
+      <div class="callout">
+        Los cuatro primeros tienen ejecutable en la versión 12c: el fuente coincide con la base de producción y la diferencia
+        está en el esquema de <code>BANESCO_DEV</code>. Otra opción es recompilarlos contra una base que tenga esos objetos con
+        <code>PROC_USERID='usuario/clave@ALIAS' ./compile_proc_list.sh</code>.
+      </div>
+
+      <h4 class="sub" id="paso-2-2">2.2 · Ejecución de CARC00100</h4>
+      <p>
+        <code>CARC00100</code> es el programa que atiende una cola de procesos: lee las órdenes pendientes de
+        <code>CART_ORDENES_PROCESOS</code> para su cola y ejecuta cada programa (Pro*C o reporte con <code>rwclient.sh</code>).
+        Se ejecuta dentro del contenedor <code>reports-server</code>, desde el directorio de los compilados Pro*C
+        (<code>proc_app/bin</code>, en el EFS), donde está el ejecutable <code>CARC00100</code> compilado en el punto
+        <a href="#paso-2-1">2.1</a>.
+      </p>
+
+      <h5 class="sub" id="paso-2-2-1">2.2.1 · Parámetros</h5>
+      <pre class="code">CARC00100 &lt;cola&gt; &lt;máquina&gt; &lt;alias&gt; &lt;base&gt;</pre>
       <div class="tabla"><table>
-        <tr><th>Grupo</th><th>Programas</th></tr>
-        <tr><td>1</td><td><code>CAJC30001</code>, <code>CAJC30033</code>, <code>CAJC30100</code>, <code>CAJC30120</code>, <code>CAJC30123</code>, <code>CAJC30724</code>, <code>CARC30150</code>, <code>CARC30160</code>, <code>CARC30208</code>, <code>CARC40051</code>, <code>ESTC30031</code>, <code>ESTC30033</code>, <code>ESTC30034</code>, <code>ESTC30035</code>, <code>ESTC30042</code>, <code>ESTC30047</code>, <code>ESTC30053</code>, <code>PROC30010</code>, <code>PROC30020</code>, <code>PROC30038</code>, <code>PROC30044</code>, <code>PROC30047</code>, <code>PROC35020</code>, <code>PROC70031</code>, <code>SINC30090</code>, <code>SINC30125</code>, <code>SINC30131</code>, <code>SINC30132</code>, <code>SINC30139</code>, <code>SINC31001</code></td></tr>
-        <tr><td>2</td><td><code>CARC30211</code>, <code>CARC30250</code>, <code>CARC30251</code>, <code>CARC30253</code>, <code>CARC40016</code></td></tr>
-        <tr><td>3</td><td><code>INCC30080</code>, <code>INCC30081</code>, <code>INCC30082</code>, <code>INCC30083</code>, <code>INCC30084</code>, <code>INCC30085</code>, <code>INCC30086</code>, <code>INCC30087</code></td></tr>
-        <tr><td>4</td><td><code>COBC33005</code>, <code>PROC30031</code></td></tr>
-        <tr><td>5</td><td><code>CAJC30140</code></td></tr>
+        <tr><th>Parámetro</th><th>Ejemplo</th><th>Uso</th></tr>
+        <tr><td><code>cola</code></td><td><code>Y</code></td><td>Cola que atiende el proceso (<code>CART_COLAS</code>). Solo debe haber un <code>CARC00100</code> por cola.</td></tr>
+        <tr><td><code>máquina</code></td><td><code>weblogic-forms.forms.local</code></td><td>Debe coincidir con <code>CART_CONFIG_BATCH.CACH_NM_MAQUINA</code> (máximo 40 caracteres); de esa fila salen los directorios de salida y el Reports Server por defecto.</td></tr>
+        <tr><td><code>alias</code></td><td><code>SEGU</code></td><td>Alias de la base.</td></tr>
+        <tr><td><code>base</code></td><td><code>SEGU</code></td><td>Nombre de la base.</td></tr>
+      </table></div>
+
+      <h5 class="sub" id="paso-2-2-2">2.2.2 · Requisitos</h5>
+      <div class="tabla"><table>
+        <tr><th>Requisito</th><th>Dónde</th><th>Valor</th></tr>
+        <tr><td>Conexión a la base</td><td>Variables <code>PASS_FILE</code> y <code>TWO_TASK</code></td><td><code>EXEC SQL CONNECT</code> lee usuario y clave de <code>PASS_FILE</code> (<code>proc_app/bin/USUARIOBATCH.lis</code>) y usa el alias de <code>TWO_TASK</code> (<code>SEGU</code>), resuelto con el <code>tnsnames.ora</code> de <code>TNS_ADMIN</code>.</td></tr>
+        <tr><td>Configuración de la máquina</td><td><code>CART_CONFIG_BATCH</code></td><td>Fila con <code>CACH_NM_MAQUINA</code> = parámetro <code>máquina</code> y <code>CACH_DIR_SALIDAS_*</code> = <code>/u01/oracle/user_projects/apps/reports_app/rep/</code>.</td></tr>
+        <tr><td>Reports Server</td><td><code>CART_COLAS.CALA_NM_REPSERV</code> (si es nulo, <code>CART_CONFIG_BATCH.CACH_NM_REPSERV</code>)</td><td><code>rep_wls_reports_weblogic-reports</code>, nombre del servidor in-process de <code>WLS_REPORTS</code>.</td></tr>
+        <tr><td><code>rwclient.sh</code></td><td><code>PATH</code></td><td>El del dominio (<code>$DOMAIN_HOME/reports/bin</code>), no la plantilla de <code>$ORACLE_HOME/bin</code>. Las librerías que necesita (<code>libnsl.so.2</code>) vienen en la imagen <code>r3</code>.</td></tr>
+        <tr><td>Escritura de reportes</td><td><code>rwserver.conf</code> de <code>WLS_REPORTS</code></td><td><code>&lt;folderAccess&gt;</code> con escritura en <code>reports_app/rep</code>; si falta, los reportes fallan con <code>REP-56133</code>.</td></tr>
+      </table></div>
+      <p>
+        La task definition de <code>reports-server</code> ya define <code>TNS_ADMIN</code>, <code>DOMAIN_HOME</code> y
+        <code>ORACLE_HOME</code>, pero no <code>PASS_FILE</code> ni <code>TWO_TASK</code>, y su <code>PATH</code> no incluye
+        <code>$DOMAIN_HOME/reports/bin</code>: hay que exportarlos en la sesión antes de ejecutar (punto
+        <a href="#paso-2-2-3">2.2.3</a>).
+      </p>
+
+      <h5 class="sub" id="paso-2-2-3">2.2.3 · Ejecutar una cola</h5>
+      <p>1. Conectarse al contenedor <code>reports-server</code>:</p>
+      <pre class="code"><span class="c"># El ID de la tarea (--task) cambia con cada despliegue del servicio reports-server: tomar el de</span>
+<span class="c"># la tarea en ejecución actual (ECS → forms_report → servicio reports-server → pestaña Tareas)</span>
+aws ecs execute-command --cluster forms_report --task 4942b81cf33848e8bdd80ab4a458b606 \
+  --container reports-server --interactive --command "su -s /bin/bash oracle"</pre>
+      <p>2. Ubicarse en el directorio de los compilados Pro*C:</p>
+      <pre class="code">cd /u01/oracle/user_projects/apps/proc_app/bin</pre>
+      <p>3. Preparar el entorno de la sesión y verificarlo:</p>
+      <pre class="code">export PASS_FILE=/u01/oracle/user_projects/apps/proc_app/bin/USUARIOBATCH.lis
+export TWO_TASK=SEGU
+export PATH=$DOMAIN_HOME/reports/bin:$PATH
+
+echo "PASS_FILE=$PASS_FILE TWO_TASK=$TWO_TASK TNS_ADMIN=$TNS_ADMIN"
+which rwclient.sh            <span class="c"># debe ser $DOMAIN_HOME/reports/bin/rwclient.sh</span></pre>
+      <p>4. Lanzar la cola (ejemplo con la cola <code>Y</code>):</p>
+      <pre class="code">mkdir -p /u01/oracle/user_projects/apps/colas_app/log
+nohup stdbuf -oL ./CARC00100 Y weblogic-forms.forms.local SEGU SEGU \
+  &gt;&gt; /u01/oracle/user_projects/apps/colas_app/log/COLA_Y.log 2&gt;&amp;1 &amp;</pre>
+      <p>5. Seguimiento:</p>
+      <pre class="code">tail -f /u01/oracle/user_projects/apps/colas_app/log/COLA_Y.log
+ps -ef | grep "CARC00100 Y" | grep -v grep</pre>
+      <div class="callout">
+        <code>stdbuf -oL</code> hace que la salida se escriba línea por línea; sin él, si el programa termina de forma anormal el
+        log puede quedar vacío. <code>nohup</code> evita que la cola se detenga al cerrar la sesión de ECS Exec.
+      </div>
+      <div class="callout warn">
+        Los scripts de arranque de la versión 12c (<code>COLA_A</code> … <code>COLA_Z</code> y <code>COLA.env</code>, en
+        <code>/u01/oracle/scripts/bin</code>) todavía tienen las rutas y la máquina del servidor anterior
+        (<code>/aplicacion/TRector/…</code>, <code>bsdevap9710</code>): no sirven sin adaptarlos. <code>COLA.env</code> además
+        define <code>NLS_LANG=AMERICAN_AMERICA.WE8ISO8859P15</code> y <code>NLS_DATE_FORMAT=DD-MM-YYYY</code>, que no están en la
+        task definition de <code>reports-server</code>.
+      </div>
+
+      <h5 class="sub" id="paso-2-2-4">2.2.4 · Invocar un reporte desde otro contenedor</h5>
+      <p>
+        <code>rwclient.sh server=rep_wls_reports_weblogic-reports …</code> funciona dentro de <code>reports-server</code> porque
+        el Reports Server está en el mismo contenedor. Desde otro contenedor (<code>forms-server</code>, <code>colas-server</code>)
+        <code>rwclient</code> no lo encuentra: lo busca por multicast (<code>rwnetwork.conf</code>), que no funciona en la VPC.
+        La forma de invocarlo de manera remota es por HTTP, con el servlet <code>rwservlet</code> de <code>WLS_REPORTS</code>, a
+        través del nombre de Cloud Map <code>weblogic-reports.forms.local</code> y el puerto <code>9012</code>.
+      </p>
+      <p>1. Verificar el acceso al Reports Server desde el otro contenedor:</p>
+      <pre class="code">curl -sS "http://weblogic-reports.forms.local:9012/reports/rwservlet/getserverinfo?server=rep_wls_reports_weblogic-reports"</pre>
+      <p>
+        2. Ejecutar el reporte con los mismos parámetros que arma <code>CARC00100</code> (ejemplo con
+        <code>CARR30214</code> y la secuencia <code>204240</code>):
+      </p>
+      <pre class="code">curl -sS -G "http://weblogic-reports.forms.local:9012/reports/rwservlet" \
+  --data-urlencode "server=rep_wls_reports_weblogic-reports" \
+  --data-urlencode "report=/u01/oracle/user_projects/apps/reports_app/src/CARR30214.rdf" \
+  --data-urlencode "userid=uspan/&lt;clave&gt;@SEGU" \
+  --data-urlencode "NU_SEC=204240" \
+  --data-urlencode "paramform=no" \
+  --data-urlencode "destype=file" \
+  --data-urlencode "desformat=pdf" \
+  --data-urlencode "desname=/u01/oracle/user_projects/apps/reports_app/rep/CARR30214_204240.pdf"
+
+ls -l /u01/oracle/user_projects/apps/reports_app/rep/CARR30214_204240.pdf</pre>
+      <p>
+        Con <code>destype=file</code> el archivo lo escribe <code>reports-server</code>, pero como <code>reports_app/rep</code> está
+        en el EFS (volumen <code>efs-app</code>) queda visible de inmediato en el contenedor que hizo la llamada. Para recibir el
+        PDF directamente en la respuesta, usar <code>destype=cache</code> y guardar la salida con <code>-o</code>:
+      </p>
+      <pre class="code">curl -sS -G "http://weblogic-reports.forms.local:9012/reports/rwservlet" \
+  --data-urlencode "server=rep_wls_reports_weblogic-reports" \
+  --data-urlencode "report=/u01/oracle/user_projects/apps/reports_app/src/CARR30214.rdf" \
+  --data-urlencode "userid=uspan/&lt;clave&gt;@SEGU" \
+  --data-urlencode "NU_SEC=204240" \
+  --data-urlencode "paramform=no" \
+  --data-urlencode "destype=cache" \
+  --data-urlencode "desformat=pdf" \
+  -o /tmp/CARR30214_204240.pdf</pre>
+      <div class="tabla"><table>
+        <tr><th>Requisito</th><th>Detalle</th></tr>
+        <tr><td>Red</td><td>El security group de <code>reports-server</code> debe permitir el puerto <code>9012</code> desde el servicio que llama.</td></tr>
+        <tr><td>Rutas</td><td><code>report</code> y <code>desname</code> son rutas del contenedor <code>reports-server</code>; con el EFS compartido coinciden en todos los contenedores.</td></tr>
+        <tr><td>Escritura</td><td><code>&lt;folderAccess&gt;</code> de <code>rwserver.conf</code> debe permitir escribir en <code>reports_app/rep</code> (si no, <code>REP-56133</code>).</td></tr>
+        <tr><td>Resultado</td><td>La respuesta es una página HTML: con <code>destype=file</code>, el resultado se confirma revisando que el archivo exista y tenga tamaño mayor que cero.</td></tr>
       </table></div>
       <div class="callout warn">
-        <code>CARC30253</code> tiene además <code>#include &lt;doubleingpoint.h&gt;</code> en la línea 8 (debería ser
-        <code>floatingpoint.h</code>): al corregir el grupo 2 fallará por ese include. Los grupos 2 a 5 requieren cambiar el fuente;
-        el grupo 1 solo cambia las opciones de compilación y es el que más programas destraba.
+        El <code>userid</code> viaja en la URL y queda en los logs de acceso de <code>WLS_REPORTS</code>. Para no exponer la clave,
+        se puede definir una clave de conexión en <code>cgicmd.dat</code> del Reports Server y usar <code>cmdkey=</code> en lugar de
+        <code>userid=</code>. <code>CARC00100</code> invoca hoy <code>rwclient.sh</code>; para que corra fuera de
+        <code>reports-server</code> habría que cambiar en el fuente la llamada (<code>F_Ins_report</code>) por esta invocación HTTP.
       </div>
         </section>
 

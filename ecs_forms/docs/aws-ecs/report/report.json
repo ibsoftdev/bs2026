@@ -169,7 +169,7 @@
       },
       {
         "name": "com.amazonaws.ecs.capability.docker-remote-api.1.17"
-      },
+      },tenia en ""
       {
         "name": "com.amazonaws.ecs.capability.docker-remote-api.1.21"
       },

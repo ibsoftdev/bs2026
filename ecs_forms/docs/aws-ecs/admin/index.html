@@ -1476,14 +1476,21 @@
         luego se etiqueta la imagen con la URI del repositorio y por último se envía (<em>push</em>). Por el tamaño
         de la imagen (~11 GB) el envío tarda varios minutos y conviene hacerlo desde una máquina con buena conexión.
       </p>
-      <p>El botón <strong>Ver comandos de envío</strong> del repositorio muestra estos mismos comandos:</p>
-      <pre class="code">aws ecr get-login-password --region us-east-1 \
-  | docker login --username AWS --password-stdin 730335573515.dkr.ecr.us-east-1.amazonaws.com
-
-docker tag &lt;imagen-local&gt;:&lt;tag&gt; 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt;
-docker push 730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:&lt;tag&gt;</pre>
       <p>
-        En la pestaña <strong>Imágenes</strong> quedan las versiones subidas (<code>latest</code>, <code>r1</code>, <code>r2</code>,
+        El botón <strong>Ver comandos de envío</strong> del repositorio muestra estos mismos comandos. Se definen
+        primero la región, el registro y el repositorio como variables, para reutilizarlas en el etiquetado, el envío
+        y el despliegue en ECS. El ejemplo sube la revisión <code>r3</code>; para otra revisión basta cambiar la
+        imagen local y el tag:
+      </p>
+      <pre class="code">export AWS_REGION=us-east-1
+export ECR=730335573515.dkr.ecr.us-east-1.amazonaws.com
+export REPO=$ECR/forms-docker
+
+aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR
+docker tag image_forms_14.1.2:r3 $REPO:r3
+docker push $REPO:r3</pre>
+      <p>
+        En la pestaña <strong>Imágenes</strong> quedan las versiones subidas (<code>latest</code>, <code>r1</code>, <code>r2</code>, <code>r3</code>,
         ~11 GB cada una). Anotar el <strong>digest</strong> (<code>sha256:…</code>) de la versión a desplegar:
         la task definition lo referencia por digest.
       </p>

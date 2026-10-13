@@ -1232,6 +1232,18 @@
         paquetes (punto <a href="#reports-libs">4.e</a>) y verifica <code>librw*.so</code> durante el
         build. Para imágenes ya construidas existe <a href="#r2">Dockerfile.r2</a> (punto 7.a).
       </div>
+      <div class="callout warn">
+        <span class="lbl">Revisión r3 · ejecutables cliente de Reports</span>
+        Con <code>r2</code> el motor de Reports funciona, pero los ejecutables cliente que usan
+        los procesos batch Pro*C (<code>rwclient</code>, <code>rwrun</code>) fallan al cargar con
+        <code>error while loading shared libraries: libnsl.so.2</code>: en Oracle Linux 9 el
+        paquete <code>libnsl2</code> solo trae <code>libnsl.so.3</code>. El
+        <a href="Dockerfile.wls"><code>Dockerfile.wls</code></a> actual instala
+        <code>libnsl2</code>, crea el enlace <code>libnsl.so.2</code>, asegura el permiso de
+        ejecución de <code>$ORACLE_HOME/bin/rw*</code> y los verifica durante el build (punto
+        <a href="#reports-client">4.f</a>). Para imágenes ya construidas existe
+        <a href="#r3">Dockerfile.r3</a> (punto 7.b).
+      </div>
       <div class="callout">
         <span class="lbl">Archivo de referencia</span>
         La construcción se realiza con el Dockerfile
@@ -1348,11 +1360,12 @@ ls -lh jdk-17_linux-x64_bin.tar.gz \
             <div class="detalle d-3">
               <h4><span class="d-num">b</span> Stage 2 · Imagen final <span class="d-tag"><code>oraclelinux:9</code></span></h4>
               <ol class="cta-list">
-                <li>Instala paquetes de runtime: <code>libaio</code>, <code>libnsl</code> (Forms), <code>gcc</code>, <code>make</code>, <code>binutils</code> (toolchain para regenerar librerías compartidas), <code>nano</code> y <code>net-tools</code> (utilitarios de administración), <code>motif</code>, <code>libX11</code>, <code>libXext</code>, <code>libXt</code> y <code>libXp</code> (motor de Reports, ver punto 4.e).</li>
+                <li>Instala paquetes de runtime: <code>libaio</code>, <code>libnsl</code> (Forms), <code>gcc</code>, <code>make</code>, <code>binutils</code> (toolchain para regenerar librerías compartidas), <code>nano</code> y <code>net-tools</code> (utilitarios de administración), <code>motif</code>, <code>libX11</code>, <code>libXext</code>, <code>libXt</code> y <code>libXp</code> (motor de Reports, ver punto 4.e) y <code>libnsl2</code> con el enlace <code>libnsl.so.2</code> → <code>libnsl.so.3</code> (ejecutables cliente de Reports, ver punto 4.f).</li>
                 <li>Instala las librerías gráficas del Configuration Wizard: <code>Xvfb</code>, <code>x11vnc</code> (desde EPEL), <code>xauth</code>, <code>xhost</code>, <code>dbus-x11</code>, librerías X11/fuentes para Java y, si están disponibles, <code>twm</code> y utilidades X11 (ver punto 5).</li>
                 <li>Define <code>PATH</code> y <code>LD_LIBRARY_PATH</code> apuntando a <code>$ORACLE_HOME</code>.</li>
                 <li>Copia desde el builder: <code>JAVA_HOME</code>, <code>ORACLE_HOME</code> (incluye los <code>.so</code> generados) y el inventario Oracle.</li>
                 <li>Verifica con <code>ldd</code> que <code>$ORACLE_HOME/lib/librw*.so</code> no tenga dependencias <em>not found</em>; si falta alguna, el build falla.</li>
+                <li>Da permiso de ejecución a <code>$ORACLE_HOME/bin/rw*</code> y verifica con <code>ldd</code> los ejecutables <code>rwclient</code>, <code>rwrun</code>, <code>rwserver</code>, <code>rwbuilder</code> y <code>rwconverter</code>; si falta alguna dependencia, el build falla.</li>
                 <li>Recrea el usuario <code>oracle</code> y ajusta permisos sobre <code>/u01</code>.</li>
                 <li>Define <code>WORKDIR</code> en <code>/u01/oracle</code> y deja la imagen lista para crear el dominio y arrancar servidores (fuera del build).</li>
               </ol>
@@ -1386,8 +1399,8 @@ ls -lh jdk-17_linux-x64_bin.tar.gz \
             No en cada contenedor después del despliegue. El
             <a href="Dockerfile.wls"><code>Dockerfile.wls</code></a> las incorpora en el Stage 1
             (toolchain + <code>genshlib</code>) y en el Stage 2 (<code>libaio</code>,
-            <code>libnsl</code>, <code>gcc</code>, <code>make</code>, <code>nano</code>,
-            <code>net-tools</code>).
+            <code>libnsl</code>, <code>libnsl2</code>, <code>gcc</code>, <code>make</code>,
+            <code>nano</code>, <code>net-tools</code> y las librerías Motif/X11 de Reports).
           </div>
 
           <div class="detalles">
@@ -1523,6 +1536,58 @@ RUN missing=$(for f in ${ORACLE_HOME}/lib/librw*.so; do ldd "$f" | grep 'not fou
                 paso "Completar Reports".
               </div>
             </div>
+
+            <div class="detalle d-6" id="reports-client">
+              <h4><span class="d-num">f</span> Ejecutables cliente de Reports <span class="d-tag"><code>rwclient</code> · <code>libnsl.so.2</code></span></h4>
+              <p>
+                Los procesos batch Pro*C (por ejemplo <code>CARC00100</code>) envían los reportes al
+                Reports Server con <code>rwclient.sh</code>, que a su vez ejecuta
+                <code>$ORACLE_HOME/bin/rwclient</code>. Este binario necesita
+                <code>libnsl.so.2</code>, que en Oracle Linux 8 aportaba el paquete
+                <code>libnsl2</code>. En Oracle Linux 9 <code>libnsl2</code> pasó a la versión 2.0.0
+                y solo instala <code>libnsl.so.3</code>, por lo que se crea un enlace de
+                compatibilidad (mismo procedimiento que documenta Oracle para otros productos en
+                OL9).
+              </p>
+              <div class="tabla">
+                <table>
+                  <thead><tr><th>Ajuste</th><th>Motivo</th></tr></thead>
+                  <tbody>
+                    <tr><td class="lib">libnsl2</td><td>Aporta <code>/usr/lib64/libnsl.so.3</code>.</td></tr>
+                    <tr><td class="lib">libnsl.so.2 → libnsl.so.3</td><td>Nombre de librería que esperan <code>rwclient</code> y <code>rwrun</code>.</td></tr>
+                    <tr><td class="lib">chmod a+x bin/rw*</td><td>Evita <code>Permission denied</code> al ejecutar <code>rwclient</code> desde <code>rwclient.sh</code>.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p style="margin-top: 0.75rem;">Síntomas cuando faltan:</p>
+<pre class="code">/u01/oracle/bin/rwclient: error while loading shared libraries: libnsl.so.2: cannot open shared object file: No such file or directory
+.../reports/bin/rwclient.sh: line 14: /u01/oracle/bin/rwclient: Permission denied</pre>
+              <p>
+                Instrucciones en el Stage 2 de <a href="Dockerfile.wls"><code>Dockerfile.wls</code></a>
+                (paquetes de runtime) y verificación posterior al <code>COPY</code>:
+              </p>
+<pre class="code">RUN dnf install -y libaio libnsl libnsl2 gcc make binutils nano net-tools \
+                   motif libX11 libXext libXt libXp &amp;&amp; \
+    dnf clean all &amp;&amp; \
+    ln -sf /usr/lib64/libnsl.so.3 /usr/lib64/libnsl.so.2 &amp;&amp; \
+    ldconfig
+...
+RUN chmod a+x ${ORACLE_HOME}/bin/rw* &amp;&amp; \
+    missing=$(for f in ${ORACLE_HOME}/bin/rwclient ${ORACLE_HOME}/bin/rwrun ${ORACLE_HOME}/bin/rwserver \
+                       ${ORACLE_HOME}/bin/rwbuilder ${ORACLE_HOME}/bin/rwconverter; do \
+                [ -f "$f" ] &amp;&amp; ldd "$f" | grep 'not found'; \
+              done | sort -u) ; \
+    if [ -n "$missing" ]; then echo "Missing libraries for Reports binaries:"; echo "$missing"; exit 1; fi &amp;&amp; \
+    echo "OK: rw* binaries have no missing shared library dependencies"</pre>
+              <div class="callout">
+                <span class="lbl">Nota</span>
+                <code>$ORACLE_HOME/bin/rwclient.sh</code> es una plantilla de instalación (la ruta del
+                dominio queda como un marcador sin reemplazar) y no debe ejecutarse. Los batch deben usar
+                <code>$DOMAIN_HOME/reports/bin/rwclient.sh</code>, que se genera con la instancia
+                Reports Tools del dominio; para ello ese directorio debe ir antes en el
+                <code>PATH</code> (lo hace <code>set_batch_env.sh</code> de <code>forms_app</code>).
+              </div>
+            </div>
           </div>
         </section>
 
@@ -1602,12 +1667,23 @@ RUN missing=$(for f in ${ORACLE_HOME}/lib/librw*.so; do ldd "$f" | grep 'not fou
           <p>Si el build se hizo con el tag <code>forms_ol9:14.1.2</code>:</p>
 <pre class="code">sudo docker tag forms_ol9:14.1.2 image_forms_14.1.2
 <span class="c"># Opcional, con tag de versión/revisión:</span>
-sudo docker tag forms_ol9:14.1.2 image_forms_14.1.2:r2</pre>
+sudo docker tag forms_ol9:14.1.2 image_forms_14.1.2:r3</pre>
           <div class="callout">
             <span class="lbl">Revisión</span>
             Una imagen construida con el <code>Dockerfile.wls</code> actual ya equivale a
-            <code>r2</code> (incluye las librerías del motor de Reports). Para AWS se sube a ECR con
-            ese tag; ver la guía de ECR/ECS.
+            <code>r3</code> (incluye las librerías del motor de Reports y las dependencias de los
+            ejecutables cliente <code>rw*</code>). Para AWS se sube a ECR con ese tag; ver la guía
+            de ECR/ECS.
+          </div>
+          <div class="tabla">
+            <table>
+              <thead><tr><th>Revisión</th><th>Contenido</th><th>Cómo se obtiene</th></tr></thead>
+              <tbody>
+                <tr><td class="lib">r1</td><td>Imagen original (JDK, Infrastructure, Forms &amp; Reports, librerías Forms).</td><td>Build inicial de <code>Dockerfile.wls</code>.</td></tr>
+                <tr><td class="lib">r2</td><td>r1 + Motif/X11 del motor de Reports (punto 4.e).</td><td><a href="#r2"><code>Dockerfile.r2</code></a> sobre r1.</td></tr>
+                <tr><td class="lib">r3</td><td>r2 + <code>libnsl2</code>, enlace <code>libnsl.so.2</code> y permisos de <code>bin/rw*</code> (punto 4.f).</td><td><a href="#r3"><code>Dockerfile.r3</code></a> sobre r2, o <code>Dockerfile.wls</code> actual.</td></tr>
+              </tbody>
+            </table>
           </div>
 
           <div class="detalles">
@@ -1627,6 +1703,31 @@ sudo docker tag forms_ol9:14.1.2 image_forms_14.1.2:r2</pre>
                 <span class="lbl">Atención</span>
                 El punto final (<code>.</code>) es el contexto de build y es obligatorio; sin él,
                 Docker responde <code>"docker build" requires exactly 1 argument</code>.
+              </div>
+            </div>
+
+            <div class="detalle d-6" id="r3">
+              <h4><span class="d-num">b</span> Actualizar r2 a r3 <span class="d-tag"><a href="Dockerfile.r3"><code>Dockerfile.r3</code></a></span></h4>
+              <p>
+                <a href="Dockerfile.r3"><code>Dockerfile.r3</code></a> parte de
+                <code>image_forms_14.1.2:r2</code> y agrega solo los ajustes del punto 4.f: instala
+                <code>libnsl2</code>, crea el enlace <code>libnsl.so.2</code>, da permiso de ejecución
+                a <code>/u01/oracle/bin/rw*</code> y verifica con <code>ldd</code>
+                <code>rwclient</code>, <code>rwrun</code>, <code>rwserver</code>,
+                <code>rwbuilder</code> y <code>rwconverter</code>. Si alguno tiene dependencias
+                <em>not found</em>, el build falla y las muestra.
+              </p>
+<pre class="code">docker build -f Dockerfile.r3 \
+  --build-arg BASE_IMAGE=image_forms_14.1.2:r2 \
+  --build-arg RUN_USER=$(docker inspect -f '{{.Config.User}}' image_forms_14.1.2:r2) \
+  -t image_forms_14.1.2:r3 .</pre>
+              <div class="callout warn">
+                <span class="lbl">Despliegue en ECS</span>
+                Tras subir <code>r3</code> a ECR, crear una nueva revisión de las task definitions que
+                ejecutan <code>rwclient</code> (<code>forms-server</code>, donde corren los batch) y,
+                si comparten imagen, <code>reports-server</code>; luego actualizar el servicio. Un
+                <code>chmod</code> o <code>dnf install</code> hecho a mano dentro del contenedor se
+                pierde al recrear la tarea.
               </div>
             </div>
           </div>
@@ -1666,14 +1767,22 @@ sudo docker run --rm --user=oracle --entrypoint /bin/bash image_forms_14.1.2 -c 
   <span class="c"># Librerías nativas del motor de Reports (Motif/X11)</span>
   for f in $ORACLE_HOME/lib/librw*.so; do ldd "$f" | grep "not found"; done | sort -u | grep . \
     || echo "OK: librw*.so sin dependencias faltantes"
+  <span class="c"># Ejecutables cliente de Reports (libnsl.so.2 y permiso de ejecución)</span>
+  ls -l /usr/lib64/libnsl.so.2 || echo "FALTA: /usr/lib64/libnsl.so.2"
+  for b in rwclient rwrun rwserver rwbuilder rwconverter; do
+    [ -x $ORACLE_HOME/bin/$b ] || echo "SIN PERMISO DE EJECUCION: $b"
+    ldd $ORACLE_HOME/bin/$b | grep "not found"
+  done | sort -u | grep . || echo "OK: rw* ejecutables y sin dependencias faltantes"
 '</pre>
           <div class="callout ok">
             <span class="lbl">Imagen lista</span>
             Si aparecen las 16 librerías <code>.so</code>; están disponibles <code>libaio</code>,
             <code>gcc</code>, <code>make</code>, <code>nano</code> y <code>net-tools</code>; están
-            <code>Xvfb</code>, <code>x11vnc</code>, <code>xauth</code> y <code>xhost</code>; y ni
-            <code>frmweb</code> ni <code>librw*.so</code> reportan dependencias faltantes, la imagen
-            queda lista para crear el dominio y ejecutar WLS_FORMS y WLS_REPORTS.
+            <code>Xvfb</code>, <code>x11vnc</code>, <code>xauth</code> y <code>xhost</code>; existe
+            <code>libnsl.so.2</code>; y ni <code>frmweb</code>, ni <code>librw*.so</code>, ni los
+            ejecutables <code>rw*</code> reportan dependencias faltantes, la imagen queda lista para
+            crear el dominio, ejecutar WLS_FORMS y WLS_REPORTS y lanzar reportes desde los batch
+            con <code>rwclient</code>.
           </div>
         </section>
 
@@ -1840,10 +1949,14 @@ ENV JAVA_HOME=/u01/jdk \
 # - gcc / make / binutils: keep toolchain available for genshlib / Forms shared libs
 # - nano / net-tools: operational utilities (editor, ifconfig/netstat)
 # - motif / libX11 / libXext / libXt / libXp: required by Reports engine (librw.so, librwu.so -&gt; libXm.so.4)
+# - libnsl2: Reports client binaries (rwclient, rwrun) need libnsl.so.2; on OL9 libnsl2 only ships
+#   libnsl.so.3, so a libnsl.so.2 compatibility symlink is created
 USER root
-RUN dnf install -y libaio libnsl gcc make binutils nano net-tools \
+RUN dnf install -y libaio libnsl libnsl2 gcc make binutils nano net-tools \
                    motif libX11 libXext libXt libXp &amp;&amp; \
-    dnf clean all
+    dnf clean all &amp;&amp; \
+    ln -sf /usr/lib64/libnsl.so.3 /usr/lib64/libnsl.so.2 &amp;&amp; \
+    ldconfig
 
 # GUI packages for the Configuration Wizard (Xvfb display + VNC access)
 # - Xvfb: virtual X display (:99); x11vnc (EPEL): exposes the display on port 5900
@@ -1868,6 +1981,15 @@ COPY --from=builder /u01/app/oraInventory /u01/app/oraInventory
 RUN missing=$(for f in ${ORACLE_HOME}/lib/librw*.so; do ldd &quot;$f&quot; | grep &#x27;not found&#x27;; done | sort -u) &amp;&amp; \
     if [ -n &quot;$missing&quot; ]; then echo &quot;Missing libraries for Reports:&quot;; echo &quot;$missing&quot;; exit 1; fi &amp;&amp; \
     echo &quot;OK: librw*.so has no missing shared library dependencies&quot;
+
+# Reports client binaries must be executable and resolve all shared libraries (rwclient -&gt; libnsl.so.2)
+RUN chmod a+x ${ORACLE_HOME}/bin/rw* &amp;&amp; \
+    missing=$(for f in ${ORACLE_HOME}/bin/rwclient ${ORACLE_HOME}/bin/rwrun ${ORACLE_HOME}/bin/rwserver \
+                       ${ORACLE_HOME}/bin/rwbuilder ${ORACLE_HOME}/bin/rwconverter; do \
+                [ -f &quot;$f&quot; ] &amp;&amp; ldd &quot;$f&quot; | grep &#x27;not found&#x27;; \
+              done | sort -u) ; \
+    if [ -n &quot;$missing&quot; ]; then echo &quot;Missing libraries for Reports binaries:&quot;; echo &quot;$missing&quot;; exit 1; fi &amp;&amp; \
+    echo &quot;OK: rw* binaries have no missing shared library dependencies&quot;
 
 # Final setup of the &#x27;oracle&#x27; user for runtime
 RUN groupadd -g 1000 oracle &amp;&amp; useradd -u 1000 -g oracle -d /u01/oracle -s /bin/bash oracle &amp;&amp; \
@@ -1896,8 +2018,9 @@ WORKDIR ${ORACLE_HOME}
           <div class="message-box">
             <strong>En resumen:</strong> un build multi-stage produce
             <code>image_forms_14.1.2</code> con JDK, Infrastructure, Forms &amp; Reports, las 16
-            librerías compartidas de Forms, las dependencias Motif/X11 de Reports y el entorno
-            gráfico del Configuration Wizard, verificados durante el propio build.
+            librerías compartidas de Forms, las dependencias Motif/X11 de Reports, las de los
+            ejecutables cliente <code>rw*</code> (<code>libnsl.so.2</code>) y el entorno gráfico del
+            Configuration Wizard, verificados durante el propio build.
           </div>
         </section>
 
