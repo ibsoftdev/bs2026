@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roadmap · Implementación de RECTOR en Certificación</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/estilos-demo.css">
+  <style>
+    :root {
+      --font-display: "Outfit", "Segoe UI", sans-serif;
+      --font-body: "Source Sans 3", "Segoe UI", sans-serif;
+      --font-mono: "JetBrains Mono", "Courier New", monospace;
+      --text-desc: #2f3540;
+      --size-desc: 1.05rem;
+      --leading-desc: 1.7;
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--text-desc);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    .app-wrap { max-width: 960px; overflow: visible; }
+    .card, .card-body { overflow: visible; }
+
+    /* Cabecera */
+    .comercial-header {
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 1rem;
+      background-image: url('../assets/ImagenEmpresa.png');
+      background-repeat: no-repeat;
+      background-position: left center;
+      background-size: cover;
+      background-color: #eef3f8;
+      min-height: 148px;
+      padding: 0.85rem 0.9rem;
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+    .comercial-header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.5) 40%, rgba(255,255,255,0.9) 62%, #ffffff 78%);
+      pointer-events: none;
+    }
+    .comercial-header .title-wrap {
+      position: relative;
+      z-index: 1;
+      margin-left: auto;
+      max-width: 58%;
+      min-width: 280px;
+      padding: 0.95rem 1.15rem 1rem;
+      color: #0a1f4d;
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid rgba(13, 71, 161, 0.12);
+      border-left: 5px solid #0d47a1;
+      box-shadow: 0 6px 20px rgba(0, 33, 113, 0.12);
+    }
+    .comercial-header .title-wrap h1 {
+      font-family: var(--font-display);
+      color: #0a1f4d;
+      font-weight: 700;
+      line-height: 1.28;
+      margin: 0;
+    }
+    .comercial-header .title-wrap h1 .header-line-1 {
+      display: block;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      color: #0d47a1;
+    }
+    .comercial-header .title-wrap h1 .header-line-2 {
+      display: block;
+      font-size: 1.42rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+      color: #061433;
+    }
+    .comercial-header .title-wrap h1 .header-line-3 {
+      display: block;
+      font-size: 1.02rem;
+      font-weight: 600;
+      color: #1565c0;
+    }
+    .comercial-header .title-wrap .header-tagline {
+      font-size: 0.95rem;
+      line-height: 1.45;
+      margin: 0.55rem 0 0;
+      font-weight: 500;
+      color: #475569;
+      padding-top: 0.5rem;
+      border-top: 1px solid rgba(13, 71, 161, 0.15);
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 1rem;
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #0d47a1;
+      text-decoration: none;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    /* Introducción */
+    .intro-propuesta { max-width: calc(100% - 2cm - 1.5rem); margin: 0 0 1.5rem 1cm; }
+    .intro-propuesta h2 {
+      font-family: var(--font-display);
+      font-size: 1.28rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin: 0 0 0.75rem;
+    }
+    .intro-propuesta p {
+      text-align: justify;
+      font-size: var(--size-desc);
+      line-height: var(--leading-desc);
+      margin: 0 0 0.85rem;
+    }
+    .intro-propuesta .slogan {
+      margin: 1rem 0 0;
+      text-align: left;
+      font-family: var(--font-display);
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: #0d47a1;
+    }
+
+    /* Índice */
+    .toc { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 1.5rem 1cm; }
+    .toc a {
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--primary);
+      background: #fff;
+      border: 1px solid #bbdefb;
+      border-radius: 999px;
+      padding: 0.3rem 0.8rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .toc a:hover { background: #e3f2fd; border-color: #90caf9; }
+
+    /* Bloques numerados */
+    .slide-block {
+      margin-bottom: 1.75rem;
+      padding: 1.25rem 1.4rem;
+      background: #fafafa;
+      border-radius: var(--radius);
+      border-left: 4px solid var(--primary);
+      scroll-margin-top: 1rem;
+    }
+    .slide-block h3 {
+      font-family: var(--font-display);
+      margin: 0 0 0.75rem;
+      color: var(--primary-dark);
+      font-size: 1.22rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    .slide-block h3 .num {
+      flex-shrink: 0;
+      min-width: 30px;
+      height: 30px;
+      padding: 0 0.55rem;
+      border-radius: 999px;
+      background: var(--primary);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .slide-block h3 .num.anexo { background: #546e7a; }
+    .slide-block.anexo { border-left-color: #546e7a; }
+    .slide-block p {
+      margin: 0 0 0.9rem;
+      font-size: var(--size-desc);
+      line-height: var(--leading-desc);
+      text-align: justify;
+    }
+    .slide-block p:last-child { margin-bottom: 0; }
+    .slide-block h4.sub {
+      font-family: var(--font-display);
+      margin: 1.2rem 0 0.55rem;
+      color: var(--primary-dark);
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .slide-block ul, .slide-block ol {
+      margin: 0.4rem 0 0.9rem;
+      padding-left: 1.4rem;
+      font-size: 0.98rem;
+      line-height: 1.6;
+    }
+    .slide-block li { margin-bottom: 0.3rem; }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.86em;
+      background: #eef3f8;
+      color: #0a1f4d;
+      padding: 0.08rem 0.35rem;
+      border-radius: 4px;
+      overflow-wrap: anywhere;
+    }
+    a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    a code { color: var(--primary); }
+
+    /* Flujo de fases */
+    .fases-flow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+      margin: 0 0 1.5rem 1cm;
+    }
+    .fases-flow a {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #0d47a1;
+      background: #e3f2fd;
+      border: 1px solid #90caf9;
+      border-radius: 8px;
+      padding: 0.3rem 0.6rem;
+      text-decoration: none;
+    }
+    .fases-flow a.final { background: #e8f5e9; border-color: #a5d6a7; color: #1b5e20; }
+    .fases-flow .sep { color: var(--primary); font-weight: 700; }
+
+    /* Tablas */
+    .tabla {
+      overflow-x: auto;
+      margin: 0.85rem 0;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+    .tabla table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    .tabla th {
+      font-family: var(--font-display);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-align: left;
+      color: var(--text-muted);
+      background: #f7f9fc;
+      padding: 0.65rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .tabla td {
+      padding: 0.55rem 0.9rem;
+      border-top: 1px solid #eef2f6;
+      vertical-align: top;
+    }
+    .tabla tr:first-child td { border-top: none; }
+    .tabla tbody tr:hover td { background: #fafcff; }
+    .tabla td code { font-size: 0.8rem; }
+    .tabla td ul { margin: 0; padding-left: 1.1rem; font-size: 0.9rem; }
+
+    /* Notas */
+    .callout {
+      margin: 0.9rem 0;
+      padding: 0.85rem 1.05rem;
+      border-radius: var(--radius);
+      border: 1px solid #bbdefb;
+      border-left: 4px solid var(--primary);
+      background: #f3f8fe;
+      font-size: 0.97rem;
+      line-height: 1.6;
+    }
+    .callout:last-child { margin-bottom: 0; }
+    .callout.warn { background: #fff8e1; border-color: #ffe082; border-left-color: #f9a825; }
+    .callout.ok { background: #f1f8f2; border-color: #c8e6c9; border-left-color: var(--success); }
+
+    .status {
+      font-family: var(--font-display);
+      display: inline-block;
+      margin-left: 0.45rem;
+      padding: 0.12rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      vertical-align: middle;
+    }
+    .status.done { background: #e8f5e9; color: #1b5e20; border: 1px solid #a5d6a7; }
+    .status.pending { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+
+    .doc-footer {
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin: 0.5rem 0 1rem;
+    }
+
+    @media (max-width: 700px) {
+      .comercial-header { flex-wrap: wrap; background-position: top left; min-height: auto; }
+      .comercial-header::before { background: rgba(255, 255, 255, 0.88); }
+      .comercial-header .title-wrap { max-width: 100%; min-width: 0; width: 100%; }
+      .intro-propuesta, .toc, .fases-flow { margin-left: 0; max-width: 100%; }
+    }
+    @media print {
+      body { font-size: 12pt; }
+      .toc { display: none; }
+      .slide-block { break-inside: avoid-page; }
+    }
+
+    /* Cronograma esquemático */
+    .gantt {
+      margin: 0.85rem 0 0;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      overflow-x: auto;
+      font-size: 0.88rem;
+    }
+    .gantt-head, .gantt-row {
+      display: grid;
+      grid-template-columns: 210px 78px 120px minmax(360px, 1fr);
+      align-items: center;
+      min-width: 780px;
+    }
+    .gantt-head {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: #f7f9fc;
+      border-bottom: 1px solid var(--border);
+    }
+    .gantt-head > span, .gantt-row > span { padding: 0.45rem 0.6rem; }
+    .gantt-row { border-top: 1px solid #eef2f6; }
+    .gantt-row:first-child { border-top: none; }
+    .gantt-row .g-fase { font-weight: 600; color: var(--primary-dark); }
+    .gantt-row .g-dep { color: var(--text-muted); font-size: 0.82rem; }
+    .gantt-row input {
+      width: 56px;
+      padding: 0.2rem 0.35rem;
+      font: inherit;
+      text-align: center;
+      border: 1px solid #cfd8dc;
+      border-radius: 6px;
+    }
+    .gantt-head .g-scale, .gantt-row .g-track {
+      position: relative;
+      height: 100%;
+      min-height: 30px;
+      padding: 0 !important;
+    }
+    .g-scale .tick, .g-track .grid {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      border-left: 1px solid #eef2f6;
+    }
+    .g-scale .tick {
+      display: flex;
+      align-items: center;
+      padding-left: 3px;
+      font-size: 0.66rem;
+      border-left-color: #dfe6ee;
+    }
+    .g-track .bar {
+      position: absolute;
+      top: 6px;
+      bottom: 6px;
+      border-radius: 6px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .g-track .bar.final { background: var(--success); }
+    .g-track .bar.tbd {
+      background: repeating-linear-gradient(45deg, #fff3e0, #fff3e0 6px, #ffe0b2 6px, #ffe0b2 12px);
+      color: #e65100;
+      border: 1px dashed #fb8c00;
+    }
+    .gantt-foot {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.55rem 0.8rem;
+      background: #f7f9fc;
+      border-top: 1px solid var(--border);
+      min-width: 780px;
+    }
+    .g-legend { display: inline-flex; align-items: center; gap: 0.35rem; color: var(--text-muted); }
+    .g-legend i { display: inline-block; width: 18px; height: 10px; border-radius: 3px; margin-left: 0.5rem; }
+    .g-legend i.ok { background: var(--primary); }
+    .g-legend i.tbd { background: #fff3e0; border: 1px dashed #fb8c00; }
+    @media print {
+      .gantt-row input { border: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-wrap">
+    <a class="back-link" href="../index.html">← Regresar a la documentación del proyecto</a>
+
+    <header class="comercial-header">
+      <div class="title-wrap">
+        <h1>
+          <span class="header-line-1">Roadmap · AWS ECS Fargate</span>
+          <span class="header-line-2">Implementación de RECTOR en Certificación</span>
+          <span class="header-line-3">Fases, entregables y criterios de salida</span>
+        </h1>
+        <p class="header-tagline">Del ambiente de construcción validado a un ambiente de Certificación listo para pruebas de usuario</p>
+      </div>
+    </header>
+
+    <div class="intro intro-propuesta">
+      <h2>Visión general</h2>
+      <p>
+        Con los elementos de las guías anteriores ya construidos y validados (imagen <code>image_forms_14.1.2</code>, dominio
+        <code>forms_domain</code>, servicios <code>admin</code>, <code>forms</code>, <code>reports-server</code> y <code>colas</code>
+        en el cluster <code>forms_report</code>, compilación Forms y Pro*C, profile <code>prodws</code> y ejecución de colas con
+        <code>CARC00100</code>), este roadmap define las fases para llevar el aplicativo <strong>RECTOR</strong> a un ambiente de
+        <strong>Certificación</strong>: un ambiente estable, con datos y configuración equivalentes a producción, donde las áreas
+        usuarias puedan certificar la migración.
+      </p>
+      <p>
+        El nuevo ambiente reutiliza lo ya validado: la misma imagen y una copia del mismo dominio. Lo único que cambia es la base
+        de datos: los esquemas RCU del dominio se cargan en una instancia distinta de la usada en la construcción, y unos scripts
+        ajustan los DataSources del dominio según los parámetros de conexión definidos en cada tarea.
+      </p>
+      <p>
+        Cada fase indica su objetivo, las actividades, los entregables y el criterio de salida que permite pasar a la siguiente.
+        Al final se listan las brechas detectadas durante la construcción que deben cerrarse en Certificación.
+      </p>
+      <p class="slogan">Reproducible, automatizado y certificado por los usuarios antes de producción.</p>
+    </div>
+
+    <div class="fases-flow" aria-label="Fases">
+      <a href="#fase-1">1 · Infraestructura</a><span class="sep">→</span>
+      <a href="#fase-2">2 · Imagen, dominio y RCU</a><span class="sep">→</span>
+      <a href="#fase-3">3 · Configuración</a><span class="sep">→</span>
+      <a href="#fase-4">4 · Código</a><span class="sep">→</span>
+      <a href="#fase-5">5 · Batch y reportes</a><span class="sep">→</span>
+      <a href="#fase-6">6 · Acceso</a><span class="sep">→</span>
+      <a href="#fase-7">7 · Pruebas</a><span class="sep">→</span>
+      <a class="final" href="#fase-8">8 · Certificación</a>
+    </div>
+
+    <nav class="toc" aria-label="Contenido">
+      <a href="#resumen">Resumen de fases</a>
+      <a href="#brechas">Brechas a cerrar</a>
+    </nav>
+
+    <div class="card">
+      <div class="card-body">
+
+        <section class="slide-block" id="resumen">
+          <h3><span class="num">0</span> Resumen de fases</h3>
+          <div class="tabla"><table>
+            <tr><th>Fase</th><th>Objetivo</th><th>Entregable principal</th></tr>
+            <tr><td><a href="#fase-1">1 · Infraestructura AWS</a></td><td>Definir alcance, responsables y base de datos de Certificación, y crear la red, seguridad, almacenamiento y servicios base del ambiente</td><td>Plan de Certificación aprobado, BD disponible y Cuenta/VPC, EFS, ECR, Cloud Map, IAM y secretos listos</td></tr>
+            <tr><td><a href="#fase-2">2 · Imagen, dominio y RCU</a></td><td>Reutilizar la imagen y una copia del dominio, con los esquemas RCU en una nueva instancia de BD y DataSources ajustados por script</td><td>Servicios ECS en ejecución, DataSources apuntando a Certificación y servidores en RUNNING</td></tr>
+            <tr><td><a href="#fase-3">3 · Configuración</a></td><td>Configurar conexión a BD, Forms, Reports y tablas de control</td><td>Configuración versionada y verificada</td></tr>
+            <tr><td><a href="#fase-4">4 · Código</a></td><td>Desplegar y compilar la versión congelada de RECTOR</td><td>100 % de módulos compilados o excluidos con justificación</td></tr>
+            <tr><td><a href="#fase-5">5 · Batch y reportes</a></td><td>Automatizar las colas de procesos y la generación de reportes</td><td>Colas activas y reportes generados desde Forms y desde las colas</td></tr>
+            <tr><td><a href="#fase-6">6 · Acceso de usuarios</a></td><td>Publicar RECTOR con URL fija y HTTPS</td><td>URL de Certificación y cliente Java instalado en los equipos de prueba</td></tr>
+            <tr><td><a href="#fase-7">7 · Pruebas</a></td><td>Validar funcionalidad, integración, rendimiento y seguridad</td><td>Informe de pruebas y defectos cerrados</td></tr>
+            <tr><td><a href="#fase-8">8 · Operación y certificación</a></td><td>Dejar el ambiente operable y obtener la aceptación de los usuarios</td><td>Acta de certificación y plan de paso a producción</td></tr>
+          </table></div>
+          <div class="callout">
+            Las fases 1 a 3 son de infraestructura y pueden avanzar en paralelo con la preparación del código (fase 4). Las fases 5 a
+            8 son secuenciales: no se inician pruebas de usuario sin acceso estable ni procesos batch automatizados.
+          </div>
+
+          <h4 class="sub">Cronograma esquemático</h4>
+          <p>
+            Indique la duración estimada de cada fase en semanas. El diagrama ubica cada fase según sus dependencias y calcula la
+            duración total. Las fases sin duración asignada se muestran con borde punteado y una semana de referencia.
+          </p>
+          <div class="gantt" id="gantt">
+            <div class="gantt-head">
+              <span class="g-fase">Fase</span>
+              <span class="g-dur">Semanas</span>
+              <span class="g-dep">Inicia después de</span>
+              <span class="g-scale" id="gantt-scale"></span>
+            </div>
+            <div class="gantt-body" id="gantt-body"></div>
+            <div class="gantt-foot">
+              <span>Duración total estimada: <strong id="gantt-total">—</strong></span>
+              <span class="g-legend"><i class="ok"></i> Duración asignada <i class="tbd"></i> Sin asignar</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="slide-block" id="fase-1">
+          <h3><span class="num">1</span> Infraestructura AWS</h3>
+          <p>
+            Prepara el ambiente de Certificación: define qué se certifica, quién participa y con qué datos, y replica la
+            infraestructura de las guías <a href="../aws-ecs/admin/index.html">ECS Admin</a>,
+            <a href="../aws-ecs/forms/index.html">ECS Forms</a> y <a href="../aws-ecs/report/index.html">ECS Reports</a>, con los
+            controles de seguridad propios de un ambiente previo a producción.
+          </p>
+          <h4 class="sub">Preparación del ambiente</h4>
+          <ul>
+            <li>Definir el alcance: módulos Forms, reportes, colas y programas Pro*C incluidos en la certificación.</li>
+            <li>Designar responsables: infraestructura AWS, DBA, desarrollo RECTOR, áreas usuarias (Cartera, Caja, Siniestros, Contabilidad, etc.) y seguridad.</li>
+            <li>Disponer de una <strong>instancia de base de datos de Certificación</strong>, distinta de la usada en la construcción, que alojará los esquemas RCU del dominio y los esquemas de la aplicación con la estructura de producción y datos representativos (enmascarados si aplica). El esquema de desarrollo <code>BANESCO_DEV</code> tiene diferencias que hoy impiden compilar módulos (columnas como <code>CADO_CARP_CD_RAMO</code>).</li>
+            <li>Definir la nomenclatura del ambiente (cluster, servicios, alias TNS, DNS) para no mezclarlo con desarrollo.</li>
+            <li>Acordar la ventana de pruebas y los criterios de aceptación.</li>
+          </ul>
+          <h4 class="sub">Infraestructura base</h4>
+          <ul>
+            <li>Cuenta o VPC de Certificación, con subredes privadas para las tareas y conectividad a la base de datos (VPN o Direct Connect).</li>
+            <li>Security groups con reglas mínimas: los puertos <code>7001</code>, <code>9001</code> y <code>9012</code> solo desde el balanceador o las redes internas, nunca desde <code>0.0.0.0/0</code>.</li>
+            <li>EFS para el dominio y para <code>apps</code> (<code>forms_app</code>, <code>reports_app</code>, <code>proc_app</code>, <code>colas_app</code>), con AWS Backup.</li>
+            <li>Acceso desde el ambiente al repositorio ECR donde ya está la imagen existente (no se crea una imagen nueva; ver <a href="#fase-2">fase 2</a>).</li>
+            <li>Namespace de Cloud Map para el ambiente (equivalente a <code>forms.local</code>).</li>
+            <li>Roles IAM de ejecución y de tarea, con ECS Exec habilitado solo para los operadores.</li>
+            <li>Credenciales en AWS Secrets Manager (usuario de BD de la aplicación, usuario batch, clave de WebLogic) en lugar de archivos planos.</li>
+            <li>Grupos de logs en CloudWatch para cada servicio.</li>
+          </ul>
+          <h4 class="sub">Criterio de salida</h4>
+          <p>Plan de Certificación aprobado y responsables asignados; infraestructura creada (idealmente con plantillas de infraestructura como código), revisada por seguridad y con acceso a la base de datos de Certificación verificado desde una tarea de prueba.</p>
+        </section>
+
+        <section class="slide-block" id="fase-2">
+          <h3><span class="num">2</span> Imagen, dominio y esquemas RCU</h3>
+          <p>
+            El ambiente de Certificación no se construye desde cero: reutiliza la <strong>misma imagen</strong> y una
+            <strong>copia del mismo dominio</strong> <code>forms_domain</code> validados en la fase de construcción
+            (<a href="../docker/crear_imagen/index.html">Imagen Docker</a> y <a href="../docker/crear-dominio/index.html">Crear dominio</a>).
+            Así se certifica exactamente lo que se construyó y se evita repetir la instalación y la configuración del dominio.
+          </p>
+          <p>
+            Como el dominio copiado depende de sus esquemas de repositorio (RCU), esos esquemas deben trasladarse a una
+            <strong>instancia de base de datos distinta</strong> de la usada en la construcción, y el dominio debe apuntar a ella
+            mediante sus DataSources.
+          </p>
+
+          <h4 class="sub">Imagen</h4>
+          <ul>
+            <li>Usar la imagen existente <code>image_forms_14.1.2</code> del repositorio ECR, referenciada por un tag inmutable o por su digest (la revisión vigente es <code>r3</code>), nunca por <code>latest</code>.</li>
+            <li>No se reconstruye la imagen para Certificación: cualquier diferencia entre ambientes se resuelve por configuración (variables de la tarea y archivos del dominio), no dentro de la imagen.</li>
+          </ul>
+
+          <h4 class="sub">Copia del dominio</h4>
+          <ul>
+            <li>Copiar <code>forms_domain</code> desde el EFS de construcción al EFS de Certificación con los servidores detenidos, para obtener una copia consistente (por ejemplo, con AWS DataSync o una restauración de AWS Backup).</li>
+            <li>Copiar también los directorios de aplicación (<code>apps/forms_app</code>, <code>reports_app</code>, <code>proc_app</code>, <code>colas_app</code>), sin logs ni salidas de la construcción.</li>
+            <li>Ajustar en la copia lo que es propio del ambiente: nombres de Cloud Map de los servidores y máquinas, <code>tnsnames.ora</code> y credenciales.</li>
+          </ul>
+
+          <h4 class="sub">Versionado del dominio en Git (recomendación)</h4>
+          <p>
+            Se recomienda mantener la configuración del dominio compartido en un repositorio Git, con una
+            <strong>rama por cada ambiente desplegado</strong> (construcción, certificación y, más adelante, producción). El dominio
+            validado en la construcción queda como versión base, y cada ambiente nuevo nace como una rama a partir de ella.
+          </p>
+          <p>
+            <strong>Justificación.</strong> Todos los ambientes de esta arquitectura parten del mismo dominio y solo se diferencian
+            en un conjunto acotado de ajustes: conexión a la base de datos, nombres de red, parámetros de Forms y Reports. Si esos
+            ajustes se hacen directamente sobre cada copia, con el tiempo nadie sabe con certeza qué se cambió, cuándo ni por qué, y
+            reconstruir un ambiente o detectar por qué uno se comporta distinto que otro se vuelve una tarea de investigación.
+            Versionar el dominio resuelve esto:
+          </p>
+          <ul>
+            <li><strong>Trazabilidad:</strong> cada cambio requerido y aplicado en un ambiente queda registrado en su rama, con su autor, su fecha y su motivo.</li>
+            <li><strong>Comparación inmediata entre ambientes:</strong> las diferencias entre dos ambientes construidos con esta arquitectura se obtienen comparando sus ramas, sin revisar los servidores uno por uno.</li>
+            <li><strong>Reproducibilidad:</strong> un ambiente se puede reconstruir o recuperar a partir de su rama, y un ambiente nuevo parte de una base conocida.</li>
+            <li><strong>Control de cambios:</strong> las mejoras comunes se aplican una vez en la base y se llevan a todos los ambientes; los ajustes propios de cada uno quedan aislados en su rama.</li>
+            <li><strong>Apoyo al paso a producción:</strong> la rama de Certificación documenta exactamente qué configuración fue certificada por los usuarios.</li>
+          </ul>
+          <div class="callout warn">
+            Se versiona solo la configuración del dominio, no los logs ni los archivos temporales que genera WebLogic en ejecución.
+            Las credenciales no deben quedar en el repositorio; si se incluye algún archivo con claves cifradas del dominio, el
+            repositorio debe ser privado y con acceso restringido.
+          </div>
+
+          <h4 class="sub">Esquemas RCU en la nueva instancia de base de datos</h4>
+          <ul>
+            <li>Exportar los esquemas RCU del dominio (prefijo usado en la construcción: <code>DIST</code>; esquemas <code>DIST_STB</code>, <code>DIST_OPSS</code>, <code>DIST_IAU</code>, <code>DIST_IAU_APPEND</code>, <code>DIST_IAU_VIEWER</code>, <code>DIST_MDS</code>, <code>DIST_WLS</code> y los demás que haya creado RCU) desde la base de datos de construcción con Oracle Data Pump.</li>
+            <li>Importarlos en la instancia de Certificación conservando el mismo prefijo y los mismos nombres de esquema, de modo que el dominio copiado los reconozca sin volver a ejecutar RCU.</li>
+            <li>Verificar en la nueva instancia la versión registrada en <code>SCHEMA_VERSION_REGISTRY</code>, el estado de los usuarios y sus permisos.</li>
+            <li>Definir las claves de los esquemas para el nuevo ambiente y guardarlas en AWS Secrets Manager.</li>
+          </ul>
+
+          <h4 class="sub">Ajuste automático de los DataSources</h4>
+          <p>
+            Los DataSources del dominio (archivos <code>config/jdbc/*-jdbc.xml</code>, más la conexión de OPSS en
+            <code>config/fmwconfig/jps-config.xml</code>) tienen grabados la URL, el usuario y la clave cifrada de la base de datos de
+            construcción. En lugar de editarlos a mano en cada ambiente, se construyen scripts que los ajustan a partir de los
+            parámetros de conexión definidos en la task definition:
+          </p>
+          <div class="tabla"><table>
+            <tr><th>Parámetro de la tarea</th><th>Uso</th></tr>
+            <tr><td><code>DB_HOST</code>, <code>DB_PORT</code>, <code>DB_SERVICE</code></td><td>Arman la URL JDBC (<code>jdbc:oracle:thin:@//host:puerto/servicio</code>) de todos los DataSources.</td></tr>
+            <tr><td><code>RCU_PREFIX</code></td><td>Prefijo de los esquemas RCU (<code>DIST</code>); arma el usuario de cada DataSource: <code>DIST_STB</code>, <code>DIST_OPSS</code>, etc.</td></tr>
+            <tr><td><code>RCU_SCHEMA_PASSWORD</code></td><td>Clave de los esquemas, inyectada desde Secrets Manager; el script la cifra para el dominio antes de escribirla.</td></tr>
+          </table></div>
+          <ul>
+            <li>El script se ejecuta en el arranque del servicio <code>admin</code>, antes de iniciar el AdminServer, y solo cambia los archivos si los valores difieren de los actuales.</li>
+            <li>Cifra las claves con la utilidad de WebLogic (WLST en modo offline o <code>weblogic.security.Encrypt</code>) usando el <code>SerializedSystemIni.dat</code> del dominio.</li>
+            <li>Respalda los archivos antes de modificarlos y registra en el log qué DataSources ajustó, sin mostrar claves.</li>
+            <li>Valida la conexión a la base de datos antes de arrancar; si falla, detiene el arranque con un mensaje claro.</li>
+            <li>El mismo script sirve para cualquier ambiente posterior (por ejemplo, producción): solo cambian los parámetros de la tarea.</li>
+          </ul>
+
+          <h4 class="sub">Servicios ECS</h4>
+          <ul>
+            <li>Task definitions de <code>admin</code>, <code>forms</code>, <code>reports-server</code> y <code>colas</code> con la imagen fijada, los parámetros de conexión, los secretos y los volúmenes EFS del nuevo ambiente.</li>
+            <li>Arranque automático de cada servidor al iniciar su servicio (<code>startWLSForms.sh -keep</code> y equivalentes), con <code>boot.properties</code>.</li>
+            <li>Health checks de los servicios ECS para reemplazar las tareas que fallen.</li>
+          </ul>
+
+          <h4 class="sub">Criterio de salida</h4>
+          <p>
+            Los cuatro servicios arrancan sin intervención manual, los DataSources apuntan a la instancia de Certificación (verificable
+            en la consola de WebLogic) y AdminServer, <code>WLS_FORMS</code> y <code>WLS_REPORTS</code> llegan a RUNNING después de
+            reiniciar las tareas.
+          </p>
+        </section>
+
+        <section class="slide-block" id="fase-3">
+          <h3><span class="num">3</span> Configuración de la aplicación</h3>
+          <p>
+            Lleva al ambiente la configuración documentada en <a href="../app-rector/index.html">Ejecución de Aplicativo RECTOR</a>,
+            como archivos versionados y no como cambios manuales dentro del contenedor.
+          </p>
+          <h4 class="sub">Actividades</h4>
+          <ul>
+            <li><code>tnsnames.ora</code> con el alias de la BD de Certificación.</li>
+            <li><code>formsweb.cfg</code> con el profile <code>prodws</code> y <code>rector.env</code> completo (<code>FORMS_PATH</code>, <code>CLASSPATH</code>, <code>NLS_LANG</code>, <code>NLS_DATE_FORMAT</code>), verificado sin líneas cortadas.</li>
+            <li>Un único <code>NLS_LANG</code> para Forms, Reports y colas, acordado con el DBA según el juego de caracteres de la BD.</li>
+            <li><code>rwserver.conf</code> de <code>WLS_REPORTS</code> con <code>folderAccess</code> sobre <code>reports_app/rep</code>.</li>
+            <li>Tablas de control: fila de <code>CART_CONFIG_BATCH</code> para la máquina del ambiente, Reports Server en <code>CART_COLAS</code>, y los <code>ALTER</code> de <code>CACH_NM_MAQUINA</code> y <code>CAON_NM_MAQUINA</code> a 40 caracteres.</li>
+            <li><code>set_batch_env.sh</code> y <code>PASS_FILE</code> tomando las credenciales desde Secrets Manager.</li>
+          </ul>
+          <h4 class="sub">Criterio de salida</h4>
+          <p>Configuración en el repositorio, aplicada en el ambiente y verificada: <code>frmservlet?config=prodws</code> responde con el JNLP y <code>rwservlet</code> responde <code>getserverinfo</code>.</p>
+        </section>
+
+        <section class="slide-block" id="fase-4">
+          <h3><span class="num">4</span> Despliegue y compilación del código</h3>
+          <p>
+            Compila en el ambiente la versión de RECTOR que corre hoy en producción, contra el esquema de Certificación.
+          </p>
+          <h4 class="sub">Actividades</h4>
+          <ul>
+            <li>Congelar la versión de fuentes (<code>.fmb</code>, <code>.mmb</code>, <code>.pll</code>, <code>.olb</code>, <code>.pc</code>, <code>.rdf</code>) y registrarla en el control de versiones.</li>
+            <li>Excluir los fuentes que no están en producción con <code>move_old_fmb.sh</code> y <code>move_old_proc.sh</code>.</li>
+            <li>Compilar Forms con <code>compile_all_forms.sh</code> y Pro*C con <code>compile_proc_all.sh</code>, analizando <code>resultados.csv</code> y los logs por módulo.</li>
+            <li>Resolver los pendientes conocidos: módulos que dependen del esquema, <code>EJECUTAREP.fmb</code> faltante y referencias rotas en Forms; programas Pro*C con diferencias de esquema o errores de código.</li>
+            <li>Verificar que <code>Rector.fmx</code>, <code>RECTOR.mmx</code> y los menús <code>GIO_*</code> estén en <code>bin/fmx</code> y <code>bin/mnu</code>.</li>
+            <li>Copiar los reportes <code>.rdf</code> a <code>reports_app/src</code> y validar una muestra con <code>rwservlet</code>.</li>
+          </ul>
+          <h4 class="sub">Criterio de salida</h4>
+          <p>Todos los módulos del alcance compilados, o excluidos con una justificación aprobada por el área responsable.</p>
+        </section>
+
+        <section class="slide-block" id="fase-5">
+          <h3><span class="num">5</span> Procesos batch y reportes</h3>
+          <p>
+            Automatiza lo que hoy se ejecuta manualmente con <code>CARC00100</code> y define cómo se entregan los reportes y las
+            impresiones.
+          </p>
+          <h4 class="sub">Actividades</h4>
+          <ul>
+            <li>Arranque automático de una instancia de <code>CARC00100</code> por cola, como proceso supervisado del servicio que ejecute las colas.</li>
+            <li>Adaptar o reemplazar los scripts <code>COLA_A</code> … <code>COLA_Z</code> y <code>COLA.env</code> de la versión 12c (rutas, máquina y <code>NLS_*</code>).</li>
+            <li>Decidir la invocación de Reports desde otros contenedores: <code>rwclient</code> dentro de <code>reports-server</code> o <code>rwservlet</code> por HTTP.</li>
+            <li>Definir la impresión: mantener <code>LP.sh</code> desactivado o integrarlo con las impresoras o el servicio de impresión del banco.</li>
+            <li>Rotación y retención de logs (<code>colas_app/log</code>, <code>reports_app/log</code>) y de las salidas en <code>reports_app/rep</code>.</li>
+          </ul>
+          <h4 class="sub">Criterio de salida</h4>
+          <p>Las colas procesan órdenes sin intervención, los reportes se generan desde las colas y desde Forms (con el acceso interno del equipo técnico), y las salidas quedan registradas en <code>CART_IMPRESIONES</code>.</p>
+        </section>
+
+        <section class="slide-block" id="fase-6">
+          <h3><span class="num">6</span> Acceso de usuarios</h3>
+          <p>
+            Hoy se accede por la IP de la tarea, que cambia en cada despliegue y queda grabada en el JNLP. En Certificación el acceso
+            debe ser por un nombre fijo y cifrado.
+          </p>
+          <h4 class="sub">Actividades</h4>
+          <ul>
+            <li>Publicar <code>WLS_FORMS</code> detrás de un Http Server (NGINX, Apache o Tomcat), un Application Load Balancer o Amazon CloudFront, sin usar OHS.</li>
+            <li>HTTPS con certificado de AWS Certificate Manager y un nombre DNS fijo (por ejemplo <code>rector-cert.&lt;dominio&gt;</code>).</li>
+            <li>Sesiones persistentes (stickiness) hacia <code>WLS_FORMS</code> y timeouts compatibles con sesiones Forms largas.</li>
+            <li>Configurar el frontend de WebLogic (host y puerto públicos) para que el <code>codebase</code> del JNLP use el nombre DNS y no la IP de la tarea.</li>
+            <li>Estandarizar el cliente: JRE 8 x64 con Java Web Start (Oracle JRE 8 u OpenWebStart) en los equipos de prueba.</li>
+          </ul>
+          <h4 class="sub">Criterio de salida</h4>
+          <p>Los usuarios de prueba abren RECTOR con la URL de Certificación, se conectan y navegan el menú principal, y el acceso se mantiene tras redesplegar el servicio <code>forms</code>.</p>
+        </section>
+
+        <section class="slide-block" id="fase-7">
+          <h3><span class="num">7</span> Pruebas</h3>
+          <div class="tabla"><table>
+            <tr><th>Tipo</th><th>Alcance</th><th>Responsable</th></tr>
+            <tr><td>Humo</td><td>Arranque de servicios, login, menú principal, una forma por módulo, un reporte y una orden de cola</td><td>Desarrollo / infraestructura</td></tr>
+            <tr><td>Funcionales</td><td>Casos de negocio por área (Cartera, Caja, Siniestros, Contabilidad, Reaseguro, etc.), comparando contra producción</td><td>Áreas usuarias</td></tr>
+            <tr><td>Integración</td><td>Interfaces con otros sistemas, archivos de entrada y salida, procesos batch encadenados</td><td>Desarrollo / áreas usuarias</td></tr>
+            <tr><td>Rendimiento</td><td>Sesiones concurrentes esperadas, tiempos de respuesta, consumo de CPU y memoria de las tareas Fargate</td><td>Infraestructura</td></tr>
+            <tr><td>Seguridad</td><td>Puertos expuestos, cifrado, gestión de credenciales, accesos a ECS Exec</td><td>Seguridad</td></tr>
+            <tr><td>Continuidad</td><td>Reinicio y reemplazo de tareas, recuperación desde respaldo de EFS</td><td>Infraestructura</td></tr>
+          </table></div>
+          <h4 class="sub">Criterio de salida</h4>
+          <p>Casos de prueba ejecutados, defectos críticos y altos cerrados, y los demás con plan de corrección acordado.</p>
+        </section>
+
+        <section class="slide-block" id="fase-8">
+          <h3><span class="num">8</span> Operación y certificación</h3>
+          <h4 class="sub">Actividades</h4>
+          <ul>
+            <li>Monitoreo: métricas y alarmas de CloudWatch (estado de servicios, CPU, memoria, errores en logs de WebLogic y de las colas).</li>
+            <li>Respaldos: AWS Backup de EFS y política de respaldo de la BD de Certificación.</li>
+            <li>Runbooks: arranque y parada, recompilación de módulos, reinicio de colas, rotación de credenciales y solución de errores frecuentes.</li>
+            <li>Acta de certificación firmada por las áreas usuarias.</li>
+            <li>Plan de paso a producción: lecciones aprendidas, dimensionamiento, ventana de migración y plan de reversión.</li>
+          </ul>
+          <h4 class="sub">Criterio de salida</h4>
+          <p>Ambiente operado por el equipo de soporte con sus runbooks y RECTOR certificado por los usuarios.</p>
+        </section>
+
+        <section class="slide-block anexo" id="brechas">
+          <h3><span class="num anexo">A</span> Brechas detectadas en la construcción</h3>
+          <p>
+            Puntos encontrados al construir el ambiente actual que deben cerrarse en Certificación, con la fase donde se atienden.
+          </p>
+          <div class="tabla"><table>
+            <tr><th>Brecha</th><th>Situación actual</th><th>Fase</th></tr>
+            <tr><td>Esquema de BD</td><td><code>BANESCO_DEV</code> difiere de producción: 7 formas y varios programas Pro*C no compilan por columnas u objetos faltantes</td><td><a href="#fase-1">1</a>, <a href="#fase-4">4</a></td></tr>
+            <tr><td>Módulos Forms pendientes</td><td>19 pendientes (<a href="../app-rector/index.html#paso-1-1-3">1.1.3</a>): esquema, <code>EJECUTAREP.fmb</code> faltante y referencias rotas</td><td><a href="#fase-4">4</a></td></tr>
+            <tr><td>Programas Pro*C pendientes</td><td>5 pendientes (<a href="../app-rector/index.html#paso-2-1-3">2.1.3</a>)</td><td><a href="#fase-4">4</a></td></tr>
+            <tr><td>Compilados incompletos en el EFS</td><td><code>bin/fmx</code> quedó con parte de los <code>.fmx</code> y sin <code>Rector.fmx</code> (<code>FRM-40010</code>)</td><td><a href="#fase-4">4</a></td></tr>
+            <tr><td><code>rector.env</code> cortado</td><td><code>FORMS_PATH</code> y <code>CLASSPATH</code> truncados en el dominio</td><td><a href="#fase-3">3</a></td></tr>
+            <tr><td>Puertos expuestos</td><td>El security group de <code>forms</code> admite <code>7001</code>, <code>9001</code> y <code>9012</code> desde <code>0.0.0.0/0</code></td><td><a href="#fase-1">1</a></td></tr>
+            <tr><td>Acceso por IP de la tarea</td><td>La IP cambia en cada despliegue y el JNLP la lleva en su <code>codebase</code>; el acceso es HTTP sin cifrar</td><td><a href="#fase-6">6</a></td></tr>
+            <tr><td>Credenciales en texto plano</td><td><code>USUARIOBATCH.lis</code>, usuario por defecto en los scripts de compilación y <code>userid</code> en la URL de <code>rwservlet</code></td><td><a href="#fase-1">1</a>, <a href="#fase-3">3</a></td></tr>
+            <tr><td>Imagen sin fijar</td><td>Revisiones de task definition con el tag <code>latest</code> (sin <code>libaio</code>) y <code>report.json</code> con JSON inválido</td><td><a href="#fase-1">1</a>, <a href="#fase-2">2</a></td></tr>
+            <tr><td><code>NLS_LANG</code> distinto</td><td><code>rector.env</code> usa <code>WE8ISO8859P1</code> y <code>COLA.env</code> de la versión 12c <code>WE8ISO8859P15</code></td><td><a href="#fase-3">3</a></td></tr>
+            <tr><td>Colas manuales</td><td><code>CARC00100</code> se lanza a mano desde <code>reports-server</code>; los scripts <code>COLA_*</code> tienen rutas de la versión 12c</td><td><a href="#fase-5">5</a></td></tr>
+            <tr><td>Impresión</td><td>Impresión inmediata desactivada con <code>LP.sh</code></td><td><a href="#fase-5">5</a></td></tr>
+            <tr><td>Reports entre contenedores</td><td><code>rwclient</code> no descubre el Reports Server fuera de <code>reports-server</code> (multicast); la alternativa es <code>rwservlet</code> por HTTP</td><td><a href="#fase-5">5</a></td></tr>
+          </table></div>
+        </section>
+
+      </div>
+    </div>
+
+    <p class="doc-footer">
+      Roadmap de implementación en Certificación. Ver también <a href="../app-rector/index.html">Ejecución de Aplicativo RECTOR</a>.
+    </p>
+
+    <p style="margin: 1rem 0 2rem; text-align: center;">
+      <a class="back-link" href="../index.html">← Regresar a la documentación del proyecto</a>
+    </p>
+  </div>
+
+  <script>
+    (function () {
+      // deps: fases que deben terminar antes de iniciar la fase
+      var fases = [
+        { id: 1, nombre: "1 · Infraestructura AWS",    deps: [] },
+        { id: 2, nombre: "2 · Imagen, dominio y RCU",  deps: [1] },
+        { id: 3, nombre: "3 · Configuración",          deps: [2] },
+        { id: 4, nombre: "4 · Código",                 deps: [] },
+        { id: 5, nombre: "5 · Batch y reportes",       deps: [3, 4] },
+        { id: 6, nombre: "6 · Acceso de usuarios",     deps: [5] },
+        { id: 7, nombre: "7 · Pruebas",                deps: [6] },
+        { id: 8, nombre: "8 · Operación y certificación", deps: [7], final: true }
+      ];
+      var KEY = "roadmap-cert-semanas-v2";
+      var guardado = {};
+      try { guardado = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+
+      var body = document.getElementById("gantt-body");
+      var scale = document.getElementById("gantt-scale");
+      var total = document.getElementById("gantt-total");
+
+      fases.forEach(function (f) {
+        var row = document.createElement("div");
+        row.className = "gantt-row";
+        row.innerHTML =
+          '<span class="g-fase"><a href="#fase-' + f.id + '">' + f.nombre + '</a></span>' +
+          '<span class="g-dur"><input type="number" min="0" step="0.5" placeholder="—" aria-label="Semanas de la fase ' + f.id + '"></span>' +
+          '<span class="g-dep">' + (f.deps.length ? "Fase " + f.deps.join(" y ") : "Inicio") + '</span>' +
+          '<span class="g-track"></span>';
+        f.input = row.querySelector("input");
+        f.track = row.querySelector(".g-track");
+        if (guardado[f.id]) f.input.value = guardado[f.id];
+        f.input.addEventListener("input", dibujar);
+        body.appendChild(row);
+      });
+
+      function dibujar() {
+        var fin = {}, datos = {}, max = 0, asignadas = true;
+        fases.forEach(function (f) {
+          var v = parseFloat(f.input.value);
+          var tbd = !(v > 0);
+          if (tbd) asignadas = false;
+          var dur = tbd ? 1 : v;
+          var ini = f.deps.reduce(function (m, d) { return Math.max(m, fin[d] || 0); }, 0);
+          fin[f.id] = ini + dur;
+          datos[f.id] = { ini: ini, dur: dur, tbd: tbd };
+          max = Math.max(max, fin[f.id]);
+          if (!tbd) guardado[f.id] = v; else delete guardado[f.id];
+        });
+        try { localStorage.setItem(KEY, JSON.stringify(guardado)); } catch (e) {}
+
+        var semanas = Math.max(8, Math.ceil(max));
+        var paso = semanas > 26 ? 4 : semanas > 12 ? 2 : 1;
+        scale.innerHTML = "";
+        for (var s = 0; s < semanas; s += paso) {
+          var t = document.createElement("span");
+          t.className = "tick";
+          t.style.left = (s / semanas * 100) + "%";
+          t.textContent = "S" + (s + 1);
+          scale.appendChild(t);
+        }
+
+        fases.forEach(function (f) {
+          var d = datos[f.id];
+          var html = "";
+          for (var s = 0; s < semanas; s += paso) {
+            html += '<span class="grid" style="left:' + (s / semanas * 100) + '%"></span>';
+          }
+          var etiqueta = d.tbd ? "por definir" : d.dur + " sem";
+          html += '<span class="bar' + (d.tbd ? " tbd" : f.final ? " final" : "") + '" style="left:' +
+            (d.ini / semanas * 100) + '%;width:' + (d.dur / semanas * 100) + '%" title="Semana ' +
+            (d.ini + 1) + ' a ' + (d.ini + d.dur) + '">' + etiqueta + '</span>';
+          f.track.innerHTML = html;
+        });
+
+        total.textContent = asignadas
+          ? max + (max === 1 ? " semana" : " semanas")
+          : "faltan fases por asignar (" + max + " semanas, contando 1 por cada fase sin asignar)";
+      }
+
+      dibujar();
+    })();
+  </script>
+</body>
+</html>

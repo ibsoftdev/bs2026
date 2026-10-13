@@ -19,6 +19,7 @@
       --c-admin: #2e7d32;
       --c-forms: #ef6c00;
       --c-reports: #00838f;
+      --c-colas: #6d4c41;
       --c-ohs: #0d47a1;
     }
 
@@ -321,7 +322,7 @@
     }
     .arq-containers {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 0.75rem;
       align-items: stretch;
     }
@@ -339,6 +340,7 @@
     }
     .ctr.forms { border-top-color: var(--c-forms); }
     .ctr.reports { border-top-color: var(--c-reports); }
+    .ctr.colas { border-top-color: var(--c-colas); border-style: dashed; border-top-style: solid; }
     .ctr-head {
       display: flex;
       align-items: center;
@@ -357,6 +359,7 @@
     }
     .ctr.forms .ctr-head .ico { background: #fff3e0; color: var(--c-forms); }
     .ctr.reports .ctr-head .ico { background: #e0f2f1; color: var(--c-reports); }
+    .ctr.colas .ctr-head .ico { background: #efebe9; color: var(--c-colas); }
     .ctr-head .ico svg { width: 20px; height: 20px; fill: currentColor; }
     .ctr-head .t {
       font-family: var(--font-display);
@@ -425,7 +428,7 @@
     }
     .arq-mounts {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 0.75rem;
     }
     .mount {
@@ -531,7 +534,7 @@
     .dom-path .to { color: #6a1b9a; font-weight: 700; }
     .dom-parts {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 0.5rem;
       margin-top: 0.65rem;
     }
@@ -549,6 +552,7 @@
     }
     .dom-parts .part.forms { border-left-color: var(--c-forms); }
     .dom-parts .part.reports { border-left-color: var(--c-reports); }
+    .dom-parts .part.colas { border-left-color: var(--c-colas); }
     .dom-parts .part code { font-size: 0.78em; font-weight: 500; }
     .slide-block .arq-domain .dom-note,
     .dom-note {
@@ -665,7 +669,7 @@
     /* Especificaciones por contenedor */
     .specs {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 0.75rem;
       margin: 1rem 0 0.25rem;
     }
@@ -679,6 +683,7 @@
     }
     .spec.forms { border-top-color: var(--c-forms); }
     .spec.reports { border-top-color: var(--c-reports); }
+    .spec.colas { border-top-color: var(--c-colas); }
     .spec h4 {
       font-family: var(--font-display);
       font-size: 1.02rem;
@@ -721,6 +726,16 @@
       padding: 0.4rem 0.9rem;
       border-top: 1px solid #e3f2fd;
       border-bottom: 1px solid #e3f2fd;
+    }
+    .spec-note {
+      margin: 1rem 0 0;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: var(--primary-dark);
+      background: #fff8e1;
+      border-left: 4px solid #f9a825;
+      border-radius: 6px;
     }
 
     .badge {
@@ -1028,6 +1043,10 @@
       .arq-mounts { display: none; }
       .dom-parts { grid-template-columns: 1fr; }
       .specs { grid-template-columns: 1fr; }
+    }
+    @media (min-width: 821px) and (max-width: 1100px) {
+      .arq-containers, .dom-parts, .specs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .arq-mounts { display: none; }
       .capacidades-grid { grid-template-columns: 1fr; }
       .tabla { overflow-x: auto; }
     }
@@ -1276,16 +1295,22 @@
       <div class="card-body">
 
         <section class="slide-block" id="arquitectura">
-          <h3><span class="num">1</span> Arquitectura del sistema, Un dominio, tres contenedores — en Docker y en AWS</h3>
+          <h3><span class="num">1</span> Arquitectura del sistema, Un dominio, cuatro contenedores — en Docker y en AWS</h3>
           <p>
-            Tres contenedores construidos a partir de la misma imagen
+            Cuatro contenedores construidos a partir de la misma imagen
             (<code>image_forms_14.1.2</code>) comparten un único dominio WebLogic. El contenedor
             de administración aloja el <strong>AdminServer</strong>; los Managed Servers de Forms
             y Reports se ejecutan en contenedores propios, cada uno en su máquina lógica con su
             Node Manager.
           </p>
+          <p>
+            El cuarto contenedor, <strong>colas</strong>, no forma parte de la infraestructura WebLogic: es un contenedor propio
+            del aplicativo, dedicado a ejecutar las colas de procesos (programas Pro*C como <code>CARC00100</code>). No aloja
+            servidores ni Node Manager; monta el mismo dominio para tener acceso a <code>WLS_REPORTS</code> y generar los
+            reportes en los directorios de salida compartidos.
+          </p>
 
-          <figure class="arq" role="img" aria-label="Diagrama: tres contenedores admin, forms y reports en la red weblogic-network con volúmenes compartidos">
+          <figure class="arq" role="img" aria-label="Diagrama: contenedores admin, forms, reports y colas en la red weblogic-network con volúmenes compartidos">
             <div class="arq-users">
               <span class="pill">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h6v2H8v2h8v-2h-2v-2h6c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 13H4V5h16v11z"/></svg>
@@ -1354,9 +1379,27 @@
                   </div>
                   <div class="ctr-machine"><span>ReportsMachine</span></div>
                 </div>
+
+                <!-- colas -->
+                <div class="ctr colas">
+                  <div class="ctr-head">
+                    <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg></span>
+                    <span class="t">Contenedor colas<span class="h">colas-server</span></span>
+                  </div>
+                  <div class="comp">
+                    <div class="n">Colas de procesos <em>CARC00100 · Pro*C</em></div>
+                    <div class="ports"><span class="port">sin puertos</span></div>
+                  </div>
+                  <div class="comp nm">
+                    <div class="n">Cliente Reports <em>rwclient / rwservlet → WLS_REPORTS</em></div>
+                    <div class="ports"><span class="port">salidas en reports_app/rep</span></div>
+                  </div>
+                  <div class="ctr-machine"><span>Aplicativo · no WebLogic</span></div>
+                </div>
               </div>
 
               <div class="arq-mounts" aria-hidden="true">
+                <div class="mount"><span>monta el dominio</span></div>
                 <div class="mount"><span>monta el dominio</span></div>
                 <div class="mount"><span>monta el dominio</span></div>
                 <div class="mount"><span>monta el dominio</span></div>
@@ -1369,7 +1412,7 @@
                     <div class="dom-kicker">Dominio WebLogic compartido</div>
                     <div class="dom-name">forms_domain</div>
                   </div>
-                  <span class="dom-badge">1 dominio · 3 contenedores</span>
+                  <span class="dom-badge">1 dominio · 4 contenedores</span>
                 </div>
                 <div class="dom-path">
                   <code>./domains</code> <span class="to">→</span> <code>/u01/oracle/user_projects/domains/forms_domain</code>
@@ -1378,18 +1421,20 @@
                   <span class="part admin">AdminServer · <code>nodemanager/</code></span>
                   <span class="part forms">WLS_FORMS · <code>nodemanager_forms/</code></span>
                   <span class="part reports">WLS_REPORTS · <code>nodemanager_reports/</code></span>
+                  <span class="part colas">Colas · <code>reports/bin</code>, <code>tnsnames.ora</code></span>
                 </div>
                 <p class="dom-note">
-                  Los tres contenedores leen y escriben sobre la <strong>misma</strong> configuración
+                  Los contenedores de WebLogic leen y escriben sobre la <strong>misma</strong> configuración
                   (<code>config.xml</code>, seguridad, servidores y máquinas): lo que se cambia desde
-                  el AdminServer queda visible de inmediato para Forms y Reports.
+                  el AdminServer queda visible de inmediato para Forms y Reports. El contenedor colas solo usa del dominio
+                  el cliente de Reports (<code>reports/bin/rwclient.sh</code>) y el <code>tnsnames.ora</code>.
                 </p>
               </div>
 
               <div class="arq-volumes">
                 <span class="lbl">También compartidos</span>
                 <code>./app</code> aplicaciones y datos
-                <code>./scripts/{admin,forms,reports}</code> scripts por contenedor
+                <code>./scripts/{admin,forms,reports,colas}</code> scripts por contenedor
               </div>
             </div>
 
@@ -1397,15 +1442,17 @@
               <span><i style="background: var(--c-admin);"></i> Administración</span>
               <span><i style="background: var(--c-forms);"></i> Forms</span>
               <span><i style="background: var(--c-reports);"></i> Reports</span>
+              <span><i style="background: var(--c-colas);"></i> Colas (aplicativo)</span>
               <span><i style="background: #6a1b9a;"></i> Dominio compartido</span>
             </div>
-            <figcaption class="caption">Un único dominio WebLogic (<code>forms_domain</code>) compartido por los contenedores admin, forms y reports sobre la red <code>weblogic-network</code></figcaption>
+            <figcaption class="caption">Un único dominio WebLogic (<code>forms_domain</code>) compartido por los contenedores admin, forms y reports, y montado por el contenedor colas del aplicativo, sobre la red <code>weblogic-network</code></figcaption>
           </figure>
 
           <h4 class="sub">Especificaciones técnicas</h4>
           <p>
             Ficha de cada contenedor: identidad en la red, puertos, máquina lógica del dominio
-            y modo de arranque. Los tres usan la imagen <code>image_forms_14.1.2</code>.
+            e inicio. Los cuatro usan la imagen <code>image_forms_14.1.2</code> y cada uno arranca automáticamente al
+            iniciar su servicio.
           </p>
 
           <div class="specs">
@@ -1418,15 +1465,13 @@
                 <div class="row"><dt>Node Manager</dt><dd>5556</dd></div>
                 <div class="row"><dt>VNC (config.)</dt><dd>5902</dd></div>
                 <div class="row"><dt>Máquina</dt><dd>AdminServerMachine</dd></div>
-                <div class="row"><dt>Modo</dt><dd><span class="badge badge-ok">Persistente</span></dd></div>
+                <div class="row"><dt>Inicio</dt><dd><span class="badge badge-ok">Automático</span></dd></div>
               </dl>
-              <div class="sep">OHS · ohs1</div>
+              <div class="sep">Http Server</div>
               <dl>
-                <div class="row"><dt>Tipo</dt><dd>System Component</dd></div>
-                <div class="row"><dt>HTTP</dt><dd>7777</dd></div>
-                <div class="row"><dt>HTTPS</dt><dd>4443</dd></div>
-                <div class="row"><dt>Máquina</dt><dd>AdminServerMachine</dd></div>
-                <div class="row"><dt>Inicio</dt><dd><span class="badge badge-manual">Manual</span></dd></div>
+                <div class="row"><dt>Opciones</dt><dd>NGINX, Apache, Tomcat</dd></div>
+                <div class="row"><dt>Función</dt><dd>Proxy inverso</dd></div>
+                <div class="row"><dt>Destinos</dt><dd>WLS_FORMS, WLS_REPORTS</dd></div>
               </dl>
             </div>
 
@@ -1440,7 +1485,7 @@
                 <div class="row"><dt>Node Manager</dt><dd>5556 (host 5557)</dd></div>
                 <div class="row"><dt>Máquina</dt><dd>FormsMachine</dd></div>
                 <div class="row"><dt>Cluster</dt><dd>cluster_forms</dd></div>
-                <div class="row"><dt>Modo</dt><dd><span class="badge badge-manual">Manual start</span></dd></div>
+                <div class="row"><dt>Inicio</dt><dd><span class="badge badge-ok">Automático</span></dd></div>
               </dl>
             </div>
 
@@ -1454,9 +1499,30 @@
                 <div class="row"><dt>Node Manager</dt><dd>5556 (host 5558)</dd></div>
                 <div class="row"><dt>Máquina</dt><dd>ReportsMachine</dd></div>
                 <div class="row"><dt>Cluster</dt><dd>cluster_reports</dd></div>
-                <div class="row"><dt>Modo</dt><dd><span class="badge badge-manual">Manual start</span></dd></div>
+                <div class="row"><dt>Inicio</dt><dd><span class="badge badge-ok">Automático</span></dd></div>
               </dl>
             </div>
+
+            <div class="spec colas">
+              <h4>Colas de procesos</h4>
+              <dl>
+                <div class="row"><dt>Contenedor</dt><dd><code>colas-server</code></dd></div>
+                <div class="row"><dt>Tipo</dt><dd>Aplicativo</dd></div>
+                <div class="row"><dt>Programas</dt><dd>Pro*C (<code>CARC00100</code>)</dd></div>
+                <div class="row"><dt>Puertos</dt><dd>Ninguno</dd></div>
+                <div class="row"><dt>Reports</dt><dd>WLS_REPORTS</dd></div>
+                <div class="row"><dt>Salidas</dt><dd><code>reports_app/rep</code></dd></div>
+                <div class="row"><dt>Máquina</dt><dd>No aplica</dd></div>
+                <div class="row"><dt>Inicio</dt><dd><span class="badge badge-ok">Automático</span></dd></div>
+              </dl>
+            </div>
+          </div>
+
+          <div class="spec-note">
+            <strong>Nota sobre el Http Server:</strong> no se recomienda usar Oracle HTTP Server (OHS). Su instalación como
+            componente del dominio, su configuración y su mantenimiento son complejos, y su función (proxy inverso hacia
+            <code>WLS_FORMS</code> y <code>WLS_REPORTS</code>) la cubre fácilmente un Http Server estándar como NGINX, Apache
+            o Tomcat, o incluso un servicio nativo de AWS como Amazon CloudFront.
           </div>
 
           <div class="capacidades-label">Componentes clave</div>
@@ -1519,7 +1585,8 @@
           <h3><span class="num">3</span> Fases de Construcción y Despliegue</h3>
           <p>
             Guías en el orden recomendado: primero la imagen y el dominio en Docker; luego
-            el despliegue en ECS Fargate (AdminServer, Forms y Reports) y, por último, la compilación de las aplicaciones.
+            el despliegue en ECS Fargate (AdminServer, Forms y Reports), la compilación de las aplicaciones y, por último, el
+            roadmap para implementar RECTOR en un ambiente de Certificación.
           </p>
 
           <div class="path-flow" aria-hidden="true">
@@ -1528,7 +1595,8 @@
             <span class="chip aws">ECS Admin</span><span class="sep">→</span>
             <span class="chip aws">ECS Forms</span><span class="sep">→</span>
             <span class="chip aws">ECS Reports</span><span class="sep">→</span>
-            <span class="chip aws">Compilación</span>
+            <span class="chip aws">Compilación</span><span class="sep">→</span>
+            <span class="chip aws">Roadmap Certificación</span>
           </div>
 
           <div class="doc-map">
@@ -1588,6 +1656,16 @@
                 <div class="kicker">AWS ECS · Fargate</div>
                 <h4>Ejecución de Aplicativo RECTOR</h4>
                 <p>Compila los módulos Forms (<code>.fmb</code>, <code>.pll</code>, <code>.mmb</code>) con <code>frmcmp</code> y los programas Pro*C con <code>proc</code> y <code>gcc</code> en el contenedor <code>forms-server</code>, usando las variables de la task definition (<code>FORMS_PATH</code>, <code>FRMCMP</code>, <code>PROC</code>, <code>PCSCFG</code>).</p>
+              </div>
+              <span class="go">Abrir →</span>
+            </a>
+
+            <a class="doc-card aws" href="roadmap/index.html">
+              <span class="phase">7</span>
+              <div class="meta">
+                <div class="kicker">Roadmap · Certificación</div>
+                <h4>Implementación de RECTOR en Certificación</h4>
+                <p>Fases para llevar RECTOR a un ambiente de Certificación: infraestructura AWS, dominio, configuración, código, batch y reportes, acceso de usuarios, pruebas y certificación, con las brechas detectadas a cerrar.</p>
               </div>
               <span class="go">Abrir →</span>
             </a>

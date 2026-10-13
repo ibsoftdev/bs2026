@@ -1435,7 +1435,7 @@
 └── log/    logs de ejecución del script de compilación</pre>
       <div class="tabla"><table>
         <tr><th>Directorio</th><th>Contenido</th></tr>
-        <tr><td><code>compile_all_forms.sh</code></td><td>Script que compila todos los módulos: <code>src/rector/*.fmb</code> → <code>bin/fmx</code> y <code>src/menues/*.mmb</code> → <code>bin/mnu</code>. Deja sus logs en <code>log/compile_all</code>.</td></tr>
+        <tr><td><code>compile_all_forms.sh</code></td><td>Script que compila todos los módulos: <code>src/rector/*.fmb</code> → <code>bin/fmx</code> y <code>src/menues/*.mmb</code> → <code>bin/mnu</code>. Muestra el avance <code>[i/N]</code> de cada módulo y deja los logs de cada ejecución en <code>log/compile_all/&lt;AAAAMMDD_HHMMSS&gt;/</code>: el resumen, un <code>.log</code> y un <code>.err</code> por módulo, y <code>resultados.csv</code> con una línea por módulo (<code>n;total;tipo;modulo;rc;resultado;fuente</code>).</td></tr>
         <tr><td><code>compile_forms_list.sh</code></td><td>Script que compila solo los módulos indicados en un archivo <code>.lis</code> (por defecto <code>formas.lis</code>; las listas por grupo están en <code>listas/</code>). Deja sus logs en <code>log/compile_list</code>.</td></tr>
         <tr><td><code>src</code></td><td>Fuentes a compilar: formas <code>.fmb</code> en <code>src/rector</code> (≈2.290) y menús <code>.mmb</code> en <code>src/menues</code> (25).</td></tr>
         <tr><td><code>lib</code></td><td>Librerías que referencian los <code>.fmb</code> al compilar (<code>.pll</code>, <code>.olb</code>).</td></tr>
@@ -1496,44 +1496,244 @@ aws ecs execute-command --cluster forms_report --task dba0a9d75d77475d8a3ca34c79
 
       <h5 class="sub" id="paso-1-1-3">1.1.3 · Resultado de la compilación (referencia)</h5>
       <p>
-        Estado final de cada módulo según su compilación más reciente en <code>forms-server</code>: compilación completa del
-        10/09/2026 (<code>compile_all_forms.sh</code>), recompilación de los fallidos (<code>formas.lis</code>) el 02/10/2026 y
-        recompilación de los grupos 1 a 3 el 05/10/2026. Logs en <code>forms_app/log/log_aws_*</code>; no se toma en cuenta
-        <code>bin/fmx</code> de la versión 12c, que solo sirvió de referencia.
+        Estado final de los módulos que quedan en <code>src</code> después de apartar los que no están en uso (punto
+        <a href="#paso-1-1-2">1.1.2</a>), según su compilación más reciente en <code>forms-server</code>: compilación completa del
+        10/09/2026 (<code>compile_all_forms.sh</code>), recompilaciones del 02/10 y 05/10/2026, y recompilación de
+        <code>formas.lis</code> (150 módulos pendientes o con error) el 13/10/2026. Logs en <code>forms_app/log/log_aws_*</code> y
+        <code>forms_app/log/compile_list_13102026</code>.
       </p>
       <div class="tabla"><table>
         <tr><th>Estado final</th><th>Módulos</th></tr>
-        <tr><td>Compilados (2.003 sin avisos y 121 con avisos)</td><td>2.124</td></tr>
-        <tr><td>Descartados: fuentes guardados con Forms 5.0 (<code>FRM-18130</code>)</td><td>154</td></tr>
-        <tr><td>Pendientes</td><td>36</td></tr>
-        <tr><td><strong>Total</strong> (2.289 formas de <code>src/rector</code> y 25 menús)</td><td><strong>2.314</strong></td></tr>
+        <tr><td>Compilados (2.063 formas y 13 menús)</td><td>2.076</td></tr>
+        <tr><td>Pendientes</td><td>19</td></tr>
+        <tr><td><strong>Total</strong> (2.082 formas de <code>src/rector</code> y 13 menús de <code>src/menues</code>)</td><td><strong>2.095</strong></td></tr>
       </table></div>
-      <p>Los 36 pendientes, agrupados por causa:</p>
+      <p>
+        En la recompilación del 13/10 compilaron 131 de los 150 módulos de <code>formas.lis</code> (15 sin avisos, entre ellos los
+        13 menús, y 116 con avisos). Los 19 pendientes, agrupados por causa:
+      </p>
       <div class="tabla"><table>
-        <tr><th>Grupo</th><th>Causa</th><th>Módulos</th><th>¿Genera <code>.fmx</code>?</th><th>Qué hay que hacer</th><th>Dónde se corrige</th><th>Lista</th></tr>
-        <tr><td>1</td><td>El fuente no coincide con el esquema de <code>BANESCO_DEV</code> (columnas, firmas, <code>INSERT</code>/<code>FETCH</code>, objetos o permisos)</td><td>18</td><td>No</td><td>Corregir los objetos en la base o compilar con el usuario dueño. Solo <code>CADO_CARP_CD_RAMO</code> afecta a 6</td><td>Base de datos</td><td><code>esquema_bd.lis</code></td></tr>
-        <tr><td>2</td><td>Falta <code>EJECUTAREP.fmb</code> (objetos <code>EJEREP</code> y <code>REPORTE</code>)</td><td>7</td><td>Sí, incompleto</td><td>Conseguir <code>EJECUTAREP.fmb</code> y copiarlo a <code>src/rector</code></td><td>Fuentes</td><td><code>frm18108_incompletos.lis</code></td></tr>
-        <tr><td>3</td><td>Referencias a módulos de prueba, a una ruta de Windows o a una clase de propiedades dañada</td><td>5</td><td>Sí, incompleto</td><td>Apuntar la referencia al módulo real</td><td>Forms Builder</td><td><code>frm18108_incompletos.lis</code></td></tr>
-        <tr><td>4</td><td>Uso de <code>RUN_PRODUCT</code></td><td>5</td><td>No</td><td>Reemplazarlo por <code>RUN_REPORT_OBJECT</code> o <code>WEB.SHOW_DOCUMENT</code>. 2 de ellos dependen además de <code>EJECUTAREP.fmb</code></td><td>Forms Builder</td><td><code>run_product.lis</code></td></tr>
-        <tr><td>5</td><td><code>CREF00040X (1).fmb</code>, saltado por el espacio en el nombre</td><td>1</td><td>No compilado</td><td>Decidir si es el vigente: renombrarlo y compilarlo, o descartarlo</td><td>Fuentes</td><td>—</td></tr>
+        <tr><th>Grupo</th><th>Causa</th><th>Módulos</th><th>Qué hay que hacer</th><th>Dónde se corrige</th></tr>
+        <tr><td>1</td><td>El fuente no coincide con el esquema de <code>BANESCO_DEV</code>: columna <code>CADO_CARP_CD_RAMO</code> inexistente en <code>CART_DOCUMENTOS</code> (6) y <code>CJDP_FE_TERMINO</code> no reconocida como columna (1)</td><td>7</td><td>Agregar las columnas en la base o compilar contra un esquema que las tenga</td><td>Base de datos</td></tr>
+        <tr><td>2</td><td><code>FRM-18108</code>: falta <code>EJECUTAREP.fmb</code> (objetos <code>EJEREP</code> y <code>REPORTE</code>)</td><td>7</td><td>Conseguir <code>EJECUTAREP.fmb</code> y copiarlo a <code>src/rector</code></td><td>Fuentes</td></tr>
+        <tr><td>3</td><td><code>FRM-18108</code>: referencias a una ruta de Windows (<code>X:\Bibliotecas\OBJL00010.olb</code>), a módulos de prueba (<code>CARF64322_9.fmb</code>, <code>Nueva_Prueba1.fmb</code>) o a una clase de propiedades dañada (<code>CLASS_ITEM</code>)</td><td>5</td><td>Apuntar la referencia al módulo real</td><td>Forms Builder</td></tr>
       </table></div>
       <p>Módulos de cada grupo:</p>
       <div class="tabla"><table>
         <tr><th>Grupo</th><th>Módulos</th></tr>
-        <tr><td>1</td><td><code>AUTF40465</code>, <code>CAJF11075_vld</code>, <code>CARF30024</code>, <code>CARF40003</code>, <code>CARF40057</code>, <code>CARF44010</code>, <code>CARF63339</code>, <code>CARF63343</code>, <code>CARF63346</code>, <code>CONF40030</code>, <code>CREF40497</code>, <code>FINX10010</code>, <code>FINX10020</code>, <code>SINF10115</code>, <code>SINF20650N</code>, <code>SINF20681</code>, <code>SINF63623</code>, <code>SOLF10309</code></td></tr>
+        <tr><td>1</td><td><code>CARF30024</code>, <code>CARF40003</code>, <code>CARF40057</code>, <code>CARF63339</code>, <code>CARF63343</code>, <code>CARF63346</code> (<code>CADO_CARP_CD_RAMO</code>); <code>CONF40030</code> (<code>CJDP_FE_TERMINO</code>)</td></tr>
         <tr><td>2</td><td><code>CAJF30073</code>, <code>CONF60132</code>, <code>SINF40690</code>, <code>VIDF00009</code>, <code>VIDF00055</code>, <code>VIDF40521</code>, <code>VIDF90030</code></td></tr>
-        <tr><td>3</td><td><code>CARF40045</code>, <code>CARF64321</code>, <code>CARF64322</code>, <code>CARF64342</code>, <code>FINF10004</code></td></tr>
-        <tr><td>4</td><td><code>CARF42000</code>, <code>CARF50060</code>, <code>CARF64000</code>, <code>VIDF30045</code>, <code>VIDF30046</code></td></tr>
-        <tr><td>5</td><td><code>CREF00040X (1)</code></td></tr>
+        <tr><td>3</td><td><code>CARF40045</code> (<code>OBJL00010.olb</code> en <code>X:</code>), <code>CARF64321</code> (<code>CARF64322_9.fmb</code>), <code>CARF64322</code> y <code>CARF64342</code> (<code>Nueva_Prueba1.fmb</code>), <code>FINF10004</code> (<code>CLASS_ITEM</code>)</td></tr>
       </table></div>
-      <div class="callout warn">
-        Los 154 módulos con <code>FRM-18130</code> (<code>frm18130_forms50.lis</code>) quedan descartados: son fuentes rezagados
-        de Forms 5.0 que no se usan y no requieren compilación. Las listas de cada grupo están en <code>forms_app/listas/</code> y se
-        recompilan con <code>./compile_forms_list.sh listas/&lt;grupo&gt;.lis</code>.
+      <div class="callout">
+        Los grupos anteriores de <code>RUN_PRODUCT</code> y <code>CREF00040X (1).fmb</code>, los 154 módulos con
+        <code>FRM-18130</code> (fuentes de Forms 5.0) y el resto de pendientes de esquema ya no aparecen: esos fuentes no tienen
+        compilado en la versión 12c y se movieron a <code>old_version</code>. Una vez corregidos, los pendientes se recompilan
+        con <code>./compile_forms_list.sh &lt;lista&gt;.lis</code>, con una lista que contenga solo esos módulos.
       </div>
 
       <h4 class="sub" id="paso-1-2">1.2 · Ejecución Aplicación Forms</h4>
-      <p><em>Por desarrollar.</em></p>
+      <p>
+        RECTOR se levanta en <code>WLS_FORMS</code> con un profile propio, <code>prodws</code>, el mismo nombre que tenía en la
+        versión 12c. El profile indica la forma inicial (<code>Rector.fmx</code>) y el archivo de entorno
+        (<code>rector.env</code>) con la ruta de los compilados del punto <a href="#paso-1-1">1.1</a>. Se accede con la IP
+        privada (por el túnel a la VPC) o la IP pública de la tarea <code>forms-server</code> (punto <a href="#paso-1-2-6">1.2.6</a>):
+      </p>
+      <pre class="code">http://&lt;IP-privada&gt;:9001/forms/frmservlet?config=prodws
+http://&lt;IP-pública&gt;:9001/forms/frmservlet?config=prodws</pre>
+
+      <h5 class="sub" id="paso-1-2-1">1.2.1 · Archivos de configuración</h5>
+      <p>Todos están en el dominio, dentro del contenedor <code>forms-server</code>, en el directorio de la aplicación Forms:</p>
+      <pre class="code">/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig/servers/WLS_FORMS/applications/formsapp_14.1.2/config</pre>
+      <div class="tabla"><table>
+        <tr><th>Archivo</th><th>Uso</th></tr>
+        <tr><td><code>formsweb.cfg</code></td><td>Profiles de <code>frmservlet</code>: la sección <code>[default]</code> con los valores comunes y una sección por profile (<code>[prodws]</code>) con lo que cambia. El parámetro <code>config=</code> de la URL elige la sección.</td></tr>
+        <tr><td><code>rector.env</code></td><td>Entorno del runtime de Forms (<code>frmweb</code>) para RECTOR: <code>FORMS_PATH</code>, <code>TNS_ADMIN</code>, <code>NLS_*</code>. Reemplaza a <code>default.env</code> solo para <code>prodws</code>.</td></tr>
+        <tr><td><code>base.jnlp</code></td><td>Plantilla del descriptor Java Web Start que se descarga el cliente.</td></tr>
+        <tr><td><code>$DOMAIN_HOME/config/fmwconfig/tnsnames.ora</code></td><td>Alias de base de datos (<code>SEGU</code>, <code>BANESCO_DEV</code>, <code>DESARROLLO</code>), apuntado por <code>TNS_ADMIN</code>.</td></tr>
+      </table></div>
+      <p>
+        Copia de referencia de <code>formsweb.cfg</code> y <code>rector.env</code> en <code>forms_reports/dist/app/forms_app</code>.
+      </p>
+
+      <h5 class="sub" id="paso-1-2-2">1.2.2 · Profile <code>prodws</code> (<code>formsweb.cfg</code>)</h5>
+      <p>Sección agregada al final de <code>formsweb.cfg</code>:</p>
+      <pre class="code"># RECTOR — named config from remote domain "rector" (prodws)
+[prodws]
+basejnlp=/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig/servers/WLS_FORMS/applications/formsapp_14.1.2/config/base.jnlp
+webstart=enabled
+envFile=/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig/servers/WLS_FORMS/applications/formsapp_14.1.2/config/rector.env
+form=Rector.fmx
+imageBase=codebase</pre>
+      <div class="tabla"><table>
+        <tr><th>Parámetro</th><th>Valor</th><th>Uso</th></tr>
+        <tr><td><code>webstart</code></td><td><code>enabled</code></td><td>La aplicación se ejecuta con Java Web Start (JNLP), no dentro del navegador.</td></tr>
+        <tr><td><code>basejnlp</code></td><td><code>…/config/base.jnlp</code></td><td>Plantilla del JNLP.</td></tr>
+        <tr><td><code>envFile</code></td><td><code>…/config/rector.env</code></td><td>Entorno del runtime (punto <a href="#paso-1-2-3">1.2.3</a>).</td></tr>
+        <tr><td><code>form</code></td><td><code>Rector.fmx</code></td><td>Forma inicial, buscada en <code>FORMS_PATH</code>; carga el menú <code>RECTOR.mmx</code>.</td></tr>
+        <tr><td><code>imageBase</code></td><td><code>codebase</code></td><td>Las imágenes de los íconos se descargan desde el codebase (<code>/forms/java</code>).</td></tr>
+      </table></div>
+      <p>
+        El resto se hereda de <code>[default]</code>: <code>serverURL=/forms/lservlet</code>, <code>codebase=/forms/java</code>,
+        <code>archive=frmall.jar</code>, <code>lookAndFeel=Oracle</code>, <code>colorScheme=swan</code> y
+        <code>userid=</code> vacío, así que Forms muestra la pantalla de conexión (usuario, clave y base).
+      </p>
+
+      <h5 class="sub" id="paso-1-2-3">1.2.3 · Entorno de RECTOR (<code>rector.env</code>)</h5>
+      <p>
+        Adaptado del <code>rector.env</code> de la versión 12c. Si una variable no está en el archivo, el runtime toma la del entorno
+        de <code>WLS_FORMS</code>:
+      </p>
+      <div class="tabla"><table>
+        <tr><th>Variable</th><th>Valor</th><th>Uso</th></tr>
+        <tr><td><code>FORMS_PATH</code></td><td><code>…/forms_app/bin/fmx:…/forms_app/bin/mnu:…/forms_app/bin:/u01/oracle/forms</code></td><td>Dónde se buscan las formas, menús y librerías. Equivale a <code>/aplicacion/TRector/Ejecutables/{fmx,mnu}</code> de la versión 12c.</td></tr>
+        <tr><td><code>FORMS_MODULE_PATH</code></td><td><code>$FORMS_PATH</code></td><td>Restringe la ejecución a módulos de esas rutas.</td></tr>
+        <tr><td><code>TNS_ADMIN</code></td><td><code>$DOMAIN_HOME/config/fmwconfig</code></td><td>Ubicación del <code>tnsnames.ora</code>.</td></tr>
+        <tr><td><code>NLS_LANG</code></td><td><code>AMERICAN_AMERICA.WE8ISO8859P1</code></td><td>Idioma y juego de caracteres de la sesión.</td></tr>
+        <tr><td><code>NLS_DATE_FORMAT</code></td><td><code>DD-MM-YYYY</code></td><td>Formato de fecha que esperan las formas.</td></tr>
+        <tr><td><code>FORMS_RESTRICT_ENTER_QUERY</code></td><td><code>TRUE</code></td><td>Impide escribir SQL libre en modo consulta.</td></tr>
+        <tr><td><code>WEBUTIL_CONFIG</code></td><td><code>…/instances/forms1/server/webutil.cfg</code></td><td>Configuración de WebUtil.</td></tr>
+        <tr><td><code>CLASSPATH</code>, <code>PATH</code>, <code>LD_LIBRARY_PATH</code>, <code>LD_PRELOAD</code></td><td>Los de <code>default.env</code> de Forms 14.1.2</td><td>JVM y librerías del runtime; no se adaptan de la versión 12c.</td></tr>
+      </table></div>
+      <div class="callout">
+        En Linux los nombres de archivo distinguen mayúsculas: el módulo que se llama desde el código (<code>CALL_FORM</code>,
+        <code>OPEN_FORM</code>, <code>REPLACE_MENU</code>) debe existir en <code>FORMS_PATH</code> con el mismo nombre, o Forms
+        responde <code>FRM-40010: Cannot read form</code>.
+      </div>
+
+      <h5 class="sub" id="paso-1-2-4">1.2.4 · Aplicar la configuración</h5>
+      <p>1. Conectarse al contenedor <code>forms-server</code> como <code>oracle</code> (punto <a href="#paso-1-1-2">1.1.2</a>) y respaldar los archivos:</p>
+      <pre class="code">CFG=$DOMAIN_HOME/config/fmwconfig/servers/WLS_FORMS/applications/formsapp_14.1.2/config
+cd $CFG
+cp -p formsweb.cfg formsweb.cfg.bak_$(date +%Y%m%d)</pre>
+      <p>
+        2. Copiar <code>rector.env</code> en <code>$CFG</code> y agregar la sección <code>[prodws]</code> al final de
+        <code>formsweb.cfg</code> (punto <a href="#paso-1-2-2">1.2.2</a>).
+      </p>
+      <p>3. Verificar:</p>
+      <pre class="code">awk '/^\[prodws\]/{f=1;print;next} /^\[/{f=0} f' $CFG/formsweb.cfg   <span class="c"># sección del profile</span>
+grep -E '^(FORMS_PATH|TNS_ADMIN|NLS_)' $CFG/rector.env
+ls -l /u01/oracle/user_projects/apps/forms_app/bin/fmx/Rector.fmx /u01/oracle/user_projects/apps/forms_app/bin/mnu/RECTOR.mmx
+
+<span class="c"># El servlet debe responder con el JNLP del profile (HTTP 200)</span>
+curl -s -o /dev/null -w '%{http_code}\n' "http://localhost:9001/forms/frmservlet?config=prodws"</pre>
+      <div class="callout">
+        <code>frmservlet</code> lee <code>formsweb.cfg</code> en cada solicitud; si el profile no aparece, reiniciar
+        <code>WLS_FORMS</code> (punto <a href="#paso-1-2-5">1.2.5</a>). Si la sección <code>[prodws]</code> no existe, el
+        servlet responde con un error de configuración no encontrada en lugar del JNLP.
+      </div>
+
+      <h5 class="sub" id="paso-1-2-5">1.2.5 · Arrancar WLS_FORMS manualmente</h5>
+      <p>
+        <code>WLS_FORMS</code> arranca solo al iniciar la tarea <code>forms-server</code>
+        (<a href="../aws-ecs/forms/index.html#paso-5-auto">Forms 5</a>). El arranque manual se usa cuando el servidor está
+        detenido (por ejemplo, después de un cambio de configuración) o para ver el arranque paso a paso. Desde la sesión ECS
+        Exec en <code>forms-server</code> como <code>oracle</code> (punto <a href="#paso-1-1-2">1.1.2</a>):
+      </p>
+      <pre class="code">cd /u01/oracle/scripts/
+./startWLSForms.sh</pre>
+      <p>Salida de un arranque correcto (13/10/2026):</p>
+      <pre class="code">==========================================
+Inicio de WLS_FORMS
+==========================================
+Modo        : Normal
+DOMAIN_HOME : /u01/oracle/user_projects/domains/forms_domain
+ADMIN_URL   : t3://weblogic-admin.forms.local:7001
+Log         : /u01/oracle/user_projects/domains/forms_domain/servers/WLS_FORMS/logs/WLS_FORMS.out
+LD_LIBRARY_PATH: /u01/oracle/lib:/u01/oracle/oracle_common/lib
+TNS_ADMIN   : /u01/oracle/user_projects/domains/forms_domain/config/fmwconfig
+
+Verificando AdminServer en weblogic-admin.forms.local:7001 ...
+  OK
+Arrancando WLS_FORMS ...
+  Lanzado (PID 5863)
+Esperando estado RUNNING (máx. 600s) ...
+✓ WLS_FORMS en RUNNING (60s)
+  http://localhost:9001/forms/frmservlet -> HTTP 200
+
+Para ver los logs en tiempo real:
+  tail -f /u01/oracle/user_projects/domains/forms_domain/servers/WLS_FORMS/logs/WLS_FORMS.log
+  o
+  tail -f /u01/oracle/user_projects/domains/forms_domain/servers/WLS_FORMS/logs/WLS_FORMS.out</pre>
+      <div class="tabla"><table>
+        <tr><th>Etapa</th><th>Qué indica</th></tr>
+        <tr><td>Encabezado</td><td>Entorno con el que arranca: dominio, URL del AdminServer (nombre de Cloud Map <code>weblogic-admin.forms.local</code>), log de salida, <code>LD_LIBRARY_PATH</code> y <code>TNS_ADMIN</code>.</td></tr>
+        <tr><td><code>Verificando AdminServer … OK</code></td><td>El AdminServer responde en el puerto 7001; sin él, <code>WLS_FORMS</code> no puede arrancar. En modo normal el script termina con error; con <code>-keep</code> (el de la task definition) espera a que el AdminServer responda.</td></tr>
+        <tr><td><code>Lanzado (PID …)</code></td><td><code>WLS_FORMS</code> se inicia en segundo plano; su salida va a <code>WLS_FORMS.out</code>.</td></tr>
+        <tr><td><code>✓ WLS_FORMS en RUNNING (60s)</code></td><td>El servidor llegó a RUNNING (espera máxima 600 s).</td></tr>
+        <tr><td><code>frmservlet -&gt; HTTP 200</code></td><td>Forms responde: ya se puede abrir <code>config=prodws</code> (punto <a href="#paso-1-2-6">1.2.6</a>).</td></tr>
+      </table></div>
+      <div class="callout">
+        El arranque está completo cuando <code>WLS_FORMS.log</code> muestra <code>&lt;Server state changed to RUNNING.&gt;</code>
+        (<code>BEA-000365</code>). Con <code>./startWLSForms.sh --no-wait</code> el script no espera el estado RUNNING. Para
+        controlar <code>WLS_FORMS</code> desde la consola del AdminServer hace falta además el Node Manager
+        (<code>./startNodeManager.sh</code>).
+      </div>
+
+      <h5 class="sub" id="paso-1-2-6">1.2.6 · Levantar RECTOR desde la máquina cliente</h5>
+      <p>
+        Igual que la validación de <a href="../aws-ecs/forms/index.html#paso-5-validar">Forms 5</a>, pero con
+        <code>config=prodws</code>. Las IP son las de la tarea <code>forms-server</code> en ejecución (pestaña
+        <strong>Redes</strong> de la tarea) y cambian en cada despliegue. Hay dos formas de llegar:
+      </p>
+      <div class="tabla"><table>
+        <tr><th>Acceso</th><th>URL (ejemplo del 13/10/2026)</th><th>Cuándo usarlo</th></tr>
+        <tr><td>IP privada, por el túnel a la VPC</td><td><code>http://10.171.244.144:9001/forms/frmservlet?config=prodws</code></td><td>Opción recomendada. Requiere el túnel a la VPC activo (ruta a <code>10.171.240.0/20</code>); funciona aunque haya otra VPN conectada.</td></tr>
+        <tr><td>IP pública</td><td><code>http://54.173.181.48:9001/forms/frmservlet?config=prodws</code></td><td>Desde internet, sin túnel. El security group <code>forms-sg-ecs</code> admite el puerto 9001 desde <code>0.0.0.0/0</code>.</td></tr>
+      </table></div>
+      <p>Para obtener las dos IP de la tarea actual desde la línea de comandos:</p>
+      <pre class="code">T=$(aws ecs list-tasks --cluster forms_report --service-name forms --desired-status RUNNING --query 'taskArns[0]' --output text)
+ENI=$(aws ecs describe-tasks --cluster forms_report --tasks "$T" \
+  --query 'tasks[0].attachments[0].details[?name==`networkInterfaceId`].value|[0]' --output text)
+aws ec2 describe-network-interfaces --network-interface-ids "$ENI" \
+  --query 'NetworkInterfaces[0].{privada:PrivateIpAddress,publica:Association.PublicIp}' --output table
+
+ip route | grep 10.171.240.0/20     <span class="c"># túnel a la VPC activo en la máquina cliente</span></pre>
+      <div class="callout warn">
+        Con una VPN comercial conectada (p. ej. Proton VPN), la IP pública no responde: el navegador muestra
+        <code>ERR_CONNECTION_RESET</code> y <code>curl</code> da <code>Recv failure: Connection reset by peer</code>. La VPN
+        acepta la conexión TCP en cualquier puerto (incluso en puertos que el security group no permite) y luego la corta, así
+        que el problema no es del servidor ni del security group. Usar la IP privada por el túnel a la VPC, o desconectar la VPN
+        por completo: la interfaz de la VPN (<code>proton0</code>) no debe aparecer en <code>ip -brief link</code> y
+        <code>curl -s https://checkip.amazonaws.com</code> debe mostrar la IP real de salida.
+      </div>
+      <p>
+        1. Abrir la URL en el navegador. El servidor responde con el descriptor JNLP (<code>application/x-java-jnlp-file</code>,
+        ≈3,7 kB), que el navegador ofrece guardar con el nombre <code>frmservlet</code>. Se puede guardar con otro nombre, por
+        ejemplo <code>frmservlet_aws</code> en <code>~/Descargas/aws</code>:
+      </p>
+      <figure class="shot" data-shot="paso-1-2-6a">
+        <img src="assets/paso-1-2-6a-guardar-jnlp.png" alt="Diálogo del navegador para guardar el JNLP de config=prodws como frmservlet_aws en Descargas/aws" />
+        <figcaption>Paso 1.2.6a — <code>frmservlet?config=prodws</code>: guardar el JNLP (<code>frmservlet_aws</code>)</figcaption>
+      </figure>
+      <p>
+        El JNLP lleva en <code>codebase</code> la IP con la que se pidió la URL, y desde ahí Java Web Start descarga
+        <code>frmall.jar</code> y se conecta a <code>WLS_FORMS</code>. Por eso hay que descargarlo de nuevo en cada despliegue de
+        la tarea, y no reutilizar uno guardado antes. También se puede descargar con <code>curl</code>:
+      </p>
+      <pre class="code">cd ~/Descargas/aws
+curl -s -o frmservlet_prodws "http://10.171.244.144:9001/forms/frmservlet?config=prodws"
+grep codebase= frmservlet_prodws     <span class="c"># debe mostrar la IP actual de la tarea</span></pre>
+      <p>2. Ejecutar el JNLP con Java Web Start (Java 8), poco después de descargarlo:</p>
+      <pre class="code">cd ~/Descargas/aws
+$JAVA_HOME/bin/javaws ./frmservlet_prodws</pre>
+      <p>3. Ingresar a RECTOR:</p>
+      <ol>
+        <li>Java Web Start pide confirmar la ejecución de <strong>OracleForms</strong>: <strong>Ejecutar</strong>.</li>
+        <li>Forms abre <code>Rector.fmx</code> y muestra la pantalla de conexión: usuario, clave y base (alias del <code>tnsnames.ora</code>, p. ej. <code>SEGU</code>).</li>
+        <li>Al conectar se carga el menú <code>RECTOR.mmx</code>, y desde él los menús <code>GIO_*</code> y las formas de <code>bin/fmx</code>.</li>
+      </ol>
+      <div class="tabla"><table>
+        <tr><th>Error</th><th>Causa</th><th>Qué revisar</th></tr>
+        <tr><td><code>ExitException[ 3]java.net.SocketException: Connection reset</code> en <code>JNLP2Manager.ensureAllJnlpFilesAreAvailable</code></td><td>Java Web Start no puede descargar <code>frmall.jar</code>: el JNLP es de una tarea anterior (su <code>codebase</code> apunta a una IP que ya no existe) o la IP pública está bloqueada por una VPN</td><td>Descargar el JNLP de nuevo, con la IP actual, y revisar con <code>grep codebase= &lt;archivo&gt;</code> que la IP sea la de la tarea en ejecución.</td></tr>
+        <tr><td>Configuración no encontrada</td><td>El profile no existe</td><td>Sección <code>[prodws]</code> en <code>formsweb.cfg</code>.</td></tr>
+        <tr><td><code>FRM-40010</code></td><td>No encuentra la forma o el menú</td><td><code>FORMS_PATH</code> de <code>rector.env</code>, que el <code>.fmx</code>/<code>.mmx</code> exista (punto <a href="#paso-1-1-3">1.1.3</a>) y las mayúsculas del nombre.</td></tr>
+        <tr><td><code>FRM-93131</code></td><td>Falta la plantilla HTML o JNLP</td><td>Rutas <code>baseHTML*</code> / <code>basejnlp</code> de <code>formsweb.cfg</code>.</td></tr>
+        <tr><td><code>ORA-12154</code></td><td>Alias de base desconocido</td><td><code>TNS_ADMIN</code> de <code>rector.env</code> y el alias en <code>tnsnames.ora</code>.</td></tr>
+      </table></div>
+      <p>Para seguir las sesiones en el servidor:</p>
+      <pre class="code">tail -f $DOMAIN_HOME/servers/WLS_FORMS/logs/access.log | grep prodws
+tail -f $DOMAIN_HOME/servers/WLS_FORMS/logs/formsapp-diagnostic.log</pre>
         </section>
 
         <section class="slide-block" id="paso-2">
@@ -1651,13 +1851,44 @@ aws ecs execute-command --cluster forms_report --task dba0a9d75d77475d8a3ca34c79
         <tr><td>Reports Server</td><td><code>CART_COLAS.CALA_NM_REPSERV</code> (si es nulo, <code>CART_CONFIG_BATCH.CACH_NM_REPSERV</code>)</td><td><code>rep_wls_reports_weblogic-reports</code>, nombre del servidor in-process de <code>WLS_REPORTS</code>.</td></tr>
         <tr><td><code>rwclient.sh</code></td><td><code>PATH</code></td><td>El del dominio (<code>$DOMAIN_HOME/reports/bin</code>), no la plantilla de <code>$ORACLE_HOME/bin</code>. Las librerías que necesita (<code>libnsl.so.2</code>) vienen en la imagen <code>r3</code>.</td></tr>
         <tr><td>Escritura de reportes</td><td><code>rwserver.conf</code> de <code>WLS_REPORTS</code></td><td><code>&lt;folderAccess&gt;</code> con escritura en <code>reports_app/rep</code>; si falta, los reportes fallan con <code>REP-56133</code>.</td></tr>
+        <tr><td>Impresión inmediata</td><td><code>proc_app/bin/LP.sh</code> en el <code>PATH</code></td><td>Desactivada: <code>LP.sh</code> solo registra la solicitud en <code>colas_app/log/LP.log</code> (ver más abajo).</td></tr>
+      </table></div>
+      <p>
+        Ajustes de base de datos: el parámetro <code>máquina</code> (<code>weblogic-forms.forms.local</code>, 26 caracteres) es más
+        largo que el nombre del servidor de la versión 12c (<code>bsdevap9710</code>), y las columnas donde <code>CARC00100</code> lo
+        busca o lo guarda se ampliaron a 40 caracteres:
+      </p>
+      <pre class="code">ALTER TABLE CARTERA.CART_CONFIG_BATCH MODIFY (CACH_NM_MAQUINA VARCHAR2(40));
+ALTER TABLE CARTERA.CART_IMPRESIONES  MODIFY (CAON_NM_MAQUINA VARCHAR2(40));</pre>
+      <div class="tabla"><table>
+        <tr><th>Tabla</th><th>Columna</th><th>Uso en <code>CARC00100</code></th><th>Error sin el ajuste</th></tr>
+        <tr><td><code>CART_CONFIG_BATCH</code></td><td><code>CACH_NM_MAQUINA</code></td><td><code>F_Sel_Ambiente</code>: busca la fila de la máquina (directorios de salida y Reports Server).</td><td>No se puede registrar la máquina con su nombre completo: <code>Error en busqueda del ambiente en F_Sel_Ambiente</code></td></tr>
+        <tr><td><code>CART_IMPRESIONES</code></td><td><code>CAON_NM_MAQUINA</code></td><td><code>F_Upd_impresiones</code>: registra el archivo generado por el reporte.</td><td><code>ORA-12899: value too large for column "CARTERA"."CART_IMPRESIONES"…</code>; el PDF se genera pero no queda registrado</td></tr>
       </table></div>
       <p>
         La task definition de <code>reports-server</code> ya define <code>TNS_ADMIN</code>, <code>DOMAIN_HOME</code> y
         <code>ORACLE_HOME</code>, pero no <code>PASS_FILE</code> ni <code>TWO_TASK</code>, y su <code>PATH</code> no incluye
-        <code>$DOMAIN_HOME/reports/bin</code>: hay que exportarlos en la sesión antes de ejecutar (punto
-        <a href="#paso-2-2-3">2.2.3</a>).
+        <code>$DOMAIN_HOME/reports/bin</code> ni <code>proc_app/bin</code>: el script <code>apps/set_batch_env.sh</code> los
+        prepara en la sesión antes de ejecutar (punto <a href="#paso-2-2-3">2.2.3</a>).
       </p>
+      <p>
+        Impresión inmediata desactivada: cuando una orden tiene modo de impresión <code>I</code>, <code>CARC00100</code>
+        (<code>F_Ins_imprimir</code>) ejecuta, después de registrar el archivo en <code>CART_IMPRESIONES</code>:
+      </p>
+      <pre class="code">LP.sh &lt;máquina&gt; &lt;script_salida&gt; &lt;directorio&gt; &lt;archivo&gt; &lt;impresora&gt; &lt;copias&gt;</pre>
+      <p>
+        En la versión 12c <code>LP.sh</code> enviaba el archivo a la impresora del servidor; ese script no se migró y en ECS no hay
+        impresoras, así que la cola fallaba con <code>sh: line 1: LP.sh: command not found</code>. En su lugar,
+        <code>proc_app/bin/LP.sh</code> no imprime: agrega una línea con el comando recibido a
+        <code>/u01/oracle/user_projects/apps/colas_app/log/LP.log</code> y termina con código 0. El reporte queda generado en
+        <code>reports_app/rep</code> y registrado en <code>CART_IMPRESIONES</code>, igual que antes.
+      </p>
+      <div class="callout">
+        <code>CARC00100</code> invoca <code>LP.sh</code> sin directorio (la variable del directorio de scripts,
+        <code>wDIR_OBJ_SCRIPT</code>, nunca se carga en <code>F_Sel_Ambiente</code>), así que el shell lo busca en el <code>PATH</code>: <code>proc_app/bin</code> debe estar en el
+        <code>PATH</code> de la sesión (punto <a href="#paso-2-2-3">2.2.3</a>). Para reactivar la impresión, reemplazar ese
+        <code>LP.sh</code> por uno que envíe el archivo a la impresora que corresponda.
+      </div>
 
       <h5 class="sub" id="paso-2-2-3">2.2.3 · Ejecutar una cola</h5>
       <p>1. Conectarse al contenedor <code>reports-server</code>:</p>
@@ -1667,24 +1898,107 @@ aws ecs execute-command --cluster forms_report --task 4942b81cf33848e8bdd80ab4a4
   --container reports-server --interactive --command "su -s /bin/bash oracle"</pre>
       <p>2. Ubicarse en el directorio de los compilados Pro*C:</p>
       <pre class="code">cd /u01/oracle/user_projects/apps/proc_app/bin</pre>
-      <p>3. Preparar el entorno de la sesión y verificarlo:</p>
-      <pre class="code">export PASS_FILE=/u01/oracle/user_projects/apps/proc_app/bin/USUARIOBATCH.lis
-export TWO_TASK=SEGU
-export PATH=$DOMAIN_HOME/reports/bin:$PATH
-
-echo "PASS_FILE=$PASS_FILE TWO_TASK=$TWO_TASK TNS_ADMIN=$TNS_ADMIN"
-which rwclient.sh            <span class="c"># debe ser $DOMAIN_HOME/reports/bin/rwclient.sh</span></pre>
-      <p>4. Lanzar la cola (ejemplo con la cola <code>Y</code>):</p>
-      <pre class="code">mkdir -p /u01/oracle/user_projects/apps/colas_app/log
-nohup stdbuf -oL ./CARC00100 Y weblogic-forms.forms.local SEGU SEGU \
-  &gt;&gt; /u01/oracle/user_projects/apps/colas_app/log/COLA_Y.log 2&gt;&amp;1 &amp;</pre>
-      <p>5. Seguimiento:</p>
-      <pre class="code">tail -f /u01/oracle/user_projects/apps/colas_app/log/COLA_Y.log
-ps -ef | grep "CARC00100 Y" | grep -v grep</pre>
+      <p>
+        3. Cargar el entorno con <code>set_batch_env.sh</code> (en <code>/u01/oracle/user_projects/apps</code>). Debe cargarse con
+        <code>source</code>, no ejecutarse, para que las variables queden en la sesión:
+      </p>
+      <pre class="code">source ../set_batch_env.sh</pre>
+      <p>
+        El script exporta <code>PASS_FILE</code>, <code>TWO_TASK</code>, <code>TNS_ADMIN</code>, <code>DOMAIN_HOME</code> y
+        <code>ORACLE_HOME</code>, agrega <code>$DOMAIN_HOME/reports/bin</code> y <code>proc_app/bin</code> al <code>PATH</code>, y
+        muestra dónde encontró <code>rwclient.sh</code> y <code>LP.sh</code>. La salida esperada es:
+      </p>
+      <pre class="code">PASS_FILE=/u01/oracle/user_projects/apps/proc_app/bin/USUARIOBATCH.lis  TWO_TASK=SEGU  TNS_ADMIN=/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig
+DOMAIN_HOME=/u01/oracle/user_projects/domains/forms_domain  rwclient.sh=/u01/oracle/user_projects/domains/forms_domain/reports/bin/rwclient.sh  LP.sh=/u01/oracle/user_projects/apps/proc_app/bin/LP.sh
+ORACLE_HOME=/u01/oracle  rwclient: -rwxr-x--x. oracle:oracle</pre>
       <div class="callout">
-        <code>stdbuf -oL</code> hace que la salida se escriba línea por línea; sin él, si el programa termina de forma anormal el
-        log puede quedar vacío. <code>nohup</code> evita que la cola se detenga al cerrar la sesión de ECS Exec.
+        Si aparece <code>&lt;no encontrado&gt;</code> o una línea <code>AVISO:</code>, corregir antes de ejecutar: sin
+        <code>rwclient.sh</code> no se generan los reportes y sin <code>LP.sh</code> la cola falla con
+        <code>sh: line 1: LP.sh: command not found</code> (falta en el <code>PATH</code> o no tiene permiso de ejecución:
+        <code>chmod 755 LP.sh</code>).
       </div>
+      <p>
+        4. Ejecutar la cola (ejemplo con la cola <code>Y</code>). <code>CARC00100</code> atiende las órdenes pendientes de la cola
+        una por una y termina cuando ya no quedan:
+      </p>
+      <pre class="code">mkdir -p /u01/oracle/user_projects/apps/colas_app/log
+./CARC00100 Y weblogic-forms.forms.local SEGU SEGU &gt;&gt; /u01/oracle/user_projects/apps/colas_app/log/COLA_Y.log</pre>
+      <p>
+        Para que siga corriendo aunque se cierre la sesión de ECS Exec, lanzarlo en segundo plano. <code>stdbuf -oL</code> hace que
+        la salida se escriba línea por línea; sin él, si el programa termina de forma anormal el log puede quedar vacío:
+      </p>
+      <pre class="code">nohup stdbuf -oL ./CARC00100 Y weblogic-forms.forms.local SEGU SEGU \
+  &gt;&gt; /u01/oracle/user_projects/apps/colas_app/log/COLA_Y.log 2&gt;&amp;1 &amp;
+ps -ef | grep "CARC00100 Y" | grep -v grep</pre>
+      <p>5. Revisar el log de la cola:</p>
+      <pre class="code">tail -200 /u01/oracle/user_projects/apps/colas_app/log/COLA_Y.log</pre>
+      <p>Ejemplo de una ejecución correcta (13/10/2026, cola <code>Y</code>, secuencia <code>204233</code>, reporte <code>CARR10306</code>):</p>
+      <pre class="code">Inicia la conexion del programa CARC00100
+Recibe las variables de COLA y MAQUINA /n
+
+ ARCHIVO PASSWORD PASS_FILE /u01/oracle/user_projects/apps/proc_app/bin/USUARIOBATCH.lis
+Selecciono el ambiente
+Variable Wreporte_server rep_wls_reports_weblogic-reports
+Variable Wreporte_server despues el if rep_wls_reports_weblogic-reports
+
+ Valor del Status de la Cola 0
+
+ Valor de la variable paso 0
+
+ LA COLA ESTA OCUPADA Y STATUS 1 ....
+
+SECUENCIA.............&gt; 204233                 Fecha Orden..........&gt; 22-09-2026
+ Orden................&gt; 1080                   Hora Orden...........&gt; 19:30:36
+ SubOrden.............&gt; 07                     Prioridad............&gt; 0
+ Usuario..............&gt; SGONLINE
+ Impresora............&gt; NULL                 Copias...............&gt; 1
+ Parametros Script....&gt;
+ Programa.............&gt; CARR10306              Fecha y Hora.........&gt; 13-10-2026 17:17:13
+ Lenguaje.............&gt; R                      Nombre...............&gt; IMP. DE CARNET AUTO
+ Status Programa......&gt; A                      Tiene Salida.........&gt; S
+ Modo Impresion.......&gt; D                      Longitud Reporte.....&gt; 132
+ Script Dialogo.......&gt;                        Script Sucesor.......&gt;
+ Forma Papel..........&gt; PACFPOL
+
+No existe la impresora logica (F_Ins_report) para NULL longitud 132
+onsuccess =
+
+COMANDO REPORT: rwclient.sh server=rep_wls_reports_weblogic-reports report=/u01/oracle/user_projects/apps/reports_app/src/CARR10306.rdf userid=uspan/&lt;clave&gt;@SEGU NU_SEC=204233 paramform=no destype=file batch=yes desformat=pdf buffers=1280  desname=/u01/oracle/user_projects/apps/reports_app/rep/CARR10306_204233.pdf &gt;  /u01/oracle/user_projects/apps/reports_app/log/CARR10306_204233.log
+Termino de ejecutar el comando
+
+No existe la impresora logica (F_Upd_impresiones) para NULL longitud 132
+Pasa a generar el archivo en HTML
+Programa a convertir lis to html  CARR10306_204233.pdf
+No se genera el archivo HTML por que es pdf
+Paso en insertar cart ordenes ejecutadas
+
+CODIGO DE RETORNO.....&gt; 0
+
+No hay procesos en Cola...SQLCODE....&gt; ORA-01403: no data found</pre>
+      <p>Cómo leer el log, en el orden en que aparece:</p>
+      <div class="tabla"><table>
+        <tr><th>Etapa</th><th>Líneas del log</th><th>Qué hace <code>CARC00100</code></th></tr>
+        <tr><td>Conexión</td><td><code>Inicia la conexion…</code>, <code>ARCHIVO PASSWORD PASS_FILE …</code></td><td>Lee usuario y clave de <code>PASS_FILE</code> y se conecta a la base de <code>TWO_TASK</code>.</td></tr>
+        <tr><td>Ambiente</td><td><code>Selecciono el ambiente</code>, <code>Variable Wreporte_server …</code></td><td>Lee la fila de la máquina en <code>CART_CONFIG_BATCH</code> (directorios de salida) y el Reports Server de la cola (<code>rep_wls_reports_weblogic-reports</code>).</td></tr>
+        <tr><td>Toma de la cola</td><td><code>Valor del Status de la Cola 0</code>, <code>LA COLA ESTA OCUPADA Y STATUS 1</code></td><td>La cola estaba libre (status 0) y la marca como ocupada (status 1) para que no la atienda otro proceso.</td></tr>
+        <tr><td>Orden</td><td>Bloque <code>SECUENCIA … Forma Papel</code></td><td>Toma la siguiente orden pendiente de <code>CART_ORDENES_PROCESOS</code> para la cola: secuencia, programa, lenguaje (<code>R</code> = reporte; <code>C</code>, <code>P</code>, <code>S</code> y <code>K</code> son los otros tipos de programa), modo de impresión, impresora y copias.</td></tr>
+        <tr><td>Ejecución</td><td><code>COMANDO REPORT: rwclient.sh …</code>, <code>Termino de ejecutar el comando</code></td><td>Para un reporte, arma y ejecuta <code>rwclient.sh</code> con <code>NU_SEC</code> = secuencia; el PDF queda en <code>reports_app/rep/&lt;programa&gt;_&lt;secuencia&gt;.pdf</code> y la salida de <code>rwclient</code> en <code>reports_app/log/&lt;programa&gt;_&lt;secuencia&gt;.log</code>.</td></tr>
+        <tr><td>Registro de la salida</td><td><code>F_Upd_impresiones</code>, <code>No se genera el archivo HTML por que es pdf</code></td><td>Registra el archivo en <code>CART_IMPRESIONES</code>; la conversión a HTML solo aplica a salidas <code>.lis</code>.</td></tr>
+        <tr><td>Impresión</td><td>(no aparece en este ejemplo)</td><td>Solo con modo de impresión <code>I</code>: llama a <code>LP.sh</code>, que queda registrado en <code>colas_app/log/LP.log</code>. Con modo <code>D</code> (diferida) no se llama.</td></tr>
+        <tr><td>Cierre de la orden</td><td><code>Paso en insertar cart ordenes ejecutadas</code>, <code>CODIGO DE RETORNO…&gt; 0</code></td><td>Pasa la orden a ejecutadas con el código de retorno del programa (0 = correcto).</td></tr>
+        <tr><td>Fin</td><td><code>No hay procesos en Cola…ORA-01403: no data found</code></td><td>No quedan órdenes pendientes en la cola: libera la cola y termina. No es un error.</td></tr>
+      </table></div>
+      <div class="callout">
+        <code>No existe la impresora logica … para NULL longitud 132</code> es informativo: la orden no tiene impresora asignada
+        (<code>Impresora NULL</code>) y el reporte se genera igual. Si hay varias órdenes pendientes, el bloque desde
+        <code>SECUENCIA</code> hasta <code>CODIGO DE RETORNO</code> se repite por cada una.
+      </div>
+      <p>6. Verificar el archivo generado y, si hubo impresión inmediata, su registro:</p>
+      <pre class="code">ls -l /u01/oracle/user_projects/apps/reports_app/rep/CARR10306_204233.pdf
+<span class="c"># -rw-r-----. 1 oracle oracle 2856 Oct 13 17:17 /u01/oracle/user_projects/apps/reports_app/rep/CARR10306_204233.pdf</span>
+
+cat /u01/oracle/user_projects/apps/reports_app/log/CARR10306_204233.log   <span class="c"># salida de rwclient (errores REP-*)</span>
+tail /u01/oracle/user_projects/apps/colas_app/log/LP.log                  <span class="c"># impresiones que se habrían enviado</span></pre>
       <div class="callout warn">
         Los scripts de arranque de la versión 12c (<code>COLA_A</code> … <code>COLA_Z</code> y <code>COLA.env</code>, en
         <code>/u01/oracle/scripts/bin</code>) todavía tienen las rutas y la máquina del servidor anterior
