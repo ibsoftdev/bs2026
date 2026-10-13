@@ -1384,10 +1384,10 @@
         <a href="../admin/index.html">Contenedor AdminServer</a> (infraestructura, cluster, red y hostnames) y sigue el esquema del
         <a href="../forms/index.html">Contenedor Forms</a>; lo compartido se referencia en lugar de repetirse.
       </p>
-      <p class="slogan">Service Discovery, dominio en EFS y validación funcional de Reports.</p>
+      <p class="slogan">Service Discovery, dominio en EFS y Reports completo en el dominio.</p>
     </div>
 
-    <nav class="toc" aria-label="Contenido"><a href="#paso-0">0 · Requisitos y valores fijos</a><a href="#paso-1">1 · Crear task definition Reports</a><a href="#paso-2">2 · Crear servicio + Service Discovery</a><a href="#paso-3">3 · Verificar Running, Cloud Map y ECS Exec</a><a href="#paso-4">4 · Verificar hostnames del dominio</a><a href="#paso-5">5 · Arrancar Node Manager y WLS_REPORTS</a><a href="#paso-6">6 · Completar Reports en el dominio</a><a href="#paso-7">7 · Validación funcional de Reports</a><a href="#anexo-json">Anexo · Task definition JSON</a><a href="#anexo-r2">Anexo · Imagen r2</a><a href="#anexo-cli">Anexo · Comandos AWS CLI</a><a href="#lecciones-criticas">★ · Lecciones críticas</a></nav>
+    <nav class="toc" aria-label="Contenido"><a href="#paso-0">0 · Requisitos y valores fijos</a><a href="#paso-1">1 · Crear task definition Reports</a><a href="#paso-2">2 · Crear servicio + Service Discovery</a><a href="#paso-3">3 · Verificar Running, Cloud Map y ECS Exec</a><a href="#paso-4">4 · Verificar hostnames del dominio</a><a href="#paso-5">5 · Arrancar Node Manager y WLS_REPORTS</a><a href="#paso-6">6 · Completar Reports en el dominio</a><a href="../../app-rector/index.html#paso-2-2-4">Validación de Reports (RECTOR 2.2.4)</a><a href="#anexo-json">Anexo · Task definition JSON</a><a href="#anexo-r2">Anexo · Imagen r2</a><a href="#anexo-cli">Anexo · Comandos AWS CLI</a><a href="#lecciones-criticas">★ · Lecciones críticas</a></nav>
 
     <div class="card">
       <div class="card-body">
@@ -1873,7 +1873,7 @@ pkill -f 'weblogic.Name=WLS_REPORTS'; sleep 10; /u01/oracle/scripts/startWLSRepo
         <li><strong>Crear</strong> → nueva revisión (<code>reports-server:N</code>).</li>
         <li>Cluster <code>forms_report</code> → servicio <code>reports-server</code> → <strong>Actualizar</strong> → revisión <code>reports-server:N</code>
           → <strong>Forzar nueva implementación</strong> → <strong>Actualizar</strong>.</li>
-        <li>Con la nueva tarea en <em>Ejecutando</em>, validar RUNNING con el <code>tail</code> de <code>WLS_REPORTS.log</code> (<a href="#paso-5-3">5.3</a>) y el reporte de prueba (<a href="#paso-7">Paso 7</a>).</li>
+        <li>Con la nueva tarea en <em>Ejecutando</em>, validar RUNNING con el <code>tail</code> de <code>WLS_REPORTS.log</code> (<a href="#paso-5-3">5.3</a>) y el reporte de prueba (<a href="../../app-rector/index.html#paso-2-2-4">RECTOR 2.2.4</a>).</li>
       </ol>
       <figure class="shot" data-shot="paso-5-5">
         <img src="assets/paso-05-5-td-comando-arranque.png" alt="Configuración de Docker: punto de entrada vacío, comando /u01/oracle/scripts/startWLSReports.sh,-keep y directorio de trabajo /u01/oracle" />
@@ -1937,73 +1937,6 @@ createReportsToolsInstance(instanceName='reptools1', machine='ReportsMachine')</
         <tr><td>Pantalla "System User Authentication" / <code>REP-51019</code></td><td>Seguridad activa (<code>securityId</code>)</td></tr>
       </table></div>
       <pre class="code">grep -E 'REP-|rwEng' $DOMAIN_HOME/servers/WLS_REPORTS/logs/reports/rwserver_diagnostic.log | tail -15</pre>
-        </section>
-
-        <section class="slide-block" id="paso-7">
-          <h3><span class="num">7</span> Validación funcional de Reports<span class="status done">Hecho</span></h3>
-      <p>
-        Validación con <strong>reportes modelo</strong> (definiciones sencillas, sin lógica de negocio) para comprobar que Reports Server
-        responde en la arquitectura containerizada y que la conexión a la BD funciona.
-      </p>
-      <div class="tabla"><table class="fixed">
-        <colgroup><col style="width:22%" /><col style="width:46%" /><col style="width:32%" /></colgroup>
-        <tr><th>Prueba</th><th>URL / comando</th><th>Resultado esperado</th></tr>
-        <tr><td>Servlet activo</td><td><code>http://&lt;IP-pública&gt;:9012/reports/rwservlet</code></td><td>Página de bienvenida de Oracle Reports Services</td></tr>
-        <tr><td>Info del server in-process</td><td><code>…/rwservlet/getserverinfo?authid=weblogic/&lt;clave&gt;</code></td>
-          <td>Reports Server, engines y estado. Sin <code>authid</code> responde <code>REP-51019</code> (normal); con <code>REP-56071</code> falta el rol <code>RW_ADMINISTRATOR</code> (opcional); con <code>REP-52262</code> la salida de diagnóstico está deshabilitada (ver 7c).</td></tr>
-        <tr><td>Cola de trabajos</td><td><code>…/rwservlet/showjobs</code></td><td>Lista de jobs (vacía al inicio)</td></tr>
-        <tr><td>Reporte modelo con BD</td><td><code>…/rwservlet?report=&lt;modelo&gt;.rdf&amp;userid=&lt;usr&gt;/&lt;pwd&gt;@&lt;TNS&gt;&amp;destype=cache&amp;desformat=PDF</code></td><td>PDF con datos de la BD</td></tr>
-        <tr><td><strong>Caso validado:</strong> <code>CARR30015.rdf</code></td><td><code>…/rwservlet?report=CARR30015.rdf&amp;userid=uspan/&lt;clave&gt;@BANESCO_DEV&amp;destype=cache&amp;desformat=pdf&amp;nu_sec=205873</code></td><td>PDF con datos</td></tr>
-      </table></div>
-      <div class="callout warn">
-        <strong>Requisitos de <code>CARR30015.rdf</code>:</strong>
-        <ul>
-          <li><code>nu_sec=205873</code> debe existir en la BD <code>BANESCO_DEV</code>; si la BD se refresca, usar una secuencia vigente.</li>
-          <li><code>userid</code> es obligatorio: sin él el motor no compila el PL/SQL del RDF (<code>REP-1247</code>).</li>
-          <li>No requiere <code>mode=bitmap</code> (a diferencia de <code>SINR30032.rdf</code>, en modo carácter: <code>REP-1920</code>).</li>
-          <li>El alias <code>BANESCO_DEV</code> debe estar en <code>$TNS_ADMIN/tnsnames.ora</code> y la BD encendida.</li>
-        </ul>
-      </div>
-      <p>Desde dentro del contenedor (sin depender del SG):</p>
-      <pre class="code">curl -s -o /dev/null -w '%{http_code}\n' http://localhost:9012/reports/rwservlet
-curl -s http://localhost:9012/reports/rwservlet/getserverinfo | head -50</pre>
-      <div class="tabla"><table class="fixed">
-        <colgroup><col style="width:38%" /><col style="width:62%" /></colgroup>
-        <tr><th>Respuesta al invocar el reporte</th><th>Causa / acción</th></tr>
-        <tr><td><code>REP-52266</code> / <code>REP-51002</code></td><td>Falta algún elemento del <a href="#paso-6">Paso 6</a>; ver <code>rwserver_diagnostic.log</code>.</td></tr>
-        <tr><td>Petición colgada + <code>DFW-99998 UnsatisfiedLinkError: librwu.so: libXm.so.4</code></td><td>Imagen <code>r1</code>: pasar la TD a <code>r2</code> (<a href="#anexo-r2">anexo</a>).</td></tr>
-        <tr><td>Pantalla "System User Authentication"</td><td>Seguridad de Reports activa: <code>prepare-reports-domain.sh --disable-security</code> o agregar <code>&amp;authid=</code>.</td></tr>
-        <tr><td><code>REP-1247: Uncompiled program units exist</code></td><td>Falta <code>userid</code>, faltan <code>.pll</code> en <code>sourceDir</code> u objetos inválidos en la BD (<code>rwconverter.sh ... compile_all=yes</code>).</td></tr>
-        <tr><td><code>REP-1920</code> Character mode … PDF</td><td>RDF en modo carácter: <code>&amp;mode=bitmap</code> o <em>Mode = Bitmap</em> en Reports Builder.</td></tr>
-        <tr><td>PDF en blanco</td><td>Sin datos (probar <code>desformat=XML</code>) o sin fuentes en <code>$DOMAIN_HOME/reports/fonts</code>.</td></tr>
-        <tr><td><code>REP-0501</code> / <code>ORA-12170</code></td><td>Conectividad a <code>192.168.229.137:1521</code> (<a href="#paso-3">Paso 3</a>) y alias TNS; ver el <a href="../forms/index.html#anexo-cli-red-bd">anexo de red hacia BD</a>.</td></tr>
-      </table></div>
-      <figure class="shot" data-shot="paso-7a">
-        <img src="assets/paso-13a-rwservlet.png" alt="curl a rwservlet en 9012 devuelve HTTP 200 y Oracle Reports Services - Servlet" />
-        <figcaption>Paso 7a — <code>rwservlet</code> en 9012 desde fuera de AWS: <code>HTTP 200</code>, "Oracle Reports Services - Servlet"</figcaption>
-      </figure>
-      <figure class="shot" data-shot="paso-7b">
-        <img src="assets/paso-13b-carr30015-pdf.png" alt="PDF generado por CARR30015.rdf con datos de BANESCO_DEV" />
-        <figcaption>Paso 7b — <code>CARR30015.rdf</code> con <code>nu_sec=205873</code>: PDF "Cuadro Póliza - Recibo Prima" con datos de <code>BANESCO_DEV</code></figcaption>
-      </figure>
-      <p>
-        Al consultar <code>getserverinfo</code> con credenciales válidas, la respuesta por defecto es <code>REP-52262: Diagnostic output is
-        disabled</code>. <strong>No es una falla</strong>: <code>WLS_REPORTS</code> y <code>rwservlet</code> responden y la autenticación
-        pasó; solo indica que los comandos de diagnóstico del servlet están deshabilitados (valor por defecto de Oracle, recomendado
-        en producción porque exponen la configuración del server).
-      </p>
-      <figure class="shot" data-shot="paso-7c">
-        <img src="assets/paso-07c-getserverinfo-rep52262.png" alt="rwservlet/getserverinfo en 9012 responde REP-52262: Diagnostic output is disabled" />
-        <figcaption>Paso 7c — <code>getserverinfo</code>: <code>REP-52262</code>, servlet activo con diagnóstico deshabilitado</figcaption>
-      </figure>
-      <div class="callout">
-        Para habilitarlo temporalmente (solo en desarrollo), en el <code>rwservlet.properties</code> de <code>WLS_REPORTS</code> cambiar
-        <code>&lt;diagnostic&gt;no&lt;/diagnostic&gt;</code> por <code>&lt;diagnostic&gt;yes&lt;/diagnostic&gt;</code> y reiniciar
-        <code>WLS_REPORTS</code> (<a href="#paso-5-3">5.3</a>):
-        <pre class="code">find $DOMAIN_HOME/config/fmwconfig/servers/WLS_REPORTS -name rwservlet.properties
-grep -n diagnostic &lt;ruta&gt;/rwservlet.properties</pre>
-        Volver a <code>no</code> al terminar las pruebas.
-      </div>
         </section>
 
         <!-- ═════════════ ANEXOS ═════════════ -->
@@ -2248,7 +2181,7 @@ aws ecs describe-task-definition --task-definition reports-server \
         <li><strong>Lanzadores con marcadores</strong> (Paso 6.2) — <code>rwengine.sh</code> y <code>reports.sh</code> traen <code>$$domain_home$$</code>, <code>$$mw_home$$</code>, <code>$$component_name$$</code> y <code>%HOME%</code>; copiarlos sin sustituir no funciona.</li>
         <li><strong>Seguridad de Reports activa por defecto</strong> — <code>securityId="rwJaznSec"</code> pide usuario en cada reporte; en DEV se elimina.</li>
         <li><strong>TNS y <code>sourceDir</code> en EFS</strong> (Pasos 6–7) — para que sobrevivan a un redespliegue.</li>
-        <li><strong>RDF en modo carácter</strong> (Paso 7) — <code>REP-1920</code> con <code>desformat=PDF</code>; usar <code>mode=bitmap</code>.</li>
+        <li><strong>RDF en modo carácter</strong> (<a href="../../app-rector/index.html#paso-2-2-4">RECTOR 2.2.4</a>) — <code>REP-1920</code> con <code>desformat=PDF</code>; usar <code>mode=bitmap</code>.</li>
       </ol>
         </section>
 

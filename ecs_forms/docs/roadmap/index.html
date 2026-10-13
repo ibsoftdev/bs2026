@@ -26,7 +26,7 @@
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
     }
-    .app-wrap { max-width: 960px; overflow: visible; }
+    .app-wrap { max-width: 1240px; overflow: visible; }
     .card, .card-body { overflow: visible; }
 
     /* Cabecera */
@@ -345,10 +345,28 @@
     }
     .gantt-head, .gantt-row {
       display: grid;
-      grid-template-columns: 210px 78px 120px minmax(360px, 1fr);
+      grid-template-columns: 200px 66px 100px 96px 96px minmax(320px, 1fr);
       align-items: center;
-      min-width: 780px;
+      min-width: 940px;
     }
+    .gantt-ctrl {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 1rem;
+      padding: 0.55rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+      min-width: 940px;
+    }
+    .gantt-ctrl label { font-weight: 600; color: var(--primary-dark); }
+    .gantt-ctrl input {
+      padding: 0.2rem 0.35rem;
+      font: inherit;
+      border: 1px solid #cfd8dc;
+      border-radius: 6px;
+    }
+    .gantt-ctrl .nota { color: var(--text-muted); font-size: 0.82rem; }
+    .gantt-row .g-ini, .gantt-row .g-fin { font-size: 0.82rem; white-space: nowrap; }
     .gantt-head {
       font-family: var(--font-display);
       font-size: 0.72rem;
@@ -420,14 +438,14 @@
       padding: 0.55rem 0.8rem;
       background: #f7f9fc;
       border-top: 1px solid var(--border);
-      min-width: 780px;
+      min-width: 940px;
     }
     .g-legend { display: inline-flex; align-items: center; gap: 0.35rem; color: var(--text-muted); }
     .g-legend i { display: inline-block; width: 18px; height: 10px; border-radius: 3px; margin-left: 0.5rem; }
     .g-legend i.ok { background: var(--primary); }
     .g-legend i.tbd { background: #fff3e0; border: 1px dashed #fb8c00; }
     @media print {
-      .gantt-row input { border: none; }
+      .gantt-row input, .gantt-ctrl input { border: none; }
     }
   </style>
 </head>
@@ -471,12 +489,11 @@
     <div class="fases-flow" aria-label="Fases">
       <a href="#fase-1">1 · Infraestructura</a><span class="sep">→</span>
       <a href="#fase-2">2 · Imagen, dominio y RCU</a><span class="sep">→</span>
-      <a href="#fase-3">3 · Configuración</a><span class="sep">→</span>
-      <a href="#fase-4">4 · Código</a><span class="sep">→</span>
+      <a href="#fase-3">3 · Código</a><span class="sep">→</span>
+      <a href="#fase-4">4 · Configuración</a><span class="sep">→</span>
       <a href="#fase-5">5 · Batch y reportes</a><span class="sep">→</span>
       <a href="#fase-6">6 · Acceso</a><span class="sep">→</span>
-      <a href="#fase-7">7 · Pruebas</a><span class="sep">→</span>
-      <a class="final" href="#fase-8">8 · Certificación</a>
+      <a class="final" href="#fase-7">7 · Pruebas unitarias</a>
     </div>
 
     <nav class="toc" aria-label="Contenido">
@@ -490,31 +507,40 @@
         <section class="slide-block" id="resumen">
           <h3><span class="num">0</span> Resumen de fases</h3>
           <div class="tabla"><table>
-            <tr><th>Fase</th><th>Objetivo</th><th>Entregable principal</th></tr>
-            <tr><td><a href="#fase-1">1 · Infraestructura AWS</a></td><td>Definir alcance, responsables y base de datos de Certificación, y crear la red, seguridad, almacenamiento y servicios base del ambiente</td><td>Plan de Certificación aprobado, BD disponible y Cuenta/VPC, EFS, ECR, Cloud Map, IAM y secretos listos</td></tr>
-            <tr><td><a href="#fase-2">2 · Imagen, dominio y RCU</a></td><td>Reutilizar la imagen y una copia del dominio, con los esquemas RCU en una nueva instancia de BD y DataSources ajustados por script</td><td>Servicios ECS en ejecución, DataSources apuntando a Certificación y servidores en RUNNING</td></tr>
-            <tr><td><a href="#fase-3">3 · Configuración</a></td><td>Configurar conexión a BD, Forms, Reports y tablas de control</td><td>Configuración versionada y verificada</td></tr>
-            <tr><td><a href="#fase-4">4 · Código</a></td><td>Desplegar y compilar la versión congelada de RECTOR</td><td>100 % de módulos compilados o excluidos con justificación</td></tr>
-            <tr><td><a href="#fase-5">5 · Batch y reportes</a></td><td>Automatizar las colas de procesos y la generación de reportes</td><td>Colas activas y reportes generados desde Forms y desde las colas</td></tr>
-            <tr><td><a href="#fase-6">6 · Acceso de usuarios</a></td><td>Publicar RECTOR con URL fija y HTTPS</td><td>URL de Certificación y cliente Java instalado en los equipos de prueba</td></tr>
-            <tr><td><a href="#fase-7">7 · Pruebas</a></td><td>Validar funcionalidad, integración, rendimiento y seguridad</td><td>Informe de pruebas y defectos cerrados</td></tr>
-            <tr><td><a href="#fase-8">8 · Operación y certificación</a></td><td>Dejar el ambiente operable y obtener la aceptación de los usuarios</td><td>Acta de certificación y plan de paso a producción</td></tr>
+            <tr><th>Fase</th><th>Objetivo</th><th>Entregable principal</th><th>Duración</th></tr>
+            <tr><td><a href="#fase-1">1 · Infraestructura AWS</a></td><td>Definir alcance, responsables y base de datos de Certificación, y crear la red, seguridad, almacenamiento y servicios base del ambiente</td><td>Plan de Certificación aprobado, BD disponible y Cuenta/VPC, EFS, ECR, Cloud Map, IAM y secretos listos</td><td>5 días</td></tr>
+            <tr><td><a href="#fase-2">2 · Imagen, dominio y RCU</a></td><td>Reutilizar la imagen y una copia del dominio, con los esquemas RCU en una nueva instancia de BD y DataSources ajustados por script</td><td>Servicios ECS en ejecución, DataSources apuntando a Certificación y servidores en RUNNING</td><td>5 días</td></tr>
+            <tr><td><a href="#fase-3">3 · Código</a></td><td>Desplegar, compilar y ejecutar la versión congelada de RECTOR: Forms, Pro*C y colas</td><td>100 % de módulos compilados y ejecutados, o excluidos con justificación</td><td>10 días</td></tr>
+            <tr><td><a href="#fase-4">4 · Configuración</a></td><td>Configurar conexión a BD, Forms, Reports y tablas de control</td><td>Configuración versionada y verificada</td><td>3 días</td></tr>
+            <tr><td><a href="#fase-5">5 · Batch y reportes</a></td><td>Automatizar las colas de procesos y la generación de reportes</td><td>Colas activas y reportes generados desde Forms y desde las colas</td><td>5 días</td></tr>
+            <tr><td><a href="#fase-6">6 · Acceso de usuarios</a></td><td>Publicar RECTOR con URL fija y HTTPS</td><td>URL de Certificación y cliente Java instalado en los equipos de prueba</td><td>2 días</td></tr>
+            <tr><td><a href="#fase-7">7 · Pruebas unitarias</a></td><td>Verificar servicios, Forms, Reports, colas y seguridad antes de entregar el ambiente</td><td>Informe de pruebas y defectos críticos cerrados</td><td>3 días</td></tr>
+            <tr><td colspan="3"><strong>Total</strong> (la fase 4 inicia a la mitad de la fase 3; la fase 3 se solapa con las fases 4 y 5)</td><td><strong>28 días</strong></td></tr>
           </table></div>
           <div class="callout">
-            Las fases 1 a 3 son de infraestructura y pueden avanzar en paralelo con la preparación del código (fase 4). Las fases 5 a
-            8 son secuenciales: no se inician pruebas de usuario sin acceso estable ni procesos batch automatizados.
+            El código (fase 3) se compila sobre el ambiente creado en las fases 1 y 2; la configuración (fase 4) inicia a la mitad de la compilación. Las fases 5 a
+            7 son secuenciales: no se entrega el ambiente sin procesos batch automatizados, acceso estable y pruebas unitarias.
           </div>
 
           <h4 class="sub">Cronograma esquemático</h4>
           <p>
-            Indique la duración estimada de cada fase en semanas. El diagrama ubica cada fase según sus dependencias y calcula la
-            duración total. Las fases sin duración asignada se muestran con borde punteado y una semana de referencia.
+            Duración estimada de cada fase en días hábiles, con jornadas de lunes a sábado. Cada fase trae la estimación acordada
+            y cualquier valor, incluida la fecha de inicio, se puede cambiar en el diagrama. El diagrama ubica cada fase según sus
+            dependencias y calcula sus fechas y la duración total. Una fase sin duración asignada se muestra con borde punteado y
+            5 días de referencia.
           </p>
           <div class="gantt" id="gantt">
+            <div class="gantt-ctrl">
+              <label for="gantt-inicio">Fecha de inicio</label>
+              <input type="date" id="gantt-inicio" value="2026-10-14">
+              <span class="nota">Jornadas de lunes a sábado; no se descuentan feriados.</span>
+            </div>
             <div class="gantt-head">
               <span class="g-fase">Fase</span>
-              <span class="g-dur">Semanas</span>
+              <span class="g-dur">Días</span>
               <span class="g-dep">Inicia después de</span>
+              <span class="g-ini">Inicio</span>
+              <span class="g-fin">Fin</span>
               <span class="g-scale" id="gantt-scale"></span>
             </div>
             <div class="gantt-body" id="gantt-body"></div>
@@ -654,7 +680,48 @@
         </section>
 
         <section class="slide-block" id="fase-3">
-          <h3><span class="num">3</span> Configuración de la aplicación</h3>
+          <h3><span class="num">3</span> Despliegue y compilación del código</h3>
+          <p>
+            Compila en el ambiente la versión de RECTOR que corre hoy en producción, contra el esquema de Certificación, y verifica
+            que los programas no solo compilen sino que también ejecuten. Antes de compilar se congela la versión de fuentes
+            (<code>.fmb</code>, <code>.mmb</code>, <code>.pll</code>, <code>.olb</code>, <code>.pc</code>, <code>.rdf</code>) y se
+            registra en el control de versiones.
+          </p>
+
+          <h4 class="sub">Forms</h4>
+          <ul>
+            <li>Excluir los fuentes que no están en producción con <code>move_old_fmb.sh</code>.</li>
+            <li>Compilar con <code>compile_all_forms.sh</code> y analizar <code>resultados.csv</code> y los logs por módulo (<a href="../app-rector/index.html#paso-1-1-3">1.1.3</a>).</li>
+            <li><strong>Revisar y remediar las incidencias de compilación:</strong> módulos que dependen del esquema, <code>EJECUTAREP.fmb</code> faltante, referencias rotas a librerías u objetos, y avisos relevantes de los módulos compilados con avisos.</li>
+            <li>Verificar que <code>Rector.fmx</code>, <code>RECTOR.mmx</code> y los menús <code>GIO_*</code> estén en <code>bin/fmx</code> y <code>bin/mnu</code>.</li>
+            <li><strong>Revisar y remediar las incidencias de ejecución:</strong> abrir RECTOR con el profile <code>prodws</code>, navegar el menú y una muestra de formas por módulo, y corregir los errores en tiempo de ejecución (<code>FRM-40010</code> por módulos no encontrados, <code>FRM-40735</code> y <code>ORA-</code> en triggers, librerías <code>.plx</code> faltantes, llamadas a reportes).</li>
+            <li>Copiar los reportes <code>.rdf</code> a <code>reports_app/src</code> y validar una muestra con <code>rwservlet</code> y desde las formas que los invocan.</li>
+          </ul>
+
+          <h4 class="sub">Pro*C</h4>
+          <ul>
+            <li>Excluir los fuentes que no están en producción con <code>move_old_proc.sh</code>.</li>
+            <li>Compilar con <code>compile_proc_all.sh</code> y analizar los logs por programa (<a href="../app-rector/index.html#paso-2-1-3">2.1.3</a>).</li>
+            <li><strong>Revisar y remediar las incidencias de compilación:</strong> diferencias de esquema, errores de precompilación (<code>PCC-</code>) y de enlace con las librerías de Oracle.</li>
+            <li><strong>Revisar y remediar las incidencias de ejecución:</strong> ejecutar una muestra de programas con el ambiente de <code>set_batch_env.sh</code>, y corregir errores de conexión, de variables de ambiente, de rutas de entrada y salida, de scripts auxiliares (como <code>LP.sh</code>) y de <code>NLS_LANG</code>.</li>
+          </ul>
+
+          <h4 class="sub">Colas</h4>
+          <ul>
+            <li>Desplegar en <code>colas_app</code> los scripts de colas (<code>COLA_A</code> … <code>COLA_Z</code>, <code>COLA.env</code>) adaptados al nuevo ambiente.</li>
+            <li>Verificar que <code>CARC00100</code> y los programas que despacha estén compilados y accesibles en el <code>PATH</code> del contenedor <code>colas</code>.</li>
+            <li>Ejecutar manualmente una orden de prueba por cola y revisar su log y su salida en <code>reports_app/rep</code>. La automatización de las colas se hace en la <a href="#fase-5">fase 5</a>.</li>
+          </ul>
+
+          <h4 class="sub">Criterio de salida</h4>
+          <p>
+            Todos los módulos Forms y programas Pro*C del alcance compilados y ejecutados sin errores, o excluidos con una
+            justificación aprobada por el área responsable, y una orden de prueba procesada en cada cola.
+          </p>
+        </section>
+
+        <section class="slide-block" id="fase-4">
+          <h3><span class="num">4</span> Configuración de la aplicación</h3>
           <p>
             Lleva al ambiente la configuración documentada en <a href="../app-rector/index.html">Ejecución de Aplicativo RECTOR</a>,
             como archivos versionados y no como cambios manuales dentro del contenedor.
@@ -670,24 +737,6 @@
           </ul>
           <h4 class="sub">Criterio de salida</h4>
           <p>Configuración en el repositorio, aplicada en el ambiente y verificada: <code>frmservlet?config=prodws</code> responde con el JNLP y <code>rwservlet</code> responde <code>getserverinfo</code>.</p>
-        </section>
-
-        <section class="slide-block" id="fase-4">
-          <h3><span class="num">4</span> Despliegue y compilación del código</h3>
-          <p>
-            Compila en el ambiente la versión de RECTOR que corre hoy en producción, contra el esquema de Certificación.
-          </p>
-          <h4 class="sub">Actividades</h4>
-          <ul>
-            <li>Congelar la versión de fuentes (<code>.fmb</code>, <code>.mmb</code>, <code>.pll</code>, <code>.olb</code>, <code>.pc</code>, <code>.rdf</code>) y registrarla en el control de versiones.</li>
-            <li>Excluir los fuentes que no están en producción con <code>move_old_fmb.sh</code> y <code>move_old_proc.sh</code>.</li>
-            <li>Compilar Forms con <code>compile_all_forms.sh</code> y Pro*C con <code>compile_proc_all.sh</code>, analizando <code>resultados.csv</code> y los logs por módulo.</li>
-            <li>Resolver los pendientes conocidos: módulos que dependen del esquema, <code>EJECUTAREP.fmb</code> faltante y referencias rotas en Forms; programas Pro*C con diferencias de esquema o errores de código.</li>
-            <li>Verificar que <code>Rector.fmx</code>, <code>RECTOR.mmx</code> y los menús <code>GIO_*</code> estén en <code>bin/fmx</code> y <code>bin/mnu</code>.</li>
-            <li>Copiar los reportes <code>.rdf</code> a <code>reports_app/src</code> y validar una muestra con <code>rwservlet</code>.</li>
-          </ul>
-          <h4 class="sub">Criterio de salida</h4>
-          <p>Todos los módulos del alcance compilados, o excluidos con una justificación aprobada por el área responsable.</p>
         </section>
 
         <section class="slide-block" id="fase-5">
@@ -727,32 +776,21 @@
         </section>
 
         <section class="slide-block" id="fase-7">
-          <h3><span class="num">7</span> Pruebas</h3>
+          <h3><span class="num">7</span> Pruebas unitarias</h3>
+          <p>
+            Verifica por separado cada componente del ambiente antes de entregarlo a las áreas usuarias para sus pruebas de
+            certificación.
+          </p>
           <div class="tabla"><table>
-            <tr><th>Tipo</th><th>Alcance</th><th>Responsable</th></tr>
-            <tr><td>Humo</td><td>Arranque de servicios, login, menú principal, una forma por módulo, un reporte y una orden de cola</td><td>Desarrollo / infraestructura</td></tr>
-            <tr><td>Funcionales</td><td>Casos de negocio por área (Cartera, Caja, Siniestros, Contabilidad, Reaseguro, etc.), comparando contra producción</td><td>Áreas usuarias</td></tr>
-            <tr><td>Integración</td><td>Interfaces con otros sistemas, archivos de entrada y salida, procesos batch encadenados</td><td>Desarrollo / áreas usuarias</td></tr>
-            <tr><td>Rendimiento</td><td>Sesiones concurrentes esperadas, tiempos de respuesta, consumo de CPU y memoria de las tareas Fargate</td><td>Infraestructura</td></tr>
+            <tr><th>Componente</th><th>Alcance</th><th>Responsable</th></tr>
+            <tr><td>Servicios</td><td>Arranque de <code>admin</code>, <code>forms</code>, <code>reports-server</code> y <code>colas</code>; reinicio y reemplazo de tareas</td><td>Infraestructura</td></tr>
+            <tr><td>Forms</td><td>Login, menú principal y apertura de una forma por módulo</td><td>Desarrollo</td></tr>
+            <tr><td>Reports</td><td>Un reporte por módulo desde Forms y desde <code>rwservlet</code></td><td>Desarrollo</td></tr>
+            <tr><td>Colas y Pro*C</td><td>Una orden por cola procesada por <code>CARC00100</code>, con su salida en <code>reports_app/rep</code></td><td>Desarrollo</td></tr>
             <tr><td>Seguridad</td><td>Puertos expuestos, cifrado, gestión de credenciales, accesos a ECS Exec</td><td>Seguridad</td></tr>
-            <tr><td>Continuidad</td><td>Reinicio y reemplazo de tareas, recuperación desde respaldo de EFS</td><td>Infraestructura</td></tr>
           </table></div>
           <h4 class="sub">Criterio de salida</h4>
-          <p>Casos de prueba ejecutados, defectos críticos y altos cerrados, y los demás con plan de corrección acordado.</p>
-        </section>
-
-        <section class="slide-block" id="fase-8">
-          <h3><span class="num">8</span> Operación y certificación</h3>
-          <h4 class="sub">Actividades</h4>
-          <ul>
-            <li>Monitoreo: métricas y alarmas de CloudWatch (estado de servicios, CPU, memoria, errores en logs de WebLogic y de las colas).</li>
-            <li>Respaldos: AWS Backup de EFS y política de respaldo de la BD de Certificación.</li>
-            <li>Runbooks: arranque y parada, recompilación de módulos, reinicio de colas, rotación de credenciales y solución de errores frecuentes.</li>
-            <li>Acta de certificación firmada por las áreas usuarias.</li>
-            <li>Plan de paso a producción: lecciones aprendidas, dimensionamiento, ventana de migración y plan de reversión.</li>
-          </ul>
-          <h4 class="sub">Criterio de salida</h4>
-          <p>Ambiente operado por el equipo de soporte con sus runbooks y RECTOR certificado por los usuarios.</p>
+          <p>Pruebas ejecutadas sobre todos los componentes, defectos críticos y altos cerrados, y el ambiente entregado a las áreas usuarias.</p>
         </section>
 
         <section class="slide-block anexo" id="brechas">
@@ -762,16 +800,15 @@
           </p>
           <div class="tabla"><table>
             <tr><th>Brecha</th><th>Situación actual</th><th>Fase</th></tr>
-            <tr><td>Esquema de BD</td><td><code>BANESCO_DEV</code> difiere de producción: 7 formas y varios programas Pro*C no compilan por columnas u objetos faltantes</td><td><a href="#fase-1">1</a>, <a href="#fase-4">4</a></td></tr>
-            <tr><td>Módulos Forms pendientes</td><td>19 pendientes (<a href="../app-rector/index.html#paso-1-1-3">1.1.3</a>): esquema, <code>EJECUTAREP.fmb</code> faltante y referencias rotas</td><td><a href="#fase-4">4</a></td></tr>
-            <tr><td>Programas Pro*C pendientes</td><td>5 pendientes (<a href="../app-rector/index.html#paso-2-1-3">2.1.3</a>)</td><td><a href="#fase-4">4</a></td></tr>
-            <tr><td>Compilados incompletos en el EFS</td><td><code>bin/fmx</code> quedó con parte de los <code>.fmx</code> y sin <code>Rector.fmx</code> (<code>FRM-40010</code>)</td><td><a href="#fase-4">4</a></td></tr>
-            <tr><td><code>rector.env</code> cortado</td><td><code>FORMS_PATH</code> y <code>CLASSPATH</code> truncados en el dominio</td><td><a href="#fase-3">3</a></td></tr>
+            <tr><td>Esquema de BD</td><td><code>BANESCO_DEV</code> difiere de producción: 7 formas y varios programas Pro*C no compilan por columnas u objetos faltantes</td><td><a href="#fase-1">1</a>, <a href="#fase-3">3</a></td></tr>
+            <tr><td>Módulos Forms pendientes</td><td>19 pendientes (<a href="../app-rector/index.html#paso-1-1-3">1.1.3</a>): esquema, <code>EJECUTAREP.fmb</code> faltante y referencias rotas</td><td><a href="#fase-3">3</a></td></tr>
+            <tr><td>Programas Pro*C pendientes</td><td>5 pendientes (<a href="../app-rector/index.html#paso-2-1-3">2.1.3</a>)</td><td><a href="#fase-3">3</a></td></tr>
+            <tr><td><code>rector.env</code> cortado</td><td><code>FORMS_PATH</code> y <code>CLASSPATH</code> truncados en el dominio</td><td><a href="#fase-4">4</a></td></tr>
             <tr><td>Puertos expuestos</td><td>El security group de <code>forms</code> admite <code>7001</code>, <code>9001</code> y <code>9012</code> desde <code>0.0.0.0/0</code></td><td><a href="#fase-1">1</a></td></tr>
             <tr><td>Acceso por IP de la tarea</td><td>La IP cambia en cada despliegue y el JNLP la lleva en su <code>codebase</code>; el acceso es HTTP sin cifrar</td><td><a href="#fase-6">6</a></td></tr>
-            <tr><td>Credenciales en texto plano</td><td><code>USUARIOBATCH.lis</code>, usuario por defecto en los scripts de compilación y <code>userid</code> en la URL de <code>rwservlet</code></td><td><a href="#fase-1">1</a>, <a href="#fase-3">3</a></td></tr>
+            <tr><td>Credenciales en texto plano</td><td><code>USUARIOBATCH.lis</code>, usuario por defecto en los scripts de compilación y <code>userid</code> en la URL de <code>rwservlet</code></td><td><a href="#fase-1">1</a>, <a href="#fase-4">4</a></td></tr>
             <tr><td>Imagen sin fijar</td><td>Revisiones de task definition con el tag <code>latest</code> (sin <code>libaio</code>) y <code>report.json</code> con JSON inválido</td><td><a href="#fase-1">1</a>, <a href="#fase-2">2</a></td></tr>
-            <tr><td><code>NLS_LANG</code> distinto</td><td><code>rector.env</code> usa <code>WE8ISO8859P1</code> y <code>COLA.env</code> de la versión 12c <code>WE8ISO8859P15</code></td><td><a href="#fase-3">3</a></td></tr>
+            <tr><td><code>NLS_LANG</code> distinto</td><td><code>rector.env</code> usa <code>WE8ISO8859P1</code> y <code>COLA.env</code> de la versión 12c <code>WE8ISO8859P15</code></td><td><a href="#fase-4">4</a></td></tr>
             <tr><td>Colas manuales</td><td><code>CARC00100</code> se lanza a mano desde <code>reports-server</code>; los scripts <code>COLA_*</code> tienen rutas de la versión 12c</td><td><a href="#fase-5">5</a></td></tr>
             <tr><td>Impresión</td><td>Impresión inmediata desactivada con <code>LP.sh</code></td><td><a href="#fase-5">5</a></td></tr>
             <tr><td>Reports entre contenedores</td><td><code>rwclient</code> no descubre el Reports Server fuera de <code>reports-server</code> (multicast); la alternativa es <code>rwservlet</code> por HTTP</td><td><a href="#fase-5">5</a></td></tr>
@@ -793,35 +830,63 @@
   <script>
     (function () {
       // deps: fases que deben terminar antes de iniciar la fase
+      // mitadDe: la fase inicia a la mitad de la fase indicada
+      // dias: duración estimada por defecto; el valor ingresado en el diagrama la reemplaza
       var fases = [
-        { id: 1, nombre: "1 · Infraestructura AWS",    deps: [] },
-        { id: 2, nombre: "2 · Imagen, dominio y RCU",  deps: [1] },
-        { id: 3, nombre: "3 · Configuración",          deps: [2] },
-        { id: 4, nombre: "4 · Código",                 deps: [] },
-        { id: 5, nombre: "5 · Batch y reportes",       deps: [3, 4] },
-        { id: 6, nombre: "6 · Acceso de usuarios",     deps: [5] },
-        { id: 7, nombre: "7 · Pruebas",                deps: [6] },
-        { id: 8, nombre: "8 · Operación y certificación", deps: [7], final: true }
+        { id: 1, nombre: "1 · Infraestructura AWS",    deps: [],     dias: 5 },
+        { id: 2, nombre: "2 · Imagen, dominio y RCU",  deps: [1],    dias: 5 },
+        { id: 3, nombre: "3 · Compilación código",     deps: [2],    dias: 10 },
+        { id: 4, nombre: "4 · Configuración",          deps: [],     dias: 3, mitadDe: 3 },
+        { id: 5, nombre: "5 · Batch y reportes",       deps: [4],    dias: 5 },
+        { id: 6, nombre: "6 · Acceso de usuarios",     deps: [5],    dias: 2 },
+        { id: 7, nombre: "7 · Pruebas unitarias",      deps: [6],    dias: 3, final: true }
       ];
-      var KEY = "roadmap-cert-semanas-v2";
+      var KEY = "roadmap-cert-dias-v4";
       var guardado = {};
       try { guardado = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+
+      var KEY_INICIO = "roadmap-cert-inicio";
+      var INICIO_DEFECTO = "2026-10-14";
+      var DIAS_SEMANA = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
 
       var body = document.getElementById("gantt-body");
       var scale = document.getElementById("gantt-scale");
       var total = document.getElementById("gantt-total");
+      var inicio = document.getElementById("gantt-inicio");
+      try { inicio.value = localStorage.getItem(KEY_INICIO) || INICIO_DEFECTO; } catch (e) {}
+      inicio.addEventListener("input", dibujar);
+
+      // n-ésimo día hábil (0 = primero) a partir de la fecha de inicio, con jornadas de lunes a sábado
+      function diaHabil(n) {
+        var p = (inicio.value || INICIO_DEFECTO).split("-");
+        var f = new Date(+p[0], +p[1] - 1, +p[2]);
+        if (f.getDay() === 0) f.setDate(f.getDate() + 1);
+        for (var i = 0; i < n; i++) {
+          f.setDate(f.getDate() + 1);
+          if (f.getDay() === 0) f.setDate(f.getDate() + 1);
+        }
+        return f;
+      }
+      function dosDig(n) { return (n < 10 ? "0" : "") + n; }
+      function corta(f) { return dosDig(f.getDate()) + "/" + dosDig(f.getMonth() + 1); }
+      function larga(f) { return DIAS_SEMANA[f.getDay()] + " " + corta(f) + "/" + f.getFullYear(); }
 
       fases.forEach(function (f) {
         var row = document.createElement("div");
         row.className = "gantt-row";
         row.innerHTML =
           '<span class="g-fase"><a href="#fase-' + f.id + '">' + f.nombre + '</a></span>' +
-          '<span class="g-dur"><input type="number" min="0" step="0.5" placeholder="—" aria-label="Semanas de la fase ' + f.id + '"></span>' +
-          '<span class="g-dep">' + (f.deps.length ? "Fase " + f.deps.join(" y ") : "Inicio") + '</span>' +
+          '<span class="g-dur"><input type="number" min="0" step="1" placeholder="—" aria-label="Días de la fase ' + f.id + '"></span>' +
+          '<span class="g-dep">' + (f.mitadDe ? "Mitad de fase " + f.mitadDe : f.deps.length ? "Fase " + f.deps.join(" y ") : "Inicio") + '</span>' +
+          '<span class="g-ini"></span>' +
+          '<span class="g-fin"></span>' +
           '<span class="g-track"></span>';
         f.input = row.querySelector("input");
         f.track = row.querySelector(".g-track");
-        if (guardado[f.id]) f.input.value = guardado[f.id];
+        f.celIni = row.querySelector(".g-ini");
+        f.celFin = row.querySelector(".g-fin");
+        if (f.id in guardado) { if (guardado[f.id]) f.input.value = guardado[f.id]; }
+        else if (f.dias) f.input.value = f.dias;
         f.input.addEventListener("input", dibujar);
         body.appendChild(row);
       });
@@ -832,42 +897,54 @@
           var v = parseFloat(f.input.value);
           var tbd = !(v > 0);
           if (tbd) asignadas = false;
-          var dur = tbd ? 1 : v;
+          var dur = tbd ? 5 : v;
           var ini = f.deps.reduce(function (m, d) { return Math.max(m, fin[d] || 0); }, 0);
+          if (f.mitadDe) {
+            var base = datos[f.mitadDe];
+            ini = Math.max(ini, Math.floor(base.ini + base.dur / 2));
+          }
           fin[f.id] = ini + dur;
           datos[f.id] = { ini: ini, dur: dur, tbd: tbd };
           max = Math.max(max, fin[f.id]);
-          if (!tbd) guardado[f.id] = v; else delete guardado[f.id];
+          if (!tbd) guardado[f.id] = v; else guardado[f.id] = 0;
         });
-        try { localStorage.setItem(KEY, JSON.stringify(guardado)); } catch (e) {}
+        try {
+          localStorage.setItem(KEY, JSON.stringify(guardado));
+          localStorage.setItem(KEY_INICIO, inicio.value || INICIO_DEFECTO);
+        } catch (e) {}
 
-        var semanas = Math.max(8, Math.ceil(max));
-        var paso = semanas > 26 ? 4 : semanas > 12 ? 2 : 1;
+        var dias = Math.max(30, Math.ceil(max / 6) * 6);
+        var paso = dias > 120 ? 24 : dias > 60 ? 12 : 6;
         scale.innerHTML = "";
-        for (var s = 0; s < semanas; s += paso) {
+        for (var s = 0; s < dias; s += paso) {
           var t = document.createElement("span");
           t.className = "tick";
-          t.style.left = (s / semanas * 100) + "%";
-          t.textContent = "S" + (s + 1);
+          t.style.left = (s / dias * 100) + "%";
+          t.textContent = corta(diaHabil(s));
           scale.appendChild(t);
         }
 
         fases.forEach(function (f) {
           var d = datos[f.id];
           var html = "";
-          for (var s = 0; s < semanas; s += paso) {
-            html += '<span class="grid" style="left:' + (s / semanas * 100) + '%"></span>';
+          for (var s = 0; s < dias; s += paso) {
+            html += '<span class="grid" style="left:' + (s / dias * 100) + '%"></span>';
           }
-          var etiqueta = d.tbd ? "por definir" : d.dur + " sem";
+          var fIni = diaHabil(Math.floor(d.ini));
+          var fFin = diaHabil(Math.ceil(d.ini + d.dur) - 1);
+          f.celIni.textContent = larga(fIni);
+          f.celFin.textContent = larga(fFin);
+          var etiqueta = d.tbd ? "por definir" : d.dur + " d";
           html += '<span class="bar' + (d.tbd ? " tbd" : f.final ? " final" : "") + '" style="left:' +
-            (d.ini / semanas * 100) + '%;width:' + (d.dur / semanas * 100) + '%" title="Semana ' +
-            (d.ini + 1) + ' a ' + (d.ini + d.dur) + '">' + etiqueta + '</span>';
+            (d.ini / dias * 100) + '%;width:' + (d.dur / dias * 100) + '%" title="' +
+            larga(fIni) + ' a ' + larga(fFin) + '">' + etiqueta + '</span>';
           f.track.innerHTML = html;
         });
 
+        var rango = " (" + larga(diaHabil(0)) + " a " + larga(diaHabil(Math.ceil(max) - 1)) + ")";
         total.textContent = asignadas
-          ? max + (max === 1 ? " semana" : " semanas")
-          : "faltan fases por asignar (" + max + " semanas, contando 1 por cada fase sin asignar)";
+          ? max + (max === 1 ? " día" : " días") + rango
+          : "faltan fases por asignar (" + max + " días, contando 5 por cada fase sin asignar)" + rango;
       }
 
       dibujar();

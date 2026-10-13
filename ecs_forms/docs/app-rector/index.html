@@ -1496,21 +1496,26 @@ aws ecs execute-command --cluster forms_report --task dba0a9d75d77475d8a3ca34c79
 
       <h5 class="sub" id="paso-1-1-3">1.1.3 · Resultado de la compilación (referencia)</h5>
       <p>
-        Estado final de los módulos que quedan en <code>src</code> después de apartar los que no están en uso (punto
-        <a href="#paso-1-1-2">1.1.2</a>), según su compilación más reciente en <code>forms-server</code>: compilación completa del
-        10/09/2026 (<code>compile_all_forms.sh</code>), recompilaciones del 02/10 y 05/10/2026, y recompilación de
-        <code>formas.lis</code> (150 módulos pendientes o con error) el 13/10/2026. Logs en <code>forms_app/log/log_aws_*</code> y
-        <code>forms_app/log/compile_list_13102026</code>.
+        Compilación completa con <code>compile_all_forms.sh</code> en <code>forms-server</code> el 13/10/2026 (ejecución
+        <code>20261013_204134</code>), sobre los módulos que quedan en <code>src</code> después de apartar los que no están en uso
+        (punto <a href="#paso-1-1-2">1.1.2</a>). Duró 1 h 46 min 33 s. Los logs están en
+        <code>forms_app/log/compile_all/20261013_204134</code> (copia local en
+        <code>forms_app/log/compile_all_13102026</code>): el log general, un <code>&lt;modulo&gt;.log</code> y
+        <code>&lt;modulo&gt;.err</code> por módulo y <code>resultados.csv</code>.
       </p>
       <div class="tabla"><table>
-        <tr><th>Estado final</th><th>Módulos</th></tr>
-        <tr><td>Compilados (2.063 formas y 13 menús)</td><td>2.076</td></tr>
-        <tr><td>Pendientes</td><td>19</td></tr>
+        <tr><th>Resultado</th><th>Módulos</th></tr>
+        <tr><td><code>OK</code>: sin avisos (1.947 formas y los 13 menús)</td><td>1.960</td></tr>
+        <tr><td><code>OK_AVISOS</code>: compilados con avisos</td><td>116</td></tr>
+        <tr><td><code>FAIL</code>: pendientes</td><td>19</td></tr>
+        <tr><td><code>SKIP_*</code>: omitidos</td><td>0</td></tr>
         <tr><td><strong>Total</strong> (2.082 formas de <code>src/rector</code> y 13 menús de <code>src/menues</code>)</td><td><strong>2.095</strong></td></tr>
       </table></div>
       <p>
-        En la recompilación del 13/10 compilaron 131 de los 150 módulos de <code>formas.lis</code> (15 sin avisos, entre ellos los
-        13 menús, y 116 con avisos). Los 19 pendientes, agrupados por causa:
+        Quedan compilados 2.076 módulos (2.063 formas y 13 menús), incluidos <code>Rector.fmx</code> y <code>RECTOR.mmx</code>,
+        que el profile <code>prodws</code> necesita para arrancar (punto <a href="#paso-1-2">1.2</a>). Los menús no generan
+        <code>.err</code>; su salida queda solo en <code>&lt;modulo&gt;.log</code>. Los 19 pendientes son los mismos de las
+        compilaciones anteriores. Agrupados por causa:
       </p>
       <div class="tabla"><table>
         <tr><th>Grupo</th><th>Causa</th><th>Módulos</th><th>Qué hay que hacer</th><th>Dónde se corrige</th></tr>
@@ -1718,11 +1723,39 @@ grep codebase= frmservlet_prodws     <span class="c"># debe mostrar la IP actual
       <pre class="code">cd ~/Descargas/aws
 $JAVA_HOME/bin/javaws ./frmservlet_prodws</pre>
       <p>3. Ingresar a RECTOR:</p>
-      <ol>
-        <li>Java Web Start pide confirmar la ejecución de <strong>OracleForms</strong>: <strong>Ejecutar</strong>.</li>
-        <li>Forms abre <code>Rector.fmx</code> y muestra la pantalla de conexión: usuario, clave y base (alias del <code>tnsnames.ora</code>, p. ej. <code>SEGU</code>).</li>
-        <li>Al conectar se carga el menú <code>RECTOR.mmx</code>, y desde él los menús <code>GIO_*</code> y las formas de <code>bin/fmx</code>.</li>
-      </ol>
+      <p>
+        a. Java Web Start verifica la aplicación en la ubicación del <code>codebase</code> (<code>http://10.171.244.144:9001</code>)
+        y pide confirmar la ejecución de <strong>OracleForms</strong>, firmada por Oracle America, Inc. El aviso
+        <em>Connection not secure</em> aparece porque el acceso es por HTTP; desaparece al publicar Forms con HTTPS. Pulsar
+        <strong>Ejecutar</strong>:
+      </p>
+      <figure class="shot" data-shot="paso-1-2-6b">
+        <img src="assets/paso-1-2-6b-ejecutar-oracleforms.png" alt="Java Web Start: verificando la aplicación en http://10.171.244.144:9001 y confirmación para ejecutar OracleForms" />
+        <figcaption>Paso 1.2.6b — Java Web Start: confirmar la ejecución de <strong>OracleForms</strong></figcaption>
+      </figure>
+      <p>
+        b. Forms abre <code>Rector.fmx</code> y muestra la ventana <strong>Logon</strong>: usuario y clave de la base, y en
+        <strong>Database</strong> el alias del <code>tnsnames.ora</code> del dominio (<code>SEGU</code>). Pulsar
+        <strong>Connect</strong>:
+      </p>
+      <figure class="shot" data-shot="paso-1-2-6c">
+        <img src="assets/paso-1-2-6c-logon.png" alt="Ventana Logon de Oracle Fusion Middleware Forms Services con usuario, clave y base SEGU" />
+        <figcaption>Paso 1.2.6c — Pantalla de conexión de RECTOR (base <code>SEGU</code>)</figcaption>
+      </figure>
+      <p>
+        c. Al conectar se carga el menú <code>RECTOR.mmx</code> y se muestra el <strong>Menú Principal</strong>. La barra de
+        título indica el usuario y la base de la sesión (<code>KSUAREZ1@SEGU</code>), y la barra de menú da acceso a los módulos
+        (Cartera, Siniestro, Reaseguro, Productores, Caja, Cobranza, Contabilidad, Financiamiento, Auditoría, Procesos,
+        Requerimiento, Capital Humano, etc.), que abren los menús <code>GIO_*</code> y las formas de <code>bin/fmx</code>:
+      </p>
+      <figure class="shot" data-shot="paso-1-2-6d">
+        <img src="assets/paso-1-2-6d-menu-principal.png" alt="Menú Principal de RECTOR conectado como KSUAREZ1@SEGU, con la barra de menú de los módulos y el logo de Banesco Seguros" />
+        <figcaption>Paso 1.2.6d — Menú Principal de RECTOR (<code>KSUAREZ1@SEGU</code>)</figcaption>
+      </figure>
+      <div class="callout">
+        Con el Menú Principal cargado, RECTOR queda operativo en AWS: <code>Rector.fmx</code>, <code>RECTOR.mmx</code>,
+        <code>rector.env</code> y la conexión a la base funcionan con el profile <code>prodws</code>.
+      </div>
       <div class="tabla"><table>
         <tr><th>Error</th><th>Causa</th><th>Qué revisar</th></tr>
         <tr><td><code>ExitException[ 3]java.net.SocketException: Connection reset</code> en <code>JNLP2Manager.ensureAllJnlpFilesAreAvailable</code></td><td>Java Web Start no puede descargar <code>frmall.jar</code>: el JNLP es de una tarea anterior (su <code>codebase</code> apunta a una IP que ya no existe) o la IP pública está bloqueada por una VPN</td><td>Descargar el JNLP de nuevo, con la IP actual, y revisar con <code>grep codebase= &lt;archivo&gt;</code> que la IP sea la de la tarea en ejecución.</td></tr>
@@ -2007,7 +2040,73 @@ tail /u01/oracle/user_projects/apps/colas_app/log/LP.log                  <span 
         task definition de <code>reports-server</code>.
       </div>
 
-      <h5 class="sub" id="paso-2-2-4">2.2.4 · Invocar un reporte desde otro contenedor</h5>
+      <h5 class="sub" id="paso-2-2-4">2.2.4 · Ejecutar URL Reporte</h5>
+      <p>
+        Validación con <strong>reportes modelo</strong> (definiciones sencillas, sin lógica de negocio) para comprobar que Reports Server
+        responde en la arquitectura containerizada y que la conexión a la BD funciona. Requiere <code>WLS_REPORTS</code> en
+        RUNNING y Reports completo en el dominio (<a href="../aws-ecs/report/index.html#paso-6">ECS Reports · Paso 6</a>).
+      </p>
+      <div class="tabla"><table class="fixed">
+        <colgroup><col style="width:22%" /><col style="width:46%" /><col style="width:32%" /></colgroup>
+        <tr><th>Prueba</th><th>URL / comando</th><th>Resultado esperado</th></tr>
+        <tr><td>Servlet activo</td><td><code>http://&lt;IP-pública&gt;:9012/reports/rwservlet</code></td><td>Página de bienvenida de Oracle Reports Services</td></tr>
+        <tr><td>Info del server in-process</td><td><code>…/rwservlet/getserverinfo?authid=weblogic/&lt;clave&gt;</code></td>
+          <td>Reports Server, engines y estado. Sin <code>authid</code> responde <code>REP-51019</code> (normal); con <code>REP-56071</code> falta el rol <code>RW_ADMINISTRATOR</code> (opcional); con <code>REP-52262</code> la salida de diagnóstico está deshabilitada (ver 2.2.4c).</td></tr>
+        <tr><td>Cola de trabajos</td><td><code>…/rwservlet/showjobs</code></td><td>Lista de jobs (vacía al inicio)</td></tr>
+        <tr><td>Reporte modelo con BD</td><td><code>…/rwservlet?report=&lt;modelo&gt;.rdf&amp;userid=&lt;usr&gt;/&lt;pwd&gt;@&lt;TNS&gt;&amp;destype=cache&amp;desformat=PDF</code></td><td>PDF con datos de la BD</td></tr>
+        <tr><td><strong>Caso validado:</strong> <code>CARR30015.rdf</code></td><td><code>…/rwservlet?report=CARR30015.rdf&amp;userid=uspan/&lt;clave&gt;@BANESCO_DEV&amp;destype=cache&amp;desformat=pdf&amp;nu_sec=205873</code></td><td>PDF con datos</td></tr>
+      </table></div>
+      <div class="callout warn">
+        <strong>Requisitos de <code>CARR30015.rdf</code>:</strong>
+        <ul>
+          <li><code>nu_sec=205873</code> debe existir en la BD <code>BANESCO_DEV</code>; si la BD se refresca, usar una secuencia vigente.</li>
+          <li><code>userid</code> es obligatorio: sin él el motor no compila el PL/SQL del RDF (<code>REP-1247</code>).</li>
+          <li>No requiere <code>mode=bitmap</code> (a diferencia de <code>SINR30032.rdf</code>, en modo carácter: <code>REP-1920</code>).</li>
+          <li>El alias <code>BANESCO_DEV</code> debe estar en <code>$TNS_ADMIN/tnsnames.ora</code> y la BD encendida.</li>
+        </ul>
+      </div>
+      <p>Desde dentro del contenedor (sin depender del SG):</p>
+      <pre class="code">curl -s -o /dev/null -w '%{http_code}\n' http://localhost:9012/reports/rwservlet
+curl -s http://localhost:9012/reports/rwservlet/getserverinfo | head -50</pre>
+      <div class="tabla"><table class="fixed">
+        <colgroup><col style="width:38%" /><col style="width:62%" /></colgroup>
+        <tr><th>Respuesta al invocar el reporte</th><th>Causa / acción</th></tr>
+        <tr><td><code>REP-52266</code> / <code>REP-51002</code></td><td>Falta algún elemento de <a href="../aws-ecs/report/index.html#paso-6">ECS Reports · Paso 6</a>; ver <code>rwserver_diagnostic.log</code>.</td></tr>
+        <tr><td>Petición colgada + <code>DFW-99998 UnsatisfiedLinkError: librwu.so: libXm.so.4</code></td><td>Imagen <code>r1</code>: pasar la TD a <code>r2</code> (<a href="../aws-ecs/report/index.html#anexo-r2">anexo</a>).</td></tr>
+        <tr><td>Pantalla "System User Authentication"</td><td>Seguridad de Reports activa: <code>prepare-reports-domain.sh --disable-security</code> o agregar <code>&amp;authid=</code>.</td></tr>
+        <tr><td><code>REP-1247: Uncompiled program units exist</code></td><td>Falta <code>userid</code>, faltan <code>.pll</code> en <code>sourceDir</code> u objetos inválidos en la BD (<code>rwconverter.sh ... compile_all=yes</code>).</td></tr>
+        <tr><td><code>REP-1920</code> Character mode … PDF</td><td>RDF en modo carácter: <code>&amp;mode=bitmap</code> o <em>Mode = Bitmap</em> en Reports Builder.</td></tr>
+        <tr><td>PDF en blanco</td><td>Sin datos (probar <code>desformat=XML</code>) o sin fuentes en <code>$DOMAIN_HOME/reports/fonts</code>.</td></tr>
+        <tr><td><code>REP-0501</code> / <code>ORA-12170</code></td><td>Conectividad a <code>192.168.229.137:1521</code> (<a href="../aws-ecs/report/index.html#paso-3">ECS Reports · Paso 3</a>) y alias TNS; ver el <a href="../aws-ecs/forms/index.html#anexo-cli-red-bd">anexo de red hacia BD</a>.</td></tr>
+      </table></div>
+      <figure class="shot" data-shot="paso-2-2-4a">
+        <img src="../aws-ecs/report/assets/paso-13a-rwservlet.png" alt="curl a rwservlet en 9012 devuelve HTTP 200 y Oracle Reports Services - Servlet" />
+        <figcaption>Paso 2.2.4a — <code>rwservlet</code> en 9012 desde fuera de AWS: <code>HTTP 200</code>, "Oracle Reports Services - Servlet"</figcaption>
+      </figure>
+      <figure class="shot" data-shot="paso-2-2-4b">
+        <img src="../aws-ecs/report/assets/paso-13b-carr30015-pdf.png" alt="PDF generado por CARR30015.rdf con datos de BANESCO_DEV" />
+        <figcaption>Paso 2.2.4b — <code>CARR30015.rdf</code> con <code>nu_sec=205873</code>: PDF "Cuadro Póliza - Recibo Prima" con datos de <code>BANESCO_DEV</code></figcaption>
+      </figure>
+      <p>
+        Al consultar <code>getserverinfo</code> con credenciales válidas, la respuesta por defecto es <code>REP-52262: Diagnostic output is
+        disabled</code>. <strong>No es una falla</strong>: <code>WLS_REPORTS</code> y <code>rwservlet</code> responden y la autenticación
+        pasó; solo indica que los comandos de diagnóstico del servlet están deshabilitados (valor por defecto de Oracle, recomendado
+        en producción porque exponen la configuración del server).
+      </p>
+      <figure class="shot" data-shot="paso-2-2-4c">
+        <img src="../aws-ecs/report/assets/paso-07c-getserverinfo-rep52262.png" alt="rwservlet/getserverinfo en 9012 responde REP-52262: Diagnostic output is disabled" />
+        <figcaption>Paso 2.2.4c — <code>getserverinfo</code>: <code>REP-52262</code>, servlet activo con diagnóstico deshabilitado</figcaption>
+      </figure>
+      <div class="callout">
+        Para habilitarlo temporalmente (solo en desarrollo), en el <code>rwservlet.properties</code> de <code>WLS_REPORTS</code> cambiar
+        <code>&lt;diagnostic&gt;no&lt;/diagnostic&gt;</code> por <code>&lt;diagnostic&gt;yes&lt;/diagnostic&gt;</code> y reiniciar
+        <code>WLS_REPORTS</code> (<a href="../aws-ecs/report/index.html#paso-5-3">ECS Reports · 5.3</a>):
+        <pre class="code">find $DOMAIN_HOME/config/fmwconfig/servers/WLS_REPORTS -name rwservlet.properties
+grep -n diagnostic &lt;ruta&gt;/rwservlet.properties</pre>
+        Volver a <code>no</code> al terminar las pruebas.
+      </div>
+
+      <h5 class="sub" id="paso-2-2-5">2.2.5 · Invocar un reporte desde otro contenedor</h5>
       <p>
         <code>rwclient.sh server=rep_wls_reports_weblogic-reports …</code> funciona dentro de <code>reports-server</code> porque
         el Reports Server está en el mismo contenedor. Desde otro contenedor (<code>forms-server</code>, <code>colas-server</code>)
