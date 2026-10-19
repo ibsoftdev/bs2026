@@ -1942,9 +1942,9 @@ createReportsToolsInstance(instanceName='reptools1', machine='ReportsMachine')</
         <!-- ═════════════ ANEXOS ═════════════ -->
 
         <section class="slide-block anexo" id="anexo-json">
-          <h3><span class="num anexo">Anexo</span> Task definition JSON (<code>reports-server:4</code>)<span class="status done">Hecho</span></h3>
+          <h3><span class="num anexo">Anexo</span> Task definition JSON (<code>reports-server:5</code>)<span class="status done">Hecho</span></h3>
       <p>
-        Última revisión registrada (<code>reports-server:4</code>), exportada en <code>aws-ecs/report/report.json</code>. Se muestra en formato registrable:
+        Última revisión registrada (<code>reports-server:5</code>), exportada en <code>aws-ecs/report/report.json</code>. Se muestra en formato registrable:
         sin los campos de solo lectura que agrega ECS al exportar (<code>taskDefinitionArn</code>, <code>revision</code>, <code>status</code>,
         <code>requiresAttributes</code>, <code>registeredAt</code>/<code>By</code>…), por lo que puede pegarse en ECS →
         <strong>Crear nueva definición de tarea con JSON</strong> o registrarse por CLI. Sustituir <code>&lt;clave&gt;</code> por la contraseña real. La imagen queda fijada por <em>digest</em> (<code>@sha256:…</code>), tal como la resolvió ECS.
@@ -1956,7 +1956,7 @@ createReportsToolsInstance(instanceName='reptools1', machine='ReportsMachine')</
   "containerDefinitions": [
     {
       "name": "reports-server",
-      "image": "730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker@sha256:fbdf850571115d74a8abb6324c1471db7be03428c2fd9d2413fb02899365896f",
+      "image": "730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker@sha256:05a60dee7700a40cdb27520feea9bd73e35fc2841587aaf5d75d7e14ee1ae36f",
       "portMappings": [
         {
           "containerPort": 9012,
@@ -1972,34 +1972,98 @@ createReportsToolsInstance(instanceName='reptools1', machine='ReportsMachine')</
           "name": "wls-reports-https",
           "appProtocol": "http"
         },
-        {"containerPort": 9992, "hostPort": 9992, "protocol": "tcp", "name": "wls-reports-admin"},
-        {"containerPort": 5556, "hostPort": 5556, "protocol": "tcp", "name": "nodemanager"}
+        {
+          "containerPort": 9992,
+          "hostPort": 9992,
+          "protocol": "tcp",
+          "name": "wls-reports-admin"
+        },
+        {
+          "containerPort": 5556,
+          "hostPort": 5556,
+          "protocol": "tcp",
+          "name": "nodemanager"
+        }
       ],
       "essential": true,
-      "command": ["/u01/oracle/scripts/startWLSReports.sh", "-keep"],
+      "command": [
+        "/u01/oracle/scripts/startWLSReports.sh",
+        "-keep"
+      ],
       "environment": [
         {
           "name": "PATH",
           "value": "/u01/oracle/bin:/u01/oracle/oracle_common/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
         },
-        {"name": "ADMIN_SERVER_HOST", "value": "weblogic-admin.forms.local"},
-        {"name": "ADMIN_SERVER_NAME", "value": "AdminServer"},
-        {"name": "ADMIN_USER", "value": "weblogic"},
-        {"name": "MANAGED_SERVER_NAME", "value": "WLS_REPORTS"},
-        {"name": "TNS_ADMIN", "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig"},
-        {"name": "DOMAIN_NAME", "value": "forms_domain"},
-        {"name": "DOMAIN_HOME", "value": "/u01/oracle/user_projects/domains/forms_domain"},
-        {"name": "ADMIN_PASSWORD", "value": "&lt;clave&gt;"},
-        {"name": "MANAGED_SERVER_PORT", "value": "9012"},
-        {"name": "NODE_MANAGER_PORT", "value": "5556"},
-        {"name": "LD_LIBRARY_PATH", "value": "/u01/oracle/lib:/u01/oracle/oracle_common/lib"},
-        {"name": "ORACLE_HOME", "value": "/u01/oracle"},
-        {"name": "ADMIN_SERVER_PORT", "value": "7001"}
+        {
+          "name": "ADMIN_SERVER_HOST",
+          "value": "weblogic-admin.forms.local"
+        },
+        {
+          "name": "ADMIN_SERVER_NAME",
+          "value": "AdminServer"
+        },
+        {
+          "name": "ADMIN_USER",
+          "value": "weblogic"
+        },
+        {
+          "name": "MANAGED_SERVER_NAME",
+          "value": "WLS_REPORTS"
+        },
+        {
+          "name": "TNS_ADMIN",
+          "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig"
+        },
+        {
+          "name": "DOMAIN_NAME",
+          "value": "forms_domain"
+        },
+        {
+          "name": "DOMAIN_HOME",
+          "value": "/u01/oracle/user_projects/domains/forms_domain"
+        },
+        {
+          "name": "ADMIN_PASSWORD",
+          "value": "&lt;clave&gt;"
+        },
+        {
+          "name": "MANAGED_SERVER_PORT",
+          "value": "9012"
+        },
+        {
+          "name": "NODE_MANAGER_PORT",
+          "value": "5556"
+        },
+        {
+          "name": "LD_LIBRARY_PATH",
+          "value": "/u01/oracle/lib:/u01/oracle/oracle_common/lib"
+        },
+        {
+          "name": "ORACLE_HOME",
+          "value": "/u01/oracle"
+        },
+        {
+          "name": "ADMIN_SERVER_PORT",
+          "value": "7001"
+        }
       ],
       "mountPoints": [
-        {"sourceVolume": "efs-domains", "containerPath": "/u01/oracle/user_projects/domains", "readOnly": false},
-        {"sourceVolume": "efs-app", "containerPath": "/u01/oracle/user_projects/apps", "readOnly": false},
-        {"sourceVolume": "efs-scripts", "containerPath": "/u01/oracle/scripts", "readOnly": false}
+        {
+          "sourceVolume": "efs-domains",
+          "containerPath": "/u01/oracle/user_projects/domains",
+          "readOnly": false
+        },
+        {
+          "sourceVolume": "efs-app",
+          "containerPath": "/u01/oracle/user_projects/apps",
+          "readOnly": false
+        },
+        {
+          "sourceVolume": "efs-scripts",
+          "containerPath": "/u01/oracle/scripts",
+          "readOnly": false
+        }
       ],
       "workingDirectory": "/u01/oracle",
       "logConfiguration": {
@@ -2009,7 +2073,8 @@ createReportsToolsInstance(instanceName='reptools1', machine='ReportsMachine')</
           "awslogs-create-group": "true",
           "awslogs-region": "us-east-1",
           "awslogs-stream-prefix": "ecs"
-        }
+        },
+        "secretOptions": []
       }
     }
   ],
@@ -2043,11 +2108,18 @@ createReportsToolsInstance(instanceName='reptools1', machine='ReportsMachine')</
       }
     }
   ],
-  "runtimePlatform": {"cpuArchitecture": "X86_64", "operatingSystemFamily": "LINUX"},
-  "requiresCompatibilities": ["FARGATE"],
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  },
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
   "cpu": "2048",
   "memory": "4096",
-  "ephemeralStorage": {"sizeInGiB": 100}
+  "ephemeralStorage": {
+    "sizeInGiB": 100
+  }
 }</pre>
         </section>
 
@@ -2163,7 +2235,7 @@ aws ecs describe-task-definition --task-definition reports-server \
         Las lecciones de infraestructura comunes (rol de tarea, timeout de ECR, espacio efímero, NFS 2049, rutas EFS, <code>sleep infinity</code>
         y <code>PATH</code>, Service Discovery al crear, solo <code>pub-A</code> + ruta BD, hostnames) están en las
         <a href="../admin/index.html#lecciones-criticas">lecciones de admin</a>, y las de WebLogic en contenedor (usuario <code>oracle</code>,
-        <code>boot.properties</code>, zombies, ECS Running ≠ WebLogic RUNNING, libaio en la imagen, URL de BD fija en el dominio) en las
+        <code>boot.properties</code>, zombies, ECS Running ≠ WebLogic RUNNING, libaio en la imagen, URL JDBC vía <code>set-db-jdbc-url.sh</code>) en las
         <a href="../forms/index.html#lecciones-criticas">lecciones de Forms</a>. Propias de Reports:
       </p>
       <ol>

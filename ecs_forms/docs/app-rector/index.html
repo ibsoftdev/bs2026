@@ -1860,10 +1860,11 @@ tail -f $DOMAIN_HOME/servers/WLS_FORMS/logs/formsapp-diagnostic.log</pre>
       <h4 class="sub" id="paso-2-2">2.2 · Ejecución de CARC00100</h4>
       <p>
         <code>CARC00100</code> es el programa que atiende una cola de procesos: lee las órdenes pendientes de
-        <code>CART_ORDENES_PROCESOS</code> para su cola y ejecuta cada programa (Pro*C o reporte con <code>rwclient.sh</code>).
-        Se ejecuta dentro del contenedor <code>reports-server</code>, desde el directorio de los compilados Pro*C
-        (<code>proc_app/bin</code>, en el EFS), donde está el ejecutable <code>CARC00100</code> compilado en el punto
-        <a href="#paso-2-1">2.1</a>.
+        <code>CART_ORDENES_PROCESOS</code> para su cola y ejecuta cada programa (Pro*C o reporte vía
+        <code>rwservlet</code>/<code>curl</code>). Se ejecuta dentro del contenedor <code>colas-server</code>
+        (servicio ECS <code>colas</code>, DNS Cloud Map <code>weblogic-colas.forms.local</code>), desde el directorio de los
+        compilados Pro*C (<code>proc_app/bin</code>, en el EFS), donde está el ejecutable <code>CARC00100</code> compilado en el
+        punto <a href="#paso-2-1">2.1</a>.
       </p>
 
       <h5 class="sub" id="paso-2-2-1">2.2.1 · Parámetros</h5>
@@ -1871,7 +1872,7 @@ tail -f $DOMAIN_HOME/servers/WLS_FORMS/logs/formsapp-diagnostic.log</pre>
       <div class="tabla"><table>
         <tr><th>Parámetro</th><th>Ejemplo</th><th>Uso</th></tr>
         <tr><td><code>cola</code></td><td><code>Y</code></td><td>Cola que atiende el proceso (<code>CART_COLAS</code>). Solo debe haber un <code>CARC00100</code> por cola.</td></tr>
-        <tr><td><code>máquina</code></td><td><code>weblogic-forms.forms.local</code></td><td>Debe coincidir con <code>CART_CONFIG_BATCH.CACH_NM_MAQUINA</code> (máximo 40 caracteres); de esa fila salen los directorios de salida y el Reports Server por defecto.</td></tr>
+        <tr><td><code>máquina</code></td><td><code>weblogic-colas.forms.local</code></td><td>Debe coincidir con <code>CART_CONFIG_BATCH.CACH_NM_MAQUINA</code> (máximo 40 caracteres); de esa fila salen los directorios de salida y el Reports Server por defecto.</td></tr>
         <tr><td><code>alias</code></td><td><code>SEGU</code></td><td>Alias de la base.</td></tr>
         <tr><td><code>base</code></td><td><code>SEGU</code></td><td>Nombre de la base.</td></tr>
       </table></div>
@@ -1880,14 +1881,14 @@ tail -f $DOMAIN_HOME/servers/WLS_FORMS/logs/formsapp-diagnostic.log</pre>
       <div class="tabla"><table>
         <tr><th>Requisito</th><th>Dónde</th><th>Valor</th></tr>
         <tr><td>Conexión a la base</td><td>Variables <code>PASS_FILE</code> y <code>TWO_TASK</code></td><td><code>EXEC SQL CONNECT</code> lee usuario y clave de <code>PASS_FILE</code> (<code>proc_app/bin/USUARIOBATCH.lis</code>) y usa el alias de <code>TWO_TASK</code> (<code>SEGU</code>), resuelto con el <code>tnsnames.ora</code> de <code>TNS_ADMIN</code>.</td></tr>
-        <tr><td>Configuración de la máquina</td><td><code>CART_CONFIG_BATCH</code></td><td>Fila con <code>CACH_NM_MAQUINA</code> = parámetro <code>máquina</code> y <code>CACH_DIR_SALIDAS_*</code> = <code>/u01/oracle/user_projects/apps/reports_app/rep/</code>.</td></tr>
-        <tr><td>Reports Server</td><td><code>CART_COLAS.CALA_NM_REPSERV</code> (si es nulo, <code>CART_CONFIG_BATCH.CACH_NM_REPSERV</code>)</td><td><code>rep_wls_reports_weblogic-reports</code>, nombre del servidor in-process de <code>WLS_REPORTS</code>.</td></tr>
-        <tr><td><code>rwclient.sh</code></td><td><code>PATH</code></td><td>El del dominio (<code>$DOMAIN_HOME/reports/bin</code>), no la plantilla de <code>$ORACLE_HOME/bin</code>. Las librerías que necesita (<code>libnsl.so.2</code>) vienen en la imagen <code>r3</code>.</td></tr>
+        <tr><td>Configuración de la máquina</td><td><code>CART_CONFIG_BATCH</code></td><td>Fila con <code>CACH_NM_MAQUINA</code> = <code>weblogic-colas.forms.local</code> y <code>CACH_DIR_SALIDAS_*</code> = <code>/u01/oracle/user_projects/apps/reports_app/rep/</code>.</td></tr>
+        <tr><td>Reports Server</td><td><code>CART_COLAS.CALA_NM_REPSERV</code> (si es nulo, <code>CART_CONFIG_BATCH.CACH_NM_REPSERV</code>)</td><td><code>rep_wls_reports_weblogic-reports</code>, nombre del servidor in-process de <code>WLS_REPORTS</code> (no confundir con el DNS de la máquina de colas).</td></tr>
+        <tr><td>URL de <code>rwservlet</code></td><td>Variable <code>RWSERVLET_URL</code> (opcional)</td><td>Por defecto <code>http://weblogic-reports.forms.local:9012/reports/rwservlet</code>. <code>F_Ins_report</code> invoca Reports por HTTP desde <code>colas-server</code>.</td></tr>
         <tr><td>Escritura de reportes</td><td><code>rwserver.conf</code> de <code>WLS_REPORTS</code></td><td><code>&lt;folderAccess&gt;</code> con escritura en <code>reports_app/rep</code>; si falta, los reportes fallan con <code>REP-56133</code>.</td></tr>
         <tr><td>Impresión inmediata</td><td><code>proc_app/bin/LP.sh</code> en el <code>PATH</code></td><td>Desactivada: <code>LP.sh</code> solo registra la solicitud en <code>colas_app/log/LP.log</code> (ver más abajo).</td></tr>
       </table></div>
       <p>
-        Ajustes de base de datos: el parámetro <code>máquina</code> (<code>weblogic-forms.forms.local</code>, 26 caracteres) es más
+        Ajustes de base de datos: el parámetro <code>máquina</code> (<code>weblogic-colas.forms.local</code>, 26 caracteres) es más
         largo que el nombre del servidor de la versión 12c (<code>bsdevap9710</code>), y las columnas donde <code>CARC00100</code> lo
         busca o lo guarda se ampliaron a 40 caracteres:
       </p>
@@ -1899,10 +1900,11 @@ ALTER TABLE CARTERA.CART_IMPRESIONES  MODIFY (CAON_NM_MAQUINA VARCHAR2(40));</pr
         <tr><td><code>CART_IMPRESIONES</code></td><td><code>CAON_NM_MAQUINA</code></td><td><code>F_Upd_impresiones</code>: registra el archivo generado por el reporte.</td><td><code>ORA-12899: value too large for column "CARTERA"."CART_IMPRESIONES"…</code>; el PDF se genera pero no queda registrado</td></tr>
       </table></div>
       <p>
-        La task definition de <code>reports-server</code> ya define <code>TNS_ADMIN</code>, <code>DOMAIN_HOME</code> y
-        <code>ORACLE_HOME</code>, pero no <code>PASS_FILE</code> ni <code>TWO_TASK</code>, y su <code>PATH</code> no incluye
-        <code>$DOMAIN_HOME/reports/bin</code> ni <code>proc_app/bin</code>: el script <code>apps/set_batch_env.sh</code> los
-        prepara en la sesión antes de ejecutar (punto <a href="#paso-2-2-3">2.2.3</a>).
+        La task definition de <code>colas-server</code> ya define <code>PASS_FILE</code>, <code>TWO_TASK</code>,
+        <code>TNS_ADMIN</code>, <code>DOMAIN_HOME</code> y <code>ORACLE_HOME</code>. Aun así, el script
+        <code>apps/set_batch_env.sh</code> (o el de <code>scripts/colas</code>) completa el <code>PATH</code> con
+        <code>$DOMAIN_HOME/reports/bin</code> y <code>proc_app/bin</code> en la sesión antes de ejecutar (punto
+        <a href="#paso-2-2-3">2.2.3</a>).
       </p>
       <p>
         Impresión inmediata desactivada: cuando una orden tiene modo de impresión <code>I</code>, <code>CARC00100</code>
@@ -1924,11 +1926,11 @@ ALTER TABLE CARTERA.CART_IMPRESIONES  MODIFY (CAON_NM_MAQUINA VARCHAR2(40));</pr
       </div>
 
       <h5 class="sub" id="paso-2-2-3">2.2.3 · Ejecutar una cola</h5>
-      <p>1. Conectarse al contenedor <code>reports-server</code>:</p>
-      <pre class="code"><span class="c"># El ID de la tarea (--task) cambia con cada despliegue del servicio reports-server: tomar el de</span>
-<span class="c"># la tarea en ejecución actual (ECS → forms_report → servicio reports-server → pestaña Tareas)</span>
-aws ecs execute-command --cluster forms_report --task 4942b81cf33848e8bdd80ab4a458b606 \
-  --container reports-server --interactive --command "su -s /bin/bash oracle"</pre>
+      <p>1. Conectarse al contenedor <code>colas-server</code> (servicio ECS <code>colas</code>):</p>
+      <pre class="code"><span class="c"># El ID de la tarea (--task) cambia con cada despliegue del servicio colas: tomar el de</span>
+<span class="c"># la tarea en ejecución actual (ECS → forms_report → servicio colas → pestaña Tareas)</span>
+aws ecs execute-command --cluster forms_report --task d7a74b410dca44f091be018c93af219d \
+  --container colas-server --interactive --command "su -s /bin/bash oracle"</pre>
       <p>2. Ubicarse en el directorio de los compilados Pro*C:</p>
       <pre class="code">cd /u01/oracle/user_projects/apps/proc_app/bin</pre>
       <p>
@@ -1939,28 +1941,30 @@ aws ecs execute-command --cluster forms_report --task 4942b81cf33848e8bdd80ab4a4
       <p>
         El script exporta <code>PASS_FILE</code>, <code>TWO_TASK</code>, <code>TNS_ADMIN</code>, <code>DOMAIN_HOME</code> y
         <code>ORACLE_HOME</code>, agrega <code>$DOMAIN_HOME/reports/bin</code> y <code>proc_app/bin</code> al <code>PATH</code>, y
-        muestra dónde encontró <code>rwclient.sh</code> y <code>LP.sh</code>. La salida esperada es:
+        muestra dónde encontró <code>LP.sh</code> (y, si aplica, <code>rwclient.sh</code>). La salida esperada es:
       </p>
       <pre class="code">PASS_FILE=/u01/oracle/user_projects/apps/proc_app/bin/USUARIOBATCH.lis  TWO_TASK=SEGU  TNS_ADMIN=/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig
 DOMAIN_HOME=/u01/oracle/user_projects/domains/forms_domain  rwclient.sh=/u01/oracle/user_projects/domains/forms_domain/reports/bin/rwclient.sh  LP.sh=/u01/oracle/user_projects/apps/proc_app/bin/LP.sh
 ORACLE_HOME=/u01/oracle  rwclient: -rwxr-x--x. oracle:oracle</pre>
       <div class="callout">
-        Si aparece <code>&lt;no encontrado&gt;</code> o una línea <code>AVISO:</code>, corregir antes de ejecutar: sin
-        <code>rwclient.sh</code> no se generan los reportes y sin <code>LP.sh</code> la cola falla con
-        <code>sh: line 1: LP.sh: command not found</code> (falta en el <code>PATH</code> o no tiene permiso de ejecución:
-        <code>chmod 755 LP.sh</code>).
+        Antes de ejecutar, comprobar que resuelva el DNS de Reports y el de la máquina de colas:
+        <code>getent hosts weblogic-reports.forms.local weblogic-colas.forms.local</code>.
+        Si falta <code>LP.sh</code> en el <code>PATH</code>, la cola falla con
+        <code>sh: line 1: LP.sh: command not found</code> (<code>chmod 755 LP.sh</code>).
+        Los reportes se invocan por HTTP a <code>rwservlet</code>; <code>WLS_REPORTS</code> debe estar en RUNNING.
       </div>
       <p>
-        4. Ejecutar la cola (ejemplo con la cola <code>Y</code>). <code>CARC00100</code> atiende las órdenes pendientes de la cola
-        una por una y termina cuando ya no quedan:
+        4. Ejecutar la cola (ejemplo con la cola <code>Y</code>). El segundo parámetro debe ser
+        <code>weblogic-colas.forms.local</code>, el mismo valor de <code>CART_CONFIG_BATCH.CACH_NM_MAQUINA</code>.
+        <code>CARC00100</code> atiende las órdenes pendientes de la cola una por una y termina cuando ya no quedan:
       </p>
       <pre class="code">mkdir -p /u01/oracle/user_projects/apps/colas_app/log
-./CARC00100 Y weblogic-forms.forms.local SEGU SEGU &gt;&gt; /u01/oracle/user_projects/apps/colas_app/log/COLA_Y.log</pre>
+./CARC00100 Y weblogic-colas.forms.local SEGU SEGU &gt;&gt; /u01/oracle/user_projects/apps/colas_app/log/COLA_Y.log</pre>
       <p>
         Para que siga corriendo aunque se cierre la sesión de ECS Exec, lanzarlo en segundo plano. <code>stdbuf -oL</code> hace que
         la salida se escriba línea por línea; sin él, si el programa termina de forma anormal el log puede quedar vacío:
       </p>
-      <pre class="code">nohup stdbuf -oL ./CARC00100 Y weblogic-forms.forms.local SEGU SEGU \
+      <pre class="code">nohup stdbuf -oL ./CARC00100 Y weblogic-colas.forms.local SEGU SEGU \
   &gt;&gt; /u01/oracle/user_projects/apps/colas_app/log/COLA_Y.log 2&gt;&amp;1 &amp;
 ps -ef | grep "CARC00100 Y" | grep -v grep</pre>
       <p>5. Revisar el log de la cola:</p>
@@ -2012,10 +2016,10 @@ No hay procesos en Cola...SQLCODE....&gt; ORA-01403: no data found</pre>
       <div class="tabla"><table>
         <tr><th>Etapa</th><th>Líneas del log</th><th>Qué hace <code>CARC00100</code></th></tr>
         <tr><td>Conexión</td><td><code>Inicia la conexion…</code>, <code>ARCHIVO PASSWORD PASS_FILE …</code></td><td>Lee usuario y clave de <code>PASS_FILE</code> y se conecta a la base de <code>TWO_TASK</code>.</td></tr>
-        <tr><td>Ambiente</td><td><code>Selecciono el ambiente</code>, <code>Variable Wreporte_server …</code></td><td>Lee la fila de la máquina en <code>CART_CONFIG_BATCH</code> (directorios de salida) y el Reports Server de la cola (<code>rep_wls_reports_weblogic-reports</code>).</td></tr>
+        <tr><td>Ambiente</td><td><code>Selecciono el ambiente</code>, <code>Variable Wreporte_server …</code></td><td>Lee la fila de <code>CART_CONFIG_BATCH</code> con <code>CACH_NM_MAQUINA = weblogic-colas.forms.local</code> (directorios de salida) y el Reports Server de la cola (<code>rep_wls_reports_weblogic-reports</code>).</td></tr>
         <tr><td>Toma de la cola</td><td><code>Valor del Status de la Cola 0</code>, <code>LA COLA ESTA OCUPADA Y STATUS 1</code></td><td>La cola estaba libre (status 0) y la marca como ocupada (status 1) para que no la atienda otro proceso.</td></tr>
         <tr><td>Orden</td><td>Bloque <code>SECUENCIA … Forma Papel</code></td><td>Toma la siguiente orden pendiente de <code>CART_ORDENES_PROCESOS</code> para la cola: secuencia, programa, lenguaje (<code>R</code> = reporte; <code>C</code>, <code>P</code>, <code>S</code> y <code>K</code> son los otros tipos de programa), modo de impresión, impresora y copias.</td></tr>
-        <tr><td>Ejecución</td><td><code>COMANDO REPORT: rwclient.sh …</code>, <code>Termino de ejecutar el comando</code></td><td>Para un reporte, arma y ejecuta <code>rwclient.sh</code> con <code>NU_SEC</code> = secuencia; el PDF queda en <code>reports_app/rep/&lt;programa&gt;_&lt;secuencia&gt;.pdf</code> y la salida de <code>rwclient</code> en <code>reports_app/log/&lt;programa&gt;_&lt;secuencia&gt;.log</code>.</td></tr>
+        <tr><td>Ejecución</td><td><code>COMANDO REPORT: curl … rwservlet …</code>, <code>Termino de ejecutar el comando</code></td><td>Para un reporte, arma y ejecuta <code>curl</code> contra <code>rwservlet</code> en <code>weblogic-reports.forms.local:9012</code> con <code>NU_SEC</code> = secuencia; el PDF queda en <code>reports_app/rep/&lt;programa&gt;_&lt;secuencia&gt;.pdf</code> y la respuesta HTTP en <code>reports_app/log/&lt;programa&gt;_&lt;secuencia&gt;.log</code>.</td></tr>
         <tr><td>Registro de la salida</td><td><code>F_Upd_impresiones</code>, <code>No se genera el archivo HTML por que es pdf</code></td><td>Registra el archivo en <code>CART_IMPRESIONES</code>; la conversión a HTML solo aplica a salidas <code>.lis</code>.</td></tr>
         <tr><td>Impresión</td><td>(no aparece en este ejemplo)</td><td>Solo con modo de impresión <code>I</code>: llama a <code>LP.sh</code>, que queda registrado en <code>colas_app/log/LP.log</code>. Con modo <code>D</code> (diferida) no se llama.</td></tr>
         <tr><td>Cierre de la orden</td><td><code>Paso en insertar cart ordenes ejecutadas</code>, <code>CODIGO DE RETORNO…&gt; 0</code></td><td>Pasa la orden a ejecutadas con el código de retorno del programa (0 = correcto).</td></tr>
@@ -2030,14 +2034,15 @@ No hay procesos en Cola...SQLCODE....&gt; ORA-01403: no data found</pre>
       <pre class="code">ls -l /u01/oracle/user_projects/apps/reports_app/rep/CARR10306_204233.pdf
 <span class="c"># -rw-r-----. 1 oracle oracle 2856 Oct 13 17:17 /u01/oracle/user_projects/apps/reports_app/rep/CARR10306_204233.pdf</span>
 
-cat /u01/oracle/user_projects/apps/reports_app/log/CARR10306_204233.log   <span class="c"># salida de rwclient (errores REP-*)</span>
+cat /u01/oracle/user_projects/apps/reports_app/log/CARR10306_204233.log   <span class="c"># respuesta de rwservlet / errores REP-*</span>
 tail /u01/oracle/user_projects/apps/colas_app/log/LP.log                  <span class="c"># impresiones que se habrían enviado</span></pre>
       <div class="callout warn">
         Los scripts de arranque de la versión 12c (<code>COLA_A</code> … <code>COLA_Z</code> y <code>COLA.env</code>, en
         <code>/u01/oracle/scripts/bin</code>) todavía tienen las rutas y la máquina del servidor anterior
         (<code>/aplicacion/TRector/…</code>, <code>bsdevap9710</code>): no sirven sin adaptarlos. <code>COLA.env</code> además
         define <code>NLS_LANG=AMERICAN_AMERICA.WE8ISO8859P15</code> y <code>NLS_DATE_FORMAT=DD-MM-YYYY</code>, que no están en la
-        task definition de <code>reports-server</code>.
+        task definition de <code>colas-server</code>. El parámetro <code>máquina</code> de esos scripts debe ser
+        <code>weblogic-colas.forms.local</code>, no el hostname 12c.
       </div>
 
       <h5 class="sub" id="paso-2-2-4">2.2.4 · Ejecutar URL Reporte</h5>
@@ -2155,8 +2160,8 @@ ls -l /u01/oracle/user_projects/apps/reports_app/rep/CARR30214_204240.pdf</pre>
       <div class="callout warn">
         El <code>userid</code> viaja en la URL y queda en los logs de acceso de <code>WLS_REPORTS</code>. Para no exponer la clave,
         se puede definir una clave de conexión en <code>cgicmd.dat</code> del Reports Server y usar <code>cmdkey=</code> en lugar de
-        <code>userid=</code>. <code>CARC00100</code> invoca hoy <code>rwclient.sh</code>; para que corra fuera de
-        <code>reports-server</code> habría que cambiar en el fuente la llamada (<code>F_Ins_report</code>) por esta invocación HTTP.
+        <code>userid=</code>. <code>CARC00100</code> ya invoca Reports por esta vía HTTP desde <code>colas-server</code>
+        (<code>F_Ins_report</code>); este punto sirve para probar el mismo patrón a mano con <code>curl</code>.
       </div>
         </section>
 

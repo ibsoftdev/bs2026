@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía · Contenedor Colas en ECS Fargate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/estilos-demo.css">
+  <style>
+    :root {
+      --font-display: "Outfit", "Segoe UI", sans-serif;
+      --font-body: "Source Sans 3", "Segoe UI", sans-serif;
+      --font-mono: "JetBrains Mono", "Courier New", monospace;
+      --text-desc: #2f3540;
+      --size-desc: 1.05rem;
+      --leading-desc: 1.7;
+      --c-admin: #2e7d32;
+      --c-forms: #ef6c00;
+      --c-reports: #00838f;
+      --c-colas: #6d4c41;
+      --c-ohs: #0d47a1;
+    }
+    body {
+      font-family: var(--font-body);
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--text-desc);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    .app-wrap { max-width: 960px; overflow: visible; }
+    .card, .card-body { overflow: visible; }
+    .comercial-header {
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: nowrap;
+      background-image: url('../../assets/ImagenEmpresa.png');
+      background-repeat: no-repeat;
+      background-position: left center;
+      background-size: cover;
+      background-color: #eef3f8;
+      min-height: 148px;
+      padding: 0.85rem 0.9rem;
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+    .comercial-header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.5) 40%, rgba(255,255,255,0.9) 62%, #fff 78%);
+      pointer-events: none;
+    }
+    .comercial-header .title-wrap {
+      position: relative;
+      z-index: 1;
+      margin-left: auto;
+      max-width: 58%;
+      min-width: 280px;
+      text-align: left;
+      padding: 0.95rem 1.15rem 1rem;
+      color: #0a1f4d;
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid rgba(13, 71, 161, 0.12);
+      border-left: 5px solid var(--c-colas);
+      box-shadow: 0 6px 20px rgba(0, 33, 113, 0.12);
+    }
+    .comercial-header .title-wrap h1 {
+      font-family: var(--font-display);
+      color: #0a1f4d;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.28;
+      margin: 0;
+    }
+    .comercial-header .title-wrap h1 .header-line-1 {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      color: var(--c-colas);
+    }
+    .comercial-header .title-wrap h1 .header-line-2 {
+      display: block;
+      font-size: 1.42rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+      color: #061433;
+    }
+    .comercial-header .title-wrap h1 .header-line-3 {
+      display: block;
+      font-size: 1.02rem;
+      font-weight: 600;
+      color: #1565c0;
+    }
+    .comercial-header .title-wrap .header-tagline {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      line-height: 1.45;
+      margin-top: 0.55rem;
+      margin-bottom: 0;
+      font-weight: 500;
+      color: #475569;
+      padding-top: 0.5rem;
+      border-top: 1px solid rgba(13, 71, 161, 0.15);
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 1rem;
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #0d47a1;
+      text-decoration: none;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .intro-propuesta {
+      max-width: calc(100% - 1cm - 1.5rem - 1cm);
+      margin: 0 0 1.5rem 1cm;
+    }
+    .intro-propuesta h2 {
+      font-family: var(--font-display);
+      font-size: 1.28rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin: 0 0 0.75rem 0;
+    }
+    .intro-propuesta p {
+      text-align: justify;
+      color: var(--text-desc);
+      font-size: var(--size-desc);
+      line-height: var(--leading-desc);
+      margin: 0 0 0.85rem;
+    }
+    .intro-propuesta .slogan {
+      margin-top: 1rem;
+      font-family: var(--font-display);
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: var(--c-colas);
+      line-height: 1.4;
+    }
+    .toc {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0 0 1.5rem 1cm;
+    }
+    .toc a {
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--primary);
+      background: #fff;
+      border: 1px solid #bbdefb;
+      border-radius: 999px;
+      padding: 0.3rem 0.8rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .toc a:hover { background: #e3f2fd; border-color: #90caf9; }
+    .slide-block {
+      margin-bottom: 1.75rem;
+      padding: 1.25rem 1.4rem;
+      background: #fafafa;
+      border-radius: var(--radius);
+      border-left: 4px solid var(--c-colas);
+      scroll-margin-top: 1rem;
+    }
+    .slide-block h3 {
+      font-family: var(--font-display);
+      margin: 0 0 0.75rem 0;
+      color: var(--primary-dark);
+      font-size: 1.22rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      flex-wrap: wrap;
+    }
+    .slide-block h3 .num {
+      flex-shrink: 0;
+      min-width: 30px;
+      height: 30px;
+      padding: 0 0.55rem;
+      border-radius: 999px;
+      background: var(--c-colas);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .slide-block h3 .num.anexo { background: #546e7a; }
+    .slide-block h3 .num.lecciones { background: var(--success); }
+    .slide-block.anexo { border-left-color: #546e7a; }
+    .slide-block.lecciones { border-left-color: var(--success); }
+    .slide-block p {
+      margin: 0 0 0.9rem 0;
+      font-size: var(--size-desc);
+      line-height: var(--leading-desc);
+      text-align: justify;
+    }
+    .slide-block h4.sub {
+      font-family: var(--font-display);
+      margin: 1.35rem 0 0.65rem;
+      color: var(--primary-dark);
+      font-size: 1.08rem;
+      font-weight: 700;
+      scroll-margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px dashed #dfe6ee;
+    }
+    .slide-block > h4.sub:first-of-type { border-top: none; padding-top: 0; }
+    .slide-block ul, .slide-block ol {
+      margin: 0.4rem 0 0.9rem;
+      padding-left: 1.4rem;
+      font-size: 0.98rem;
+      line-height: 1.6;
+    }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.86em;
+      background: #eef3f8;
+      color: #0a1f4d;
+      padding: 0.08rem 0.35rem;
+      border-radius: 4px;
+    }
+    pre.code {
+      margin: 0.5rem 0 0.75rem;
+      background: #0f1b2d;
+      color: #e6edf3;
+      padding: 0.9rem 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    pre.code.full { max-height: 520px; overflow-y: auto; }
+    .tabla {
+      margin: 0.85rem 0;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow-x: auto;
+      box-shadow: var(--shadow-sm);
+    }
+    .tabla table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    .tabla th {
+      font-family: var(--font-display);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-align: left;
+      color: var(--text-muted);
+      background: #f7f9fc;
+      padding: 0.65rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .tabla td {
+      padding: 0.55rem 0.9rem;
+      border-top: 1px solid #eef2f6;
+      vertical-align: top;
+    }
+    .tabla tbody tr:hover td { background: #fafcff; }
+    .callout {
+      margin: 0.9rem 0;
+      padding: 0.85rem 1.05rem;
+      border-radius: var(--radius);
+      border: 1px solid #bbdefb;
+      border-left: 4px solid var(--primary);
+      background: #f3f8fe;
+      font-size: 0.97rem;
+      line-height: 1.6;
+    }
+    .callout.warn { background: #fff8e1; border-color: #ffe082; border-left-color: #f9a825; }
+    .callout.ok { background: #f1f8f2; border-color: #c8e6c9; border-left-color: var(--success); }
+    .callout p { margin: 0 0 0.45rem !important; text-align: left !important; font-size: 0.97rem !important; }
+    .callout p:last-child { margin-bottom: 0 !important; }
+    .status {
+      font-family: var(--font-display);
+      display: inline-block;
+      margin-left: 0.45rem;
+      padding: 0.12rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .status.pending { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+    .status.done { background: #e8f5e9; color: #1b5e20; border: 1px solid #a5d6a7; }
+    a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .doc-footer {
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin: 0.5rem 0 1rem;
+    }
+    .role-pill {
+      display: inline-block;
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: #efebe9;
+      color: var(--c-colas);
+      border: 1px solid #bcaaa4;
+      border-radius: 999px;
+      padding: 0.2rem 0.65rem;
+      margin-bottom: 0.5rem;
+    }
+    @media (max-width: 700px) {
+      .comercial-header .title-wrap { max-width: 100%; min-width: 0; width: 100%; }
+      .intro-propuesta, .toc { margin-left: 0; max-width: 100%; }
+    }
+    @media print { .toc { display: none; } .slide-block { break-inside: avoid-page; } }
+  </style>
+</head>
+<body>
+  <div class="app-wrap">
+    <a class="back-link" href="../../index.html">← Regresar a la documentación del proyecto</a>
+
+    <header class="comercial-header">
+      <div class="title-wrap">
+        <h1>
+          <span class="header-line-1">AWS ECS · Fargate</span>
+          <span class="header-line-2">Crear el contenedor Colas</span>
+          <span class="header-line-3">Task definition · Servicio · Pro*C · CARC00100</span>
+        </h1>
+        <p class="header-tagline"><code>colas-server</code> en el cluster <code>forms_report</code> — contenedor de aplicativo, no Managed Server WebLogic</p>
+      </div>
+    </header>
+
+    <div class="intro intro-propuesta">
+      <span class="role-pill">Contenedor de aplicativo</span>
+      <h2>Visión general</h2>
+      <p>
+        Guía paso a paso para crear la <strong>task definition</strong> <code>colas-server</code> y su <strong>servicio</strong> en el
+        cluster <code>forms_report</code>. El contenedor ejecuta procesos de colas Pro*C (por ejemplo <code>CARC00100</code>), monta el dominio
+        y las aplicaciones compartidas en EFS, y usa scripts desde <code>scripts/colas</code>. <strong>No</strong> arranca
+        <code>WLS_REPORTS</code> ni un Node Manager: Reports ya corre en el servicio
+        <a href="../report/index.html">Contenedor Reports</a> (<code>weblogic-reports.forms.local:9012</code>) o se accede al mismo EFS de salida
+        (<code>reports_app</code>, <code>rep</code>).
+      </p>
+      <p>
+        La estructura replica la de la guía de <a href="../report/index.html">Reports</a> (task definition, servicio, Cloud Map, verificación
+        y ECS Exec), adaptada a un contenedor sin puertos publicados y con comando <code>sleep infinity</code>. Infraestructura común:
+        <a href="../admin/index.html">AdminServer</a>, red, EFS y namespace <code>forms.local</code>.
+      </p>
+      <p class="slogan">Colas en Fargate: EFS compartido, Reports por HTTP y validación en app-rector.</p>
+    </div>
+
+    <nav class="toc" aria-label="Contenido">
+      <a href="#paso-0">0 · Requisitos y valores fijos</a>
+      <a href="#paso-1">1 · Crear task definition Colas</a>
+      <a href="#paso-2">2 · Crear servicio + Service Discovery</a>
+      <a href="#paso-3">3 · Verificar Running, Cloud Map y ECS Exec</a>
+      <a href="#paso-4">4 · Verificar montajes dominio y apps</a>
+      <a href="#paso-5">5 · Preparar ambiente de colas</a>
+      <a href="#paso-6">6 · Validar acceso a Reports / EFS</a>
+      <a href="../../app-rector/index.html#paso-2-2">CARC00100 (RECTOR 2.2)</a>
+      <a href="#anexo-json">Anexo · Task definition JSON</a>
+      <a href="#anexo-cli">Anexo · Comandos AWS CLI</a>
+      <a href="#lecciones-criticas">★ · Lecciones críticas</a>
+    </nav>
+
+    <div class="card">
+      <div class="card-body">
+
+        <section class="slide-block" id="paso-0">
+          <h3><span class="num">0</span> Requisitos y valores fijos<span class="status pending">Pendiente</span></h3>
+          <p>
+            Colas depende de la misma base que Admin, Forms y Reports. Antes de registrar la task definition, deben estar operativos el
+            AdminServer, el dominio en EFS y — para impresión y <code>rwclient</code> — el managed server Reports en
+            <a href="../report/index.html">Reports</a>.
+          </p>
+
+          <h4 class="sub" id="paso-0-1">0.1 · Requisitos ya creados</h4>
+          <div class="tabla"><table>
+            <tr><th>Elemento</th><th>Dónde se crea</th></tr>
+            <tr><td>Imagen ECR <code>forms-docker</code> (tag <code>r3</code> en la TD de referencia; librerías Motif/X11 como en <a href="../report/index.html#anexo-r2">Reports — imagen r2+</a>)</td><td><a href="../admin/index.html#paso-1-1">Admin 1.1</a></td></tr>
+            <tr><td>Security group <code>forms-sg-ecs</code> + regla interna entre contenedores</td><td><a href="../admin/index.html#paso-1-2">Admin 1.2</a></td></tr>
+            <tr><td>EFS <code>fs-08471cc88d2a8edc3</code> (dominio, app, scripts)</td><td><a href="../admin/index.html#paso-1-3">Admin 1.3</a></td></tr>
+            <tr><td>Rol de tarea <code>ecs-forms-admin-task-role</code> (ECS Exec)</td><td><a href="../admin/index.html#paso-1-4">Admin 1.4</a></td></tr>
+            <tr><td>Namespace Cloud Map <code>forms.local</code></td><td><a href="../admin/index.html#paso-1-5">Admin 1.5</a></td></tr>
+            <tr><td>Cluster <code>forms_report</code></td><td><a href="../admin/index.html#paso-2">Admin 2</a></td></tr>
+            <tr><td>AdminServer RUNNING · <code>weblogic-admin.forms.local:7001</code></td><td><a href="../admin/index.html#paso-7">Admin 7</a></td></tr>
+            <tr><td><code>WLS_REPORTS</code> RUNNING · <code>weblogic-reports.forms.local:9012</code></td><td><a href="../report/index.html#paso-5">Reports 5</a></td></tr>
+            <tr><td>Forms (<code>weblogic-forms</code>) si CARC00100 referencia esa máquina en BD</td><td><a href="../forms/index.html">Forms</a></td></tr>
+          </table></div>
+
+          <h4 class="sub" id="paso-0-2">0.2 · Valores propios de Colas (referencia <code>colas.json</code>)</h4>
+          <div class="tabla"><table>
+            <tr><th>Concepto</th><th>Reports (WebLogic)</th><th>Colas (aplicativo)</th></tr>
+            <tr><td>Naturaleza</td><td>Managed Server <code>WLS_REPORTS</code></td><td>Pro*C / colas batch; <strong>no</strong> es Managed Server</td></tr>
+            <tr><td>Familia TD / contenedor</td><td><code>reports-server</code></td><td><code>colas-server</code></td></tr>
+            <tr><td>Servicio ECS (recomendado)</td><td><code>reports-server</code></td><td><code>colas</code></td></tr>
+            <tr><td>Service Discovery</td><td><code>weblogic-reports</code></td><td><code>weblogic-colas</code> → <code>weblogic-colas.forms.local</code></td></tr>
+            <tr><td>Imagen</td><td><code>forms-docker:r2</code> (digest en prod)</td><td><code>730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:r3</code></td></tr>
+            <tr><td>Comando</td><td><code>startWLSReports.sh,-keep</code> (automático) o <code>sleep infinity</code></td><td><code>sleep,infinity</code> (sin puertos)</td></tr>
+            <tr><td><code>portMappings</code></td><td>9012, 9512, 9992, 5556</td><td><strong>Vacío</strong></td></tr>
+            <tr><td>Scripts EFS</td><td><code>…/scripts/reports</code></td><td><code>…/scripts/colas</code></td></tr>
+            <tr><td>CPU / memoria / efímero</td><td>2048 / 4096 / 100 GiB</td><td>2048 / 4096 / 100 GiB</td></tr>
+            <tr><td>Log group</td><td><code>/ecs/reports-server</code></td><td><code>/ecs/colas-server</code></td></tr>
+            <tr><td>Roles IAM</td><td colspan="2"><code>ecs-forms-admin-task-role</code> · <code>ecsTaskExecutionRole</code></td></tr>
+          </table></div>
+
+          <div class="callout warn">
+            <strong>Security group:</strong> Colas no expone puertos HTTP. No hace falta abrir 9012 en el SG <em>para este servicio</em>;
+            sí necesita la regla interna del SG y conectividad saliente hacia Admin (7001), Oracle (<code>TWO_TASK=SEGU</code>) y
+            <code>weblogic-reports.forms.local:9012</code> cuando <code>CARC00100</code> o <code>LP.sh</code> invoquen Reports.
+          </div>
+          <div class="callout">
+            <strong>Carpeta EFS <code>scripts/colas</code></strong> debe existir antes de lanzar la tarea (mismo error de montaje que en
+            Reports si falta el <code>rootDirectory</code>). Verificar también <code>proc_app/bin/CARC00100</code> y
+            <code>apps/set_batch_env.sh</code> en el volumen <code>efs-app</code>.
+          </div>
+        </section>
+
+        <section class="slide-block" id="paso-1">
+          <h3><span class="num">1</span> Crear task definition Colas<span class="status pending">Pendiente</span></h3>
+          <p>
+            La familia <code>colas-server</code> describe un contenedor de aplicativo sobre la misma imagen base que Forms/Reports. Sigue el
+            asistente explicado en <a href="../admin/index.html#paso-3">Admin 3</a> o registra el JSON del
+            <a href="#anexo-json">anexo</a> (<a href="colas.json"><code>colas.json</code></a>).
+          </p>
+
+          <h4 class="sub" id="paso-1-1">1.1 · Familia, Fargate, tamaño y roles</h4>
+          <div class="tabla"><table>
+            <tr><th>Campo</th><th>Valor</th></tr>
+            <tr><td>Familia</td><td><code>colas-server</code></td></tr>
+            <tr><td>Tipo de inicio / SO</td><td>AWS Fargate · Linux/X86_64</td></tr>
+            <tr><td>CPU / memoria</td><td><code>2048</code> (2 vCPU) / <code>4096</code> (4 GB)</td></tr>
+            <tr><td>Almacenamiento efímero</td><td>100 GiB</td></tr>
+            <tr><td>Rol de tarea / ejecución</td><td><code>arn:aws:iam::730335573515:role/ecs-forms-admin-task-role</code> / <code>ecsTaskExecutionRole</code></td></tr>
+          </table></div>
+
+          <h4 class="sub" id="paso-1-2">1.2 · Contenedor: imagen, puertos y comando</h4>
+          <div class="tabla"><table>
+            <tr><th>Campo</th><th>Valor</th></tr>
+            <tr><td>Nombre del contenedor</td><td><code>colas-server</code></td></tr>
+            <tr><td>Imagen</td><td><code>730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:r3</code></td></tr>
+            <tr><td>Esencial</td><td>Sí</td></tr>
+            <tr><td><code>portMappings</code></td><td>Ninguno</td></tr>
+            <tr><td>Comando</td><td><code>sleep</code>, <code>infinity</code></td></tr>
+            <tr><td>Directorio de trabajo</td><td><code>/u01/oracle</code></td></tr>
+          </table></div>
+          <div class="callout ok">
+            <strong><code>sleep infinity</code></strong> mantiene la tarea viva para ECS Exec y para lanzar <code>CARC00100</code> manualmente o
+            con <code>nohup</code>. No sustituye un supervisor de procesos: el operador (o un script futuro en EFS) inicia las colas.
+          </div>
+
+          <h4 class="sub" id="paso-1-3">1.3 · Variables de entorno</h4>
+          <p>
+            Heredan contexto de dominio y Reports para <code>PATH</code>, TNS y credenciales batch. <code>MANAGED_SERVER_NAME=WLS_REPORTS</code>
+            orienta scripts que apuntan al servidor Reports del dominio; <strong>no</strong> implica arrancar WebLogic en este contenedor.
+          </p>
+          <div class="tabla"><table>
+            <tr><th>Variable</th><th>Valor (task definition / <code>colas.json</code>)</th></tr>
+            <tr><td><code>PATH</code></td><td><code>/u01/oracle/user_projects/domains/forms_domain/reports/bin:/u01/oracle/bin:/u01/oracle/oracle_common/bin:/u01/jdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin</code></td></tr>
+            <tr><td><code>ADMIN_SERVER_HOST</code></td><td><code>weblogic-admin.forms.local</code></td></tr>
+            <tr><td><code>ADMIN_SERVER_NAME</code></td><td><code>AdminServer</code></td></tr>
+            <tr><td><code>TWO_TASK</code></td><td><code>SEGU</code></td></tr>
+            <tr><td><code>ADMIN_USER</code></td><td><code>weblogic</code></td></tr>
+            <tr><td><code>MANAGED_SERVER_NAME</code></td><td><code>WLS_REPORTS</code></td></tr>
+            <tr><td><code>TNS_ADMIN</code></td><td><code>/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig</code></td></tr>
+            <tr><td><code>DOMAIN_NAME</code></td><td><code>forms_domain</code></td></tr>
+            <tr><td><code>DOMAIN_HOME</code></td><td><code>/u01/oracle/user_projects/domains/forms_domain</code></td></tr>
+            <tr><td><code>ADMIN_PASSWORD</code></td><td><code>t.123456</code> (DEV en claro; migrar a Secrets Manager)</td></tr>
+            <tr><td><code>MANAGED_SERVER_PORT</code></td><td><code>9012</code></td></tr>
+            <tr><td><code>NODE_MANAGER_PORT</code></td><td><code>5556</code> (referencia; NM no se usa en Colas)</td></tr>
+            <tr><td><code>LD_LIBRARY_PATH</code></td><td><code>/u01/oracle/lib:/u01/oracle/oracle_common/lib</code></td></tr>
+            <tr><td><code>PASS_FILE</code></td><td><code>/u01/oracle/user_projects/apps/proc_app/bin/USUARIOBATCH.lis</code></td></tr>
+            <tr><td><code>ORACLE_HOME</code></td><td><code>/u01/oracle</code></td></tr>
+            <tr><td><code>ADMIN_SERVER_PORT</code></td><td><code>7001</code></td></tr>
+          </table></div>
+          <div class="callout warn">
+            No definir <code>PATH=${PATH}:…</code> en ECS: no expande variables. Usar la cadena completa anterior.
+            Ese <code>PATH</code> de la TD incluye <code>reports/bin</code> pero <strong>no</strong>
+            <code>proc_app/bin</code>: para <code>CARC00100</code> y <code>LP.sh</code> hay que cargar
+            <code>set_batch_env.sh</code> en la sesión (o ampliar el <code>PATH</code> de la TD).
+          </div>
+
+          <h4 class="sub" id="paso-1-4">1.4 · Volúmenes EFS y montajes</h4>
+          <p>Filesystem <code>fs-08471cc88d2a8edc3</code>, cifrado en tránsito habilitado (igual que Reports).</p>
+          <div class="tabla"><table>
+            <tr><th>Volumen</th><th>rootDirectory en EFS</th><th>containerPath</th></tr>
+            <tr><td><code>efs-domains</code></td><td><code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/domains</code></td><td><code>/u01/oracle/user_projects/domains</code></td></tr>
+            <tr><td><code>efs-app</code></td><td><code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/app</code></td><td><code>/u01/oracle/user_projects/apps</code></td></tr>
+            <tr><td><code>efs-scripts</code></td><td><code>/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/scripts/colas</code></td><td><code>/u01/oracle/scripts</code></td></tr>
+          </table></div>
+
+          <h4 class="sub" id="paso-1-5">1.5 · Logs CloudWatch</h4>
+          <div class="tabla"><table>
+            <tr><th>Opción</th><th>Valor</th></tr>
+            <tr><td><code>logDriver</code></td><td><code>awslogs</code></td></tr>
+            <tr><td><code>awslogs-group</code></td><td><code>/ecs/colas-server</code></td></tr>
+            <tr><td><code>awslogs-region</code></td><td><code>us-east-1</code></td></tr>
+            <tr><td><code>awslogs-stream-prefix</code></td><td><code>ecs</code></td></tr>
+            <tr><td><code>awslogs-create-group</code></td><td><code>true</code> (crear el grupo a mano si falla por permisos — ver <a href="../report/index.html#paso-1-7">Reports 1.7</a>)</td></tr>
+          </table></div>
+          <pre class="code">aws logs create-log-group --log-group-name /ecs/colas-server --region us-east-1</pre>
+
+          <h4 class="sub" id="paso-1-6">1.6 · Crear la definición</h4>
+          <p>ECS → <strong>Definiciones de tareas</strong> → <strong>Crear nueva definición de tarea con JSON</strong> → pegar contenido de
+            <a href="colas.json"><code>colas.json</code></a> (ajustar contraseñas e imagen por digest si aplica) → <strong>Crear</strong>.</p>
+        </section>
+
+        <section class="slide-block" id="paso-2">
+          <h3><span class="num">2</span> Crear servicio + Service Discovery<span class="status pending">Pendiente</span></h3>
+          <p>
+            Mismo flujo que <a href="../report/index.html#paso-2">Reports 2</a> y <a href="../admin/index.html#paso-4">Admin 4</a>: un servicio
+            con una tarea, ECS Exec habilitado, despliegue acumulativo y registro DNS en <code>forms.local</code>.
+          </p>
+
+          <h4 class="sub" id="paso-2-1">2.1 · Crear el servicio ECS</h4>
+          <ol>
+            <li>Cluster <code>forms_report</code> → <strong>Servicios</strong> → <strong>Crear</strong>.</li>
+            <li>Familia <code>colas-server</code> (revisión más reciente); nombre del servicio <code>colas</code>; tareas deseadas <code>1</code>.</li>
+            <li>Capacidad <code>FARGATE</code>, plataforma <code>LATEST</code>, <strong>ECS Exec</strong> activado.</li>
+            <li>Implementación: actualización acumulativa, mín. <code>0</code> % / máx. <code>200</code> % (evita dos procesadores de cola compitiendo por la misma cola en BD).</li>
+          </ol>
+
+          <h4 class="sub" id="paso-2-2">2.2 · Service Discovery <code>weblogic-colas</code></h4>
+          <div class="tabla"><table>
+            <tr><th>Campo</th><th>Valor</th></tr>
+            <tr><td>Namespace</td><td>Existente: <code>forms.local</code></td></tr>
+            <tr><td>Nombre del servicio DNS</td><td><code>weblogic-colas</code> (FQDN: <code>weblogic-colas.forms.local</code>)</td></tr>
+            <tr><td>Registro</td><td><code>A</code>, TTL <code>15</code>, propagación de estado ECS</td></tr>
+          </table></div>
+          <div class="callout">
+            Se usa <code>colas</code> en lugar del prefijo <code>weblogic-*</code> porque este contenedor <strong>no</strong> es un Managed Server
+            WebLogic. El nombre sirve para operación, scripts y auditoría; la resolución de Reports sigue siendo
+            <code>weblogic-reports.forms.local</code>.
+          </div>
+
+          <h4 class="sub" id="paso-2-3">2.3 · Red del servicio</h4>
+          <p>
+            Igual que admin, Forms y Reports: subred <code>pub-A</code>, security group <code>forms-sg-ecs</code>, IP pública asignada
+            (<a href="../admin/index.html#paso-4-9">Admin 4.9</a>). <strong>No</strong> es necesario mapear puertos en la definición de tarea ni
+            añadir reglas de entrada públicas específicas para Colas.
+          </p>
+
+          <h4 class="sub" id="paso-2-4">2.4 · Crear e implementar</h4>
+          <p>Confirmar Service Discovery antes de finalizar el asistente. Tras crear, esperar <code>1/1</code> tareas en ejecución.</p>
+        </section>
+
+        <section class="slide-block" id="paso-3">
+          <h3><span class="num">3</span> Verificar Running, Cloud Map y ECS Exec<span class="status pending">Pendiente</span></h3>
+          <p>Comprobar tarea en <strong>Ejecutando</strong>, instancia en Cloud Map y acceso interactivo (como <a href="../report/index.html#paso-3">Reports 3</a>).</p>
+          <pre class="code">aws ecs execute-command \
+  --cluster forms_report \
+  --task &lt;TASK_ID&gt; \
+  --container colas-server \
+  --interactive \
+  --command "su -s /bin/bash oracle"</pre>
+          <pre class="code">df -h | grep -E 'domains|apps|scripts'
+ls -la /u01/oracle/scripts
+
+getent hosts weblogic-colas.forms.local weblogic-reports.forms.local weblogic-admin.forms.local
+ip -4 -o addr show | awk '{print $2,$4}'
+
+timeout 5 bash -c 'echo &gt;/dev/tcp/weblogic-admin.forms.local/7001' &amp;&amp; echo Admin_OK || echo Admin_FAIL
+timeout 5 bash -c 'echo &gt;/dev/tcp/weblogic-reports.forms.local/9012' &amp;&amp; echo Reports_OK || echo Reports_FAIL</pre>
+          <div class="callout warn">
+            La IP de <code>weblogic-colas.forms.local</code> debe coincidir con la IP privada VPC de la tarea (interfaz <code>eth1</code>), no con
+            direcciones link-local de metadata.
+          </div>
+        </section>
+
+        <section class="slide-block" id="paso-4">
+          <h3><span class="num">4</span> Verificar montajes del dominio y apps<span class="status pending">Pendiente</span></h3>
+          <p>Validar que EFS expone dominio, aplicaciones batch y scripts de colas.</p>
+          <pre class="code">test -d "$DOMAIN_HOME/config" &amp;&amp; echo DOMAIN_OK
+test -f /u01/oracle/user_projects/apps/set_batch_env.sh &amp;&amp; echo SET_BATCH_OK
+test -x /u01/oracle/user_projects/apps/proc_app/bin/CARC00100 &amp;&amp; echo CARC00100_OK
+test -f /u01/oracle/user_projects/apps/proc_app/bin/LP.sh &amp;&amp; echo LP_OK
+ls /u01/oracle/scripts</pre>
+          <div class="tabla"><table>
+            <tr><th>Ruta en contenedor</th><th>Contenido esperado</th></tr>
+            <tr><td><code>/u01/oracle/user_projects/domains/forms_domain</code></td><td>Dominio compartido (TNS, <code>reports/bin</code> vía dominio montado)</td></tr>
+            <tr><td><code>/u01/oracle/user_projects/apps/proc_app/bin</code></td><td><code>CARC00100</code>, <code>LP.sh</code>, <code>USUARIOBATCH.lis</code></td></tr>
+            <tr><td><code>/u01/oracle/user_projects/apps/colas_app/log</code></td><td>Logs de cola (crear si no existe)</td></tr>
+            <tr><td><code>/u01/oracle/scripts</code></td><td>Scripts desplegados en EFS bajo <code>scripts/colas</code></td></tr>
+          </table></div>
+        </section>
+
+        <section class="slide-block" id="paso-5">
+          <h3><span class="num">5</span> Preparar ambiente de colas<span class="status pending">Pendiente</span></h3>
+          <p>
+            A diferencia de Reports (<a href="../report/index.html#paso-5">Paso 5 — Node Manager y WLS_REPORTS</a>), aquí se prepara el entorno
+            Pro*C y batch. Detalle funcional y parámetros de <code>CARC00100</code> en
+            <a href="../../app-rector/index.html#paso-2-2">app-rector · 2.2</a>.
+          </p>
+
+          <h4 class="sub" id="paso-5-1">5.1 · Cargar <code>set_batch_env.sh</code></h4>
+          <p>Desde ECS Exec como <code>oracle</code>, en el directorio de aplicaciones:</p>
+          <pre class="code">cd /u01/oracle/user_projects/apps/proc_app/bin
+source ../../set_batch_env.sh
+echo "PATH=$PATH"
+echo "TWO_TASK=$TWO_TASK"
+which CARC00100 LP.sh 2&gt;/dev/null</pre>
+          <p>El script debe dejar en el <code>PATH</code> tanto <code>proc_app/bin</code> como utilidades de Reports del dominio montado.</p>
+
+          <h4 class="sub" id="paso-5-2">5.2 · Verificar Oracle y credenciales batch</h4>
+          <pre class="code">echo "$TNS_ADMIN"
+sqlplus -L /nolog &lt;&lt;'EOF'
+connect batch_user/&lt;clave&gt;@SEGU
+select sysdate from dual;
+exit
+EOF</pre>
+          <p><code>PASS_FILE</code> apunta a <code>USUARIOBATCH.lis</code> según la TD; alinear con el procedimiento operativo de colas.</p>
+
+          <h4 class="sub" id="paso-5-3">5.3 · Ejecutar cola (ejemplo)</h4>
+          <p>No se inicia WebLogic en este contenedor. Lanzar el procesador de cola en primer plano o con <code>nohup</code>:</p>
+          <pre class="code">mkdir -p /u01/oracle/user_projects/apps/colas_app/log
+cd /u01/oracle/user_projects/apps/proc_app/bin
+source ../../set_batch_env.sh
+
+./CARC00100 Y weblogic-colas.forms.local SEGU SEGU \
+  &gt;&gt; /u01/oracle/user_projects/apps/colas_app/log/COLA_Y.log 2&gt;&amp;1</pre>
+          <p>Para ejecución continua en background, ver el bloque <code>nohup stdbuf</code> en
+            <a href="../../app-rector/index.html#paso-2-2">RECTOR 2.2</a>.</p>
+          <div class="callout">
+            <strong><code>LP.sh</code>:</strong> en entornos DEV puede estar configurado para registrar en
+            <code>colas_app/log/LP.log</code> sin imprimir; revisar app-rector antes de esperar PDF inmediato.
+          </div>
+        </section>
+
+        <section class="slide-block" id="paso-6">
+          <h3><span class="num">6</span> Validar acceso a Reports y EFS de salida<span class="status pending">Pendiente</span></h3>
+          <p>
+            Colas consume Reports de dos formas: HTTP hacia el servicio WebLogic ya desplegado, o archivos compartidos bajo
+            <code>reports_app</code> / <code>rep</code> en el mismo EFS. La prueba PDF vía <code>rwservlet</code> documentada en Reports no es el
+            objetivo principal de esta guía; usar
+            <a href="../../app-rector/index.html#paso-2-2-4">RECTOR 2.2.4</a> cuando haga falta validar el motor Reports.
+          </p>
+
+          <h4 class="sub" id="paso-6-1">6.1 · Conectividad a Reports (HTTP)</h4>
+          <pre class="code">curl -s -o /dev/null -w '%{http_code}\n' \
+  'http://weblogic-reports.forms.local:9012/reports/rwservlet/getjobid' || true</pre>
+          <p>Código <code>200</code> o respuesta esperada del servlet indica que Reports es alcanzable desde Colas (requiere
+            <code>WLS_REPORTS</code> RUNNING — <a href="../report/index.html#paso-5-3">Reports 5.3</a>).</p>
+
+          <h4 class="sub" id="paso-6-2">6.2 · Salidas en EFS</h4>
+          <pre class="code">ls -la /u01/oracle/user_projects/apps/reports_app 2&gt;/dev/null | head
+ls -la /u01/oracle/user_projects/apps/rep 2&gt;/dev/null | head
+tail -20 /u01/oracle/user_projects/apps/colas_app/log/LP.log 2&gt;/dev/null</pre>
+
+          <h4 class="sub" id="paso-6-3">6.3 · Validación funcional CARC00100</h4>
+          <p>
+            Tras procesar órdenes en cola, revisar <code>COLA_*.log</code>, tablas de cola en Oracle y — si aplica impresión — entradas en
+            <code>LP.log</code>. Criterios completos en <a href="../../app-rector/index.html#paso-2-2">app-rector · Ejecución de CARC00100</a>.
+          </p>
+        </section>
+
+        <section class="slide-block anexo" id="anexo-json">
+          <h3><span class="num anexo">Anexo</span> Task definition JSON (<code>colas-server:1</code>)<span class="status done">Hecho</span></h3>
+          <p>
+            Última revisión registrada (<code>colas-server:1</code>), exportada en el repositorio: <a href="colas.json"><code>aws-ecs/colas/colas.json</code></a>.
+            Registrar con <strong>Crear nueva definición de tarea con JSON</strong> o CLI (<a href="#anexo-cli-1">abajo</a>).
+            Sustituir contraseñas antes de producción; considerar fijar imagen por digest como en
+            <a href="../report/index.html#anexo-json">Reports — anexo JSON</a>.
+          </p>
+          <p>Vista resumida (ver archivo completo para copiar/pegar):</p>
+          <pre class="code full">{
+  "family": "colas-server",
+  "containerDefinitions": [{
+    "name": "colas-server",
+    "image": "730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker:r3",
+    "portMappings": [],
+    "essential": true,
+    "command": ["sleep", "infinity"],
+    "environment": [
+      {"name": "PATH", "value": "/u01/oracle/user_projects/domains/forms_domain/reports/bin:/u01/oracle/bin:/u01/oracle/oracle_common/bin:/u01/jdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"},
+      {"name": "ADMIN_SERVER_HOST", "value": "weblogic-admin.forms.local"},
+      {"name": "ADMIN_SERVER_NAME", "value": "AdminServer"},
+      {"name": "TWO_TASK", "value": "SEGU"},
+      {"name": "ADMIN_USER", "value": "weblogic"},
+      {"name": "MANAGED_SERVER_NAME", "value": "WLS_REPORTS"},
+      {"name": "TNS_ADMIN", "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig"},
+      {"name": "DOMAIN_NAME", "value": "forms_domain"},
+      {"name": "DOMAIN_HOME", "value": "/u01/oracle/user_projects/domains/forms_domain"},
+      {"name": "ADMIN_PASSWORD", "value": "&lt;clave&gt;"},
+      {"name": "MANAGED_SERVER_PORT", "value": "9012"},
+      {"name": "NODE_MANAGER_PORT", "value": "5556"},
+      {"name": "LD_LIBRARY_PATH", "value": "/u01/oracle/lib:/u01/oracle/oracle_common/lib"},
+      {"name": "PASS_FILE", "value": "/u01/oracle/user_projects/apps/proc_app/bin/USUARIOBATCH.lis"},
+      {"name": "ORACLE_HOME", "value": "/u01/oracle"},
+      {"name": "ADMIN_SERVER_PORT", "value": "7001"}
+    ],
+    "mountPoints": [
+      {"sourceVolume": "efs-domains", "containerPath": "/u01/oracle/user_projects/domains"},
+      {"sourceVolume": "efs-app", "containerPath": "/u01/oracle/user_projects/apps"},
+      {"sourceVolume": "efs-scripts", "containerPath": "/u01/oracle/scripts"}
+    ],
+    "workingDirectory": "/u01/oracle",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/ecs/colas-server",
+        "awslogs-create-group": "true",
+        "awslogs-region": "us-east-1",
+        "awslogs-stream-prefix": "ecs"
+      }
+    }
+  }],
+  "taskRoleArn": "arn:aws:iam::730335573515:role/ecs-forms-admin-task-role",
+  "executionRoleArn": "arn:aws:iam::730335573515:role/ecsTaskExecutionRole",
+  "networkMode": "awsvpc",
+  "volumes": [
+    {"name": "efs-domains", "efsVolumeConfiguration": {"fileSystemId": "fs-08471cc88d2a8edc3", "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/domains", "transitEncryption": "ENABLED"}},
+    {"name": "efs-app", "efsVolumeConfiguration": {"fileSystemId": "fs-08471cc88d2a8edc3", "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/app", "transitEncryption": "ENABLED"}},
+    {"name": "efs-scripts", "efsVolumeConfiguration": {"fileSystemId": "fs-08471cc88d2a8edc3", "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/scripts/colas", "transitEncryption": "ENABLED"}}
+  ],
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "2048",
+  "memory": "4096",
+  "ephemeralStorage": {"sizeInGiB": 100},
+  "runtimePlatform": {"cpuArchitecture": "X86_64", "operatingSystemFamily": "LINUX"}
+}</pre>
+        </section>
+
+        <section class="slide-block anexo" id="anexo-cli">
+          <h3><span class="num anexo">Anexo</span> Comandos AWS CLI<span class="status pending">Referencia</span></h3>
+          <p>
+            Infraestructura compartida: <a href="../admin/index.html#anexo-cli">anexo CLI de admin</a>.
+            Comandos específicos de Colas (mismos IDs de red que Reports cuando aplica):
+          </p>
+
+          <h4 class="sub" id="anexo-cli-1">1 · Registrar la task definition</h4>
+          <pre class="code">aws ecs register-task-definition \
+  --cli-input-json file://aws-ecs/colas/colas.json \
+  --region us-east-1</pre>
+
+          <h4 class="sub" id="anexo-cli-2">2 · Servicio Cloud Map <code>colas</code></h4>
+          <pre class="code">aws servicediscovery create-service \
+  --name colas \
+  --namespace-id ns-r3zqawwpjtp5pzue \
+  --dns-config 'NamespaceId=ns-r3zqawwpjtp5pzue,RoutingPolicy=MULTIVALUE,DnsRecords=[{Type=A,TTL=15}]' \
+  --health-check-custom-config FailureThreshold=1 \
+  --region us-east-1 --query 'Service.Arn' --output text</pre>
+
+          <h4 class="sub" id="anexo-cli-3">3 · Crear el servicio ECS</h4>
+          <pre class="code">aws ecs create-service \
+  --cluster forms_report \
+  --service-name colas \
+  --task-definition colas-server \
+  --desired-count 1 \
+  --launch-type FARGATE \
+  --platform-version LATEST \
+  --enable-execute-command \
+  --deployment-configuration 'minimumHealthyPercent=0,maximumPercent=200' \
+  --network-configuration 'awsvpcConfiguration={subnets=[subnet-01212efd4a9ce759b],securityGroups=[sg-0e1787d32bac71fcd],assignPublicIp=ENABLED}' \
+  --service-registries 'registryArn=&lt;ARN_SERVICIO_CLOUDMAP_COLAS&gt;' \
+  --region us-east-1</pre>
+
+          <h4 class="sub" id="anexo-cli-4">4 · Tarea, diagnóstico y logs</h4>
+          <pre class="code">TASK_ARN=$(aws ecs list-tasks --cluster forms_report --service-name colas \
+  --region us-east-1 --query 'taskArns[0]' --output text)
+
+aws ecs describe-tasks --cluster forms_report --tasks "$TASK_ARN" --region us-east-1 \
+  --query 'tasks[0].{status:lastStatus,stopped:stoppedReason,container:containers[0].reason}'
+
+aws logs tail /ecs/colas-server --follow --region us-east-1</pre>
+
+          <h4 class="sub" id="anexo-cli-5">5 · Equivalencia admin / forms / reports / colas</h4>
+          <div class="tabla"><table>
+            <tr><th>Concepto</th><th>Admin</th><th>Forms</th><th>Reports</th><th>Colas</th></tr>
+            <tr><td>Servicio ECS</td><td><code>admin</code></td><td><code>forms</code></td><td><code>reports-server</code></td><td><code>colas</code></td></tr>
+            <tr><td>Task definition</td><td><code>forms-admin</code></td><td><code>forms-server</code></td><td><code>reports-server</code></td><td><code>colas-server</code></td></tr>
+            <tr><td>Discovery</td><td><code>weblogic-admin</code></td><td><code>weblogic-forms</code></td><td><code>weblogic-reports</code></td><td><code>colas</code></td></tr>
+            <tr><td>Scripts EFS</td><td><code>scripts/admin</code></td><td><code>scripts/forms</code></td><td><code>scripts/reports</code></td><td><code>scripts/colas</code></td></tr>
+            <tr><td>Log group</td><td><code>/ecs/forms-admin</code></td><td><code>/ecs/forms-server</code></td><td><code>/ecs/reports-server</code></td><td><code>/ecs/colas-server</code></td></tr>
+            <tr><td>Puertos</td><td>7001, …</td><td>9001, …</td><td>9012, …</td><td>Ninguno</td></tr>
+          </table></div>
+        </section>
+
+        <section class="slide-block lecciones" id="lecciones-criticas">
+          <h3><span class="num lecciones">★</span> Lecciones críticas</h3>
+          <p>
+            Lecciones de infraestructura: <a href="../admin/index.html#lecciones-criticas">admin</a> y
+            <a href="../forms/index.html#lecciones-criticas">Forms</a>. Lecciones de Reports (Motif, log group, Coherence) aplican al
+            <strong>servicio Reports</strong>, no a Colas. Específicas de Colas:
+          </p>
+          <ol>
+            <li><strong>No es WebLogic</strong> — <code>sleep infinity</code> no implica RUNNING de ningún managed server; validar Reports por separado.</li>
+            <li><strong>Sin <code>portMappings</code></strong> — el servicio no publica HTTP; la conectividad es saliente hacia <code>weblogic-reports:9012</code> y Oracle.</li>
+            <li><strong><code>scripts/colas</code> en EFS</strong> — obligatorio antes del primer arranque; mismo patrón de error NFS que <code>scripts/reports</code>.</li>
+            <li><strong><code>set_batch_env.sh</code></strong> — sin cargarlo, <code>CARC00100</code> no encuentra <code>reports/bin</code> ni <code>proc_app/bin</code>.</li>
+            <li><strong>Un procesador por cola</strong> — no escalar <code>desired-count</code> &gt; 1 para la misma cola BD sin partición explícita.</li>
+            <li><strong><code>MANAGED_SERVER_*</code> en env</strong> — referencia al Reports remoto; no ejecutar <code>startWLSReports.sh</code> aquí salvo error de diseño.</li>
+            <li><strong>Log group <code>/ecs/colas-server</code></strong> — crear manualmente si <code>CreateLogGroup</code> falla (Reports 1.7).</li>
+            <li><strong>Imagen <code>r3</code></strong> — debe incluir cliente Oracle/Pro*C y dependencias de Reports client; alinear con la línea de imagen documentada en admin/Reports.</li>
+            <li><strong>Validación funcional</strong> — seguir <a href="../../app-rector/index.html#paso-2-2">RECTOR 2.2</a> (CARC00100) y
+              <a href="../../app-rector/index.html#paso-2-2-4">2.2.4</a> (Reports), no duplicar pruebas rwservlet como objetivo de esta guía.</li>
+            <li><strong>Secretos</strong> — <code>ADMIN_PASSWORD</code> en claro en <code>colas.json</code> es solo DEV; usar Secrets Manager en producción.</li>
+          </ol>
+        </section>
+
+      </div>
+    </div>
+
+    <p class="doc-footer">
+      Documentación ECS Colas — JSON en <code>colas.json</code>. Ver también
+      <a href="../report/index.html">ECS Reports</a>,
+      <a href="../admin/index.html">ECS AdminServer</a>,
+      <a href="../forms/index.html">ECS Forms</a> y
+      <a href="../../app-rector/index.html">app-rector</a>.
+    </p>
+
+    <p style="margin: 1rem 0 2rem; text-align: center;">
+      <a class="back-link" href="../../index.html">← Regresar a la documentación del proyecto</a>
+    </p>
+  </div>
+</body>
+</html>

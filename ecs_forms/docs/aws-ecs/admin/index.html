@@ -2575,6 +2575,7 @@ aws ecs execute-command --cluster $CLUSTER --task &lt;TASK_ID&gt; --container ad
         <li><strong>Solo <code>pub-A</code> + ruta BD</strong> (Paso 4.9–4.10) — no asociar <code>database-A</code>; <code>192.168.229.137/32 → pcx</code> en <code>Pub-RT</code>.</li>
         <li><strong>Hostnames</strong> (Paso 6) — sin FQDN en <code>config.xml</code> y <code>nodemanager.properties</code> aparece <code>UnknownHostException</code>.</li>
         <li><strong>ECS Running ≠ WebLogic RUNNING</strong> (Paso 7) — validar siempre el log del AdminServer.</li>
+        <li><strong>URL JDBC de schemas RCU/OPSS</strong> — WebLogic no lee variables de entorno en los XML del dominio. Al arrancar, <code>startAdminserver.sh</code> llama a <code>set-db-jdbc-url.sh</code> si hay <code>DB_JDBC_URL</code> o <code>DB_HOST</code>+<code>DB_PORT</code>+<code>DB_SERVICE</code> en la task definition. Actualiza los 6 datasources RCU y <code>jps-config*.xml</code> (dominio en EFS, con <code>flock</code>). No modifica <code>tnsnames.ora</code> ni <code>cwallet.sso</code>. Comprobar: <code>/u01/oracle/scripts/set-db-jdbc-url.sh --check</code>.</li>
       </ol>
         </section>
 

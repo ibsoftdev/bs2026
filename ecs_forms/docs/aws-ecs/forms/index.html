@@ -1442,7 +1442,7 @@
       </p>
       <p>
         ECS → <strong>Definiciones de tareas</strong> → <strong>Crear nueva definición de tarea</strong>.
-        Definición completa de la última revisión en el <a href="#anexo-json">anexo JSON</a> (<code>forms-server:10</code>).
+        Definición completa de la última revisión en el <a href="#anexo-json">anexo JSON</a> (<code>forms-server:12</code>).
       </p>
 
       <h4 class="sub" id="paso-1-1">1.1 · Familia, Fargate, tamaño y roles</h4>
@@ -1877,29 +1877,57 @@ timeout 5 bash -c 'echo &gt;/dev/tcp/weblogic-admin.forms.local/7001' &amp;&amp;
         <!-- ═════════════ ANEXOS ═════════════ -->
 
         <section class="slide-block anexo" id="anexo-json">
-          <h3><span class="num anexo">Anexo</span> Task definition JSON (<code>forms-server:10</code>)<span class="status done">Hecho</span></h3>
+          <h3><span class="num anexo">Anexo</span> Task definition JSON (<code>forms-server:12</code>)<span class="status done">Hecho</span></h3>
       <p>
-        Última revisión registrada (<code>forms-server:10</code>), exportada en <code>aws-ecs/forms/forms.json</code>. Se muestra en formato registrable:
+        Última revisión registrada (<code>forms-server:12</code>), exportada en <code>aws-ecs/forms/forms.json</code>. Se muestra en formato registrable:
         sin los campos de solo lectura que agrega ECS al exportar (<code>taskDefinitionArn</code>, <code>revision</code>, <code>status</code>,
         <code>requiresAttributes</code>, <code>registeredAt</code>/<code>By</code>…), por lo que puede pegarse en ECS →
         <strong>Crear nueva definición de tarea con JSON</strong> o registrarse por CLI. Sustituir <code>&lt;clave&gt;</code> por la contraseña real. La imagen queda fijada por <em>digest</em> (<code>@sha256:…</code>), tal como la resolvió ECS.
-        Corresponde al <a href="#paso-1">Paso 1</a> con el comando de arranque automático de <a href="#paso-5-auto">5d</a>.
+        Corresponde al <a href="#paso-1">Paso 1</a> con comando <code>sleep infinity</code> (arranque manual vía ECS Exec; ver <a href="#paso-5-auto">5d</a> para auto-start con <code>startWLSForms.sh -keep</code>).
       </p>
       <pre class="code">{
   "containerDefinitions": [
     {
       "name": "forms-server",
-      "image": "730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker@sha256:82a4532d4c80c5c643d60c9dba8e2f99f459c3255f023fdcaea2e68779d320cf",
+      "image": "730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker@sha256:05a60dee7700a40cdb27520feea9bd73e35fc2841587aaf5d75d7e14ee1ae36f",
       "portMappings": [
-        {"containerPort": 9001, "hostPort": 9001, "protocol": "tcp", "name": "wls-forms-http", "appProtocol": "http"},
-        {"containerPort": 9501, "hostPort": 9501, "protocol": "tcp", "name": "wls-forms-https", "appProtocol": "http"},
-        {"containerPort": 9991, "hostPort": 9991, "protocol": "tcp", "name": "wls-forms-admin"},
-        {"containerPort": 5556, "hostPort": 5556, "protocol": "tcp", "name": "nodemanager"}
+        {
+          "containerPort": 9001,
+          "hostPort": 9001,
+          "protocol": "tcp",
+          "name": "wls-forms-http",
+          "appProtocol": "http"
+        },
+        {
+          "containerPort": 9501,
+          "hostPort": 9501,
+          "protocol": "tcp",
+          "name": "wls-forms-https",
+          "appProtocol": "http"
+        },
+        {
+          "containerPort": 9991,
+          "hostPort": 9991,
+          "protocol": "tcp",
+          "name": "wls-forms-admin"
+        },
+        {
+          "containerPort": 5556,
+          "hostPort": 5556,
+          "protocol": "tcp",
+          "name": "nodemanager"
+        }
       ],
       "essential": true,
-      "command": ["/u01/oracle/scripts/startWLSForms.sh", "-keep"],
+      "command": [
+        "sleep",
+        "infinity"
+      ],
       "environment": [
-        {"name": "CC", "value": "/usr/bin/gcc"},
+        {
+          "name": "CC",
+          "value": "/usr/bin/gcc"
+        },
         {
           "name": "FORMS_PATH",
           "value": "/u01/oracle/user_projects/apps/forms_app/bin:/u01/oracle/user_projects/apps/forms_app/src:/u01/oracle/forms"
@@ -1908,42 +1936,106 @@ timeout 5 bash -c 'echo &gt;/dev/tcp/weblogic-admin.forms.local/7001' &amp;&amp;
           "name": "PATH",
           "value": "/u01/oracle/bin:/u01/oracle/oracle_common/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
         },
-        {"name": "PROC_INCLUDE", "value": "/u01/oracle/precomp/public"},
-        {"name": "ADMIN_SERVER_HOST", "value": "weblogic-admin.forms.local"},
-        {"name": "ADMIN_SERVER_NAME", "value": "AdminServer"},
-        {"name": "ADMIN_USER", "value": "weblogic"},
-        {"name": "MANAGED_SERVER_NAME", "value": "WLS_FORMS"},
-        {"name": "TNS_ADMIN", "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig"},
-        {"name": "DOMAIN_NAME", "value": "forms_domain"},
-        {"name": "FORMS_MODULE_PATH", "value": "/u01/oracle/user_projects/apps/forms_app/bin:/u01/oracle/forms"},
-        {"name": "DOMAIN_HOME", "value": "/u01/oracle/user_projects/domains/forms_domain"},
-        {"name": "ADMIN_PASSWORD", "value": "&lt;clave&gt;"},
+        {
+          "name": "PROC_INCLUDE",
+          "value": "/u01/oracle/precomp/public"
+        },
+        {
+          "name": "ADMIN_SERVER_HOST",
+          "value": "weblogic-admin.forms.local"
+        },
+        {
+          "name": "ADMIN_SERVER_NAME",
+          "value": "AdminServer"
+        },
+        {
+          "name": "ADMIN_USER",
+          "value": "weblogic"
+        },
+        {
+          "name": "MANAGED_SERVER_NAME",
+          "value": "WLS_FORMS"
+        },
+        {
+          "name": "TNS_ADMIN",
+          "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig"
+        },
+        {
+          "name": "DOMAIN_NAME",
+          "value": "forms_domain"
+        },
+        {
+          "name": "FORMS_MODULE_PATH",
+          "value": "/u01/oracle/user_projects/apps/forms_app/bin:/u01/oracle/forms"
+        },
+        {
+          "name": "DOMAIN_HOME",
+          "value": "/u01/oracle/user_projects/domains/forms_domain"
+        },
+        {
+          "name": "ADMIN_PASSWORD",
+          "value": "&lt;clave&gt;"
+        },
         {
           "name": "FORMS_INSTANCE",
           "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig/components/FORMS/instances/forms1"
         },
-        {"name": "MANAGED_SERVER_PORT", "value": "9001"},
-        {"name": "NODE_MANAGER_PORT", "value": "5556"},
-        {"name": "PROC", "value": "/u01/oracle/bin/proc"},
-        {"name": "LD_LIBRARY_PATH", "value": "/u01/oracle/lib:/u01/oracle/oracle_common/lib"},
-        {"name": "JAVA_OPTIONS", "value": "-Dforms.instance=forms1"},
-        {"name": "ORACLE_HOME", "value": "/u01/oracle"},
-        {"name": "ADMIN_SERVER_PORT", "value": "7001"},
-        {"name": "PCSCFG", "value": "/u01/oracle/precomp/admin/pcscfg.cfg"},
+        {
+          "name": "MANAGED_SERVER_PORT",
+          "value": "9001"
+        },
+        {
+          "name": "NODE_MANAGER_PORT",
+          "value": "5556"
+        },
+        {
+          "name": "PROC",
+          "value": "/u01/oracle/bin/proc"
+        },
+        {
+          "name": "LD_LIBRARY_PATH",
+          "value": "/u01/oracle/lib:/u01/oracle/oracle_common/lib"
+        },
+        {
+          "name": "JAVA_OPTIONS",
+          "value": "-Dforms.instance=forms1"
+        },
+        {
+          "name": "ORACLE_HOME",
+          "value": "/u01/oracle"
+        },
+        {
+          "name": "ADMIN_SERVER_PORT",
+          "value": "7001"
+        },
+        {
+          "name": "PCSCFG",
+          "value": "/u01/oracle/precomp/admin/pcscfg.cfg"
+        },
         {
           "name": "FRMCMP",
           "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig/components/FORMS/instances/forms1/bin/frmcmp_batch.sh"
         }
       ],
-      "environmentFiles": [],
       "mountPoints": [
-        {"sourceVolume": "efs-domains", "containerPath": "/u01/oracle/user_projects/domains", "readOnly": false},
-        {"sourceVolume": "efs-app", "containerPath": "/u01/oracle/user_projects/apps", "readOnly": false},
-        {"sourceVolume": "efs-scripts", "containerPath": "/u01/oracle/scripts", "readOnly": false}
+        {
+          "sourceVolume": "efs-domains",
+          "containerPath": "/u01/oracle/user_projects/domains",
+          "readOnly": false
+        },
+        {
+          "sourceVolume": "efs-app",
+          "containerPath": "/u01/oracle/user_projects/apps",
+          "readOnly": false
+        },
+        {
+          "sourceVolume": "efs-scripts",
+          "containerPath": "/u01/oracle/scripts",
+          "readOnly": false
+        }
       ],
       "workingDirectory": "/u01/oracle",
       "readonlyRootFilesystem": false,
-      "ulimits": [],
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
@@ -1951,7 +2043,8 @@ timeout 5 bash -c 'echo &gt;/dev/tcp/weblogic-admin.forms.local/7001' &amp;&amp;
           "awslogs-create-group": "true",
           "awslogs-region": "us-east-1",
           "awslogs-stream-prefix": "ecs"
-        }
+        },
+        "secretOptions": []
       }
     }
   ],
@@ -1985,8 +2078,20 @@ timeout 5 bash -c 'echo &gt;/dev/tcp/weblogic-admin.forms.local/7001' &amp;&amp;
       }
     }
   ],
-  "runtimePlatform": {"cpuArchitecture": "X86_64", "operatingSystemFamily": "LINUX"},
-  "requiresCompatibilities": ["FARGATE"],
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  },
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "2048",
+  "memory": "4096",
+  "ephemeralStorage": {
+    "sizeInGiB": 100
+  },
+  "enableFaultInjection": false
+}"FARGATE"],
   "cpu": "2048",
   "memory": "4096",
   "ephemeralStorage": {"sizeInGiB": 100}
@@ -2002,7 +2107,7 @@ timeout 5 bash -c 'echo &gt;/dev/tcp/weblogic-admin.forms.local/7001' &amp;&amp;
       <pre class="code">export AWS_REGION=us-east-1
 export CLUSTER=forms_report
 export SERVICE=forms-server
-export TASKDEF=forms-server:4
+export TASKDEF=forms-server:12
 
 # Exportar servicio (red, SG, IP pública, Exec) y task definition
 aws ecs describe-services --cluster $CLUSTER --services $SERVICE \
@@ -2102,7 +2207,7 @@ $ORACLE_HOME/bin/sqlplus USUARIO/PASS@192.168.229.137:1521/METAPRD</pre>
         <li><strong>Cliente JNLP en Linux</strong> (Paso 5) — JDK 8 <strong>x64</strong> + <code>javaws</code> (IcedTea / OpenWebStart); JDK 17 no trae Java Web Start.</li>
         <li><strong>Usuario <code>oracle</code></strong> (Paso 3) — arrancar Node Manager, <code>WLS_FORMS</code> y scripts como <code>oracle</code> (<code>--command "su -s /bin/bash oracle"</code>), conservando las variables de la task definition. Evitar <code>root</code>.</li>
         <li><strong><code>boot.properties</code> de <code>WLS_FORMS</code></strong> (Paso 5) — en <code>servers/WLS_FORMS/security/</code>. <code>ADMIN_USER</code> / <code>ADMIN_PASSWORD</code> del compose no bastan, y <code>startManagedWebLogic.sh</code> reinicia <code>WLS_USER</code> / <code>WLS_PW</code>. No confundir con el de Node Manager (<code>.../data/nodemanager/</code>).</li>
-        <li><strong>URL de BD fija en el dominio</strong> — <em>pendiente por resolver</em>. La URL JDBC queda en <code>config/fmwconfig/jps-config-jse.xml</code>, <code>config/jdbc/opss-datasource-jdbc.xml</code>, <code>config/jdbc/WLSRuntimeSchemaDataSource-jdbc.xml</code> y otros; WebLogic no resuelve variables de entorno en esos XML. Objetivo: parametrizarla al arrancar la tarea (<code>sed</code> / <code>envsubst</code> o WLST offline).</li>
+        <li><strong>URL de BD fija en el dominio</strong> — resuelto con <code>set-db-jdbc-url.sh</code> (invocado desde <code>startAdminserver.sh</code> / <code>startWLSForms.sh</code> / <code>startWLSReports.sh</code>). Variables en la task definition: <code>DB_JDBC_URL</code> <em>o</em> <code>DB_HOST</code>+<code>DB_PORT</code>+<code>DB_SERVICE</code>. Actualiza los 6 <code>*-jdbc.xml</code> RCU y <code>jps-config*.xml</code>; no toca <code>tnsnames.ora</code> ni <code>cwallet.sso</code>. Sin variables, el arranque omite el cambio. Verificación: <code>/u01/oracle/scripts/set-db-jdbc-url.sh --check</code>.</li>
         <li><strong>Redespliegue</strong> — nueva tarea = nueva IP; Cloud Map la actualiza (respetar el TTL de 15 s).</li>
       </ol>
         </section>
