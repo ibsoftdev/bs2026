@@ -1394,7 +1394,7 @@
       </div>
     </div>
 
-    <nav class="toc" aria-label="Contenido"><a href="#paso-0">0 · Preparación y valores fijos</a><a href="#paso-1">1 · Configuraciones comunes del Cluster</a><a href="#paso-2">2 · Cluster forms_report</a><a href="#paso-3">3 · Crear task definition AdminServer</a><a href="#paso-4">4 · Crear servicio + Service Discovery</a><a href="#paso-5">5 · Verificar Running y ECS Exec</a><a href="#paso-6">6 · Alinear hostnames Cloud Map</a><a href="#paso-7">7 · Arrancar AdminServer y consola</a><a href="#anexo-json">Anexo · Task definition JSON</a><a href="#anexo-cli">Anexo · Comandos AWS CLI</a><a href="#lecciones-criticas">★ · Lecciones críticas</a></nav>
+    <nav class="toc" aria-label="Contenido"><a href="#paso-0">0 · Preparación y valores fijos</a><a href="#paso-1">1 · Configuraciones comunes del Cluster</a><a href="#paso-2">2 · Cluster forms_report</a><a href="#paso-3">3 · Crear task definition AdminServer</a><a href="#paso-4">4 · Crear servicio + Service Discovery</a><a href="#paso-5">5 · Verificar Running y ECS Exec</a><a href="#paso-6">6 · Alinear hostnames Cloud Map</a><a href="#paso-7">7 · Arrancar AdminServer y consola</a><a href="#paso-8">8 · URLs de BD dinámicas (RCU y tnsnames)</a><a href="#anexo-json">Anexo · Task definition JSON</a><a href="#anexo-cli">Anexo · Comandos AWS CLI</a><a href="#lecciones-criticas">★ · Lecciones críticas</a></nav>
 
     <div class="card">
       <div class="card-body">
@@ -1830,7 +1830,7 @@ docker push $REPO:r3</pre>
         una nueva <strong>revisión</strong> numerada (<code>forms-admin:1</code>, <code>:2</code>, …) y el servicio
         indica qué revisión ejecutar.
       </p>
-      <p>Definición completa de la última revisión en el <a href="#anexo-json">anexo JSON</a> (<code>forms-admin:7</code>).</p>
+      <p>Definición completa de la última revisión en el <a href="#anexo-json">anexo JSON</a> (<code>forms-admin:10</code>).</p>
       <p>
         ECS → <strong>Definiciones de tareas</strong> → <strong>Crear nueva definición de tarea</strong>
         (o <strong>Crear nueva revisión</strong> si la familia ya existe). Familia:
@@ -2399,19 +2399,134 @@ tail -200f user_projects/domains/forms_domain/servers/AdminServer/logs/AdminServ
         Con el arranque automático ya no hace falta ejecutar <code>./startAdminserver.sh</code> desde ECS Exec; la sesión
         (<a href="#paso-5">Paso 5</a>) se sigue usando para revisar logs y diagnosticar.
       </div>
-      <p>Siguiente fase: <a href="../forms/index.html">crear el contenedor Forms</a>.</p>
+      <p>Siguiente: parametrizar las URLs de BD (<a href="#paso-8">Paso 8</a>) y luego <a href="../forms/index.html">crear el contenedor Forms</a>.</p>
+        </section>
+
+<section class="slide-block" id="paso-8">
+          <h3><span class="num">8</span> URLs de BD dinámicas (RCU y tnsnames)<span class="status done">Hecho</span></h3>
+      <p>
+        WebLogic <strong>no</strong> resuelve variables de entorno dentro de los XML del dominio. La URL de los schemas RCU
+        (OPSS, STB, WLS…) y la entrada de aplicación en <code>tnsnames.ora</code> quedan fijas al crear el dominio.
+        En ECS, cada ambiente puede apuntar a otra BD: al arrancar el <strong>AdminServer</strong>, los scripts leen
+        variables de la task definition <code>forms-admin</code> y reescriben esos archivos en el dominio compartido
+        (EFS) <em>solo si el valor objetivo es distinto</em>. Forms y Reports <strong>no</strong> aplican este cambio:
+        leen el mismo dominio ya ajustado por Admin.
+      </p>
+
+      <h4 class="sub" id="paso-8a">8a · Dos destinos distintos</h4>
+      <div class="tabla"><table>
+        <tr><th>Prefijo</th><th>Para qué</th><th>Archivos que toca</th><th>Script</th></tr>
+        <tr>
+          <td><code>RCU_DB_*</code></td>
+          <td>Schemas RCU / metadata (OPSS, IAU, STB, WLS, WLS_RUNTIME)</td>
+          <td>Los 6 <code>config/jdbc/*-jdbc.xml</code> RCU + <code>jps-config.xml</code> + <code>jps-config-jse.xml</code></td>
+          <td><code>set-db-jdbc-url.sh</code></td>
+        </tr>
+        <tr>
+          <td><code>TNSNAMES_DB_*</code></td>
+          <td>Conexión de aplicación Forms/Reports (un alias TNS)</td>
+          <td><code>config/fmwconfig/tnsnames.ora</code> (solo el alias indicado)</td>
+          <td><code>set-db-tnsnames.sh</code></td>
+        </tr>
+      </table></div>
+      <div class="callout warn">
+        <strong>No se modifican:</strong> <code>cwallet.sso</code> (usuario/password de bootstrap OPSS, p. ej. <code>DIST_OPSS</code>),
+        nombres de usuario de los schemas, contraseñas cifradas en los datasources, ni aliases de <code>tnsnames.ora</code>
+        distintos del indicado en <code>TNSNAMES_DB_ALIAS</code>. Si cambia el password de OPSS, hay que usar WLST
+        <code>modifyBootStrapCredential</code> (fuera de este mecanismo).
+      </div>
+
+      <h4 class="sub" id="paso-8b">8b · Variables de la task definition</h4>
+      <p><strong>RCU (metadata)</strong> — usar <em>una</em> de las dos formas:</p>
+      <div class="tabla"><table>
+        <tr><th>Variable</th><th>Ejemplo</th><th>Notas</th></tr>
+        <tr><td><code>RCU_DB_HOST</code></td><td><code>192.168.229.137</code></td><td rowspan="3">Se arma la URL <code>jdbc:oracle:thin:@(description=…)</code></td></tr>
+        <tr><td><code>RCU_DB_PORT</code></td><td><code>1521</code></td></tr>
+        <tr><td><code>RCU_DB_SERVICE</code></td><td><code>METAPRD</code></td></tr>
+        <tr><td><code>RCU_DB_JDBC_URL</code></td><td><code>jdbc:oracle:thin:@(description=…)</code></td><td>Opcional; si está definida, tiene <strong>prioridad</strong> sobre host/puerto/service</td></tr>
+        <tr><td><code>RCU_DB_SKIP=1</code></td><td>—</td><td>Omite el ajuste aunque haya variables</td></tr>
+      </table></div>
+      <p><strong>TNS (aplicación)</strong> — las cuatro son obligatorias para aplicar:</p>
+      <div class="tabla"><table>
+        <tr><th>Variable</th><th>Ejemplo</th><th>Notas</th></tr>
+        <tr><td><code>TNSNAMES_DB_ALIAS</code></td><td><code>SEGU</code></td><td><strong>Un solo</strong> alias (no lista). Debe existir ya en <code>tnsnames.ora</code></td></tr>
+        <tr><td><code>TNSNAMES_DB_HOST</code></td><td><code>192.168.229.137</code></td><td>Sustituye <code>(HOST = …)</code> en ese bloque</td></tr>
+        <tr><td><code>TNSNAMES_DB_PORT</code></td><td><code>1521</code></td><td><code>(PORT = …)</code></td></tr>
+        <tr><td><code>TNSNAMES_DB_SERVICE</code></td><td><code>SEGU</code></td><td><code>(SERVICE_NAME = …)</code> — puede diferir del service RCU</td></tr>
+        <tr><td><code>TNSNAMES_DB_SKIP=1</code></td><td>—</td><td>Omite el ajuste</td></tr>
+      </table></div>
+      <p>Valores actuales en la task definition <code>forms-admin</code> (solo admin; Forms/Reports no llevan estas variables):</p>
+      <pre class="code">RCU_DB_HOST=192.168.229.137
+RCU_DB_PORT=1521
+RCU_DB_SERVICE=METAPRD
+
+TNSNAMES_DB_ALIAS=SEGU
+TNSNAMES_DB_HOST=192.168.229.137
+TNSNAMES_DB_PORT=1521
+TNSNAMES_DB_SERVICE=SEGU</pre>
+
+      <h4 class="sub" id="paso-8c">8c · Cómo se aplica al arrancar</h4>
+      <p>
+        Solo el contenedor <strong>admin</strong> aplica el cambio. Su comando (<a href="#paso-7d">7d</a>)
+        <code>startAdminserver.sh -keep</code> llama, <strong>antes</strong> de levantar WebLogic, a:
+      </p>
+      <ol>
+        <li><code>/u01/oracle/scripts/set-db-jdbc-url.sh</code> — lee <code>RCU_DB_*</code></li>
+        <li><code>/u01/oracle/scripts/set-db-tnsnames.sh</code> — lee <code>TNSNAMES_DB_*</code></li>
+      </ol>
+      <p>
+        Los scripts viven en EFS <code>…/scripts/admin</code> (montado en <code>/u01/oracle/scripts</code> del contenedor admin).
+        <code>startWLSForms.sh</code> y <code>startWLSReports.sh</code> <strong>no</strong> los invocan: no deben
+        reescribir la URL del dominio con otros parámetros.
+      </p>
+      <p>Comportamiento:</p>
+      <ul>
+        <li><strong>Sin variables</strong> (o incompletas en TNS): no fallan; registran omisión y el AdminServer arranca.</li>
+        <li><strong>Idempotentes</strong>: si los archivos ya tienen el valor objetivo, no escriben (arranques posteriores son no-op).</li>
+        <li><strong><code>flock</code></strong> sobre el dominio EFS.</li>
+        <li><strong>Respaldo</strong> <code>*.bak_YYYYMMDD_HHMMSS</code> solo cuando hay escritura.</li>
+        <li>Solo <strong>bash</strong>; no van en la imagen Docker.</li>
+      </ul>
+      <div class="callout warn">
+        Orden recomendado: AdminServer primero (aplica RCU/TNS), luego Forms y Reports. Si se cambian
+        <code>RCU_DB_*</code> / <code>TNSNAMES_DB_*</code>, hay que redesplegar <strong>admin</strong> (y reiniciar
+        managed servers si ya estaban arriba con la config anterior en memoria).
+      </div>
+
+      <h4 class="sub" id="paso-8d">8d · Verificar y cambiar de ambiente</h4>
+      <p>Desde ECS Exec (usuario <code>oracle</code>), con el mismo <code>DOMAIN_HOME</code> de la task definition:</p>
+      <pre class="code">/u01/oracle/scripts/set-db-jdbc-url.sh --check
+/u01/oracle/scripts/set-db-tnsnames.sh --check
+# o un alias concreto:
+TNSNAMES_DB_ALIAS=SEGU /u01/oracle/scripts/set-db-tnsnames.sh --check</pre>
+      <p>
+        Para apuntar a otra BD: editar <code>RCU_DB_*</code> / <code>TNSNAMES_DB_*</code> en una
+        <strong>nueva revisión</strong> de <code>forms-admin</code>, actualizar el servicio <code>admin</code> y forzar
+        nueva implementación. En el siguiente arranque del AdminServer los scripts reescriben el dominio si el valor cambió.
+      </p>
+      <pre class="code"># Ejemplo: nueva revisión de forms-admin con RCU_DB_* / TNSNAMES_DB_*
+aws ecs update-service --cluster forms_report --service admin \
+  --task-definition forms-admin:&lt;rev&gt; --force-new-deployment</pre>
+      <div class="callout warn">
+        En EFS <code>…/scripts/admin</code> deben estar <code>startAdminserver.sh</code>,
+        <code>set-db-jdbc-url.sh</code> y <code>set-db-tnsnames.sh</code> con <code>chmod +x</code>.
+        Forms/Reports no necesitan esos dos scripts de BD.
+      </div>
+      <figure class="shot" data-shot="paso-8">
+        <div class="placeholder">[ Captura pendiente: salida de set-db-jdbc-url.sh --check y set-db-tnsnames.sh --check ]</div>
+        <figcaption>Paso 8 — URLs RCU y alias TNS alineados con las variables de la task definition</figcaption>
+      </figure>
         </section>
 
         <!-- ═════════════ ANEXOS ═════════════ -->
 
         <section class="slide-block anexo" id="anexo-json">
-          <h3><span class="num anexo">Anexo</span> Task definition JSON (<code>forms-admin:7</code>)<span class="status done">Hecho</span></h3>
+          <h3><span class="num anexo">Anexo</span> Task definition JSON (<code>forms-admin</code>)<span class="status done">Hecho</span></h3>
       <p>
-        Última revisión registrada (<code>forms-admin:7</code>), exportada en <code>aws-ecs/admin/admin.json</code>. Se muestra en formato registrable:
-        sin los campos de solo lectura que agrega ECS al exportar (<code>taskDefinitionArn</code>, <code>revision</code>, <code>status</code>,
-        <code>requiresAttributes</code>, <code>registeredAt</code>/<code>By</code>…), por lo que puede pegarse en ECS →
-        <strong>Crear nueva definición de tarea con JSON</strong> o registrarse por CLI. La imagen queda fijada por <em>digest</em> (<code>@sha256:…</code>), tal como la resolvió ECS.
-        Corresponde al <a href="#paso-3">Paso 3</a> con el comando de arranque automático de <a href="#paso-7d">7d</a>.
+        Fragmento registrable (sin campos de solo lectura de ECS). Incluye el comando de arranque automático
+        (<a href="#paso-7d">7d</a> y las variables de BD dinámicas del <a href="#paso-8">Paso 8</a>
+        (<code>RCU_DB_*</code> / <code>TNSNAMES_DB_*</code>). La revisión vigente en AWS puede ser superior
+        (<code>forms-admin:10</code> u otra); exportar con CLI si se necesita el JSON exacto.
       </p>
       <pre class="code">{
   "containerDefinitions": [
@@ -2437,7 +2552,14 @@ tail -200f user_projects/domains/forms_domain/servers/AdminServer/logs/AdminServ
         {"name": "LD_LIBRARY_PATH", "value": "/u01/oracle/lib:/u01/oracle/oracle_common/lib"},
         {"name": "ORACLE_HOME", "value": "/u01/oracle"},
         {"name": "DOMAIN_NAME", "value": "forms_domain"},
-        {"name": "ADMIN_PORT", "value": "7001"}
+        {"name": "ADMIN_PORT", "value": "7001"},
+        {"name": "RCU_DB_HOST", "value": "192.168.229.137"},
+        {"name": "RCU_DB_PORT", "value": "1521"},
+        {"name": "RCU_DB_SERVICE", "value": "METAPRD"},
+        {"name": "TNSNAMES_DB_ALIAS", "value": "SEGU"},
+        {"name": "TNSNAMES_DB_HOST", "value": "192.168.229.137"},
+        {"name": "TNSNAMES_DB_PORT", "value": "1521"},
+        {"name": "TNSNAMES_DB_SERVICE", "value": "SEGU"}
       ],
       "environmentFiles": [],
       "mountPoints": [
@@ -2507,7 +2629,7 @@ tail -200f user_projects/domains/forms_domain/servers/AdminServer/logs/AdminServ
       <pre class="code">export AWS_REGION=us-east-1
 export CLUSTER=forms_report
 export SERVICE=admin            # forms-server / reports-server en las otras fases
-export TASKDEF=forms-admin:6</pre>
+export TASKDEF=forms-admin:10</pre>
 
       <h4 class="sub" id="anexo-cli-1">1 · Exportar servicio y task definition</h4>
       <p>Respaldar y revisar red, SG, IP pública y definición de tarea.</p>
@@ -2575,7 +2697,7 @@ aws ecs execute-command --cluster $CLUSTER --task &lt;TASK_ID&gt; --container ad
         <li><strong>Solo <code>pub-A</code> + ruta BD</strong> (Paso 4.9–4.10) — no asociar <code>database-A</code>; <code>192.168.229.137/32 → pcx</code> en <code>Pub-RT</code>.</li>
         <li><strong>Hostnames</strong> (Paso 6) — sin FQDN en <code>config.xml</code> y <code>nodemanager.properties</code> aparece <code>UnknownHostException</code>.</li>
         <li><strong>ECS Running ≠ WebLogic RUNNING</strong> (Paso 7) — validar siempre el log del AdminServer.</li>
-        <li><strong>URL JDBC de schemas RCU/OPSS</strong> — WebLogic no lee variables de entorno en los XML del dominio. Al arrancar, <code>startAdminserver.sh</code> llama a <code>set-db-jdbc-url.sh</code> si hay <code>DB_JDBC_URL</code> o <code>DB_HOST</code>+<code>DB_PORT</code>+<code>DB_SERVICE</code> en la task definition. Actualiza los 6 datasources RCU y <code>jps-config*.xml</code> (dominio en EFS, con <code>flock</code>). No modifica <code>tnsnames.ora</code> ni <code>cwallet.sso</code>. Comprobar: <code>/u01/oracle/scripts/set-db-jdbc-url.sh --check</code>.</li>
+        <li><strong>URLs de BD (RCU y tnsnames)</strong> — solo el AdminServer las aplica (<a href="#paso-8">Paso 8</a>). <code>startAdminserver.sh</code> → <code>set-db-jdbc-url.sh</code> (<code>RCU_DB_*</code>) y <code>set-db-tnsnames.sh</code> (<code>TNSNAMES_DB_*</code>). Forms/Reports no reescriben el dominio. Idempotente; no toca <code>cwallet.sso</code>.</li>
       </ol>
         </section>
 

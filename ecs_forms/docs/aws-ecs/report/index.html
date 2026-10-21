@@ -1387,7 +1387,7 @@
       <p class="slogan">Service Discovery, dominio en EFS y Reports completo en el dominio.</p>
     </div>
 
-    <nav class="toc" aria-label="Contenido"><a href="#paso-0">0 · Requisitos y valores fijos</a><a href="#paso-1">1 · Crear task definition Reports</a><a href="#paso-2">2 · Crear servicio + Service Discovery</a><a href="#paso-3">3 · Verificar Running, Cloud Map y ECS Exec</a><a href="#paso-4">4 · Verificar hostnames del dominio</a><a href="#paso-5">5 · Arrancar Node Manager y WLS_REPORTS</a><a href="#paso-6">6 · Completar Reports en el dominio</a><a href="../../app-rector/index.html#paso-2-2-4">Validación de Reports (RECTOR 2.2.4)</a><a href="#anexo-json">Anexo · Task definition JSON</a><a href="#anexo-r2">Anexo · Imagen r2</a><a href="#anexo-cli">Anexo · Comandos AWS CLI</a><a href="#lecciones-criticas">★ · Lecciones críticas</a></nav>
+    <nav class="toc" aria-label="Contenido"><a href="#paso-0">0 · Requisitos y valores fijos</a><a href="#paso-1">1 · Crear task definition Reports</a><a href="#paso-2">2 · Crear servicio + Service Discovery</a><a href="#paso-3">3 · Verificar Running, Cloud Map y ECS Exec</a><a href="#paso-4">4 · Verificar hostnames del dominio</a><a href="#paso-5">5 · Arrancar Node Manager y WLS_REPORTS</a><a href="#paso-5-bd">5.6 · URLs de BD dinámicas</a><a href="#paso-6">6 · Completar Reports en el dominio</a><a href="../../app-rector/index.html#paso-2-2-4">Validación de Reports (RECTOR 2.2.4)</a><a href="#anexo-json">Anexo · Task definition JSON</a><a href="#anexo-r2">Anexo · Imagen r2</a><a href="#anexo-cli">Anexo · Comandos AWS CLI</a><a href="#lecciones-criticas">★ · Lecciones críticas</a></nav>
 
     <div class="card">
       <div class="card-body">
@@ -1893,6 +1893,13 @@ pkill -f 'weblogic.Name=WLS_REPORTS'; sleep 10; /u01/oracle/scripts/startWLSRepo
         El Node Manager de <code>ReportsMachine</code> no se arranca automáticamente: si hace falta (consola, Reports Tools del
         <a href="#paso-6">Paso 6</a>), iniciarlo por ECS Exec como en <a href="#paso-5-2">5.2</a>.
       </div>
+
+      <h4 class="sub" id="paso-5-bd">5.6 · URLs de BD (solo AdminServer)<span class="status done">Hecho</span></h4>
+      <p>
+        El ajuste de URLs RCU y <code>tnsnames.ora</code> lo aplica solo el AdminServer
+        (<a href="../admin/index.html#paso-8">Admin · Paso 8</a>). <code>startWLSReports.sh</code> no modifica esos
+        archivos; Reports usa el dominio EFS ya configurado. Ver también <a href="../forms/index.html#paso-5-bd">Forms 5e</a>.
+      </p>
         </section>
 
         <section class="slide-block" id="paso-6">
@@ -1942,9 +1949,9 @@ createReportsToolsInstance(instanceName='reptools1', machine='ReportsMachine')</
         <!-- ═════════════ ANEXOS ═════════════ -->
 
         <section class="slide-block anexo" id="anexo-json">
-          <h3><span class="num anexo">Anexo</span> Task definition JSON (<code>reports-server:5</code>)<span class="status done">Hecho</span></h3>
+          <h3><span class="num anexo">Anexo</span> Task definition JSON (<code>reports-server:8</code>)<span class="status done">Hecho</span></h3>
       <p>
-        Última revisión registrada (<code>reports-server:5</code>), exportada en <code>aws-ecs/report/report.json</code>. Se muestra en formato registrable:
+        Última revisión registrada (<code>reports-server:8</code>), exportada en <code>aws-ecs/report/report.json</code>. Se muestra en formato registrable:
         sin los campos de solo lectura que agrega ECS al exportar (<code>taskDefinitionArn</code>, <code>revision</code>, <code>status</code>,
         <code>requiresAttributes</code>, <code>registeredAt</code>/<code>By</code>…), por lo que puede pegarse en ECS →
         <strong>Crear nueva definición de tarea con JSON</strong> o registrarse por CLI. Sustituir <code>&lt;clave&gt;</code> por la contraseña real. La imagen queda fijada por <em>digest</em> (<code>@sha256:…</code>), tal como la resolvió ECS.
@@ -2235,7 +2242,8 @@ aws ecs describe-task-definition --task-definition reports-server \
         Las lecciones de infraestructura comunes (rol de tarea, timeout de ECR, espacio efímero, NFS 2049, rutas EFS, <code>sleep infinity</code>
         y <code>PATH</code>, Service Discovery al crear, solo <code>pub-A</code> + ruta BD, hostnames) están en las
         <a href="../admin/index.html#lecciones-criticas">lecciones de admin</a>, y las de WebLogic en contenedor (usuario <code>oracle</code>,
-        <code>boot.properties</code>, zombies, ECS Running ≠ WebLogic RUNNING, libaio en la imagen, URL JDBC vía <code>set-db-jdbc-url.sh</code>) en las
+        <code>boot.properties</code>, zombies, ECS Running ≠ WebLogic RUNNING, libaio en la imagen, URLs de BD solo vía
+        AdminServer — <a href="../admin/index.html#paso-8">Admin · Paso 8</a>) en las
         <a href="../forms/index.html#lecciones-criticas">lecciones de Forms</a>. Propias de Reports:
       </p>
       <ol>
