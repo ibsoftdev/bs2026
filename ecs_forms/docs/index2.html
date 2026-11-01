@@ -1416,6 +1416,34 @@
             <figcaption class="caption">Un único dominio WebLogic (<code>forms_domain</code>) compartido por <code>wls_forms-ec2</code> (Admin + Forms) y <code>wls_reports-ec2</code> (Reports + Colas) en ECS sobre EC2</figcaption>
           </figure>
 
+          <h4 class="sub" id="beneficios-arq">Flexibilidad de configuración y alta disponibilidad</h4>
+          <p>
+            La misma imagen y el mismo dominio en EFS se especializan por
+            <strong>task definition</strong>: puertos, variables (<code>ADMIN_MACHINE_HOST</code>,
+            <code>PASS_FILE</code>, <code>TWO_TASK</code>), CPU/memoria y origen de cada volumen
+            (EFS, disco local o <code>tmpfs</code>). Se cambia el montaje o el tamaño de la
+            tarea sin reconstruir la imagen ni partir el <code>config.xml</code>. Cloud Map
+            (<code>weblogic-admin</code>, <code>weblogic-reports</code>) mantiene los nombres
+            estables cuando la ENI cambia; las Machines y el WKA siguen en FQDN, no en IP.
+          </p>
+          <p>
+            Las fallas son más probables en Reports que en Forms. <code>WLS_REPORTS</code>
+            lanza motores nativos (<code>rwengine</code>, PDF, fuentes) con picos de CPU y
+            memoria; las colas (<code>CARC00100</code>, Pro*C, <code>rwclient</code>) son
+            procesos largos, con más I/O y más conexiones a la base. Un reporte pesado o un
+            lote mal cerrado tumba o satura ese lado con más frecuencia que una sesión
+            <code>frmweb</code>. Por eso Reports y Colas van en su instancia: perder o reciclar
+            <code>wls_reports-ec2</code> no tumba Admin ni Forms; un bounce de Forms no corta
+            el batch ni <code>rwservlet</code>.
+          </p>
+          <p>
+            El dominio y las aplicaciones viven en EFS: sobreviven al reemplazo de la tarea.
+            ECS vuelve a registrar la ENI en Cloud Map y el otro contenedor reconecta por el
+            mismo FQDN. No es un clúster activo-activo en varias AZ; es
+            <strong>aislamiento de fallo y recambio independiente</strong>, con gestión
+            centralizada en un solo AdminServer.
+          </p>
+
           <h4 class="sub" id="especificaciones">Especificaciones técnicas</h4>
           <p>
             Ficha de cada contenedor EC2: Cloud Map, puertos, máquinas del dominio y script de arranque.
@@ -1483,42 +1511,77 @@
 
           <h4 class="sub" id="rendimiento">Análisis de rendimiento</h4>
           <p>
-            Docker sobre EC2 no es el freno frente a una instalación estática en la misma
+            Docker sobre EC2 no representa un freno frente a una instalación estática en la misma
             <code>r5.xlarge</code>. El Oracle Home ya vive en la <strong>imagen</strong> (disco
-            local de la instancia, EBS). Lo que añade latencia es <strong>EFS</strong> cuando
-            los ejecutables y los logs se leen o escriben por NFS en cada sesión.
+            local de la instancia). El dominio y los scripts se quedan en EFS: es el árbol
+            compartido.
           </p>
           <p>
-            Para acercarse al estático <strong>sin perder el dominio compartido</strong>: dominio
-            y scripts se quedan en EFS; los objetos calientes
-            (<code>.fmx</code>, <code>.rep</code>, binarios Pro*C) se sirven desde
-            <strong>EBS</strong> de cada instancia (copia o <code>FORMS_PATH</code> local al
-            arrancar). Los logs de runtime pueden ir al mismo disco local. No hace falta quitar
-            Docker.
+            El rendimiento de <code>WLS_FORMS</code>, <code>WLS_REPORTS</code> y Pro*C en los
+            contenedores se puede acercar al de una instalación estática —y reducir la latencia
+            al mínimo— eligiendo de dónde monta cada tarea el árbol caliente
+            (<code>.fmx</code>, <code>.rdf</code>, binarios). Eso se define en los
+            <strong>volúmenes de la task definition</strong>: se cambia el origen del montaje,
+            no la arquitectura. El dominio sigue en EFS; se conserva la flexibilidad de imagen,
+            escala y recambio de tarea.
           </p>
           <div class="tabla"><table>
             <tr>
-              <th>Situación</th>
-              <th>Frente a instalación estática (misma EC2)</th>
+              <th>Volumen / origen</th>
+              <th>Efecto</th>
             </tr>
             <tr>
-              <td>Sesión Forms / reporte en caliente, ejecutables en EBS</td>
-              <td class="num">≈ 5&nbsp;% (en la práctica no se nota; pico 30 usuarios)</td>
+              <td>EFS (Elastic + <code>nconnect</code>, <code>noatime</code>)</td>
+              <td>Un solo árbol compartido. Menos cambio. Mejora el throughput; no iguala disco local en ficheros chicos.</td>
+            </tr>
+            <tr>
+              <td>Bind mount al disco de la instancia (EBS gp3 o NVMe de <code>r5d</code>)</td>
+              <td>Latencia local. Se copia o se apunta <code>FORMS_PATH</code> al arrancar. El instance store es efímero.</td>
+            </tr>
+            <tr>
+              <td>Volumen <code>tmpfs</code> (RAM) para el juego del día</td>
+              <td>La menor latencia si el conjunto cabe en memoria. Se pierde al parar la tarea.</td>
+            </tr>
+            <tr>
+              <td>Ejecutables en la <strong>imagen ECR</strong></td>
+              <td>Disco local sin volumen extra. Cada lote de compilación implica nueva revisión y redespliegue.</td>
+            </tr>
+            <tr>
+              <td>FSx for NetApp ONTAP (en lugar de EFS)</td>
+              <td>NAS compartido más rápido en ficheros chicos. Otro servicio y más costo. Solo si EFS no alcanza y no se acepta disco local.</td>
+            </tr>
+          </table></div>
+          <p>
+            Los logs de runtime pueden ir al mismo volumen local o a CloudWatch.
+            Se mide con un formulario y un reporte reales; no se cambia de producto por defecto.
+          </p>
+          <div class="tabla"><table>
+            <colgroup>
+              <col style="width: 55%">
+              <col style="width: 45%">
+            </colgroup>
+            <tr>
+              <th>Situación</th>
+              <th>Vs. estático (misma EC2)</th>
+            </tr>
+            <tr>
+              <td>Sesión Forms o reporte en caliente</td>
+              <td class="num">≈ 5&nbsp;%</td>
             </tr>
             <tr>
               <td>CPU de batch (Pro*C, <code>rwengine</code>)</td>
-              <td class="num">≈ 2–5&nbsp;% menos throughput (cgroups / overlay)</td>
+              <td class="num">≈ 2–5&nbsp;% menos throughput</td>
             </tr>
             <tr>
               <td>Arranque en frío de WebLogic</td>
-              <td class="num">10–30&nbsp;% más lento: <code>config.xml</code> sigue en EFS</td>
+              <td class="num">≤ 5&nbsp;% (solo al iniciar el server)</td>
             </tr>
           </table></div>
           <p>
             El salto de red entre las dos instancias (Cloud Map, Admin ↔ Reports) no es
             overhead de contenedor: es el aislamiento de CPU que se busca. Medir un mismo
             formulario y un mismo reporte en ambos modelos cierra el número; para operación
-            diaria el contenedor, con ejecutables en EBS, queda en el mismo orden que el estático.
+            diaria el contenedor, con ejecutables fuera de NFS, queda en el mismo orden que el estático.
           </p>
 
           <h4 class="sub" id="licencia-oracle">Análisis de costos de licencia Oracle</h4>
