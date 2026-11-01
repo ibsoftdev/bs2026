@@ -181,6 +181,30 @@
     .callout.ok { background: #f1f8f2; border-color: #c8e6c9; border-left-color: var(--success); }
     .callout.ok .lbl { color: #1b5e20; }
     .callout ul { margin: 0.3rem 0 0; padding-left: 1.2rem; }
+    figure.shot {
+      margin: 1rem 0 1.15rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem;
+      box-shadow: var(--shadow-sm);
+    }
+    figure.shot img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+      border-radius: 8px;
+      border: 1px solid #eef2f6;
+      background: #0f1b2d;
+    }
+    figure.shot figcaption {
+      margin-top: 0.55rem;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.4;
+    }
     @media (max-width: 820px) {
       .comercial-header .title-wrap { max-width: 100%; min-width: 0; width: 100%; }
       .intro-propuesta, .toc { margin-left: 0; max-width: 100%; }
@@ -224,6 +248,7 @@
       <a href="#paso-4-6">4.6 · SG UDP</a>
       <a href="#paso-5">5 · Arranque</a>
       <a href="#paso-6">6 · Endpoints VPC</a>
+      <a href="#paso-7">7 · Compilación</a>
       <a href="#lecciones">★ · Lecciones</a>
     </nav>
 
@@ -960,6 +985,67 @@ time timeout 5 bash -c 'echo &gt;/dev/tcp/logs.us-east-1.amazonaws.com/443' &amp
           </div>
         </section>
 
+        <section class="slide-block" id="paso-7">
+          <h3><span class="num">7</span> Procesos de compilación</h3>
+          <p>
+            Se ejecutan en <code>wls_forms-ec2</code> (usuario <code>oracle</code>), con el
+            volumen <code>efs-app</code> montado en
+            <code>/u01/oracle/user_projects/apps</code>. Los ejecutables quedan en EFS y los
+            usa <code>WLS_FORMS</code> y las colas de <code>wls_reports-ec2</code>.
+            Ningún script se detiene por un módulo fallido: al final lista OK, avisos, FAIL
+            y el <strong>tiempo total</strong>.
+          </p>
+
+          <h4 class="sub" id="paso-7-1">7.1 · Compilación Forms</h4>
+          <p>
+            <code>compile_all_forms.sh</code> recorre <code>src/rector/*.fmb</code> y
+            <code>src/menues/*.mmb</code> con <code>frmcmp_batch</code> (Forms 14.1.2).
+            Cada forma pasa a <code>bin/fmx/*.fmx</code> y cada menú a
+            <code>bin/mnu/*.mmx</code>. El lote se conecta a la base con
+            <code>FORMS_USERID</code> (si no está, <code>uspan/uspandesa@BANESCO_DEV</code>
+            vía <code>TNS_ADMIN</code>). El detalle de cada módulo queda en
+            <code>log/compile_all/&lt;AAAAMMDD_HHMMSS&gt;/</code>
+            (<code>.log</code>, <code>.err</code> y <code>resultados.csv</code>).
+          </p>
+<pre class="code">cd /u01/oracle/user_projects/apps/forms_app
+nohup ./compile_all_forms.sh &amp;
+# Solo una lista: ./compile_forms_list.sh   o   ./compile_forms_list.sh listas/&lt;grupo&gt;.lis</pre>
+          <p>
+            Referencia (1/11/2026, ejecución <code>20261101_160906</code>): 2095 módulos,
+            1 h 42 min 31 s. 1959 OK, 116 OK con avisos, 20 FAIL, 13 sin <code>.err</code>.
+            El lote no se corta por los fallidos; se recompilan después con
+            <code>compile_forms_list.sh</code>.
+          </p>
+          <figure class="shot" data-shot="paso-7-1">
+            <img src="assets/paso-07a-compile-forms.png" alt="Resumen de compile_all_forms.sh: 2095 módulos, 1h 42m 31s, 20 FAIL">
+            <figcaption>Paso 7.1 — Resumen de <code>compile_all_forms.sh</code> en <code>wls_forms-ec2</code></figcaption>
+          </figure>
+
+          <h4 class="sub" id="paso-7-2">7.2 · Compilación Pro*C</h4>
+          <p>
+            <code>compile_proc_all.sh</code> arma la lista de <code>src/*.pc</code> y delega en
+            <code>compile_proc_list.sh</code>. Cada programa pasa por
+            <code>proc</code> (<code>src/X.pc</code> → <code>obj/X.c</code>,
+            <code>sqlcheck=semantics</code> contra <code>TWO_TASK</code> / <code>SEGU</code>)
+            y luego <code>gcc</code> (<code>CFLAGS=-std=gnu89</code>) a <code>bin/X</code>.
+            Los fuentes sin <code>main()</code> se omiten (inclusión). El log queda en
+            <code>proc_app/log/compile_proc_all/</code>.
+          </p>
+<pre class="code">cd /u01/oracle/user_projects/apps/proc_app
+./compile_proc_all.sh
+# Solo una lista: ./compile_proc_list.sh   o   ./compile_proc_list.sh proc.lis</pre>
+          <p>
+            Referencia (1/11/2026, <code>compile_proc_all_20261101_160037</code>): 626 programas,
+            7 min 36 s. 408 OK, 206 OK con avisos, 9 FAIL en <code>proc</code>, 1 FAIL en
+            <code>gcc</code>, 2 skip. Los ejecutables de <code>bin/</code> (incluido
+            <code>CARC00100</code>) los usa el contenedor Reports.
+          </p>
+          <figure class="shot" data-shot="paso-7-2">
+            <img src="assets/paso-07b-compile-proc.png" alt="Resumen de compile_proc_all.sh: 626 programas, 7m 36s, 9 FAIL proc, 1 FAIL gcc">
+            <figcaption>Paso 7.2 — Resumen de <code>compile_proc_all.sh</code> en <code>wls_forms-ec2</code></figcaption>
+          </figure>
+        </section>
+
         <section class="slide-block lecciones" id="lecciones">
           <h3><span class="num lecciones">★</span> Lecciones de esta creación</h3>
           <ul>
@@ -975,6 +1061,7 @@ time timeout 5 bash -c 'echo &gt;/dev/tcp/logs.us-east-1.amazonaws.com/443' &amp
             <li>El SG <code>forms-sg-ecs</code> necesita <strong>Todos los UDP</strong> desde sí mismo (Coherence 7574). Se puede agregar con las tareas arriba. Ver <a href="#paso-4-6">paso 4.6</a>.</li>
             <li>SSH/Instance Connect falla: Session Manager + <code>ecsInstanceRole</code>.</li>
             <li><code>execute-command</code> lento en EC2: la ENI no tiene IP pública. Faltaban VPC endpoints <code>sts</code> y <code>logs</code> (además de <code>ssmmessages</code> / <code>ssm</code> / <code>ec2messages</code>). Ver <a href="#paso-6">paso 6</a>.</li>
+            <li>La compilación Forms y Pro*C se hace en <code>wls_forms-ec2</code> sobre EFS (<a href="#paso-7">paso 7</a>). El lote no se detiene por un FAIL; el resumen incluye el tiempo total.</li>
           </ul>
         </section>
 
