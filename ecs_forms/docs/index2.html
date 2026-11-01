@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oracle Forms &amp; Reports 14.1.2 · Dos contenedores ECS EC2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/estilos-demo.css">
+  <style>
+    :root {
+      --font-display: "Outfit", "Segoe UI", sans-serif;
+      --font-body: "Source Sans 3", "Segoe UI", sans-serif;
+      --font-mono: "JetBrains Mono", "Courier New", monospace;
+      --text-desc: #2f3540;
+      --size-desc: 1.05rem;
+      --leading-desc: 1.7;
+      --c-admin: #2e7d32;
+      --c-forms: #ef6c00;
+      --c-reports: #00838f;
+      --c-colas: #6d4c41;
+      --c-ohs: #0d47a1;
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--text-desc);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .app-wrap {
+      max-width: 960px;
+      overflow: visible;
+    }
+    .card,
+    .card-body {
+      overflow: visible;
+    }
+
+    /* Cabecera */
+    .comercial-header {
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: nowrap;
+      background-image: url('assets/ImagenEmpresa.png');
+      background-repeat: no-repeat;
+      background-position: left center;
+      background-size: cover;
+      background-color: #eef3f8;
+      min-height: 148px;
+      padding: 0.85rem 0.9rem;
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+    .comercial-header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.12) 0%,
+        rgba(255, 255, 255, 0.5) 40%,
+        rgba(255, 255, 255, 0.9) 62%,
+        #ffffff 78%
+      );
+      pointer-events: none;
+    }
+    .comercial-header .title-wrap {
+      position: relative;
+      z-index: 1;
+      margin-left: auto;
+      max-width: 58%;
+      min-width: 280px;
+      text-align: left;
+      padding: 0.95rem 1.15rem 1rem;
+      color: #0a1f4d;
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid rgba(13, 71, 161, 0.12);
+      border-left: 5px solid #0d47a1;
+      box-shadow: 0 6px 20px rgba(0, 33, 113, 0.12);
+    }
+    .comercial-header .title-wrap h1 {
+      font-family: var(--font-display);
+      color: #0a1f4d;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.28;
+      margin: 0;
+    }
+    .comercial-header .title-wrap h1 .header-line-1 {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      color: #0d47a1;
+    }
+    .comercial-header .title-wrap h1 .header-line-2 {
+      display: block;
+      font-size: 1.42rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+      color: #061433;
+    }
+    .comercial-header .title-wrap h1 .header-line-3 {
+      display: block;
+      font-size: 1.02rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: #1565c0;
+    }
+    .comercial-header .title-wrap .header-tagline {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      line-height: 1.45;
+      margin-top: 0.55rem;
+      margin-bottom: 0;
+      font-weight: 500;
+      color: #475569;
+      letter-spacing: 0.01em;
+      padding-top: 0.5rem;
+      border-top: 1px solid rgba(13, 71, 161, 0.15);
+    }
+
+    /* Introducción */
+    .intro-propuesta {
+      max-width: calc(100% - 1cm - 1.5rem - 1cm);
+      margin: 0 0 1.5rem 1cm;
+    }
+    .intro-propuesta h2 {
+      font-family: var(--font-display);
+      font-size: 1.28rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      color: var(--primary-dark);
+      margin: 0 0 0.75rem 0;
+    }
+    .intro-propuesta p {
+      text-align: justify;
+      color: var(--text-desc);
+      font-size: var(--size-desc);
+      line-height: var(--leading-desc);
+      font-weight: 400;
+      margin: 0 0 0.85rem;
+    }
+    .intro-propuesta p:last-child { margin-bottom: 0; }
+    .intro-propuesta .slogan {
+      margin-top: 1rem;
+      margin-bottom: 0;
+      text-align: left;
+      font-family: var(--font-display);
+      font-size: 1.12rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #0d47a1;
+      line-height: 1.4;
+    }
+
+    /* Índice */
+    .toc {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0 0 1.5rem 1cm;
+    }
+    .toc a {
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--primary);
+      background: #fff;
+      border: 1px solid #bbdefb;
+      border-radius: 999px;
+      padding: 0.3rem 0.8rem;
+      box-shadow: var(--shadow-sm);
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .toc a:hover { background: #e3f2fd; border-color: #90caf9; }
+
+    /* Bloques numerados */
+    .slide-block {
+      margin-bottom: 1.75rem;
+      padding: 1.25rem 1.4rem;
+      background: #fafafa;
+      border-radius: var(--radius);
+      border-left: 4px solid var(--primary);
+      scroll-margin-top: 1rem;
+    }
+    .slide-block h3 {
+      font-family: var(--font-display);
+      margin: 0 0 0.75rem 0;
+      color: var(--primary-dark);
+      font-size: 1.22rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    .slide-block h3 .num {
+      flex-shrink: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+    .slide-block p {
+      margin: 0 0 0.9rem 0;
+      color: var(--text-desc);
+      font-size: var(--size-desc);
+      line-height: var(--leading-desc);
+      font-weight: 400;
+      text-align: justify;
+    }
+    .slide-block p:last-child { margin-bottom: 0; }
+    .slide-block h4.sub {
+      font-family: var(--font-display);
+      margin: 1.35rem 0 0.65rem;
+      color: var(--primary-dark);
+      font-size: 1.08rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.86em;
+      background: #eef3f8;
+      color: #0a1f4d;
+      padding: 0.08rem 0.35rem;
+      border-radius: 4px;
+    }
+
+    /* Diagrama de arquitectura */
+    .arq {
+      margin: 1rem 0 0.5rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      padding: 1.1rem 1.1rem 1.2rem;
+    }
+    .arq-users {
+      display: flex;
+      justify-content: center;
+    }
+    .arq-users .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--primary-dark);
+      background: #e3f2fd;
+      border: 1px solid #90caf9;
+      border-radius: 999px;
+      padding: 0.45rem 1rem;
+    }
+    .arq-users .pill svg { width: 20px; height: 20px; fill: var(--primary); }
+    .arq-flow {
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      line-height: 1.2;
+      margin: 0.3rem 0;
+    }
+    .arq-flow .arrow {
+      display: block;
+      font-size: 1.3rem;
+      color: var(--primary);
+      line-height: 1;
+    }
+    .arq-host {
+      border: 2px dashed #90a4ae;
+      border-radius: 12px;
+      padding: 0.9rem 0.9rem 1rem;
+      background: #f7f9fc;
+      position: relative;
+    }
+    .arq-host-label {
+      font-family: var(--font-display);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #546e7a;
+      margin-bottom: 0.65rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .arq-host-label .net {
+      color: var(--primary);
+      background: #e3f2fd;
+      border-radius: 999px;
+      padding: 0.05rem 0.6rem;
+      letter-spacing: 0.04em;
+    }
+    .arq-containers {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+      align-items: stretch;
+    }
+    .ctr {
+      min-width: 0;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--c-admin);
+      border-radius: 10px;
+      box-shadow: var(--shadow-sm);
+      padding: 0.75rem 0.8rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .ctr.forms { border-top-color: var(--c-forms); }
+    .ctr.reports { border-top-color: var(--c-reports); }
+    .ctr.colas { border-top-color: var(--c-colas); border-style: dashed; border-top-style: solid; }
+    .ctr-head {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+    .ctr-head .ico {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e8f5e9;
+      color: var(--c-admin);
+    }
+    .ctr.forms .ctr-head .ico { background: #fff3e0; color: var(--c-forms); }
+    .ctr.reports .ctr-head .ico { background: #e0f2f1; color: var(--c-reports); }
+    .ctr.colas .ctr-head .ico { background: #efebe9; color: var(--c-colas); }
+    .ctr-head .ico svg { width: 20px; height: 20px; fill: currentColor; }
+    .ctr-head .t {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: var(--primary-dark);
+      line-height: 1.15;
+    }
+    .ctr-head .h {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    .comp {
+      border: 1px solid #e3e8ef;
+      border-radius: 8px;
+      padding: 0.45rem 0.6rem;
+      background: #fafbfd;
+    }
+    .comp .n {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      line-height: 1.25;
+    }
+    .comp .n em {
+      display: block;
+      font-style: normal;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      overflow-wrap: anywhere;
+    }
+    .comp .ports {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-top: 0.3rem;
+    }
+    .port {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 0.05rem 0.45rem;
+      border-radius: 999px;
+      background: #eef3f8;
+      color: #0a1f4d;
+      border: 1px solid #dbe4ee;
+      white-space: nowrap;
+    }
+    .comp.ohs { border-color: #bbdefb; background: #f3f8fe; }
+    .comp.nm { border-style: dashed; }
+    .ctr-machine {
+      margin-top: auto;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+    }
+    .arq-mounts {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    .mount {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 44px;
+    }
+    .mount::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 4px;
+      left: 50%;
+      border-left: 3px solid #8e24aa;
+      transform: translateX(-50%);
+    }
+    .mount::after {
+      content: "";
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 8px solid #8e24aa;
+    }
+    .mount span {
+      position: relative;
+      font-family: var(--font-display);
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #6a1b9a;
+      background: #fff;
+      border: 1px solid #e1bee7;
+      border-radius: 999px;
+      padding: 0.05rem 0.55rem;
+    }
+    .arq-domain {
+      position: relative;
+      background: linear-gradient(135deg, #f3e5f5 0%, #ede7f6 55%, #e8eaf6 100%);
+      border: 2px solid #8e24aa;
+      border-radius: 12px;
+      padding: 0.85rem 1rem 0.95rem;
+      box-shadow: 0 6px 18px rgba(106, 27, 154, 0.15);
+    }
+    .dom-head {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .dom-ico {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: #6a1b9a;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .dom-ico svg { width: 24px; height: 24px; fill: currentColor; }
+    .dom-kicker {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #6a1b9a;
+    }
+    .dom-name {
+      font-family: var(--font-mono);
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: #2a0a3d;
+      line-height: 1.2;
+    }
+    .dom-badge {
+      margin-left: auto;
+      font-family: var(--font-display);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #fff;
+      background: #6a1b9a;
+      border-radius: 999px;
+      padding: 0.3rem 0.8rem;
+    }
+    .dom-path {
+      margin-top: 0.65rem;
+      font-size: 0.85rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .dom-path code { background: #fff; }
+    .dom-path .to { color: #6a1b9a; font-weight: 700; }
+    .dom-parts {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.5rem;
+      margin-top: 0.65rem;
+    }
+    .dom-parts .part {
+      background: #fff;
+      border: 1px solid #e1bee7;
+      border-left: 4px solid var(--c-admin);
+      border-radius: 8px;
+      padding: 0.35rem 0.55rem;
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      overflow-wrap: anywhere;
+    }
+    .dom-parts .part.forms { border-left-color: var(--c-forms); }
+    .dom-parts .part.reports { border-left-color: var(--c-reports); }
+    .dom-parts .part.colas { border-left-color: var(--c-colas); }
+    .dom-parts .part code { font-size: 0.78em; font-weight: 500; }
+    .slide-block .arq-domain .dom-note,
+    .dom-note {
+      margin: 0.65rem 0 0;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: #3c2a4d;
+      text-align: left;
+    }
+    .arq-volumes {
+      margin-top: 0.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 0.75rem;
+      background: #eceff1;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      color: #37474f;
+    }
+    .arq-volumes .lbl {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.74rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #455a64;
+      margin-right: 0.25rem;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      justify-content: center;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+    .legend i {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+    .figure .caption,
+    .caption {
+      font-family: var(--font-body);
+      margin-top: 0.6rem;
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.45;
+      letter-spacing: 0.01em;
+    }
+
+    /* Componentes clave */
+    .capacidades-label {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin: 1.1rem 0 0.65rem;
+    }
+    .capacidades-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.65rem;
+    }
+    .capacidad {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.7rem 0.85rem;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.15s ease;
+    }
+    .capacidad:hover { border-color: #90caf9; }
+    .capacidad .nro {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #0d47a1, #1565c0);
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.05rem;
+    }
+    .capacidad .txt {
+      font-size: 0.95rem;
+      line-height: 1.4;
+      color: var(--text-desc);
+      padding-top: 0.2rem;
+      font-weight: 400;
+    }
+    .capacidad .txt strong {
+      font-family: var(--font-display);
+      color: var(--primary-dark);
+      font-weight: 700;
+    }
+
+    /* Especificaciones por contenedor */
+    .specs {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      margin: 1rem 0 0.25rem;
+    }
+    .spec {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--c-admin);
+      overflow: hidden;
+    }
+    .spec.forms { border-top-color: var(--c-forms); }
+    .spec.reports { border-top-color: var(--c-reports); }
+    .spec.colas { border-top-color: var(--c-colas); }
+    .spec h4 {
+      font-family: var(--font-display);
+      font-size: 1.02rem;
+      font-weight: 700;
+      margin: 0;
+      padding: 0.75rem 0.9rem 0.6rem;
+      color: var(--primary-dark);
+      letter-spacing: -0.01em;
+      border-bottom: 1px solid #eef2f6;
+    }
+    .spec dl {
+      margin: 0;
+      padding: 0.35rem 0.9rem 0.7rem;
+    }
+    .spec .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.36rem 0;
+      border-bottom: 1px dashed #eef2f6;
+      font-size: 0.9rem;
+    }
+    .spec .row:last-child { border-bottom: none; }
+    .spec dt { color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+    .spec dd {
+      margin: 0;
+      text-align: right;
+      color: var(--primary-dark);
+      font-weight: 600;
+    }
+    .spec .sep {
+      font-family: var(--font-display);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--c-ohs);
+      background: #f3f8fe;
+      padding: 0.4rem 0.9rem;
+      border-top: 1px solid #e3f2fd;
+      border-bottom: 1px solid #e3f2fd;
+    }
+    .spec-note {
+      margin: 1rem 0 0;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: var(--primary-dark);
+      background: #fff8e1;
+      border-left: 4px solid #f9a825;
+      border-radius: 6px;
+    }
+
+    .badge {
+      font-family: var(--font-display);
+      display: inline-block;
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .badge-ok {
+      background: #e8f5e9;
+      color: #1b5e20;
+      border: 1px solid #a5d6a7;
+    }
+    .badge-manual {
+      background: #fff3e0;
+      color: #e65100;
+      border: 1px solid #ffcc80;
+    }
+
+    /* Tablas */
+    .tabla {
+      margin-top: 0.85rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .tabla table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    .tabla th {
+      font-family: var(--font-display);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-align: left;
+      color: var(--text-muted);
+      background: #f7f9fc;
+      padding: 0.65rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .tabla td {
+      padding: 0.55rem 0.9rem;
+      border-top: 1px solid #eef2f6;
+      color: var(--text-desc);
+      vertical-align: middle;
+    }
+    .tabla tr:first-child td { border-top: none; }
+    .tabla tbody tr:hover td { background: #fafcff; }
+    .tabla td.svc {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--primary-dark);
+      white-space: nowrap;
+    }
+    .tabla td.svc::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+      background: var(--c-admin);
+    }
+    .tabla td.svc.ohs::before { background: var(--c-ohs); }
+    .tabla td.svc.forms::before { background: var(--c-forms); }
+    .tabla td.svc.reports::before { background: var(--c-reports); }
+    .tabla td.num {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+    .tabla td.num.diff { color: #b26a00; font-weight: 600; }
+
+    /* Fichas de detalle técnico */
+    .detalles {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 1rem 0 0.25rem;
+    }
+    .detalle {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 1rem 1.15rem 1.1rem;
+      border-left: 4px solid var(--primary);
+    }
+    .detalle.d-2 { border-left-color: #00838f; }
+    .detalle.d-3 { border-left-color: #2e7d32; }
+    .detalle.d-4 { border-left-color: #558b2f; }
+    .detalle.d-5 { border-left-color: #6a1b9a; }
+    .detalle.d-6 { border-left-color: #546e7a; }
+    .detalle h4 {
+      font-family: var(--font-display);
+      margin: 0 0 0.55rem 0;
+      color: var(--primary-dark);
+      font-size: 1.08rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+    .detalle h4 .d-num {
+      flex-shrink: 0;
+      min-width: 1.7rem;
+      height: 1.7rem;
+      padding: 0 0.45rem;
+      border-radius: 999px;
+      background: var(--primary);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .detalle.d-2 h4 .d-num { background: #00838f; }
+    .detalle.d-3 h4 .d-num { background: #2e7d32; }
+    .detalle.d-4 h4 .d-num { background: #558b2f; }
+    .detalle.d-5 h4 .d-num { background: #6a1b9a; }
+    .detalle.d-6 h4 .d-num { background: #546e7a; }
+    .detalle h4 .d-tag {
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0;
+    }
+    .detalle p {
+      margin: 0 0 0.65rem 0;
+      font-size: 0.98rem;
+      line-height: 1.6;
+      text-align: justify;
+      color: var(--text-desc);
+    }
+    .detalle p:last-child { margin-bottom: 0; }
+
+    .cta-list {
+      margin: 0.35rem 0 0.65rem;
+      padding-left: 1.2rem;
+      color: var(--text-desc);
+      line-height: 1.65;
+      font-size: 0.98rem;
+      font-weight: 400;
+    }
+    .cta-list:last-child { margin-bottom: 0; }
+    .cta-list li { margin-bottom: 0.3rem; }
+    .cta-list strong {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    /* Bloques de código */
+    pre.code {
+      margin: 0.5rem 0 0.75rem;
+      background: #0f1b2d;
+      color: #e6edf3;
+      padding: 0.9rem 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.6;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+    }
+    pre.code:last-child { margin-bottom: 0; }
+    pre.code .c { color: #7d8ea3; }
+    pre.code .k { color: #79c0ff; }
+    pre.code .s { color: #a5d6ff; }
+
+    /* Comandos (plegables) */
+    .cmds {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      margin-top: 0.9rem;
+    }
+    .cmd {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .cmd summary {
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.75rem 0.95rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: var(--primary-dark);
+    }
+    .cmd summary::-webkit-details-marker { display: none; }
+    .cmd summary::after {
+      content: "+";
+      margin-left: auto;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+    .cmd[open] summary::after { content: "–"; }
+    .cmd summary .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+      flex-shrink: 0;
+    }
+    .cmd.admin summary .dot { background: var(--c-admin); }
+    .cmd.forms summary .dot { background: var(--c-forms); }
+    .cmd.reports summary .dot { background: var(--c-reports); }
+    .cmd summary .sub {
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .cmd .body {
+      padding: 0 0.95rem 0.95rem;
+      border-top: 1px solid #eef2f6;
+    }
+    .cmd .body p {
+      font-size: 0.92rem;
+      margin: 0.7rem 0 0.2rem;
+      text-align: left;
+    }
+
+    /* Beneficios */
+    .benefits {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.85rem;
+    }
+    .benefit {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 0.95rem 1.05rem;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    .benefit h4 {
+      font-family: var(--font-display);
+      margin: 0 0 0.4rem 0;
+      color: var(--primary-dark);
+      font-size: 1.02rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .benefit p {
+      margin: 0;
+      font-size: 0.98rem;
+      text-align: left;
+      color: var(--text-desc);
+      line-height: 1.55;
+      font-weight: 400;
+    }
+
+    .message-box {
+      margin-top: 1rem;
+      padding: 1.05rem 1.25rem;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%);
+      border: 1px solid rgba(13, 71, 161, 0.25);
+      font-size: var(--size-desc);
+      line-height: var(--leading-desc);
+      font-weight: 400;
+      color: var(--text-desc);
+    }
+    .message-box strong {
+      font-family: var(--font-display);
+      font-weight: 700;
+    }
+
+    .doc-footer {
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin: 0.5rem 0 1rem;
+    }
+    .doc-footer strong {
+      font-family: var(--font-display);
+      color: var(--primary-dark);
+    }
+
+    @media (max-width: 820px) {
+      .arq-containers { grid-template-columns: 1fr; }
+      .arq-mounts { display: none; }
+      .dom-parts { grid-template-columns: 1fr; }
+      .specs { grid-template-columns: 1fr; }
+    }
+    @media (min-width: 821px) and (max-width: 1100px) {
+      .arq-containers, .dom-parts, .specs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .arq-mounts { display: none; }
+      .capacidades-grid { grid-template-columns: 1fr; }
+      .tabla { overflow-x: auto; }
+    }
+
+    @media (max-width: 700px) {
+      .comercial-header {
+        flex-wrap: wrap;
+        background-position: top left;
+        min-height: auto;
+      }
+      .comercial-header::before {
+        background: rgba(255, 255, 255, 0.88);
+      }
+      .comercial-header .title-wrap {
+        max-width: 100%;
+        min-width: 0;
+        width: 100%;
+        text-align: left;
+      }
+      .comercial-header .title-wrap h1 .header-line-2 { font-size: 1.22rem; }
+      .intro-propuesta, .toc { margin-left: 0; max-width: 100%; }
+    }
+
+    @media print {
+      body { font-size: 12pt; }
+      .comercial-header .title-wrap h1 .header-line-2 { font-size: 16pt; }
+      .toc { display: none; }
+      .cmd .body { display: block !important; }
+      .slide-block { break-inside: avoid-page; }
+    }
+
+    /* Mapa de documentación */
+    .doc-map {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+      margin-top: 0.85rem;
+    }
+    .doc-card {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0.85rem 1rem;
+      align-items: center;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.95rem 1.1rem;
+      box-shadow: var(--shadow-sm);
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    }
+    .doc-card:hover {
+      border-color: #90caf9;
+      box-shadow: var(--shadow);
+      transform: translateY(-1px);
+      text-decoration: none;
+    }
+    .doc-card .phase {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: #fff;
+      background: linear-gradient(135deg, #0d47a1, #1565c0);
+      flex-shrink: 0;
+    }
+    .doc-card.docker .phase { background: linear-gradient(135deg, #00695c, #00838f); }
+    .doc-card.arq .phase { background: linear-gradient(135deg, #6a1b9a, #8e24aa); }
+    .doc-card.aws .phase { background: linear-gradient(135deg, #e65100, #ef6c00); }
+    .doc-card .meta .kicker {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.15rem;
+    }
+    .doc-card .meta h4 {
+      font-family: var(--font-display);
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin: 0 0 0.25rem;
+      letter-spacing: -0.01em;
+    }
+    .doc-card .meta p {
+      margin: 0 !important;
+      font-size: 0.92rem !important;
+      line-height: 1.45 !important;
+      text-align: left !important;
+      color: var(--text-muted) !important;
+    }
+    .doc-card .go {
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--primary);
+      white-space: nowrap;
+    }
+    .doc-card:hover .go { text-decoration: underline; }
+    .path-flow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.35rem;
+      margin: 0.85rem 0 1rem;
+      padding: 0.75rem 0.9rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+    .path-flow .chip {
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      background: #e3f2fd;
+      border: 1px solid #bbdefb;
+      color: var(--primary-dark);
+    }
+    .path-flow .chip.aws { background: #fff3e0; border-color: #ffcc80; color: #e65100; }
+    .path-flow .chip.arq { background: #f3e5f5; border-color: #e1bee7; color: #6a1b9a; }
+    .path-flow .sep { color: var(--primary); font-weight: 700; }
+    .arq-more {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      align-items: center;
+    }
+    .arq-more a {
+      font-family: var(--font-display);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--primary);
+      text-decoration: none;
+      padding: 0.45rem 0.95rem;
+      border-radius: 999px;
+      box-shadow: var(--shadow-sm);
+    }
+    .arq-more a:hover { background: var(--primary-dark); text-decoration: none; }
+    .arq-more span {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    /* Ventajas y beneficios */
+    .beneficios-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .beneficio-card {
+      padding: 1rem 1.15rem;
+      border-radius: 10px;
+      border-left-width: 4px;
+      border-left-style: solid;
+      box-shadow: var(--shadow-sm);
+    }
+    .beneficios-grid .beneficio-card:nth-child(4n+1) {
+      background: linear-gradient(135deg, #fff4e8 0%, #ffffff 72%);
+      border: 1px solid rgba(230, 81, 0, 0.16);
+      border-left: 4px solid #ef6c00;
+    }
+    .beneficios-grid .beneficio-card:nth-child(4n+1) h5 { color: #e65100; }
+    .beneficios-grid .beneficio-card:nth-child(4n+2) {
+      background: linear-gradient(135deg, #eaf6ec 0%, #ffffff 72%);
+      border: 1px solid rgba(46, 125, 50, 0.16);
+      border-left: 4px solid #2e7d32;
+    }
+    .beneficios-grid .beneficio-card:nth-child(4n+2) h5 { color: #1b5e20; }
+    .beneficios-grid .beneficio-card:nth-child(4n+3) {
+      background: linear-gradient(135deg, #e8f0f8 0%, #ffffff 72%);
+      border: 1px solid rgba(13, 71, 161, 0.16);
+      border-left: 4px solid #0d47a1;
+    }
+    .beneficios-grid .beneficio-card:nth-child(4n+3) h5 { color: #002171; }
+    .beneficios-grid .beneficio-card:nth-child(4n+4) {
+      background: linear-gradient(135deg, #fdecea 0%, #ffffff 72%);
+      border: 1px solid rgba(198, 40, 40, 0.16);
+      border-left: 4px solid #c62828;
+    }
+    .beneficios-grid .beneficio-card:nth-child(4n+4) h5 { color: #b71c1c; }
+    .beneficio-card h5 {
+      font-family: var(--font-display);
+      margin: 0 0 0.45rem;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .slide-block .beneficio-card p {
+      margin: 0;
+      font-size: 0.93rem;
+      line-height: 1.55;
+      text-align: left;
+    }
+
+    @media (max-width: 700px) {
+      .doc-card { grid-template-columns: auto 1fr; }
+      .doc-card .go { grid-column: 2; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app-wrap">
+    <header class="comercial-header">
+      <div class="title-wrap">
+        <h1>
+          <span class="header-line-1">Oracle Forms &amp; Reports 14.1.2</span>
+          <span class="header-line-2">Documentación del proyecto</span>
+          <span class="header-line-3">Docker · Dominio WebLogic · AWS ECS EC2</span>
+        </h1>
+        <p class="header-tagline">Dos contenedores sobre un dominio compartido</p>
+      </div>
+    </header>
+
+    <div class="intro intro-propuesta">
+      <h2>Visión general</h2>
+      <p>
+        Este sitio reúne la documentación para construir, operar y desplegar
+        <strong>Oracle Forms &amp; Reports 14.1.2</strong> sobre una arquitectura de
+        <strong>dos contenedores</strong>: una imagen Docker común y un dominio WebLogic
+        compartido en EFS. El primero agrupa <strong>AdminServer + WLS_FORMS</strong>;
+        el segundo agrupa <strong>WLS_REPORTS + Colas</strong>. Ambos corren en
+        <strong>AWS ECS sobre EC2</strong>.
+      </p>
+      <p>
+        El recorrido va desde la creación de la imagen (<code>image_forms_14.1.2</code>) y
+        la preparación del dominio, hasta las task definitions y servicios
+        <code>wls_forms-ec2</code> y <code>wls_reports-ec2</code>. Un dominio, dos contenedores,
+        gestión centralizada.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+
+        <section class="slide-block" id="arquitectura">
+          <h3><span class="num">1</span> Arquitectura del sistema, Un dominio, dos contenedores — en Docker y en AWS</h3>
+          <p>
+            Dos contenedores construidos a partir de la misma imagen
+            (<code>image_forms_14.1.2</code>) comparten un único dominio WebLogic en EFS.
+            El contenedor <strong>Admin-WLS_FORMS</strong> aloja el AdminServer y el Managed Server
+            <code>WLS_FORMS</code> (máquinas <code>AdminServerMachine</code> y <code>FormsMachine</code>
+            en el mismo host Cloud Map <code>weblogic-admin.forms.local</code>, un solo Node Manager).
+          </p>
+          <p>
+            El contenedor <strong>WLS_REPORTS-Colas</strong> aloja <code>WLS_REPORTS</code> y el
+            aplicativo de colas (Pro*C / <code>CARC00100</code>). Reports usa
+            <code>ADMIN_SERVER_HOST=weblogic-admin.forms.local</code>. Colas no es un Managed Server:
+            llama a <code>rwservlet</code> en Reports y escribe salidas en el volumen compartido.
+          </p>
+
+          <figure class="arq" role="img" aria-label="Diagrama: contenedores Admin-WLS_FORMS y WLS_REPORTS-Colas sobre dominio compartido">
+            <div class="arq-users">
+              <span class="pill">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h6v2H8v2h8v-2h-2v-2h6c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 13H4V5h16v11z"/></svg>
+                Usuarios · Navegador
+              </span>
+            </div>
+            <div class="arq-flow">
+              <span class="arrow">↓</span>
+              Consola 7001 &nbsp;|&nbsp; Forms 9001 &nbsp;|&nbsp; Reports 9012
+            </div>
+
+            <div class="arq-host">
+              <div class="arq-host-label">
+                <span>AWS ECS · launch type EC2</span>
+                <span class="net">Cloud Map: forms.local</span>
+              </div>
+
+              <div class="arq-containers">
+                <div class="ctr admin">
+                  <div class="ctr-head">
+                    <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></span>
+                    <span class="t">Admin-WLS_FORMS<span class="h">wls_forms-ec2 · weblogic-admin.forms.local</span></span>
+                  </div>
+                  <div class="comp">
+                    <div class="n">AdminServer <em>Consola · T3 localhost:7001</em></div>
+                    <div class="ports"><span class="port">7001</span><span class="port">9002</span></div>
+                  </div>
+                  <div class="comp">
+                    <div class="n">WLS_FORMS <em>cluster_forms</em></div>
+                    <div class="ports"><span class="port">HTTP 9001</span><span class="port">HTTPS 9501</span><span class="port">Admin 9991</span></div>
+                  </div>
+                  <div class="comp nm">
+                    <div class="n">Node Manager <em>un proceso · nodemanager/</em></div>
+                    <div class="ports"><span class="port">5556</span></div>
+                  </div>
+                  <div class="ctr-machine"><span>AdminServerMachine + FormsMachine</span></div>
+                </div>
+
+                <div class="ctr reports">
+                  <div class="ctr-head">
+                    <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg></span>
+                    <span class="t">WLS_REPORTS-Colas<span class="h">wls_reports-ec2 · weblogic-reports.forms.local</span></span>
+                  </div>
+                  <div class="comp">
+                    <div class="n">WLS_REPORTS <em>cluster_reports</em></div>
+                    <div class="ports"><span class="port">HTTP 9012</span><span class="port">HTTPS 9512</span><span class="port">Admin 9992</span></div>
+                  </div>
+                  <div class="comp">
+                    <div class="n">Colas de procesos <em>CARC00100 · Pro*C</em></div>
+                    <div class="ports"><span class="port">rwservlet → 9012</span></div>
+                  </div>
+                  <div class="comp nm">
+                    <div class="n">Node Manager <em>nodemanager_reports/</em></div>
+                    <div class="ports"><span class="port">5556</span></div>
+                  </div>
+                  <div class="ctr-machine"><span>ReportsMachine</span></div>
+                </div>
+              </div>
+
+              <div class="arq-mounts" aria-hidden="true">
+                <div class="mount"><span>monta el dominio</span></div>
+                <div class="mount"><span>monta el dominio</span></div>
+              </div>
+
+              <div class="arq-domain">
+                <div class="dom-head">
+                  <span class="dom-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C7.03 2 3 3.79 3 6v12c0 2.21 4.03 4 9 4s9-1.79 9-4V6c0-2.21-4.03-4-9-4zm0 2c4.42 0 7 1.5 7 2s-2.58 2-7 2-7-1.5-7-2 2.58-2 7-2zm7 14c0 .5-2.58 2-7 2s-7-1.5-7-2v-2.23C6.61 16.55 9.16 17 12 17s5.39-.45 7-1.23V18zm0-5c0 .5-2.58 2-7 2s-7-1.5-7-2v-2.23C6.61 11.55 9.16 12 12 12s5.39-.45 7-1.23V13z"/></svg></span>
+                  <div>
+                    <div class="dom-kicker">Dominio WebLogic compartido</div>
+                    <div class="dom-name">forms_domain</div>
+                  </div>
+                  <span class="dom-badge">1 dominio · 2 contenedores</span>
+                </div>
+                <div class="dom-path">
+                  <code>EFS rector-dev</code> <span class="to">→</span> <code>/u01/oracle/user_projects/domains/forms_domain</code>
+                </div>
+                <div class="dom-parts">
+                  <span class="part admin">Admin + Forms · <code>weblogic-admin.forms.local</code></span>
+                  <span class="part reports">Reports + Colas · <code>weblogic-reports.forms.local</code></span>
+                </div>
+                <p class="dom-note">
+                  Ambos contenedores leen y escriben el <strong>mismo</strong> <code>config.xml</code>.
+                  <code>startAdmin_Forms_EC2.sh</code> alinea las Machines y el WKA de Coherence
+                  (<code>ADMIN_MACHINE_HOST</code>, <code>FORMS_MACHINE_HOST</code>, <code>REPORTS_MACHINE_HOST</code>)
+                  antes de levantar el Admin. Reports se une después vía <code>weblogic-admin.forms.local</code>.
+                </p>
+              </div>
+
+              <div class="arq-volumes">
+                <span class="lbl">También compartidos</span>
+                <code>domains</code> · <code>apps</code> · <code>scripts</code> (EFS)
+              </div>
+            </div>
+
+            <div class="legend">
+              <span><i style="background: var(--c-admin);"></i> Administración</span>
+              <span><i style="background: var(--c-forms);"></i> Forms</span>
+              <span><i style="background: var(--c-reports);"></i> Reports</span>
+              <span><i style="background: var(--c-colas);"></i> Colas (aplicativo)</span>
+              <span><i style="background: #6a1b9a;"></i> Dominio compartido</span>
+            </div>
+            <figcaption class="caption">Un único dominio WebLogic (<code>forms_domain</code>) compartido por <code>wls_forms-ec2</code> (Admin + Forms) y <code>wls_reports-ec2</code> (Reports + Colas) en ECS sobre EC2</figcaption>
+          </figure>
+
+          <h4 class="sub" id="especificaciones">Especificaciones técnicas</h4>
+          <p>
+            Ficha de cada contenedor EC2: Cloud Map, puertos, máquinas del dominio y script de arranque.
+            Ambos usan la imagen <code>image_forms_14.1.2</code>, el mismo EFS y una instancia
+            <strong>EC2 familia <code>r5.xlarge</code></strong> (4 vCPU / 32 GiB) para cada uno.
+          </p>
+
+          <div class="specs">
+            <div class="spec admin">
+              <h4>Admin-WLS_FORMS</h4>
+              <dl>
+                <div class="row"><dt>Instancia EC2</dt><dd><code>r5.xlarge</code> (4 vCPU / 32 GiB)</dd></div>
+                <div class="row"><dt>Servicio / TD</dt><dd><code>wls_forms-ec2</code></dd></div>
+                <div class="row"><dt>Cloud Map</dt><dd><code>weblogic-admin.forms.local</code></dd></div>
+                <div class="row"><dt>AdminServer</dt><dd>7001 (t3 localhost)</dd></div>
+                <div class="row"><dt>WLS_FORMS</dt><dd>9001 / 9501 / 9991</dd></div>
+                <div class="row"><dt>Node Manager</dt><dd>5556 (uno solo)</dd></div>
+                <div class="row"><dt>Machines</dt><dd>Admin + Forms → mismo host</dd></div>
+                <div class="row"><dt>Arranque</dt><dd><code>startAdmin_Forms_EC2.sh</code></dd></div>
+              </dl>
+            </div>
+
+            <div class="spec reports">
+              <h4>WLS_REPORTS-Colas</h4>
+              <dl>
+                <div class="row"><dt>Instancia EC2</dt><dd><code>r5.xlarge</code> (4 vCPU / 32 GiB)</dd></div>
+                <div class="row"><dt>Servicio / TD</dt><dd><code>wls_reports-ec2</code></dd></div>
+                <div class="row"><dt>Cloud Map</dt><dd><code>weblogic-reports.forms.local</code></dd></div>
+                <div class="row"><dt>WLS_REPORTS</dt><dd>9012 / 9512 / 9992</dd></div>
+                <div class="row"><dt>Admin remoto</dt><dd><code>weblogic-admin.forms.local:7001</code></dd></div>
+                <div class="row"><dt>Colas</dt><dd>Pro*C <code>CARC00100</code></dd></div>
+                <div class="row"><dt>Máquina</dt><dd>ReportsMachine</dd></div>
+                <div class="row"><dt>Arranque</dt><dd><code>startReports_EC2.sh</code></dd></div>
+              </dl>
+            </div>
+          </div>
+          <p>
+            El dominio es uno (<code>forms_domain</code> en EFS); los runtimes no.
+            <code>WLS_FORMS</code> y <code>WLS_REPORTS</code> van en contenedores e instancias
+            distintas para que la sesión interactiva no comparta CPU, memoria ni ciclo de vida
+            con la generación de reportes y las colas.
+          </p>
+          <ul>
+            <li>
+              <strong>CPU y memoria aisladas.</strong> Un pico de Reports (motores
+              <code>rwengine</code>, PDF, Pro*C) satura su <code>r5.xlarge</code>, no la de Forms.
+              Las sesiones <code>frmweb</code> no esperan ni se bloquean por un reporte pesado.
+            </li>
+            <li>
+              <strong>Fallo acotado.</strong> Reiniciar o perder <code>wls_reports-ec2</code> no tumba
+              Admin ni Forms. Al revés: un bounce de Forms no corta el batch ni
+              <code>rwservlet</code>.
+            </li>
+            <li>
+              <strong>Arranque y escala independientes.</strong> Cada lado tiene su script
+              (<code>startAdmin_Forms_EC2.sh</code>, <code>startReports_EC2.sh</code>), su Node
+              Manager y su Cloud Map. Se puede subir o reciclar uno sin redesplegar el otro.
+            </li>
+            <li>
+              <strong>Colas junto a Reports.</strong> <code>CARC00100</code> llama a
+              <code>rwservlet</code> en el mismo contenedor; Forms no carga ese tráfico HTTP ni
+              los procesos nativos del batch.
+            </li>
+          </ul>
+
+          <h4 class="sub" id="rendimiento">Análisis de rendimiento</h4>
+          <p>
+            Docker sobre EC2 no es el freno frente a una instalación estática en la misma
+            <code>r5.xlarge</code>. El Oracle Home ya vive en la <strong>imagen</strong> (disco
+            local de la instancia, EBS). Lo que añade latencia es <strong>EFS</strong> cuando
+            los ejecutables y los logs se leen o escriben por NFS en cada sesión.
+          </p>
+          <p>
+            Para acercarse al estático <strong>sin perder el dominio compartido</strong>: dominio
+            y scripts se quedan en EFS; los objetos calientes
+            (<code>.fmx</code>, <code>.rep</code>, binarios Pro*C) se sirven desde
+            <strong>EBS</strong> de cada instancia (copia o <code>FORMS_PATH</code> local al
+            arrancar). Los logs de runtime pueden ir al mismo disco local. No hace falta quitar
+            Docker.
+          </p>
+          <div class="tabla"><table>
+            <tr>
+              <th>Situación</th>
+              <th>Frente a instalación estática (misma EC2)</th>
+            </tr>
+            <tr>
+              <td>Sesión Forms / reporte en caliente, ejecutables en EBS</td>
+              <td class="num">≈ 5&nbsp;% (en la práctica no se nota; pico 30 usuarios)</td>
+            </tr>
+            <tr>
+              <td>CPU de batch (Pro*C, <code>rwengine</code>)</td>
+              <td class="num">≈ 2–5&nbsp;% menos throughput (cgroups / overlay)</td>
+            </tr>
+            <tr>
+              <td>Arranque en frío de WebLogic</td>
+              <td class="num">10–30&nbsp;% más lento: <code>config.xml</code> sigue en EFS</td>
+            </tr>
+          </table></div>
+          <p>
+            El salto de red entre las dos instancias (Cloud Map, Admin ↔ Reports) no es
+            overhead de contenedor: es el aislamiento de CPU que se busca. Medir un mismo
+            formulario y un mismo reporte en ambos modelos cierra el número; para operación
+            diaria el contenedor, con ejecutables en EBS, queda en el mismo orden que el estático.
+          </p>
+
+          <h4 class="sub" id="licencia-oracle">Análisis de costos de licencia Oracle</h4>
+          <p>
+            En AWS, Oracle no usa la <em>Core Factor Table</em> de on-premise. La política
+            <em>Licensing Oracle Software in the Cloud Computing Environment</em> cuenta
+            <strong>vCPU de la instancia EC2</strong> (no los CPU units de la task definition):
+            con hyper-threading (el caso normal en EC2), <strong>2 vCPU = 1 licencia Processor</strong>.
+          </p>
+          <p>
+            Cada <code>r5.xlarge</code> tiene 4 vCPU → <strong>2 Processor</strong>.
+            Dos instancias → <strong>4 Processor</strong> en total. Se licencia el host, no el
+            contenedor: Admin y Forms comparten una frontera; Reports y Colas la otra.
+            Eso replica el patrón on-premise (caja Forms + caja Reports).
+          </p>
+          <div class="tabla"><table>
+            <tr>
+              <th>Instancia</th>
+              <th>Contenedor</th>
+              <th>vCPU / RAM</th>
+              <th>Processor</th>
+            </tr>
+            <tr>
+              <td class="svc forms"><code>r5.xlarge</code></td>
+              <td>Admin-WLS_FORMS</td>
+              <td class="num">4 / 32 GiB</td>
+              <td class="num">2</td>
+            </tr>
+            <tr>
+              <td class="svc reports"><code>r5.xlarge</code></td>
+              <td>WLS_REPORTS-Colas</td>
+              <td class="num">4 / 32 GiB</td>
+              <td class="num">2</td>
+            </tr>
+            <tr>
+              <td><strong>Total</strong></td>
+              <td>2 instancias</td>
+              <td class="num">8 vCPU / 64 GiB</td>
+              <td class="num"><strong>4</strong></td>
+            </tr>
+          </table></div>
+          <p>
+            Productos a alinear con el contrato: <strong>Oracle Forms and Reports</strong>
+            (incluye WebLogic de uso restringido para Forms/Reports) sobre las dos
+            <code>r5.xlarge</code>. El cliente Pro*C de las colas queda cubierto por esa
+            misma licencia, en la instancia de Reports. No se cotiza precio de lista aquí: el costo es
+            <code>4 × precio Processor</code> (o NUP con el mínimo por Processor del contrato).
+          </p>
+
+          <div class="spec-note">
+            <strong>Nota sobre el Http Server:</strong> no se recomienda usar Oracle HTTP Server (OHS). Su instalación como
+            componente del dominio, su configuración y su mantenimiento son complejos, y su función (proxy inverso hacia
+            <code>WLS_FORMS</code> y <code>WLS_REPORTS</code>) la cubre fácilmente un Http Server estándar como NGINX, Apache
+            o Tomcat, o incluso un servicio nativo de AWS como Amazon CloudFront.
+          </div>
+
+          <div class="capacidades-label">Componentes clave</div>
+          <div class="capacidades-grid">
+            <div class="capacidad"><span class="nro">01</span><span class="txt"><strong>Dominio WebLogic compartido:</strong> un único dominio en EFS entre los dos contenedores EC2.</span></div>
+            <div class="capacidad"><span class="nro">02</span><span class="txt"><strong>Un Node Manager por contenedor:</strong> Admin y Forms comparten el NM de Admin (mismo host); Reports tiene el suyo.</span></div>
+            <div class="capacidad"><span class="nro">03</span><span class="txt"><strong>Clusters:</strong> <code>cluster_forms</code> y <code>cluster_reports</code> para alta disponibilidad.</span></div>
+            <div class="capacidad"><span class="nro">04</span><span class="txt"><strong>Coherence:</strong> caché distribuida para sesiones y datos compartidos.</span></div>
+            <div class="capacidad"><span class="nro">05</span><span class="txt"><strong>JRF (Java Required Files):</strong> infraestructura común para seguridad y servicios.</span></div>
+          </div>
+        </section>
+
+        <section class="slide-block" id="beneficios">
+          <h3><span class="num">2</span> Ventajas y beneficios de la nueva arquitectura</h3>
+          <p>
+            Llevar cualquier aplicativo <strong>Oracle Forms &amp; Reports</strong> a contenedores
+            en AWS ECS aporta beneficios estratégicos y operativos para la organización:
+          </p>
+          <div class="beneficios-grid">
+            <div class="beneficio-card">
+              <h5>Escalabilidad horizontal</h5>
+              <p>Posibilidad de agregar instancias adicionales de WLS_FORMS o WLS_REPORTS según demanda de usuarios, sin redimensionar servidores monolíticos.</p>
+            </div>
+            <div class="beneficio-card">
+              <h5>Alta disponibilidad</h5>
+              <p>Cada contenedor corre en su instancia: si cae Reports-Colas, Admin y Forms siguen. Un pico de CPU de Reports (motores, PDF, colas) no compite con las sesiones Forms ni las bloquea. ECS puede reemplazar la tarea caída en su EC2.</p>
+            </div>
+            <div class="beneficio-card">
+              <h5>Portabilidad y consistencia</h5>
+              <p>La misma imagen Docker validada en Compose se despliega en AWS sin divergencias entre entornos. En la nube, <strong>AWS Service Discovery</strong> mantiene la comunicación por nombres (<code>*.forms.local</code>) en lugar de IPs fijas, alineada con el patrón definido en desarrollo.</p>
+            </div>
+            <div class="beneficio-card">
+              <h5>Gestión centralizada</h5>
+              <p>Un único dominio WebLogic compartido (EFS) permite administrar el aplicativo de forma unificada con ejecución en dos tareas ECS sobre EC2.</p>
+            </div>
+            <div class="beneficio-card">
+              <h5>Capacidad EC2 predecible</h5>
+              <p>Cada contenedor corre en su instancia ECS-optimized (launch type EC2): CPU y memoria reservadas, sin el techo de Fargate para este dominio.</p>
+            </div>
+            <div class="beneficio-card">
+              <h5>Despliegue ágil y CI/CD</h5>
+              <p>Imágenes versionadas en ECR, task definitions versionadas y despliegue controlado por revisión sin downtime prolongado.</p>
+            </div>
+            <div class="beneficio-card">
+              <h5>Aislamiento y seguridad</h5>
+              <p>Dos tareas ECS con security groups, IAM y secrets gestionados. Comunicación interna vía Cloud Map (<code>weblogic-admin</code> y <code>weblogic-reports</code> en <code>forms.local</code>).</p>
+            </div>
+            <div class="beneficio-card">
+              <h5>Continuidad del negocio</h5>
+              <p>Se preserva Oracle Forms &amp; Reports 14.1.2 y el dominio existente, modernizando solo la capa de despliegue sin reescribir la aplicación.</p>
+            </div>
+            <div class="beneficio-card">
+              <h5>Ambientes paralelos para desarrollo y pruebas</h5>
+              <p>La misma arquitectura containerizada puede replicarse en entornos independientes —desarrollo, calidad o pilotos— con contenedores y volúmenes propios, de forma <strong>rápida y segura</strong>. Así se habilitan nuevos proyectos y pruebas controladas del aplicativo sin interferir con el ambiente operativo.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="slide-block" id="documentacion">
+          <h3><span class="num">3</span> Fases de Construcción y Despliegue</h3>
+          <p>
+            Guías en el orden recomendado: primero la imagen y el dominio; luego
+            los dos contenedores ECS sobre EC2 (Admin-WLS_FORMS y WLS_REPORTS-Colas),
+            la compilación de las aplicaciones y el roadmap de Certificación.
+          </p>
+
+          <div class="path-flow" aria-hidden="true">
+            <span class="chip">Imagen Docker</span><span class="sep">→</span>
+            <span class="chip">Crear dominio</span><span class="sep">→</span>
+            <span class="chip aws">EC2 Admin-Forms</span><span class="sep">→</span>
+            <span class="chip aws">EC2 Reports-Colas</span><span class="sep">→</span>
+            <span class="chip aws">Compilación</span><span class="sep">→</span>
+            <span class="chip aws">Roadmap Certificación</span>
+          </div>
+
+          <div class="doc-map">
+            <a class="doc-card docker" href="docker/crear_imagen/index.html">
+              <span class="phase">1</span>
+              <div class="meta">
+                <div class="kicker">Docker · Imagen</div>
+                <h4>Crear la imagen <code>image_forms_14.1.2</code></h4>
+                <p>Construye la imagen base con JDK 17, FMW Infrastructure y Forms &amp; Reports, lista para crear el dominio y ejecutar los servidores.</p>
+              </div>
+              <span class="go">Abrir →</span>
+            </a>
+
+            <a class="doc-card docker" href="docker/crear-dominio/index.html">
+              <span class="phase">2</span>
+              <div class="meta">
+                <div class="kicker">Docker · Dominio</div>
+                <h4>Crear el dominio WebLogic</h4>
+                <p>Prepara el dominio compartido con Docker Compose, RCU y Configuration Wizard, hasta dejar AdminServer, Forms y Reports operativos.</p>
+              </div>
+              <span class="go">Abrir →</span>
+            </a>
+
+            <a class="doc-card aws" href="aws-ecs/forms-ec2/index.html">
+              <span class="phase">3</span>
+              <div class="meta">
+                <div class="kicker">AWS ECS · EC2</div>
+                <h4>Contenedor Admin-WLS_FORMS</h4>
+                <p>Instancia EC2, task definition <code>td_wls_forms-ec2</code> y servicio <code>wls_forms-ec2</code> con Cloud Map <code>weblogic-admin</code>. Arranca Admin + Forms con <code>startAdmin_Forms_EC2.sh</code> (Machines y WKA de Coherence).</p>
+              </div>
+              <span class="go">Abrir →</span>
+            </a>
+
+            <a class="doc-card aws" href="aws-ecs/reports-ec2/index.html">
+              <span class="phase">4</span>
+              <div class="meta">
+                <div class="kicker">AWS ECS · EC2</div>
+                <h4>Contenedor WLS_REPORTS-Colas</h4>
+                <p>Segunda instancia EC2, task definition <code>td_wls_reports-ec2</code> y servicio <code>wls_reports-ec2</code> con Cloud Map <code>weblogic-reports</code>. Arranca Reports con <code>startReports_EC2.sh</code>; las colas (Pro*C / <code>CARC00100</code>) corren en el mismo contenedor.</p>
+              </div>
+              <span class="go">Abrir →</span>
+            </a>
+
+            <a class="doc-card aws" href="app-rector/index.html">
+              <span class="phase">5</span>
+              <div class="meta">
+                <div class="kicker">AWS ECS · EC2</div>
+                <h4>Ejecución de Aplicativo RECTOR</h4>
+                <p>Compila los módulos Forms (<code>.fmb</code>, <code>.pll</code>, <code>.mmb</code>) con <code>frmcmp</code> y los programas Pro*C con <code>proc</code> y <code>gcc</code> en <code>wls_forms-ec2</code>, usando las variables de la task definition (<code>FORMS_PATH</code>, <code>FRMCMP</code>, <code>PROC</code>, <code>PCSCFG</code>).</p>
+              </div>
+              <span class="go">Abrir →</span>
+            </a>
+
+            <a class="doc-card aws" href="roadmap/index.html">
+              <span class="phase">6</span>
+              <div class="meta">
+                <div class="kicker">Roadmap · Certificación</div>
+                <h4>Implementación de RECTOR en Certificación</h4>
+                <p>Fases para llevar RECTOR a un ambiente de Certificación: infraestructura AWS, dominio, código, configuración, batch y reportes, acceso de usuarios y pruebas unitarias, con las brechas detectadas a cerrar.</p>
+              </div>
+              <span class="go">Abrir →</span>
+            </a>
+          </div>
+        </section>
+
+
+      </div>
+    </div>
+
+    <p class="doc-footer">
+      <strong>Oracle Forms &amp; Reports 14.1.2 · Documentación del proyecto</strong><br>
+      Docker · dominio compartido · AWS ECS EC2 · dos contenedores
+    </p>
+  </div>
+</body>
+</html>

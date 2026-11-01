@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía · AdminServer-WLS_FORMS (ECS sobre EC2)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/estilos-demo.css">
+  <style>
+    :root {
+      --font-display: "Outfit", "Segoe UI", sans-serif;
+      --font-body: "Source Sans 3", "Segoe UI", sans-serif;
+      --font-mono: "JetBrains Mono", "Courier New", monospace;
+      --text-desc: #2f3540;
+      --size-desc: 1.05rem;
+      --leading-desc: 1.7;
+      --c-admin: #2e7d32;
+      --c-forms: #ef6c00;
+    }
+    body {
+      font-family: var(--font-body);
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--text-desc);
+      -webkit-font-smoothing: antialiased;
+    }
+    .app-wrap { max-width: 960px; overflow: visible; }
+    .comercial-header {
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 1rem;
+      background-image: url('../../assets/ImagenEmpresa.png');
+      background-repeat: no-repeat;
+      background-position: left center;
+      background-size: cover;
+      background-color: #eef3f8;
+      min-height: 148px;
+      padding: 0.85rem 0.9rem;
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+    .comercial-header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.5) 40%, rgba(255,255,255,0.9) 62%, #fff 78%);
+      pointer-events: none;
+    }
+    .comercial-header .title-wrap {
+      position: relative;
+      z-index: 1;
+      margin-left: auto;
+      max-width: 58%;
+      min-width: 280px;
+      padding: 0.95rem 1.15rem 1rem;
+      color: #0a1f4d;
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid rgba(13, 71, 161, 0.12);
+      border-left: 5px solid #ef6c00;
+      box-shadow: 0 6px 20px rgba(0, 33, 113, 0.12);
+    }
+    .comercial-header .title-wrap h1 { font-family: var(--font-display); margin: 0; color: #0a1f4d; }
+    .comercial-header .title-wrap h1 .header-line-1 {
+      display: block; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em;
+      margin-bottom: 0.4rem; text-transform: uppercase; color: #ef6c00;
+    }
+    .comercial-header .title-wrap h1 .header-line-2 {
+      display: block; font-size: 1.42rem; font-weight: 800; letter-spacing: -0.02em;
+      margin-bottom: 0.25rem; color: #061433;
+    }
+    .comercial-header .title-wrap h1 .header-line-3 {
+      display: block; font-size: 1.02rem; font-weight: 600; color: #1565c0;
+    }
+    .comercial-header .title-wrap .header-tagline {
+      font-size: 0.95rem; line-height: 1.45; margin: 0.55rem 0 0;
+      font-weight: 500; color: #475569; padding-top: 0.5rem;
+      border-top: 1px solid rgba(13, 71, 161, 0.15);
+    }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      margin-bottom: 1rem; font-family: var(--font-display);
+      font-size: 0.9rem; font-weight: 600; color: #0d47a1; text-decoration: none;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .intro-propuesta { max-width: calc(100% - 1cm - 1.5rem - 1cm); margin: 0 0 1.5rem 1cm; }
+    .intro-propuesta h2 {
+      font-family: var(--font-display); font-size: 1.28rem; font-weight: 700;
+      color: var(--primary-dark); margin: 0 0 0.75rem;
+    }
+    .intro-propuesta p {
+      text-align: justify; font-size: var(--size-desc); line-height: var(--leading-desc);
+      margin: 0 0 0.85rem;
+    }
+    .intro-propuesta .slogan {
+      margin-top: 1rem; font-family: var(--font-display); font-size: 1.12rem;
+      font-weight: 700; color: #ef6c00; line-height: 1.4;
+    }
+    .toc { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 1.5rem 1cm; }
+    .toc a {
+      font-family: var(--font-display); font-size: 0.82rem; font-weight: 600;
+      text-decoration: none; color: var(--primary); background: #fff;
+      border: 1px solid #bbdefb; border-radius: 999px; padding: 0.3rem 0.8rem;
+    }
+    .toc a:hover { background: #e3f2fd; }
+    .slide-block {
+      margin-bottom: 1.75rem; padding: 1.25rem 1.4rem; background: #fafafa;
+      border-radius: var(--radius); border-left: 4px solid var(--c-forms);
+      scroll-margin-top: 1rem;
+    }
+    .slide-block h3 {
+      font-family: var(--font-display); margin: 0 0 0.75rem; color: var(--primary-dark);
+      font-size: 1.22rem; font-weight: 700; display: flex; align-items: center; gap: 0.7rem;
+    }
+    .slide-block h3 .num {
+      flex-shrink: 0; min-width: 30px; height: 30px; padding: 0 0.55rem;
+      border-radius: 999px; background: var(--c-forms); color: #fff;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-weight: 700;
+    }
+    .slide-block h3 .num.lecciones { background: var(--success); }
+    .slide-block.lecciones { border-left-color: var(--success); }
+    .slide-block p {
+      margin: 0 0 0.9rem; font-size: var(--size-desc); line-height: var(--leading-desc);
+      text-align: justify;
+    }
+    .slide-block h4.sub {
+      font-family: var(--font-display); margin: 1.35rem 0 0.65rem; color: var(--primary-dark);
+      font-size: 1.08rem; font-weight: 700; padding-top: 0.75rem;
+      border-top: 1px dashed #dfe6ee; scroll-margin-top: 1rem;
+    }
+    .slide-block > h4.sub:first-of-type { border-top: none; padding-top: 0; }
+    .slide-block ul, .slide-block ol {
+      margin: 0.4rem 0 0.9rem; padding-left: 1.4rem; font-size: 0.98rem; line-height: 1.6;
+    }
+    .slide-block li { margin-bottom: 0.3rem; }
+    code {
+      font-family: var(--font-mono); font-size: 0.86em; background: #eef3f8;
+      color: #0a1f4d; padding: 0.08rem 0.35rem; border-radius: 4px;
+    }
+    a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    a code { color: var(--primary); }
+    .tabla {
+      margin-top: 0.85rem; background: #fff; border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm);
+    }
+    .tabla table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    .tabla th {
+      font-family: var(--font-display); font-size: 0.76rem; font-weight: 700;
+      letter-spacing: 0.05em; text-transform: uppercase; text-align: left;
+      color: var(--text-muted); background: #f7f9fc; padding: 0.65rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .tabla td { padding: 0.55rem 0.9rem; border-top: 1px solid #eef2f6; vertical-align: top; }
+    .tabla td code { font-size: 0.8rem; }
+    pre.code {
+      margin: 0.5rem 0 0.75rem; background: #0f1b2d; color: #e6edf3;
+      padding: 0.9rem 1rem; border-radius: 8px; overflow-x: auto;
+      font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    .callout {
+      margin: 0.9rem 0; padding: 0.85rem 1.05rem; border-radius: var(--radius);
+      border: 1px solid #bbdefb; border-left: 4px solid var(--primary);
+      background: #f3f8fe; font-size: 0.97rem; line-height: 1.6;
+    }
+    .callout .lbl {
+      display: block; font-family: var(--font-display); font-size: 0.74rem;
+      font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--primary); margin-bottom: 0.25rem;
+    }
+    .callout.warn { background: #fff8e1; border-color: #ffe082; border-left-color: #f9a825; }
+    .callout.warn .lbl { color: #b26a00; }
+    .callout.ok { background: #f1f8f2; border-color: #c8e6c9; border-left-color: var(--success); }
+    .callout.ok .lbl { color: #1b5e20; }
+    .callout ul { margin: 0.3rem 0 0; padding-left: 1.2rem; }
+    @media (max-width: 820px) {
+      .comercial-header .title-wrap { max-width: 100%; min-width: 0; width: 100%; }
+      .intro-propuesta, .toc { margin-left: 0; max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-wrap">
+    <a class="back-link" href="../../index2.html">← Regresar a la documentación del proyecto</a>
+
+    <header class="comercial-header">
+      <div class="title-wrap">
+        <h1>
+          <span class="header-line-1">AWS ECS · EC2</span>
+          <span class="header-line-2">AdminServer-WLS_FORMS</span>
+          <span class="header-line-3">Servicio wls_forms-ec2 · Cloud Map weblogic-admin</span>
+        </h1>
+        <p class="header-tagline">AdminServer y WLS_FORMS en un contenedor, dominio compartido en EFS</p>
+      </div>
+    </header>
+
+    <div class="intro intro-propuesta">
+      <h2>Visión general</h2>
+      <p>
+        Esta guía crea el contenedor <strong>AdminServer-WLS_FORMS</strong> (servicio
+        <code>wls_forms-ec2</code>) en el cluster <code>forms-reports-ec2</code>.
+        La capacidad es una instancia EC2 propia. El contenedor arranca AdminServer y
+        <code>WLS_FORMS</code> con <code>startAdmin_Forms_EC2.sh</code>: alinea las Machines
+        y el WKA de Coherence, levanta un solo Node Manager y no arranca Reports.
+        Reports + Colas van en <code>wls_reports-ec2</code>.
+      </p>
+      <p class="slogan">Misma imagen ECR y mismo EFS; el cómputo es EC2.</p>
+    </div>
+
+    <nav class="toc" aria-label="Contenido">
+      <a href="#paso-0">0 · Valores fijos</a>
+      <a href="#paso-1">1 · Instancia EC2</a>
+      <a href="#paso-2">2 · Cluster</a>
+      <a href="#paso-3">3 · Task definition</a>
+      <a href="#paso-4">4 · Servicio</a>
+      <a href="#paso-4-6">4.6 · SG UDP</a>
+      <a href="#paso-5">5 · Arranque</a>
+      <a href="#paso-6">6 · Endpoints VPC</a>
+      <a href="#lecciones">★ · Lecciones</a>
+    </nav>
+
+    <div class="card">
+      <div class="card-body">
+
+        <section class="slide-block" id="paso-0">
+          <h3><span class="num">0</span> Valores fijos</h3>
+          <div class="tabla"><table>
+            <tr><th>Concepto</th><th>Valor</th></tr>
+            <tr><td>Cluster</td><td><code>forms-reports-ec2</code></td></tr>
+            <tr><td>Instancia EC2 (Name)</td><td><code>wls_forms_ec2</code></td></tr>
+            <tr><td>Familia TD</td><td><code>td_wls_forms-ec2</code></td></tr>
+            <tr><td>Servicio ECS / contenedor</td><td><code>wls_forms-ec2</code> (AdminServer-WLS_FORMS)</td></tr>
+            <tr><td>Qué arranca</td><td>AdminServer (<code>7001</code>) + <code>WLS_FORMS</code> (<code>9001</code>)</td></tr>
+            <tr><td>Comando</td><td><code>/u01/oracle/scripts/startAdmin_Forms_EC2.sh</code> (o <code>sleep infinity</code> y arranque a mano)</td></tr>
+            <tr><td>Cloud Map</td><td><code>weblogic-admin.forms.local</code> (namespace <code>forms.local</code>)</td></tr>
+            <tr><td><code>ADMIN_SERVER_HOST</code></td><td><code>localhost</code> (t3 al Admin del mismo contenedor)</td></tr>
+            <tr><td><code>ADMIN_MACHINE_HOST</code></td><td><code>weblogic-admin.forms.local</code></td></tr>
+            <tr><td><code>FORMS_MACHINE_HOST</code></td><td><code>weblogic-admin.forms.local</code> (mismo host → un NM)</td></tr>
+            <tr><td><code>REPORTS_MACHINE_HOST</code></td><td><code>weblogic-reports.forms.local</code> (Machine sí; no entra al WKA)</td></tr>
+            <tr><td>Imagen de aplicación</td><td>ECR <code>forms-docker</code> (la misma de Fargate)</td></tr>
+            <tr><td>JSON local</td><td><code>aws-ecs/forms-ec2/forms-ec2.json</code></td></tr>
+            <tr><td>Log group</td><td><code>/ecs/td_wls_forms-ec2</code></td></tr>
+            <tr><td>VPC / subnet / SG</td><td><code>vpc-Banesco-Seguros-VE-dev</code> / <code>pub-A-SN</code> / <code>forms-sg-ecs</code></td></tr>
+            <tr><td>Rol de instancia</td><td><code>ecsInstanceRole</code></td></tr>
+            <tr><td>Roles de tarea</td><td><code>ecs-forms-admin-task-role</code> · <code>ecsTaskExecutionRole</code></td></tr>
+          </table></div>
+        </section>
+
+        <section class="slide-block" id="paso-1">
+          <h3><span class="num">1</span> Crear la instancia EC2</h3>
+          <p>
+            La instancia es el host Docker donde ECS coloca la tarea. No se monta EFS en el asistente de
+            EC2: el EFS lo monta la <em>task definition</em> dentro del contenedor.
+          </p>
+
+          <h4 class="sub" id="paso-1-1">1.1 · De dónde sale la AMI (imprescindible)</h4>
+          <p>
+            La AMI <strong>no</strong> está en Quick Start, ni en Marketplace, ni se encuentra bien por
+            nombre en Community AMIs. Hay que tomar el ID oficial del Parameter Store público de ECS y
+            lanzar <em>desde esa AMI</em>.
+          </p>
+          <ol>
+            <li>Systems Manager → <strong>Parameter Store</strong>.</li>
+            <li>Marca <strong>Públicos</strong> (no los parámetros de la cuenta).</li>
+            <li>Abre exactamente:
+              <code>/aws/service/ecs/optimized-ami/amazon-linux-2023/recommended/image_id</code></li>
+            <li>Copia el valor (un <code>ami-…</code>). Ese ID cambia cuando AWS publica una AMI nueva.</li>
+            <li>EC2 → <strong>Images → AMIs</strong> → filtro <strong>Public images</strong> → pega el ID.</li>
+            <li>Selecciona la AMI (nombre tipo
+              <code>al2023-ami-ecs-hvm-2023.0.…</code>) → <strong>Launch instance from AMI</strong>.</li>
+          </ol>
+          <div class="callout warn">
+            <span class="lbl">No uses otra imagen</span>
+            Amazon Linux “normal”, Ubuntu o una AMI de Marketplace no traen el agente ECS. La instancia
+            nunca aparecerá en la pestaña Infraestructura del cluster.
+          </div>
+          <div class="callout">
+            <span class="lbl">Por qué este camino</span>
+            En el asistente Launch instance, Quick Start no lista la AMI ECS-optimized de AL2023.
+            Buscar el ID en Community AMIs también falla. Parameter Store → AMI pública → Launch from AMI
+            es la ruta que funciona.
+          </div>
+
+          <h4 class="sub" id="paso-1-2">1.2 · Valores del lanzamiento</h4>
+          <div class="tabla"><table>
+            <tr><th>Campo</th><th>Valor</th></tr>
+            <tr><td>Name</td><td><code>wls_forms_ec2</code></td></tr>
+            <tr><td>AMI</td><td>La del Parameter Store (ECS-optimized Amazon Linux 2023)</td></tr>
+            <tr><td>Tipo</td><td>El que aguante la TD (CPU/memoria de <code>forms-ec2.json</code>)</td></tr>
+            <tr><td>VPC / subnet</td><td>La de Forms · <code>pub-A-SN</code></td></tr>
+            <tr><td>IP pública</td><td><strong>Habilitar</strong> (arriba y en la interfaz)</td></tr>
+            <tr><td>IP principal</td><td><strong>Vacío</strong> (auto <code>10.171.240.x</code>). No escribir la <code>x</code></td></tr>
+            <tr><td>Security group</td><td><code>forms-sg-ecs</code> (existente)</td></tr>
+            <tr><td>Disco</td><td>30 GB gp3. Sin EFS / FSx / S3 en la instancia</td></tr>
+            <tr><td>IAM instance profile</td><td><code>ecsInstanceRole</code></td></tr>
+          </table></div>
+
+          <h4 class="sub" id="paso-1-3">1.3 · Rol <code>ecsInstanceRole</code></h4>
+          <p>
+            No reutilices el rol de <em>tarea</em> (<code>ecs-forms-admin-task-role</code>). El perfil de
+            instancia necesita confianza <strong>ec2.amazonaws.com</strong> y estas políticas:
+          </p>
+          <ul>
+            <li><code>AmazonEC2ContainerServiceforEC2Role</code> — el agente registra la instancia en el cluster</li>
+            <li><code>AmazonSSMManagedInstanceCore</code> — Session Manager (el SG no abre SSH 22)</li>
+          </ul>
+
+          <h4 class="sub" id="paso-1-4">1.4 · User-data (cluster al que se une)</h4>
+          <p>
+            Sin esta línea la instancia arranca pero <strong>no entra en ningún cluster</strong>.
+          </p>
+<pre class="code">#!/bin/bash
+echo ECS_CLUSTER=forms-reports-ec2 >> /etc/ecs/ecs.config</pre>
+          <div class="callout warn">
+            <span class="lbl">Nombre exacto</span>
+            Tiene que coincidir con el cluster del paso 2. Si el nombre está mal, la instancia
+            no aparece en Infraestructura de <code>forms-reports-ec2</code>.
+          </div>
+        </section>
+
+        <section class="slide-block" id="paso-2">
+          <h3><span class="num">2</span> Crear el cluster <code>forms-reports-ec2</code></h3>
+          <p>
+            El cluster nace <strong>vacío</strong>. No pidas a AWS que lance instancias nuevas: ya tienes
+            <code>wls_forms_ec2</code>.
+          </p>
+
+          <h4 class="sub" id="paso-2-1">2.1 · Asistente Create cluster</h4>
+          <div class="tabla"><table>
+            <tr><th>Campo</th><th>Valor</th></tr>
+            <tr><td>Nombre</td><td><code>forms-reports-ec2</code></td></tr>
+            <tr><td>Puertas de enlace</td><td>Ninguna</td></tr>
+            <tr><td>Namespace</td><td>El existente <code>forms.local</code>. No crear otro</td></tr>
+            <tr><td>Infraestructura</td><td><strong>Solo Fargate</strong></td></tr>
+          </table></div>
+          <div class="callout warn">
+            <span class="lbl">No marques EC2 en el asistente</span>
+            “Fargate e instancias administradas” lanza máquinas nuevas. “Autoadministradas” pide un Auto
+            Scaling Group. <strong>Solo Fargate</strong> no impide usar tus EC2: el agente se registra
+            después con <code>ECS_CLUSTER</code>. Es el mismo patrón que <code>forms_report</code>.
+          </div>
+          <p>
+            Tampoco pulses <strong>Registrar instancias externas</strong>: eso es ECS Anywhere (fuera de AWS).
+          </p>
+
+          <h4 class="sub" id="paso-2-2">2.2 · Las instancias deben verse en Infraestructura</h4>
+          <p>
+            Un cluster “creado” con 0 instancias <strong>no sirve</strong> para un servicio EC2. La tarea
+            queda PENDING sin capacidad.
+          </p>
+          <ol>
+            <li>ECS → cluster <code>forms-reports-ec2</code> → pestaña <strong>Infraestructura</strong>.</li>
+            <li>Debes ver <code>wls_forms_ec2</code> (y la de Reports, si ya la lanzaste) en estado <strong>ACTIVE</strong>.</li>
+            <li>CPU/memoria libre deben alcanzar lo que pide la TD.</li>
+          </ol>
+          <div class="callout ok">
+            <span class="lbl">Criterio de listo</span>
+            Cluster Active + al menos la instancia Forms <strong>ACTIVE</strong> en Infraestructura.
+            Si esa pestaña dice “No hay instancias de contenedor”, no crees el servicio.
+          </div>
+        </section>
+
+        <section class="slide-block" id="paso-3">
+          <h3><span class="num">3</span> Crear la task definition</h3>
+          <p>
+            Familia <code>td_wls_forms-ec2</code>. Un contenedor <strong>AdminServer-WLS_FORMS</strong>,
+            launch type <strong>EC2</strong> (sin <code>ephemeralStorage</code>). JSON de referencia:
+            <code>aws-ecs/forms-ec2/forms-ec2.json</code>.
+          </p>
+
+          <h4 class="sub" id="paso-3-1">3.1 · Qué debe incluir</h4>
+          <div class="tabla"><table>
+            <tr><th>Campo</th><th>Valor</th></tr>
+            <tr><td>Compatibilidad</td><td><code>EC2</code></td></tr>
+            <tr><td>Contenedor</td><td><code>wls_forms-ec2</code></td></tr>
+            <tr><td>CPU / memoria</td><td>La de <code>forms-ec2.json</code> (hoy 3072 / 14336, reserva 12288). Debe caber en la instancia</td></tr>
+            <tr><td>Comando</td><td><code>sleep infinity</code> para bootstrap, o <code>startAdmin_Forms_EC2.sh -keep</code></td></tr>
+            <tr><td>Puertos Admin</td><td><code>7001</code>, <code>9002</code>, <code>5556</code>, OHS <code>7777</code>/<code>4443</code></td></tr>
+            <tr><td>Puertos Forms</td><td><code>9001</code>, <code>9501</code>, <code>9991</code></td></tr>
+            <tr><td>Admin (env)</td><td><code>ADMIN_*</code>, <code>RCU_*</code>, <code>TNSNAMES_*</code>, <code>NODE_MANAGER_PORT</code></td></tr>
+            <tr><td>Forms (env)</td><td><code>MANAGED_SERVER_NAME=WLS_FORMS</code>, puerto <code>9001</code>, <code>FORMS_*</code></td></tr>
+            <tr><td><code>ADMIN_SERVER_HOST</code></td><td><code>localhost</code></td></tr>
+            <tr><td>Machines (env)</td><td><code>ADMIN_MACHINE_HOST</code> y <code>FORMS_MACHINE_HOST</code> = <code>weblogic-admin.forms.local</code>; <code>REPORTS_MACHINE_HOST</code> = <code>weblogic-reports.forms.local</code></td></tr>
+            <tr><td>EFS scripts</td><td>Raíz <code>…/domain_forms/scripts</code> (se ven <code>admin/</code> y <code>forms/</code>; JDBC/TNS viven en <code>admin/</code>)</td></tr>
+          </table></div>
+
+          <h4 class="sub" id="paso-3-2">3.2 · Registrar en la consola</h4>
+          <ol>
+            <li>ECS → Task definitions → <strong>Create new task definition</strong> → JSON.</li>
+            <li>Pega el JSON siguiente (el de <code>forms-ec2.json</code>) → Create.</li>
+            <li>Si cambias CPU/memoria después, crea una <strong>nueva revisión</strong> y úsala en el servicio.</li>
+          </ol>
+<pre class="code">{
+    "family": "td_wls_forms-ec2",
+    "containerDefinitions": [
+        {
+            "name": "wls_forms-ec2",
+            "image": "730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker@sha256:05a60dee7700a40cdb27520feea9bd73e35fc2841587aaf5d75d7e14ee1ae36f",
+            "cpu": 3072,
+            "memory": 14336,
+            "memoryReservation": 12288,
+            "portMappings": [
+                {
+                    "containerPort": 7001,
+                    "hostPort": 7001,
+                    "protocol": "tcp",
+                    "name": "adminserver"
+                },
+                {
+                    "containerPort": 9002,
+                    "hostPort": 9002,
+                    "protocol": "tcp",
+                    "name": "adminport"
+                },
+                {
+                    "containerPort": 9001,
+                    "hostPort": 9001,
+                    "protocol": "tcp",
+                    "name": "wls-forms-http",
+                    "appProtocol": "http"
+                },
+                {
+                    "containerPort": 9501,
+                    "hostPort": 9501,
+                    "protocol": "tcp",
+                    "name": "wls-forms-https",
+                    "appProtocol": "http"
+                },
+                {
+                    "containerPort": 9991,
+                    "hostPort": 9991,
+                    "protocol": "tcp",
+                    "name": "wls-forms-admin"
+                },
+                {
+                    "containerPort": 5556,
+                    "hostPort": 5556,
+                    "protocol": "tcp",
+                    "name": "nodemanager"
+                },
+                {
+                    "containerPort": 7777,
+                    "hostPort": 7777,
+                    "protocol": "tcp",
+                    "name": "ohshttp"
+                },
+                {
+                    "containerPort": 4443,
+                    "hostPort": 4443,
+                    "protocol": "tcp",
+                    "name": "ohshttps"
+                }
+            ],
+            "essential": true,
+            "command": [
+                "sleep",
+                "infinity"
+            ],
+            "environment": [
+                {
+                    "name": "PATH",
+                    "value": "/u01/oracle/bin:/u01/oracle/oracle_common/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+                },
+                {
+                    "name": "LD_LIBRARY_PATH",
+                    "value": "/u01/oracle/lib:/u01/oracle/oracle_common/lib"
+                },
+                {
+                    "name": "ORACLE_HOME",
+                    "value": "/u01/oracle"
+                },
+                {
+                    "name": "DOMAIN_NAME",
+                    "value": "forms_domain"
+                },
+                {
+                    "name": "DOMAIN_HOME",
+                    "value": "/u01/oracle/user_projects/domains/forms_domain"
+                },
+                {
+                    "name": "TNS_ADMIN",
+                    "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig"
+                },
+                {
+                    "name": "ADMIN_PORT",
+                    "value": "7001"
+                },
+                {
+                    "name": "ADMIN_SERVER_NAME",
+                    "value": "AdminServer"
+                },
+                {
+                    "name": "ADMIN_SERVER_HOST",
+                    "value": "localhost"
+                },
+                {
+                    "name": "ADMIN_SERVER_PORT",
+                    "value": "7001"
+                },
+                {
+                    "name": "ADMIN_MACHINE_HOST",
+                    "value": "weblogic-admin.forms.local"
+                },
+                {
+                    "name": "FORMS_MACHINE_HOST",
+                    "value": "weblogic-admin.forms.local"
+                },
+                {
+                    "name": "REPORTS_MACHINE_HOST",
+                    "value": "weblogic-reports.forms.local"
+                },
+                {
+                    "name": "ADMIN_USER",
+                    "value": "weblogic"
+                },
+                {
+                    "name": "ADMIN_PASSWORD",
+                    "value": "t.123456"
+                },
+                {
+                    "name": "NODE_MANAGER_PORT",
+                    "value": "5556"
+                },
+                {
+                    "name": "RCU_DB_HOST",
+                    "value": "192.168.229.137"
+                },
+                {
+                    "name": "RCU_DB_PORT",
+                    "value": "1521"
+                },
+                {
+                    "name": "RCU_DB_SERVICE",
+                    "value": "METAPRD"
+                },
+                {
+                    "name": "TNSNAMES_DB_HOST",
+                    "value": "192.168.229.137"
+                },
+                {
+                    "name": "TNSNAMES_DB_PORT",
+                    "value": "1521"
+                },
+                {
+                    "name": "TNSNAMES_DB_ALIAS",
+                    "value": "SEGU"
+                },
+                {
+                    "name": "TNSNAMES_DB_SERVICE",
+                    "value": "SEGU"
+                },
+                {
+                    "name": "MANAGED_SERVER_NAME",
+                    "value": "WLS_FORMS"
+                },
+                {
+                    "name": "MANAGED_SERVER_PORT",
+                    "value": "9001"
+                },
+                {
+                    "name": "JAVA_OPTIONS",
+                    "value": "-Dforms.instance=forms1"
+                },
+                {
+                    "name": "FORMS_INSTANCE",
+                    "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig/components/FORMS/instances/forms1"
+                },
+                {
+                    "name": "FORMS_PATH",
+                    "value": "/u01/oracle/user_projects/apps/forms_app/bin:/u01/oracle/user_projects/apps/forms_app/src:/u01/oracle/forms"
+                },
+                {
+                    "name": "FORMS_MODULE_PATH",
+                    "value": "/u01/oracle/user_projects/apps/forms_app/bin:/u01/oracle/forms"
+                },
+                {
+                    "name": "FRMCMP",
+                    "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig/components/FORMS/instances/forms1/bin/frmcmp_batch.sh"
+                },
+                {
+                    "name": "CC",
+                    "value": "/usr/bin/gcc"
+                },
+                {
+                    "name": "PROC",
+                    "value": "/u01/oracle/bin/proc"
+                },
+                {
+                    "name": "PROC_INCLUDE",
+                    "value": "/u01/oracle/precomp/public"
+                },
+                {
+                    "name": "PCSCFG",
+                    "value": "/u01/oracle/precomp/admin/pcscfg.cfg"
+                }
+            ],
+            "environmentFiles": [],
+            "mountPoints": [
+                {
+                    "sourceVolume": "efs-domains",
+                    "containerPath": "/u01/oracle/user_projects/domains",
+                    "readOnly": false
+                },
+                {
+                    "sourceVolume": "efs-app",
+                    "containerPath": "/u01/oracle/user_projects/apps",
+                    "readOnly": false
+                },
+                {
+                    "sourceVolume": "efs-scripts",
+                    "containerPath": "/u01/oracle/scripts",
+                    "readOnly": false
+                }
+            ],
+            "volumesFrom": [],
+            "workingDirectory": "/u01/oracle",
+            "readonlyRootFilesystem": false,
+            "ulimits": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/td_wls_forms-ec2",
+                    "awslogs-create-group": "true",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            },
+            "systemControls": []
+        }
+    ],
+    "taskRoleArn": "arn:aws:iam::730335573515:role/ecs-forms-admin-task-role",
+    "executionRoleArn": "arn:aws:iam::730335573515:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "volumes": [
+        {
+            "name": "efs-domains",
+            "efsVolumeConfiguration": {
+                "fileSystemId": "fs-08471cc88d2a8edc3",
+                "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/domains",
+                "transitEncryption": "ENABLED"
+            }
+        },
+        {
+            "name": "efs-app",
+            "efsVolumeConfiguration": {
+                "fileSystemId": "fs-08471cc88d2a8edc3",
+                "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/app",
+                "transitEncryption": "ENABLED"
+            }
+        },
+        {
+            "name": "efs-scripts",
+            "efsVolumeConfiguration": {
+                "fileSystemId": "fs-08471cc88d2a8edc3",
+                "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/scripts",
+                "transitEncryption": "ENABLED"
+            }
+        }
+    ],
+    "placementConstraints": [],
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "LINUX"
+    },
+    "requiresCompatibilities": [
+        "EC2"
+    ]
+}</pre>
+
+          <h4 class="sub" id="paso-3-3">3.3 · Scripts en EFS</h4>
+          <p>
+            El orquestador <code>startAdmin_Forms_EC2.sh</code> llama a
+            <code>admin/startAdminserver.sh</code> y <code>forms/startWLSForms.sh</code>.
+            JDBC/TNS del dominio compartido viven <strong>junto al Admin</strong>
+            (<code>scripts/admin/</code>), no en <code>scripts/common/</code>.
+            Deben existir en EFS <strong>antes</strong> del arranque en frío:
+          </p>
+          <ul>
+            <li><code>/u01/oracle/scripts/startAdmin_Forms_EC2.sh</code></li>
+            <li><code>/u01/oracle/scripts/admin/startAdminserver.sh</code></li>
+            <li><code>/u01/oracle/scripts/admin/set-db-jdbc-url.sh</code></li>
+            <li><code>/u01/oracle/scripts/admin/set-db-tnsnames.sh</code></li>
+          </ul>
+          <p>
+            Copiarlos desde <code>forms_reports/dist/scripts/</code>.
+            En EFS borra <code>scripts/common/</code> si quedó de un intento anterior.
+          </p>
+          <p>
+            <code>startAdminserver.sh</code> busca los helpers en este orden:
+            el directorio del propio script, <code>/u01/oracle/scripts/admin</code>
+            y <code>/u01/oracle/scripts</code> (en Fargate el montaje de <code>admin/</code>
+            cae en esa ruta). Los aplica <strong>una sola vez</strong> en el arranque en frío
+            del Admin, con los servidores abajo. Forms y Reports no reescriben JDBC.
+            El orquestador arranca Forms con <code>RCU_DB_SKIP=1</code> porque el Admin
+            ya aplicó la URL.
+          </p>
+          <div class="callout warn">
+            <span class="lbl">No reescribir JDBC con Admin vivo</span>
+            Si una copia vieja de <code>startWLSForms.sh</code> en EFS llama a
+            <code>set-db-jdbc-url.sh</code> con el Admin arriba, falla.
+            Arranque puntual: <code>RCU_DB_SKIP=1 /u01/oracle/scripts/forms/startWLSForms.sh</code>.
+            No relances el orquestador si Admin ya está RUNNING: no edita
+            <code>config.xml</code> con un <code>weblogic.Name=</code> en marcha.
+          </div>
+        </section>
+
+        <section class="slide-block" id="paso-4">
+          <h3><span class="num">4</span> Crear el servicio</h3>
+          <p>
+            Cluster <code>forms-reports-ec2</code> → Create → <strong>Create service</strong> (no modo exprés).
+            El servicio no “apunta” a la instancia por Name tag: ECS coloca por capacidad (o por una
+            restricción de <code>instance-id</code>, opcional).
+          </p>
+
+          <h4 class="sub" id="paso-4-1">4.1 · Valores del asistente</h4>
+          <div class="tabla"><table>
+            <tr><th>Campo</th><th>Valor</th></tr>
+            <tr><td>Launch type</td><td><strong>EC2</strong> (no Fargate, no capacity provider)</td></tr>
+            <tr><td>Task definition</td><td><code>td_wls_forms-ec2</code> (revisión que quepa en la instancia)</td></tr>
+            <tr><td>Nombre</td><td><code>wls_forms-ec2</code></td></tr>
+            <tr><td>Desired</td><td><strong>1</strong></td></tr>
+            <tr><td>ECS Exec</td><td>Habilitar</td></tr>
+            <tr><td>Estrategia</td><td>Réplica · rolling</td></tr>
+            <tr><td>Reequilibrio de AZ</td><td><strong>Desmarcado</strong></td></tr>
+            <tr><td>Min / max %</td><td><strong>0 / 100</strong></td></tr>
+            <tr><td>VPC / subnet / SG</td><td>La de siempre / <code>pub-A-SN</code> / <code>forms-sg-ecs</code></td></tr>
+            <tr><td>Cloud Map</td><td>Namespace <code>forms.local</code>, nombre <code>weblogic-admin</code></td></tr>
+          </table></div>
+          <div class="callout">
+            <span class="lbl">Por qué weblogic-admin</span>
+            Reports resuelve el Admin en <code>weblogic-admin.forms.local</code>
+            (<code>ADMIN_SERVER_HOST</code> de <code>td_wls_reports-ec2</code>). El Admin ahora vive en
+            este contenedor: Cloud Map debe publicar esa IP con el nombre que Reports ya usa.
+          </div>
+          <div class="callout warn">
+            <span class="lbl">Servicio Cloud Map ya existente</span>
+            En Cloud Map (namespace <code>forms.local</code>) verifica si ya existe el nombre
+            <code>weblogic-admin</code>.
+            <ul>
+              <li>Si <strong>existe</strong>: usa <strong>Seleccionar un servicio existente</strong> →
+                <code>weblogic-admin</code>. El servicio ECS viejo que lo tenía debe estar en 0 tareas.
+                No elijas “Crear un servicio de detección nuevo” con el mismo nombre: CloudFormation
+                falla (<code>AlreadyExists</code>).</li>
+              <li>Si <strong>no existe</strong>: créalo como nuevo, nombre <code>weblogic-admin</code>,
+                namespace <code>forms.local</code>.</li>
+            </ul>
+          </div>
+
+          <h4 class="sub" id="paso-4-2">4.2 · Reequilibrio de AZ y máximo 100</h4>
+          <p>
+            Con reequilibrio activo, ECS exige máximo &gt; 100. En una sola subnet y una instancia que no
+            cabe dos tareas, eso bloquea el deploy. Desmarca el reequilibrio y deja máximo <strong>100</strong>.
+          </p>
+
+          <h4 class="sub" id="paso-4-3">4.3 · Placement (opcional)</h4>
+          <p>
+            En este layout no hace falta si la instancia de Forms es la única que cabe la TD.
+            Si hay dos instancias iguales, añade
+            <code>attribute:ecs.instance-id == i-…</code> de <code>wls_forms_ec2</code>.
+          </p>
+
+          <h4 class="sub" id="paso-4-4">4.4 · Si Create falla por CloudFormation</h4>
+          <p>
+            Un intento fallido deja la pila
+            <code>ECS-Console-V2-Service-wls_forms-ec2-forms-reports-ec2-…</code> en
+            <code>CREATE_FAILED</code> / <code>ROLLBACK_COMPLETE</code>. ECS no reutiliza el nombre hasta
+            borrarla.
+          </p>
+          <ol>
+            <li>CloudFormation → Stacks, región <code>us-east-1</code>, filtro Active, busca <code>ECS-Console</code> o <code>wls_forms</code>.</li>
+            <li>Delete de <strong>esa</strong> pila (no las de <code>forms-reports</code>, <code>admin</code> o <code>forms</code>).</li>
+            <li>Espera <code>DELETE_COMPLETE</code> y vuelve a Create service.</li>
+          </ol>
+
+          <h4 class="sub" id="paso-4-5">4.5 · Comprobar el servicio</h4>
+          <ul>
+            <li>Tarea <strong>RUNNING</strong> en la instancia <code>wls_forms_ec2</code>.</li>
+            <li><code>getent hosts weblogic-admin.forms.local</code> resuelve la ENI de <em>esta</em> tarea (no una IP de un deploy anterior).</li>
+            <li>No hace falta <code>weblogic-forms</code> en Cloud Map: Forms comparte el host de Admin.</li>
+          </ul>
+<pre class="code">curl -s $ECS_CONTAINER_METADATA_URI_V4/task | grep -o '"ServiceName":"[^"]*"'
+ip -o -4 addr show scope global | awk '{print $4}'
+getent hosts weblogic-admin.forms.local</pre>
+          <p>
+            La imagen no trae <code>hostname</code>. Usa <code>ip</code>. Ignora
+            <code>169.254.172.x</code> (enlace local de ECS). La IPv4
+            <code>10.171.240.x/…</code> debe coincidir con Cloud Map.
+          </p>
+
+          <h4 class="sub" id="paso-4-6">4.6 · Security group <code>forms-sg-ecs</code></h4>
+          <p>
+            Las dos tareas (<code>wls_forms-ec2</code> y <code>wls_reports-ec2</code>) usan
+            <code>forms-sg-ecs</code> (<code>sg-0e1787d32bac71fcd</code>).
+            Coherence une el cluster por <strong>UDP 7574</strong>, no por TCP.
+            “Todos los TCP” entre el SG y sí mismo no alcanza.
+          </p>
+          <div class="tabla"><table>
+            <tr><th>Tipo</th><th>Puerto</th><th>Origen</th><th>Uso</th></tr>
+            <tr><td>TCP</td><td><code>7001</code></td><td><code>0.0.0.0/0</code> (DEV)</td><td>Admin HTTP</td></tr>
+            <tr><td>TCP</td><td><code>9001</code></td><td><code>0.0.0.0/0</code> (DEV)</td><td>Forms HTTP</td></tr>
+            <tr><td>TCP</td><td><code>9012</code></td><td><code>0.0.0.0/0</code> (DEV)</td><td>Reports HTTP</td></tr>
+            <tr><td>Todos los TCP</td><td>0–65535</td><td>el propio <code>forms-sg-ecs</code></td><td>NM, t3, managed</td></tr>
+            <tr><td><strong>Todos los UDP</strong></td><td>0–65535</td><td>el propio <code>forms-sg-ecs</code></td><td>Coherence (WKA 7574)</td></tr>
+          </table></div>
+          <div class="callout">
+            <span class="lbl">Se edita con los servicios arriba</span>
+            La regla aplica a las ENI enseguida. No relances las tareas para abrir UDP.
+            Si falta, Reports queda en <code>Delaying formation of a new cluster</code>
+            y a ~5 min pasa a <code>FAILED</code> (<code>BEA-2194507</code>).
+            Ver <a href="../reports-ec2/index.html#paso-5-2">reports-ec2 · 5.2</a>.
+          </div>
+        </section>
+
+        <section class="slide-block" id="paso-5">
+          <h3><span class="num">5</span> Arrancar AdminServer y WLS_FORMS</h3>
+          <p>
+            Arranque en frío: Admin, Forms y Reports <strong>abajo</strong> en todos los
+            contenedores. El script no edita <code>config.xml</code> si hay un
+            <code>weblogic.Name=</code>.
+          </p>
+<pre class="code">pgrep -af 'weblogic.Name='
+ls -l /u01/oracle/scripts/startAdmin_Forms_EC2.sh \
+      /u01/oracle/scripts/admin/set-db-jdbc-url.sh \
+      /u01/oracle/scripts/admin/set-db-tnsnames.sh
+/u01/oracle/scripts/startAdmin_Forms_EC2.sh</pre>
+          <p>
+            El orquestador aplica Machines + WKA, arranca el Admin
+            (<code>setsid nohup startAdminserver.sh -keep</code>, sesión propia) y luego
+            Forms con <code>RCU_DB_SKIP=1</code>. Cerrar ECS Exec ya no manda SIGTERM al JVM
+            (<code>BEA-000388</code>). En el bloque <code>0/2 Machines</code> debe quedar:
+          </p>
+          <ul>
+            <li><code>AdminServerMachine</code> y <code>FormsMachine</code> → <code>weblogic-admin.forms.local</code></li>
+            <li>WKA de Coherence solo con ese host (Reports no entra; si entra una IP muerta, Forms no pasa a RUNNING)</li>
+            <li>Un solo Node Manager (puerto 5556)</li>
+          </ul>
+          <div class="callout warn">
+            <span class="lbl">WKA y Reports</span>
+            <code>REPORTS_MACHINE_HOST</code> se escribe en <code>ReportsMachine</code> para el Node Manager.
+            No se mete al WKA de Coherence desde este script: Forms formaría cluster esperando
+            <code>weblogic-reports.forms.local:7574</code>. Reports se une después, cuando
+            <code>wls_reports-ec2</code> esté arriba, contactando este WKA por UDP 7574.
+          </div>
+          <h4 class="sub" id="paso-5-1">5.1 · Si el Admin ya está RUNNING</h4>
+          <p>
+            No relances <code>startAdmin_Forms_EC2.sh</code>. Si Forms no subió (p. ej. JDBC
+            con Admin vivo), solo Forms:
+          </p>
+<pre class="code">RCU_DB_SKIP=1 /u01/oracle/scripts/forms/startWLSForms.sh</pre>
+          <div class="callout ok">
+            <span class="lbl">Criterio de listo</span>
+            Admin en <code>localhost:7001</code>, <code>WLS_FORMS</code> en RUNNING,
+            <code>http://localhost:9001/forms/frmservlet</code> responde.
+            Coherence en este host: <code>ss -lun | grep 7574</code> (UDP en
+            <code>0.0.0.0:7574</code>) y TCP 7574 en la ENI.
+          </div>
+        </section>
+
+        <section class="slide-block" id="paso-6">
+          <h3><span class="num">6</span> Endpoints VPC para ECS Exec</h3>
+          <p>
+            En Fargate la tarea tenía IP pública y <code>aws ecs execute-command</code> llegaba a SSM
+            por Internet en segundos. En EC2 + <code>awsvpc</code> la ENI de la tarea es <strong>solo
+            privada</strong> (<code>assignPublicIp</code> no aplica). Sin NAT, cada API de AWS que
+            resuelva a una IP pública (<code>13.</code>, <code>44.</code>, <code>3.</code>) espera
+            el timeout y la sesión tarda 30–60 s.
+          </p>
+          <p>
+            Estos endpoints son de la <strong>VPC</strong> (valen para Forms y Reports). Se crean
+            una vez. No hace falta redesplegar las tareas.
+          </p>
+
+          <h4 class="sub" id="paso-6-1">6.1 · Cuáles hacen falta</h4>
+          <div class="tabla"><table>
+            <tr><th>Servicio</th><th>Para qué</th><th>Estado en esta VPC</th></tr>
+            <tr><td><code>com.amazonaws.us-east-1.ssmmessages</code></td><td>Canal de la sesión Exec</td><td>Ya existía</td></tr>
+            <tr><td><code>com.amazonaws.us-east-1.ssm</code></td><td>Control SSM</td><td>Ya existía</td></tr>
+            <tr><td><code>com.amazonaws.us-east-1.ec2messages</code></td><td>Agente SSM (legacy)</td><td>Ya existía</td></tr>
+            <tr><td><code>com.amazonaws.us-east-1.sts</code></td><td>Credenciales del agente Exec</td><td>Crear si no está</td></tr>
+            <tr><td><code>com.amazonaws.us-east-1.logs</code></td><td>Logging de Exec / CloudWatch</td><td>Crear si no está</td></tr>
+          </table></div>
+          <div class="callout warn">
+            <span class="lbl">No crees kms ahora</span>
+            Solo hace falta <code>com.amazonaws.us-east-1.kms</code> si cifras las sesiones con una
+            CMK propia. Tampoco uses “Servicios de punto de enlace” (NLB) ni
+            “Puntos de enlace de instancia”.
+          </div>
+
+          <h4 class="sub" id="paso-6-2">6.2 · Asistente (sts y luego logs)</h4>
+          <p>
+            VPC → <strong>Puntos de enlace</strong> (no “Servicios de punto de enlace”) →
+            <strong>Crear punto de enlace</strong>. Dos veces: primero
+            <code>com.amazonaws.us-east-1.sts</code>, cuando quede Available
+            <code>com.amazonaws.us-east-1.logs</code>.
+          </p>
+          <div class="tabla"><table>
+            <tr><th>Campo</th><th>Valor</th></tr>
+            <tr><td>Nombre (opcional)</td><td><code>vpce-sts-forms</code> / <code>vpce-logs-forms</code></td></tr>
+            <tr><td>Categoría</td><td><strong>Servicios de AWS</strong></td></tr>
+            <tr><td>Servicio</td><td>Exactamente <code>sts</code> o <code>logs</code>. No <code>sts-fips</code>, <code>sts-oidc</code>, <code>logs-fips</code> ni <code>logs-insights</code></td></tr>
+            <tr><td>Tipo</td><td><strong>Interface</strong></td></tr>
+            <tr><td>Región cruzada</td><td>Desmarcado</td></tr>
+            <tr><td>VPC</td><td><code>vpc-Banesco-Seguros-VE-dev</code> (<code>vpc-055a4007418b34e64</code>)</td></tr>
+            <tr><td>DNS privado</td><td><strong>Habilitar</strong></td></tr>
+            <tr><td>Registro DNS / tipo de IP</td><td><strong>IPv4</strong> (no Dualstack)</td></tr>
+            <tr><td>Subred</td><td>Solo <code>us-east-1a</code> → <code>pub-A-SN</code> (<code>subnet-01212efd4a9ce759b</code>)</td></tr>
+            <tr><td>Designar IPs</td><td><strong>No</strong></td></tr>
+            <tr><td>Security group</td><td>Solo <code>forms-sg-ecs</code> (quita el <code>default</code>)</td></tr>
+            <tr><td>Política</td><td><strong>Acceso completo</strong></td></tr>
+          </table></div>
+          <div class="callout">
+            <span class="lbl">ENI en la consola</span>
+            La pestaña Subredes a veces muestra IPv4 e interfaz en “-”. Comprueba en
+            EC2 → Interfaces de red filtrando el <code>vpce-…</code>: debe haber un
+            <code>eni-…</code> <em>in-use</em> con IP <code>10.171.240.x</code> y
+            <code>forms-sg-ecs</code>.
+          </div>
+
+          <h4 class="sub" id="paso-6-3">6.3 · Comprobar en el contenedor</h4>
+          <p>
+            Espera estado <strong>Available</strong> (~1–2 min) y que el DNS privado se propague.
+            Si <code>getent</code> sigue en IPs públicas, es caché: abre otro shell o pregunta al
+            resolver de la VPC (<code>10.171.240.2</code>).
+          </p>
+<pre class="code">getent hosts sts.us-east-1.amazonaws.com logs.us-east-1.amazonaws.com \
+  ssmmessages.us-east-1.amazonaws.com ssm.us-east-1.amazonaws.com \
+  ec2messages.us-east-1.amazonaws.com
+time timeout 5 bash -c 'echo &gt;/dev/tcp/sts.us-east-1.amazonaws.com/443' &amp;&amp; echo sts_ok
+time timeout 5 bash -c 'echo &gt;/dev/tcp/logs.us-east-1.amazonaws.com/443' &amp;&amp; echo logs_ok</pre>
+          <p>
+            Criterio: las cinco en <code>10.171.240.x</code> y <code>OK</code> en milisegundos.
+            IPs <code>13.</code> / <code>44.</code> / <code>3.</code> + <code>timeout 5</code> = FAIL
+            significan que ese API todavía sale a Internet.
+          </p>
+
+          <h4 class="sub" id="paso-6-4">6.4 · Sesión nueva</h4>
+          <p>
+            Cierra la sesión vieja. El agente no reutiliza el DNS anterior.
+          </p>
+<pre class="code">time aws ecs execute-command \
+  --cluster forms-reports-ec2 \
+  --task &lt;TASK_ID&gt; \
+  --container wls_forms-ec2 \
+  --interactive --region us-east-1 \
+  --command "bash"</pre>
+          <div class="callout ok">
+            <span class="lbl">Criterio de listo</span>
+            El prompt aparece en pocos segundos (como en Fargate). Dentro,
+            <code>su - oracle</code> si hace falta. No pongas <code>su</code> en el
+            <code>--command</code> (PAM puede colgar el plugin).
+          </div>
+        </section>
+
+        <section class="slide-block lecciones" id="lecciones">
+          <h3><span class="num lecciones">★</span> Lecciones de esta creación</h3>
+          <ul>
+            <li>La AMI ECS-optimized se obtiene del Parameter Store público, no del catálogo Quick Start.</li>
+            <li>El cluster Solo Fargate acepta EC2 si el user-data apunta a su nombre; hay que verlas en <strong>Infraestructura</strong>.</li>
+            <li>La TD debe caber en la instancia (revisa CPU/memoria de <code>forms-ec2.json</code>).</li>
+            <li><code>startAdmin_Forms_EC2.sh</code> es el orquestador: Machines + WKA, Admin desacoplado (<code>setsid nohup … -keep</code>) y Forms con <code>RCU_DB_SKIP=1</code>.</li>
+            <li>JDBC/TNS viven en <code>scripts/admin/</code>. El Admin los aplica una vez en frío. No hay <code>scripts/common/</code>.</li>
+            <li>No relances el orquestador si Admin ya está RUNNING. Forms suelto: <code>RCU_DB_SKIP=1 startWLSForms.sh</code>.</li>
+            <li><code>BEA-000388</code> al cerrar Exec era SIGTERM al JVM padre; el <code>setsid</code> lo evita.</li>
+            <li>Cloud Map es <code>weblogic-admin</code> (se reutiliza). No hace falta <code>weblogic-forms</code>. <code>getent</code> debe coincidir con la ENI actual (<code>ip</code>, no <code>hostname</code>).</li>
+            <li>Coherence WKA solo Admin+Forms. Una IP muerta de <code>weblogic-reports</code> deja Forms en STARTING.</li>
+            <li>El SG <code>forms-sg-ecs</code> necesita <strong>Todos los UDP</strong> desde sí mismo (Coherence 7574). Se puede agregar con las tareas arriba. Ver <a href="#paso-4-6">paso 4.6</a>.</li>
+            <li>SSH/Instance Connect falla: Session Manager + <code>ecsInstanceRole</code>.</li>
+            <li><code>execute-command</code> lento en EC2: la ENI no tiene IP pública. Faltaban VPC endpoints <code>sts</code> y <code>logs</code> (además de <code>ssmmessages</code> / <code>ssm</code> / <code>ec2messages</code>). Ver <a href="#paso-6">paso 6</a>.</li>
+          </ul>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,277 @@
+{
+    "family": "td_wls_reports-ec2",
+    "containerDefinitions": [
+        {
+            "name": "forms-reports",
+            "image": "730335573515.dkr.ecr.us-east-1.amazonaws.com/forms-docker@sha256:05a60dee7700a40cdb27520feea9bd73e35fc2841587aaf5d75d7e14ee1ae36f",
+            "cpu": 2048,
+            "memory": 3072,
+            "memoryReservation": 2560,
+            "portMappings": [
+                {
+                    "containerPort": 7001,
+                    "hostPort": 7001,
+                    "protocol": "tcp",
+                    "name": "adminserver"
+                },
+                {
+                    "containerPort": 9002,
+                    "hostPort": 9002,
+                    "protocol": "tcp",
+                    "name": "adminport"
+                },
+                {
+                    "containerPort": 9001,
+                    "hostPort": 9001,
+                    "protocol": "tcp",
+                    "name": "wls-forms-http",
+                    "appProtocol": "http"
+                },
+                {
+                    "containerPort": 9501,
+                    "hostPort": 9501,
+                    "protocol": "tcp",
+                    "name": "wls-forms-https",
+                    "appProtocol": "http"
+                },
+                {
+                    "containerPort": 9991,
+                    "hostPort": 9991,
+                    "protocol": "tcp",
+                    "name": "wls-forms-admin"
+                },
+                {
+                    "containerPort": 9012,
+                    "hostPort": 9012,
+                    "protocol": "tcp",
+                    "name": "wls-reports-http",
+                    "appProtocol": "http"
+                },
+                {
+                    "containerPort": 9512,
+                    "hostPort": 9512,
+                    "protocol": "tcp",
+                    "name": "wls-reports-https",
+                    "appProtocol": "http"
+                },
+                {
+                    "containerPort": 9992,
+                    "hostPort": 9992,
+                    "protocol": "tcp",
+                    "name": "wls-reports-admin"
+                },
+                {
+                    "containerPort": 5556,
+                    "hostPort": 5556,
+                    "protocol": "tcp",
+                    "name": "nodemanager"
+                },
+                {
+                    "containerPort": 7777,
+                    "hostPort": 7777,
+                    "protocol": "tcp",
+                    "name": "ohshttp"
+                },
+                {
+                    "containerPort": 4443,
+                    "hostPort": 4443,
+                    "protocol": "tcp",
+                    "name": "ohshttps"
+                }
+            ],
+            "essential": true,
+            "command": [
+                "sleep",
+                "infinity"
+            ],
+            "environment": [
+                {
+                    "name": "PATH",
+                    "value": "/u01/oracle/bin:/u01/oracle/oracle_common/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+                },
+                {
+                    "name": "LD_LIBRARY_PATH",
+                    "value": "/u01/oracle/lib:/u01/oracle/oracle_common/lib"
+                },
+                {
+                    "name": "ORACLE_HOME",
+                    "value": "/u01/oracle"
+                },
+                {
+                    "name": "DOMAIN_NAME",
+                    "value": "forms_domain"
+                },
+                {
+                    "name": "DOMAIN_HOME",
+                    "value": "/u01/oracle/user_projects/domains/forms_domain"
+                },
+                {
+                    "name": "TNS_ADMIN",
+                    "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig"
+                },
+                {
+                    "name": "ADMIN_PORT",
+                    "value": "7001"
+                },
+                {
+                    "name": "ADMIN_SERVER_NAME",
+                    "value": "AdminServer"
+                },
+                {
+                    "name": "ADMIN_SERVER_HOST",
+                    "value": "localhost"
+                },
+                {
+                    "name": "ADMIN_SERVER_PORT",
+                    "value": "7001"
+                },
+                {
+                    "name": "ADMIN_USER",
+                    "value": "weblogic"
+                },
+                {
+                    "name": "ADMIN_PASSWORD",
+                    "value": "t.123456"
+                },
+                {
+                    "name": "NODE_MANAGER_PORT",
+                    "value": "5556"
+                },
+                {
+                    "name": "RCU_DB_HOST",
+                    "value": "192.168.229.137"
+                },
+                {
+                    "name": "RCU_DB_PORT",
+                    "value": "1521"
+                },
+                {
+                    "name": "RCU_DB_SERVICE",
+                    "value": "METAPRD"
+                },
+                {
+                    "name": "TNSNAMES_DB_HOST",
+                    "value": "192.168.229.137"
+                },
+                {
+                    "name": "TNSNAMES_DB_PORT",
+                    "value": "1521"
+                },
+                {
+                    "name": "TNSNAMES_DB_ALIAS",
+                    "value": "SEGU"
+                },
+                {
+                    "name": "TNSNAMES_DB_SERVICE",
+                    "value": "SEGU"
+                },
+                {
+                    "name": "JAVA_OPTIONS",
+                    "value": "-Dforms.instance=forms1"
+                },
+                {
+                    "name": "FORMS_INSTANCE",
+                    "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig/components/FORMS/instances/forms1"
+                },
+                {
+                    "name": "FORMS_PATH",
+                    "value": "/u01/oracle/user_projects/apps/forms_app/bin:/u01/oracle/user_projects/apps/forms_app/src:/u01/oracle/forms"
+                },
+                {
+                    "name": "FORMS_MODULE_PATH",
+                    "value": "/u01/oracle/user_projects/apps/forms_app/bin:/u01/oracle/forms"
+                },
+                {
+                    "name": "FRMCMP",
+                    "value": "/u01/oracle/user_projects/domains/forms_domain/config/fmwconfig/components/FORMS/instances/forms1/bin/frmcmp_batch.sh"
+                },
+                {
+                    "name": "CC",
+                    "value": "/usr/bin/gcc"
+                },
+                {
+                    "name": "PROC",
+                    "value": "/u01/oracle/bin/proc"
+                },
+                {
+                    "name": "PROC_INCLUDE",
+                    "value": "/u01/oracle/precomp/public"
+                },
+                {
+                    "name": "PCSCFG",
+                    "value": "/u01/oracle/precomp/admin/pcscfg.cfg"
+                }
+            ],
+            "environmentFiles": [],
+            "mountPoints": [
+                {
+                    "sourceVolume": "efs-domains",
+                    "containerPath": "/u01/oracle/user_projects/domains",
+                    "readOnly": false
+                },
+                {
+                    "sourceVolume": "efs-app",
+                    "containerPath": "/u01/oracle/user_projects/apps",
+                    "readOnly": false
+                },
+                {
+                    "sourceVolume": "efs-scripts",
+                    "containerPath": "/u01/oracle/scripts",
+                    "readOnly": false
+                }
+            ],
+            "volumesFrom": [],
+            "workingDirectory": "/u01/oracle",
+            "readonlyRootFilesystem": false,
+            "ulimits": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/forms-reports",
+                    "awslogs-create-group": "true",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            },
+            "systemControls": []
+        }
+    ],
+    "taskRoleArn": "arn:aws:iam::730335573515:role/ecs-forms-admin-task-role",
+    "executionRoleArn": "arn:aws:iam::730335573515:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "volumes": [
+        {
+            "name": "efs-domains",
+            "efsVolumeConfiguration": {
+                "fileSystemId": "fs-08471cc88d2a8edc3",
+                "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/domains",
+                "transitEncryption": "ENABLED"
+            }
+        },
+        {
+            "name": "efs-app",
+            "efsVolumeConfiguration": {
+                "fileSystemId": "fs-08471cc88d2a8edc3",
+                "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/app",
+                "transitEncryption": "ENABLED"
+            }
+        },
+        {
+            "name": "efs-scripts",
+            "efsVolumeConfiguration": {
+                "fileSystemId": "fs-08471cc88d2a8edc3",
+                "rootDirectory": "/aws-backup-restore_2020-04-19T22-54-07-041Z/domain_forms/scripts",
+                "transitEncryption": "ENABLED"
+            }
+        }
+    ],
+    "placementConstraints": [],
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "LINUX"
+    },
+    "requiresCompatibilities": [
+        "EC2"
+    ]
+}
